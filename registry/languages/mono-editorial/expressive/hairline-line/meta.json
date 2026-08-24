@@ -1,0 +1,14 @@
+{
+  "slug": "hairline-line",
+  "title": "Thirty days of sign-ups",
+  "description": "one dot = one day · hollow = weekend · the barcode floor keeps the calendar honest",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "growth"
+  ],
+  "dependencies": []
+}

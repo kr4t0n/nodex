@@ -1,0 +1,15 @@
+{
+  "slug": "tick-rows",
+  "title": "Six teams, shipped and counted",
+  "description": "one tick = one release this quarter · the row is a queue, not a bar",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "release",
+    "log"
+  ],
+  "dependencies": []
+}

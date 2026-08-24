@@ -1,0 +1,15 @@
+{
+  "slug": "dot-cascade",
+  "title": "What breaks, stacked and ranked",
+  "description": "incidents by root cause · 2019 → 2026 · one dot = 2 incidents · sorted ascending",
+  "component": "dot-plot",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "incident",
+    "log"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "draw-in-counter",
+  "title": "H1 revenue, drawn in one stroke",
+  "description": "cumulative ARR · the line draws, the number counts · click to replay",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "finance"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

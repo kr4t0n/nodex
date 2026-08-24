@@ -1,0 +1,15 @@
+{
+  "slug": "radial-patchwork",
+  "title": "A quarter of deploys, overlaid",
+  "description": "each wedge = one deploy · angle = time of day · reach = files touched · ink builds where deploys pile up",
+  "component": "polar-area",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "deploy",
+    "log"
+  ],
+  "dependencies": []
+}

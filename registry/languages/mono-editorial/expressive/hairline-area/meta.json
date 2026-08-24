@@ -1,0 +1,15 @@
+{
+  "slug": "hairline-area",
+  "title": "Concurrent users, filled with days",
+  "description": "one hairline = one day, floor to peak · the area is made of days, not paint",
+  "component": "area",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "live",
+    "ops"
+  ],
+  "dependencies": []
+}

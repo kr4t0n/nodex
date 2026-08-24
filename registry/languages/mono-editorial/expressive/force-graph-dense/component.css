@@ -1,0 +1,12 @@
+/* A galaxy of one hundred eighty services — mono-editorial */
+
+.nx-force-graph-dense .card {background:var(--nx-dark);color:#F0EFEB;border-radius:24px;padding:34px 34px 24px;
+    width:min(1100px,100%)}
+
+.nx-force-graph-dense h2 {font-weight:700;font-size:19px;letter-spacing:-.02em;margin-bottom:4px}
+
+.nx-force-graph-dense .sub {font-size:12px;color:#8F8E88;margin-bottom:10px}
+
+.nx-force-graph-dense .src {font-size:9.5px;color:#55554F;margin-top:12px;letter-spacing:.08em;font-weight:500}
+
+.nx-force-graph-dense #ch {height:78vh;min-height:620px;cursor:grab}

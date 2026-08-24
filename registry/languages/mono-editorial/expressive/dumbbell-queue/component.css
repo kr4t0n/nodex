@@ -1,0 +1,46 @@
+/* Onboarding, before and after the redesign — mono-editorial */
+
+.nx-dumbbell-queue .card {background:var(--nx-bg);border-radius:24px;padding:28px 28px 20px}
+
+.nx-dumbbell-queue h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
+
+.nx-dumbbell-queue .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
+
+.nx-dumbbell-queue .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
+
+.nx-dumbbell-queue .badge {display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;
+    padding:3px 10px;border-radius:99px;margin-bottom:10px;border:1px dashed #B0AFA9;color:#8F8E88}
+
+.nx-dumbbell-queue svg {width:100%;max-height:330px;display:block;margin:0 auto}
+
+.nx-dumbbell-queue .chartbox {width:100%;height:360px}
+
+.nx-dumbbell-queue svg text {font-family:'Inter',sans-serif}
+
+.nx-dumbbell-queue .pop {transform-box:fill-box;transform-origin:center;animation:pop .5s cubic-bezier(.2,.7,.3,1.3) both}
+
+.nx-dumbbell-queue .fade {animation:fade .9s ease both}
+
+.nx-dumbbell-queue .draw {stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s cubic-bezier(.4,0,.2,1) both}
+
+.nx-dumbbell-queue .pagehead h1 {font-size:22px;letter-spacing:-.02em;font-weight:800}
+
+.nx-dumbbell-queue .pagehead p {font-size:12px;color:#8F8E88;margin-top:5px;line-height:1.7}
+
+@keyframes pop {from{transform:scale(0)}to{transform:none}}
+
+@keyframes fade {from{opacity:0}}
+
+@keyframes draw {to{stroke-dashoffset:0}}
+
+@media (prefers-reduced-motion: reduce) {
+.nx-dumbbell-queue .pop,
+.nx-dumbbell-queue .fade,
+.nx-dumbbell-queue .draw {
+    animation: none;
+  }
+.nx-dumbbell-queue .draw {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}

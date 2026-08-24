@@ -1,0 +1,17 @@
+{
+  "slug": "force-graph-dense",
+  "title": "A galaxy of one hundred eighty services",
+  "description": "8 domains self-organize · node = call volume · drag anything, the galaxy fights back · click empty space to replay",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "close-read",
+  "tags": [
+    "source",
+    "service",
+    "mesh"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

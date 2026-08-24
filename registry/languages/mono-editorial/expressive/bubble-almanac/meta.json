@@ -1,0 +1,15 @@
+{
+  "slug": "bubble-almanac",
+  "title": "Eight years of tickets, one almanac",
+  "description": "bubble area = support tickets per product area, per year · bubbles overlap where years pile up · dark core = escalations · dashed ring = still in beta",
+  "component": "bubble",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "840/400",
+  "tags": [
+    "support",
+    "desk"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,52 @@
+/* Daily active range — mono-editorial */
+
+.nx-range-capsules .card {background:var(--nx-bg);border-radius:24px;padding:28px 28px 20px}
+
+.nx-range-capsules .card.dark {background:var(--nx-dark);color:#F0EFEB}
+
+.nx-range-capsules .card.dark .sub {color:#8F8E88}
+
+.nx-range-capsules .card.dark .src {color:#55554F}
+
+.nx-range-capsules h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
+
+.nx-range-capsules .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
+
+.nx-range-capsules .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
+
+.nx-range-capsules .ch {height:320px}
+
+.nx-range-capsules .wrap {position:relative;height:320px}
+
+.nx-range-capsules svg text {font-family:'Inter',sans-serif}
+
+.nx-range-capsules .pop {transform-box:fill-box;transform-origin:center;animation:pop .5s cubic-bezier(.2,.7,.3,1.3) both}
+
+.nx-range-capsules .pagehead h1 {font-size:22px;letter-spacing:-.02em;font-weight:800}
+
+.nx-range-capsules .pagehead p {font-size:12px;color:#8F8E88;margin-top:5px;line-height:1.7}
+
+.nx-range-capsules .pagehead .badge {margin:0 2px}
+
+.nx-range-capsules .badge {display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;
+    padding:3px 10px;border-radius:99px;margin-bottom:10px}
+
+.nx-range-capsules .badge.del {background:#1C1C1A;color:#F0EFEB}
+
+.nx-range-capsules .badge.pick {border:1.5px solid #1C1C1A;color:#1C1C1A}
+
+.nx-range-capsules .badge.pair {border:1px dashed #B0AFA9;color:#8F8E88}
+
+.nx-range-capsules .card.dark .badge.del {background:#F0EFEB;color:#1C1C1A}
+
+.nx-range-capsules .card.dark .badge.pick {border-color:#F0EFEB;color:#F0EFEB}
+
+.nx-range-capsules .card.dark .badge.pair {border-color:#55554F;color:#8F8E88}
+
+@keyframes pop {from{transform:scale(0)}to{transform:none}}
+
+@media (prefers-reduced-motion: reduce) {
+.nx-range-capsules .pop {
+    animation: none;
+  }
+}

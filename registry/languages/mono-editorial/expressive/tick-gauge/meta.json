@@ -1,0 +1,15 @@
+{
+  "slug": "tick-gauge",
+  "title": "How far to the quarter's goal",
+  "description": "one tick = one percent of target · inked = earned · the dial reads left to right",
+  "component": "gauge",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "quarterly",
+    "target"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "chunky-bars",
+  "title": "Revenue by plan",
+  "description": "Q2 2026 · MRR, $K",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "billing"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

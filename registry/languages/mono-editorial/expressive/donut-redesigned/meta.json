@@ -1,0 +1,14 @@
+{
+  "slug": "donut-redesigned",
+  "title": "Where sign-ups come from",
+  "description": "Q2 2026 · every dot = 1% of new accounts",
+  "component": "donut",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "380/300",
+  "tags": [
+    "attribution"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,8 @@
+{
+  "slug": "mono-editorial",
+  "name": "Mono Editorial",
+  "description": "Hairline data drawing on warm paper. One mark per record, sub-pixel strokes, tiny uppercase captions. Built for charts that reward reading rather than glancing.",
+  "visibility": "public",
+  "density": ["close-read", "glance"],
+  "featured": ["barcode-lollipop", "cluster-field", "calendar-heat", "ridgeline"]
+}

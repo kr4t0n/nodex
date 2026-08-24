@@ -1,0 +1,16 @@
+{
+  "slug": "pictorial-bar",
+  "title": "Trees planted, year by year",
+  "description": "reforestation program · thousands of trees",
+  "component": "pictorial-bar",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "green",
+    "ops"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

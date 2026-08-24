@@ -1,0 +1,15 @@
+{
+  "slug": "beeswarm",
+  "title": "A hundred and twenty deals, swarming",
+  "description": "one dot = one closed deal · the swarm piles up where deals cluster · hollow = enterprise · dashed = median",
+  "component": "beeswarm",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "sales",
+    "ops"
+  ],
+  "dependencies": []
+}

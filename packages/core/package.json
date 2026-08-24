@@ -1,0 +1,13 @@
+{
+  "name": "@nodex/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The nodex registry contract: schemas, taxonomy, and manifest loading",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  }
+}

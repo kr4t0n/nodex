@@ -1,0 +1,16 @@
+{
+  "slug": "dynamic-data",
+  "title": "Concurrent users, streaming",
+  "description": "one new reading every 300ms · window of 50 · click to restart",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "live",
+    "ops"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "slug": "rung-bars",
+  "title": "Revenue by plan, rung by rung",
+  "description": "one rung = one $k of MRR · the bar is a ladder you can count",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "billing"
+  ],
+  "dependencies": []
+}

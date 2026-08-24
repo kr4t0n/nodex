@@ -1,0 +1,16 @@
+{
+  "slug": "range-capsules",
+  "title": "Daily active range",
+  "description": "min – max concurrent users · 1–14 Feb",
+  "component": "range-bar",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "live",
+    "ops"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

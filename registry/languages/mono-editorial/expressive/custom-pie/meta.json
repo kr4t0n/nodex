@@ -1,0 +1,16 @@
+{
+  "slug": "custom-pie",
+  "title": "Big slice, deep engagement",
+  "description": "angle = share of users · radius = minutes per day · dotted rings at 15 / 30 / 45 min",
+  "component": "pie",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "product",
+    "analytics"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

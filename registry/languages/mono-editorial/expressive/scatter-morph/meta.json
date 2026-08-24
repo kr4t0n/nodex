@@ -1,0 +1,15 @@
+{
+  "slug": "scatter-morph",
+  "title": "One dataset, three views",
+  "description": "watch the same 12 products fly between views · every 3s",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "cohorts"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

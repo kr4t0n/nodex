@@ -1,0 +1,15 @@
+{
+  "slug": "launch-fan",
+  "title": "Twelve features, fanned out",
+  "description": "one spoke per feature · big dot = launch week, sized by MAU today · small dots = every week since",
+  "component": "radial-plot",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "product",
+    "analytics"
+  ],
+  "dependencies": []
+}

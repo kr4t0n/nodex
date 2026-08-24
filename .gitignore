@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+
+# generated registry artifacts — rebuilt by scripts/build-registry.mjs
+registry/**/index.html
+registry/languages/*/tokens.css
+public/r/
+
+# generated contact sheet — rebuilt by tmp/make-verify.mjs
+tmp/verify.html
+
+# env — never commit secrets
+.env
+.env.*
+!.env.example
+
+# editor / os
+.DS_Store
+*.log
+.vite/
+.turbo/
+
+# NOTE: tmp/ is intentionally NOT ignored during Phase 1.
+# It holds the one-shot extractor and its source, which are committed once
+# for provenance and then deleted. Add `tmp/` here in the cleanup commit.

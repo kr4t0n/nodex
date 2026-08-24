@@ -1,0 +1,15 @@
+{
+  "slug": "parallel-coords",
+  "title": "Twelve products, four dimensions",
+  "description": "one hairline = one product across price · satisfaction · retention · growth · ink = the one that wins everywhere",
+  "component": "parallel-coordinates",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "product",
+    "panel"
+  ],
+  "dependencies": []
+}

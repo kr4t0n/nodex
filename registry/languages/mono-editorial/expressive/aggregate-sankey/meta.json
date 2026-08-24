@@ -1,0 +1,15 @@
+{
+  "slug": "aggregate-sankey",
+  "title": "Channels pour into plans",
+  "description": "ribbon width = accounts · channels on the left, the plans they land in on the right",
+  "component": "sankey",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "attribution"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

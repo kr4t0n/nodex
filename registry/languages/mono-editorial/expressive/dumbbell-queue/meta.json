@@ -1,0 +1,14 @@
+{
+  "slug": "dumbbell-queue",
+  "title": "Onboarding, before and after the redesign",
+  "description": "hollow dot = before · solid dot = after · beads on the track = minutes saved, countable",
+  "component": "dumbbell",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "timing"
+  ],
+  "dependencies": []
+}

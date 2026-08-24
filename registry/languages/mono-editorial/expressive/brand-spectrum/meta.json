@@ -1,0 +1,16 @@
+{
+  "slug": "brand-spectrum",
+  "title": "Where the brand sits",
+  "description": "panel of 120 customers placed us between opposing traits · big dot = us · small dots = competitors",
+  "component": "dot-plot",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "460/300",
+  "tags": [
+    "brand",
+    "survey"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

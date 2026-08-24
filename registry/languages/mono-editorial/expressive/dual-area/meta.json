@@ -1,0 +1,16 @@
+{
+  "slug": "dual-area",
+  "title": "Campaigns rain down, sign-ups flow",
+  "description": "daily ad spend (from top, $K) vs sign-ups (flow, hundreds) · 30 days",
+  "component": "area",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "growth",
+    "ads"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

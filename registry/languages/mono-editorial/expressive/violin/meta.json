@@ -1,0 +1,16 @@
+{
+  "slug": "violin",
+  "title": "How fast each plan gets an answer",
+  "description": "hours to first reply · silhouette = where tickets pile up · paper tick = median",
+  "component": "violin",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "support",
+    "desk"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "diverging-bar",
+  "title": "Where we gained, where we bled",
+  "description": "net accounts per segment · Q2 2026 · churn left, growth right",
+  "component": "diverging-bar",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "crm"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

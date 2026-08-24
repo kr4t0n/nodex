@@ -1,0 +1,16 @@
+{
+  "slug": "nested-treemap",
+  "title": "Where the work went",
+  "description": "1,280 shipped hours · area = effort · parent bands preserve the product hierarchy",
+  "component": "treemap",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "close-read",
+  "tags": [
+    "work",
+    "portfolio"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

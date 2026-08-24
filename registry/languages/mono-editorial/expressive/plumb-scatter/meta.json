@@ -1,0 +1,15 @@
+{
+  "slug": "plumb-scatter",
+  "title": "Price against satisfaction, twelve products",
+  "description": "every dot hangs a plumb line to the floor · read x by the line, y by the height",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "product",
+    "panel"
+  ],
+  "dependencies": []
+}

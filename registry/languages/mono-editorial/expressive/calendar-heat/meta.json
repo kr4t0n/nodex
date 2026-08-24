@@ -1,0 +1,15 @@
+{
+  "slug": "calendar-heat",
+  "title": "A year of deploys, day by day",
+  "description": "52 weeks × 7 days · dot area = deploys that day · tiny dot = a quiet day · dashed ring = the busiest day of 2025",
+  "component": "calendar-heatmap",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "840/232",
+  "tags": [
+    "deploy",
+    "log"
+  ],
+  "dependencies": []
+}

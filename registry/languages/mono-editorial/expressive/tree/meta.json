@@ -1,0 +1,16 @@
+{
+  "slug": "tree",
+  "title": "Everything the platform ships",
+  "description": "product areas and capabilities · Jun 2026",
+  "component": "tree",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "product",
+    "catalog"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

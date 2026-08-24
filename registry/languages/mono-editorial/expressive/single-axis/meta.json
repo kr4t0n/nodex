@@ -1,0 +1,16 @@
+{
+  "slug": "single-axis",
+  "title": "Support load, day by day",
+  "description": "tickets per hour · each row is its own axis · dot = volume",
+  "component": "strip-plot",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "support",
+    "desk"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

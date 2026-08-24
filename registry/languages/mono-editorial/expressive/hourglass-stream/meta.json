@@ -1,0 +1,14 @@
+{
+  "slug": "hourglass-stream",
+  "title": "The funnel, poured",
+  "description": "each strip's width = people at that stage · threads trickle down · Q2 2026 cohort",
+  "component": "funnel",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/330",
+  "tags": [
+    "growth"
+  ],
+  "dependencies": []
+}

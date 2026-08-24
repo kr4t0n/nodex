@@ -1,0 +1,15 @@
+{
+  "slug": "barcode-lollipop",
+  "title": "Ninety days as a barcode",
+  "description": "peak concurrent users, daily · Apr – Jun 2026",
+  "component": "lollipop",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "800/300",
+  "tags": [
+    "live",
+    "ops"
+  ],
+  "dependencies": []
+}

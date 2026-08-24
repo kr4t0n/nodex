@@ -1,0 +1,15 @@
+{
+  "slug": "circular-graph",
+  "title": "Who works with whom",
+  "description": "cross-team collaborations · Q2 2026 · line = shared project",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "project"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

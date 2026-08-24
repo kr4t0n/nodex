@@ -1,0 +1,15 @@
+{
+  "slug": "paired-rungs",
+  "title": "This year against last, plan by plan",
+  "description": "two ladders per plan · solid rungs = 2026 · faint rungs = 2025 · one rung = $1k",
+  "component": "grouped-bar",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "billing",
+    "yoy"
+  ],
+  "dependencies": []
+}

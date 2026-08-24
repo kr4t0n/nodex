@@ -1,0 +1,15 @@
+{
+  "slug": "ballot-tally",
+  "title": "What they fear, tick by tick",
+  "description": "one tick = one respondent in a hundred · inked = picked it · they could pick several",
+  "component": "unit-chart",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "workplace",
+    "survey"
+  ],
+  "dependencies": []
+}

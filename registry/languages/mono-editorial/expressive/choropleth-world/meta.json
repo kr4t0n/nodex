@@ -1,0 +1,19 @@
+{
+  "slug": "choropleth-world",
+  "title": "Where the users are",
+  "description": "real outlines · shade = monthly active accounts · gray = markets we haven't opened",
+  "component": "choropleth",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "global",
+    "ops"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ],
+  "externalData": [
+    "https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/world.json"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "dotty-matrix",
+  "title": "Four squads, stacked in space",
+  "description": "each plane = one squad · 6 × 6 weeks of activity · dot area = tasks closed",
+  "component": "dot-matrix",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/372",
+  "tags": [
+    "sprint",
+    "board"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "trend-lineage",
+  "title": "Features rise, fall, come back",
+  "description": "● shipped · ○ reworked · dashed = dormant years · line runs on if it's still alive today",
+  "component": "bump",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/340",
+  "tags": [
+    "product",
+    "history"
+  ],
+  "dependencies": []
+}

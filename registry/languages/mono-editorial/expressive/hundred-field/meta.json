@@ -1,0 +1,15 @@
+{
+  "slug": "hundred-field",
+  "title": "A hundred of us, four minds",
+  "description": "one dot = one person in a hundred · four attitude clusters, sized by share · 2026 survey",
+  "component": "unit-chart",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "attitude",
+    "survey"
+  ],
+  "dependencies": []
+}

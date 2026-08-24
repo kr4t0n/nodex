@@ -1,0 +1,15 @@
+{
+  "slug": "matrix-heat",
+  "title": "Which features get used together",
+  "description": "8 × 8 co-usage · shade = share of accounts using both · dashed square = strongest pair",
+  "component": "heatmap",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "product",
+    "analytics"
+  ],
+  "dependencies": []
+}

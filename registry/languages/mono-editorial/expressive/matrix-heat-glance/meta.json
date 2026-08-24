@@ -1,0 +1,16 @@
+{
+  "slug": "matrix-heat-glance",
+  "title": "Adoption runs hot on the new versions",
+  "description": "5 versions × 6 features · shade = % of accounts using it · every cell carries its number",
+  "component": "heatmap",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "product",
+    "analytics"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

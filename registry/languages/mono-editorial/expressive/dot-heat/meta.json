@@ -1,0 +1,15 @@
+{
+  "slug": "dot-heat",
+  "title": "When support gets loud",
+  "description": "7 days × 12 hours · dot area = tickets · biggest cell labeled · silence stays visible",
+  "component": "heatmap",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "support",
+    "desk"
+  ],
+  "dependencies": []
+}

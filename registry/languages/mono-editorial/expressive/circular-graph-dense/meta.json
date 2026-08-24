@@ -1,0 +1,17 @@
+{
+  "slug": "circular-graph-dense",
+  "title": "Six hundred collaborations, one ring",
+  "description": "60 repos · line = shared contributors · hover a repo to light up its world · click to replay",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "close-read",
+  "tags": [
+    "source",
+    "git",
+    "log"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

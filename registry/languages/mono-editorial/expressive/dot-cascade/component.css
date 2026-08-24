@@ -1,0 +1,64 @@
+/* What breaks, stacked and ranked — mono-editorial */
+
+.nx-dot-cascade .card {background:var(--nx-bg);border-radius:24px;padding:28px 28px 20px}
+
+.nx-dot-cascade .card.dark {background:var(--nx-dark);color:#F0EFEB}
+
+.nx-dot-cascade .card.dark .sub {color:#8F8E88}
+
+.nx-dot-cascade .card.dark .src {color:#55554F}
+
+.nx-dot-cascade .split {display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start}
+
+.nx-dot-cascade h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
+
+.nx-dot-cascade .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
+
+.nx-dot-cascade .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
+
+.nx-dot-cascade .note {font-size:11px;color:#6A6963;line-height:1.65;margin-bottom:16px}
+
+.nx-dot-cascade .legend {font-size:9px;letter-spacing:.1em;font-weight:600;color:var(--nx-muted);line-height:2}
+
+.nx-dot-cascade svg {width:100%;max-height:330px;display:block;margin:0 auto}
+
+.nx-dot-cascade svg text {font-family:'Inter',sans-serif}
+
+.nx-dot-cascade .pop {transform-box:fill-box;transform-origin:center;animation:pop .5s cubic-bezier(.2,.7,.3,1.3) both}
+
+.nx-dot-cascade .fade {animation:fade .9s ease both}
+
+.nx-dot-cascade .draw {stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s cubic-bezier(.4,0,.2,1) both}
+
+.nx-dot-cascade .pagehead h1 {font-size:22px;letter-spacing:-.02em;font-weight:800}
+
+.nx-dot-cascade .pagehead p {font-size:12px;color:#8F8E88;margin-top:5px;line-height:1.7}
+
+.nx-dot-cascade .pagehead .badge {margin:0 2px}
+
+.nx-dot-cascade .badge {display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;
+    padding:3px 10px;border-radius:99px;margin-bottom:10px}
+
+.nx-dot-cascade .badge.del {background:#1C1C1A;color:#F0EFEB}
+
+.nx-dot-cascade .badge.pick {border:1.5px solid #1C1C1A;color:#1C1C1A}
+
+.nx-dot-cascade .badge.pair {border:1px dashed #B0AFA9;color:#8F8E88}
+
+.nx-dot-cascade .card.dark .badge.del {background:#F0EFEB;color:#1C1C1A}
+
+.nx-dot-cascade .card.dark .badge.pick {border-color:#F0EFEB;color:#F0EFEB}
+
+.nx-dot-cascade .card.dark .badge.pair {border-color:#55554F;color:#8F8E88}
+
+@keyframes pop {from{transform:scale(0)}to{transform:none}}
+
+@keyframes fade {from{opacity:0}}
+
+@keyframes draw {to{stroke-dashoffset:0}}
+
+@media (prefers-reduced-motion:reduce) {
+  .nx-dot-cascade .pop,
+.nx-dot-cascade .fade {animation:none}
+  .nx-dot-cascade .draw {animation:none;stroke-dasharray:none;stroke-dashoffset:0}
+}

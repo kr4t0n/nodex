@@ -1,0 +1,15 @@
+{
+  "slug": "radial-convergence",
+  "title": "48 requests pull toward five themes",
+  "description": "every rim node = a feature request · lines bundle into the theme that claimed it",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "feedback",
+    "board"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "stacked-rungs",
+  "title": "Where each region's revenue sits",
+  "description": "one rung = $1k · three products stack up the ladder, darkest carries the most",
+  "component": "stacked-bar",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "revenue",
+    "mix"
+  ],
+  "dependencies": []
+}

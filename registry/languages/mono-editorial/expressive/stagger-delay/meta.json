@@ -1,0 +1,15 @@
+{
+  "slug": "stagger-delay",
+  "title": "Fifty markets, one wave",
+  "description": "sign-ups per market · bars cascade in · click to replay",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "growth"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "slug": "stream-ribbon",
+  "title": "Three products trade the same river",
+  "description": "48 weeks of usage share · band width = weekly active accounts · the river swells where the total grows",
+  "component": "streamgraph",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "840/300",
+  "tags": [
+    "product",
+    "analytics"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

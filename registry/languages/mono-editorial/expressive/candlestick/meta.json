@@ -1,0 +1,16 @@
+{
+  "slug": "candlestick",
+  "title": "Six weeks of the token, candle by candle",
+  "description": "body = open to close · wick = the day's full reach · ink = closed down · hollow = closed up",
+  "component": "candlestick",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "market",
+    "data"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

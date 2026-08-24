@@ -1,0 +1,16 @@
+{
+  "slug": "rung-histogram",
+  "title": "Most tickets resolve within six hours",
+  "description": "one rung = one ticket in a hundred · bins of two hours · the ladder shows the pile",
+  "component": "histogram",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "support",
+    "desk"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

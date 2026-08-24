@@ -1,0 +1,15 @@
+{
+  "slug": "type-colonnade",
+  "title": "Forty-four repos, ten owners",
+  "description": "every hairline hands a repo to the team that owns it · the pile-ups are the org chart nobody drew",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "code",
+    "ownership"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "rank-strip",
+  "title": "Flows climbs to the top",
+  "description": "one row per product, one cell per quarter · darker = higher rank · a bar race you can print",
+  "component": "bump",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "billing"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}

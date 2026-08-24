@@ -1,0 +1,15 @@
+{
+  "slug": "ridgeline",
+  "title": "Five pipelines, five tempos",
+  "description": "each crest = one pipeline's completion-time shape · the area is made of hairlines · dot = the peak",
+  "component": "ridgeline",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "data",
+    "platform"
+  ],
+  "dependencies": []
+}

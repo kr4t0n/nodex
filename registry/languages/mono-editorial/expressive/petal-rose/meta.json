@@ -1,0 +1,17 @@
+{
+  "slug": "petal-rose",
+  "title": "How releases made us feel",
+  "description": "reactions tagged in retro · H1 2026",
+  "component": "polar-area",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "density": "glance",
+  "tags": [
+    "team",
+    "retro",
+    "board"
+  ],
+  "dependencies": [
+    "echarts@6"
+  ]
+}

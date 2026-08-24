@@ -1,0 +1,14 @@
+{
+  "slug": "tick-donut",
+  "title": "Where the traffic comes from",
+  "description": "one tick = one percent · four sources shade the dial · read it like a clock",
+  "component": "donut",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "glance",
+  "aspectRatio": "400/320",
+  "tags": [
+    "acquisition"
+  ],
+  "dependencies": []
+}

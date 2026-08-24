@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      # Schema validation, slug uniqueness, taxonomy enum membership, density
+      # values against each language's declaration, and the design-language
+      # conformance lints. The slug and enum checks are what stop a future
+      # import from silently corrupting search.
+      - name: Validate registry
+        run: npm run check:registry
+
+      # Proves components still mount and draw. Parsing is not enough: a chart
+      # with an over-shaken helper set parses fine and renders nothing.
+      - name: Smoke-test components
+        run: npm run smoke
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck

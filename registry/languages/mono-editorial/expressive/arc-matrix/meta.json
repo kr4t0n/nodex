@@ -1,0 +1,15 @@
+{
+  "slug": "arc-matrix",
+  "title": "Eight products land in twelve cities",
+  "description": "bubble = paying accounts · each row bows like a horizon",
+  "component": "bubble",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "430/320",
+  "tags": [
+    "sales",
+    "geo"
+  ],
+  "dependencies": []
+}

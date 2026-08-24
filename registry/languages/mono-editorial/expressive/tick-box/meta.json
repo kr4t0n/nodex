@@ -1,0 +1,16 @@
+{
+  "slug": "tick-box",
+  "title": "Reply times, boxed by plan",
+  "description": "box = the middle half of tickets · paper tick = median · hollow dot = an outlier nobody enjoyed",
+  "component": "boxplot",
+  "tier": "expressive",
+  "runtime": "svg",
+  "density": "close-read",
+  "aspectRatio": "400/320",
+  "tags": [
+    "support",
+    "desk"
+  ],
+  "dependencies": [],
+  "strokeAsArea": true
+}
