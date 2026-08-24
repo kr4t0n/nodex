@@ -248,34 +248,64 @@ function ComponentGrid({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-end gap-5">
           {/* Rendered only when the language declares the axis, so the shell
-              never hardcodes a distinction a future language may not have. */}
-          {declaredDensity?.map((value) => (
-            <button
-              key={value}
-              type="button"
-              className="nx-btn nx-btn--outline"
-              aria-pressed={density === value}
-              onClick={() => setDensity(density === value ? null : value)}
-            >
-              {value === 'close-read' ? 'Close read' : 'Glance'}
-            </button>
-          ))}
+              never hardcodes a distinction a future language may not have.
 
-          <select
-            className="nx-select nx-select--auto"
-            value={type ?? ''}
-            aria-label="Filter by component type"
-            onChange={(event) => setType(event.target.value || null)}
-          >
-            <option value="">All types</option>
-            {types.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
+              Labelled, because "Close read / Glance" says nothing about what it
+              filters if you have not read DESIGN.md. Two unexplained buttons in
+              a filter bar is the same failure as placeholder-as-label. */}
+          {declaredDensity?.length ? (
+            <fieldset className="nx-field m-0 border-0 p-0">
+              <legend className="nx-field__label p-0">
+                Reading{' '}
+                <span
+                  className="normal-case"
+                  style={{ letterSpacing: 0, fontWeight: 500 }}
+                  title="Close read draws one mark per record and rewards study. Glance shows aggregate shapes and reads instantly."
+                >
+                  (how it is read)
+                </span>
+              </legend>
+              <div className="flex flex-wrap items-center gap-2">
+                {declaredDensity.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className="nx-btn nx-btn--outline"
+                    aria-pressed={density === value}
+                    title={
+                      value === 'close-read'
+                        ? 'One mark per record. Rewards study, for reports.'
+                        : 'Aggregate shapes. Reads instantly, for dashboards.'
+                    }
+                    onClick={() => setDensity(density === value ? null : value)}
+                  >
+                    {value === 'close-read' ? 'Close read' : 'Glance'}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+
+          <div className="nx-field">
+            <label className="nx-field__label" htmlFor="nx-type">
+              Type
+            </label>
+            <select
+              id="nx-type"
+              className="nx-select nx-select--auto"
+              value={type ?? ''}
+              onChange={(event) => setType(event.target.value || null)}
+            >
+              <option value="">All types</option>
+              {types.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {active ? (
             <button
