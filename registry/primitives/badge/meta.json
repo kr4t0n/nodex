@@ -1,0 +1,10 @@
+{
+  "slug": "badge",
+  "title": "Badge",
+  "description": "Uppercase micro-label in solid, outline, dashed, and quiet treatments",
+  "component": "badge",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["label", "meta"],
+  "dependencies": []
+}

@@ -1,0 +1,94 @@
+/* button - shared primitive, themed entirely by the active language's tokens.
+   Presentational only: no JavaScript API. For real keyboard and ARIA behaviour,
+   apply these classes to a headless component (Radix, Ark) instead.
+
+   Every value here is a token reference. A literal would break theming, since
+   this one file serves every design language. */
+
+.nx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0.55em 1.1em;
+  border: var(--nx-hairline) solid transparent;
+  border-radius: var(--nx-radius-pill);
+  font-family: var(--nx-font-sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  color: var(--nx-ink);
+  transition:
+    background-color 160ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 160ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 160ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Solid. The only high-emphasis action on a surface. */
+.nx-btn--solid {
+  background: var(--nx-ink);
+  border-color: var(--nx-ink);
+  color: var(--nx-bg);
+}
+
+.nx-btn--solid:hover {
+  background: var(--nx-muted);
+  border-color: var(--nx-muted);
+}
+
+/* Outline. Hairline border, which is this language's whole signature. */
+.nx-btn--outline {
+  border-color: var(--nx-grid);
+  color: var(--nx-ink);
+}
+
+.nx-btn--outline:hover {
+  border-color: var(--nx-ink);
+}
+
+.nx-btn--outline[aria-pressed='true'],
+.nx-btn--outline[data-active='true'] {
+  background: var(--nx-ink);
+  border-color: var(--nx-ink);
+  color: var(--nx-bg);
+}
+
+/* Quiet. For tertiary navigation where a border would be noise. */
+.nx-btn--quiet {
+  color: var(--nx-muted);
+  padding-inline: 0.5em;
+}
+
+.nx-btn--quiet:hover {
+  color: var(--nx-ink);
+}
+
+/* Tactile press. Transform only, so it stays on the compositor. */
+.nx-btn:active {
+  transform: translateY(1px);
+}
+
+.nx-btn:focus-visible {
+  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline-offset: 3px;
+}
+
+.nx-btn:disabled,
+.nx-btn[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-btn {
+    transition: none;
+  }
+  .nx-btn:active {
+    transform: none;
+  }
+}

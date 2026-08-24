@@ -1,0 +1,84 @@
+/* input - shared primitive, themed by the active language's tokens.
+
+   Label sits above, helper or error below. Placeholder is never the label:
+   it disappears the moment someone types, and a field with no visible label is
+   unusable for anyone who looks away mid-entry. */
+
+.nx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--nx-font-sans);
+}
+
+.nx-field__label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+}
+
+.nx-input {
+  width: 100%;
+  padding: 0.6em 0.95em;
+  border: var(--nx-hairline) solid var(--nx-grid);
+  border-radius: var(--nx-radius-pill);
+  background: var(--nx-bg);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+  font-size: 12px;
+  line-height: 1.4;
+  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Placeholder must clear WCAG AA against the field background, so it uses the
+   muted token rather than the faint one. Faint is for captions on paper, and
+   fails contrast at this size. */
+.nx-input::placeholder {
+  color: var(--nx-muted);
+  opacity: 1;
+}
+
+.nx-input:hover {
+  border-color: var(--nx-muted);
+}
+
+.nx-input:focus {
+  outline: none;
+  border-color: var(--nx-ink);
+}
+
+.nx-input:focus-visible {
+  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline-offset: 2px;
+}
+
+.nx-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nx-field__help {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--nx-muted);
+}
+
+.nx-field__error {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--nx-ink);
+  font-weight: 600;
+}
+
+.nx-field[data-invalid='true'] .nx-input {
+  border-color: var(--nx-ink);
+  border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-input {
+    transition: none;
+  }
+}

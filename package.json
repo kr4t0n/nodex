@@ -15,9 +15,10 @@
     "build:registry": "node scripts/build-registry.mjs",
     "check:registry": "node scripts/build-registry.mjs --check",
     "smoke": "node scripts/smoke-components.mjs",
-    "typecheck": "tsc --build",
+    "typecheck": "tsc --build && npm run typecheck --workspace @nodex/gallery",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "dev": "npm run dev --workspace @nodex/gallery"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

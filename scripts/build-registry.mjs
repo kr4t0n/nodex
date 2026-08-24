@@ -125,7 +125,22 @@ ${fragment.trim()}
 </div>
 <script type="module">
   import { mount } from './component.js';
-  mount(document.querySelector('.nx-preview'));
+  const root = document.querySelector('.nx-preview');
+  mount(root);
+
+  /* Report content height to an embedding gallery.
+     The card's real height depends on its title, subtitle, notes and caption, so
+     a chart's viewBox ratio is only ever an approximation and guessing it clips
+     the footer. Measuring and posting the true height removes the guess. */
+  const post = () => {
+    parent.postMessage(
+      { type: 'nx-preview-size', height: document.documentElement.scrollHeight },
+      '*',
+    );
+  };
+  post();
+  new ResizeObserver(post).observe(document.documentElement);
+  addEventListener('load', post);
 </script>
 </body>
 </html>
@@ -138,6 +153,40 @@ ${fragment.trim()}
  * Conformance lints for a design language. These replace what a shared module
  * would have enforced if components imported one instead of inlining.
  */
+/**
+ * Primitives are shared across languages, so they carry `language: "shared"`
+ * rather than being duplicated once per language. The gallery still displays
+ * them under each language it renders: storage location and browse location are
+ * decoupled, which is the manifest's whole job.
+ *
+ * They also need no generated preview. Unlike the charts they ship no global CSS
+ * and no scripts, so the gallery renders them inline and they re-theme live when
+ * the active language changes. An iframe would freeze them to one token set.
+ */
+function primitiveItem({ meta, dir }) {
+  const rel = path.relative(REGISTRY_DIR, dir).split(path.sep).join('/');
+  const files = ['component.html', 'component.css'].map((name) => ({
+    path: `registry/${rel}/${name}`,
+    type: 'registry:file',
+    target: `nodex/primitives/${meta.slug}/${name}`,
+  }));
+  return {
+    $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+    name: meta.slug,
+    type: 'registry:ui',
+    title: meta.title,
+    ...(meta.description ? { description: meta.description } : {}),
+    files,
+    meta: {
+      language: 'shared',
+      tier: meta.tier,
+      component: meta.component,
+      runtime: meta.runtime,
+      tags: meta.tags,
+    },
+  };
+}
+
 function lintComponent({ languageMeta, tokens, meta, css, js, where }) {
   // 1. Reduced motion. Anything that animates needs an escape hatch.
   if (/animation\s*:/.test(css) && !/prefers-reduced-motion/.test(css)) {
@@ -150,7 +199,7 @@ function lintComponent({ languageMeta, tokens, meta, css, js, where }) {
   //    component rather than inferred from type, since the same chart type can
   //    be drawn either way.
   const lineMax = Number.parseFloat(tokens.stroke?.lineMax ?? '1.4');
-  if (!meta.strokeAsArea) {
+  if (js && !meta.strokeAsArea) {
     const widths = [...js.matchAll(/'stroke-width'\s*:\s*([0-9.]+)/g)]
       .map((m) => Number.parseFloat(m[1]))
       .filter((w) => w > lineMax);
@@ -174,7 +223,7 @@ function lintComponent({ languageMeta, tokens, meta, css, js, where }) {
   );
   const strays = [
     ...new Set(
-      [...`${js}\n${css}`.matchAll(/#[0-9A-Fa-f]{6}/g)]
+      [...`${js ?? ''}\n${css}`.matchAll(/#[0-9A-Fa-f]{6}/g)]
         .map((m) => m[0].toUpperCase())
         .filter((hex) => !ramp.has(hex) && !semantic.has(hex)),
     ),
@@ -255,6 +304,37 @@ async function main() {
   const items = [];
   const slugs = new Map();
   const generated = [];
+
+  // Primitives first: shared, no preview document, rendered inline by the app.
+  for (const primitive of source.primitives) {
+    const where = `primitives/${primitive.meta.slug}`;
+    if (primitive.meta.tier !== 'primitive') {
+      fail(where, `tier is "${primitive.meta.tier}" but it lives in primitives/`);
+    }
+    if (path.basename(primitive.dir) !== primitive.meta.slug) {
+      fail(
+        where,
+        `directory is "${path.basename(primitive.dir)}" but slug is "${primitive.meta.slug}"`,
+      );
+    }
+    if (primitive.meta.density) {
+      fail(where, 'primitives must not declare density');
+    }
+    // A primitive that hardcodes a colour cannot be themed, which defeats the
+    // entire point of it being shared.
+    const css = await readFile(
+      path.join(primitive.dir, 'component.css'),
+      'utf8',
+    );
+    const literals = [...new Set([...css.matchAll(/#[0-9A-Fa-f]{3,8}\b/g)].map((m) => m[0]))];
+    if (literals.length > 0) {
+      fail(
+        where,
+        `hardcodes colour(s) ${literals.join(', ')} - primitives may only reference token variables`,
+      );
+    }
+    items.push(primitiveItem(primitive));
+  }
 
   for (const language of source.languages) {
     const tokens = JSON.parse(
@@ -360,6 +440,24 @@ async function main() {
   await writeFile(
     path.join(OUT_DIR, 'registry.json'),
     `${JSON.stringify(registry, null, 2)}\n`,
+  );
+
+  // Language metadata travels separately: registrySchema mirrors shadcn's shape
+  // and would strip a non-standard `languages` key, so adding it there would
+  // silently lose the data.
+  await writeFile(
+    path.join(OUT_DIR, 'languages.json'),
+    `${JSON.stringify(
+      source.languages.map((l) => ({
+        ...l.meta,
+        counts: {
+          expressive: l.expressive.length,
+          primitives: source.primitives.length,
+        },
+      })),
+      null,
+      2,
+    )}\n`,
   );
   for (const item of registry.items) {
     const file = path.join(OUT_DIR, `${item.meta.language}`, `${item.name}.json`);

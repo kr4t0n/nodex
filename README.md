@@ -19,9 +19,20 @@ on warm paper.
 
 ## Status
 
-Phase 1 of 5. The registry and its build pipeline exist; the CLI, primitives,
-gallery, and backend do not yet. See `AGENTS.md` for the architecture and the
-plan for the roadmap.
+The registry, the primitives, and the gallery app exist. The CLI and the
+accounts backend do not yet. See `AGENTS.md` for the architecture.
+
+## Running the gallery
+
+```bash
+npm install
+npm run build:registry   # generates tokens.css, previews, and the manifest
+npm run dev              # http://localhost:4180
+```
+
+The gallery must be preceded by `build:registry` at least once: it reads the
+built manifest from `public/r/` and iframes the generated previews, neither of
+which is committed.
 
 ## Prerequisites
 
@@ -41,8 +52,9 @@ npm install
 | `npm run build:registry` | Validate, generate previews and `tokens.css`, emit the manifest |
 | `npm run check:registry` | Validate only, no writes — what CI runs |
 | `npm run smoke` | Mount all 64 components in a real DOM and assert they draw |
+| `npm run dev` | Gallery dev server on port 4180 |
 | `npm run lint` | ESLint across the workspace |
-| `npm run typecheck` | `tsc --build` across the workspace |
+| `npm run typecheck` | Types across the workspace and the gallery |
 
 `npm run build:registry` writes three kinds of output:
 
@@ -55,18 +67,14 @@ All three are build artifacts and are gitignored.
 
 ## Looking at the components
 
-There is no gallery app yet (Phase 4). To eyeball all 64 in the meantime:
+`npm run dev` and browse. Three routes:
 
-```bash
-npm run build:registry
-node tmp/make-verify.mjs
-python3 -m http.server 4173      # then open /tmp/verify.html
-```
+- `/` the language index, each language shown as a live composite of its own components
+- `/l/:slug` the language: tokens, filterable component grid, primitives, and the rendered `DESIGN.md`
+- `/l/:slug/:name` one component, full size, with its `nodex add` command
 
-The charts draw themselves when scrolled into view and replay on click, so
-scroll slowly and click any frame to replay it.
-
-Individual previews are also directly openable, for example
+Charts draw when scrolled into view and replay on click. Individual previews are
+directly openable too, for example
 `/registry/languages/mono-editorial/expressive/barcode-lollipop/index.html`.
 
 ## Project structure
@@ -84,7 +92,10 @@ registry/
       component.js     exports mount(root)
       meta.json        type, density, runtime, aspect ratio, tags
       index.html       GENERATED standalone preview
+  primitives/<name>/   button, card, badge, input. ONE implementation,
+                       shared by every language, token variables only
 packages/core/       the registry contract: schemas, taxonomy, loader
+apps/gallery/        Vite + React + TS + Tailwind browse app
 scripts/
   build-registry.mjs      validate + generate + emit
   smoke-components.mjs    mount every component and assert it draws

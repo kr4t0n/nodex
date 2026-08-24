@@ -1,0 +1,10 @@
+{
+  "slug": "card",
+  "title": "Card",
+  "description": "Container with the fixed title, sub, body, and caption anatomy, plus an inverted variant",
+  "component": "card",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["container", "surface"],
+  "dependencies": []
+}

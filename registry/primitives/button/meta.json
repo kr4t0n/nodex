@@ -1,0 +1,10 @@
+{
+  "slug": "button",
+  "title": "Button",
+  "description": "Solid, outline, and quiet variants with hover, pressed, focus, and disabled states",
+  "component": "button",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["action", "interactive"],
+  "dependencies": []
+}

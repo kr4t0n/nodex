@@ -29,3 +29,6 @@ tmp/verify.html
 # NOTE: tmp/ is intentionally NOT ignored during Phase 1.
 # It holds the one-shot extractor and its source, which are committed once
 # for provenance and then deleted. Add `tmp/` here in the cleanup commit.
+
+# gallery build output
+apps/gallery/dist/

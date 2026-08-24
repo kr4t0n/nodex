@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nodex</title>
+    <meta
+      name="description"
+      content="A component registry organised by design language. Pick a language and get its tokens, its written rules, and the components that belong to it."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!--
+      Shared primitives, loaded once. They reference only token variables, so
+      they take on whichever language's tokens.css is active. That is why they
+      render inline here rather than in an iframe: an iframe would freeze them
+      to a single token set.
+    -->
+    <link rel="stylesheet" href="/registry/primitives/button/component.css" />
+    <link rel="stylesheet" href="/registry/primitives/card/component.css" />
+    <link rel="stylesheet" href="/registry/primitives/badge/component.css" />
+    <link rel="stylesheet" href="/registry/primitives/input/component.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

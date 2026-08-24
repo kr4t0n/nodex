@@ -130,6 +130,46 @@ lint enforces membership of the 37 greys actually present rather than a palette
 someone wished for, so it passes today and fails on any addition. Same for
 `strokeAsArea`.
 
+## The gallery re-themes rather than having a style
+
+`apps/gallery` has no palette, type stack, or radius of its own. Every value
+resolves through `--nx-*`, and swapping the active language's `tokens.css`
+restyles the whole interface. That dogfoods the token system: a broken primitive
+is immediately visible in the app's own chrome.
+
+Consequence worth stating: the shell deliberately has **no independent dark
+mode**. The theme is whatever the viewed language is. An app whose job is to
+present a design language faithfully cannot impose a second one on top.
+
+The line between what the app owns and what the language owns:
+
+- **Craft** belongs to the app: layout composition, spacing rhythm, motion
+  quality, interaction states, restraint.
+- **Identity** belongs to the language: type, colour, stroke weight, radius.
+
+GSAP is app-only and never enters registry content. A component that depended on
+GSAP would force that dependency on everyone who copied it.
+
+### Primitives render inline, charts render in iframes
+
+Not an inconsistency. Charts carry global CSS resets and scripts, so they need
+frame isolation, and React will not execute `<script>` from innerHTML anyway.
+Primitives carry neither, so inlining them is both safe and better: they inherit
+the live token layer and re-theme instantly, where an iframe would freeze them to
+one language.
+
+### Previews are scaled, not cropped
+
+Components were authored for a full page, so dropping one into a 320px card shows
+the top-left corner of a 1400px layout. `Preview` renders at a fixed logical
+width and scales the frame, keeping composition and type proportion intact.
+
+Height is not guessed from the chart's `viewBox`: a card's real height depends on
+its title, notes, and caption, so the generated preview posts its measured
+`scrollHeight` to the parent. In grids a fixed `boxHeight` is applied anyway, so
+titles share a baseline. Content-driven heights leave every card a different size
+and the grid reads as broken.
+
 ## Gotchas
 
 - **`rnd` is a deterministic hash, not `Math.random()`.** Sample data must not

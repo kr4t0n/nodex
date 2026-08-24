@@ -1,0 +1,44 @@
+/* badge - shared primitive, themed by the active language's tokens.
+
+   Derived from the three badge treatments in the source collection: solid,
+   outline, and dashed. Uppercase micro-type at 9px with wide tracking, which is
+   how this language handles labels. */
+
+.nx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 3px 10px;
+  border: var(--nx-hairline) solid transparent;
+  border-radius: var(--nx-radius-pill);
+  font-family: var(--nx-font-sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--nx-muted);
+}
+
+.nx-badge--solid {
+  background: var(--nx-ink);
+  border-color: var(--nx-ink);
+  color: var(--nx-bg);
+}
+
+.nx-badge--outline {
+  border-color: var(--nx-ink);
+  color: var(--nx-ink);
+}
+
+.nx-badge--dashed {
+  border-style: dashed;
+  border-color: var(--nx-faint);
+  color: var(--nx-muted);
+}
+
+.nx-badge--quiet {
+  color: var(--nx-faint);
+  padding-inline: 0;
+}
