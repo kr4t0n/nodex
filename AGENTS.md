@@ -98,6 +98,14 @@ authored. A future language may have no such distinction and omits the field. A
 language declares its legal values in `meta.json`; a component may only use a
 declared value.
 
+**Agent-facing only. It is deliberately absent from the gallery UI.** Density
+answers a question an agent has when generating code, which is whether this
+component is built to be studied or scanned. A human browsing the grid can see
+that in the thumbnail, so a filter for it was noise. It stays in the manifest, in
+each component's `meta.json`, in `nodex search --density`, and in `DESIGN.md`.
+
+Do not reintroduce it as a UI control.
+
 **The build must never infer density from a slug.** `matrix-heat-glance` and
 `circular-graph-dense` carry density-sounding suffixes, but those are collision
 disambiguation that happens to borrow the vocabulary — not an encoding.

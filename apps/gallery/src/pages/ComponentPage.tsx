@@ -57,7 +57,6 @@ export function ComponentPage() {
     ['Type', item.meta.component],
     ['Runtime', item.meta.runtime],
   ];
-  if (item.meta.density) facts.push(['Reading', item.meta.density]);
   if (item.dependencies?.length) {
     facts.push(['Dependencies', item.dependencies.join(', ')]);
   }

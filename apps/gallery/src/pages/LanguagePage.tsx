@@ -97,11 +97,7 @@ export function LanguagePage() {
           {tokens ? <TokenPanel tokens={tokens} /> : null}
         </section>
 
-        <ComponentGrid
-          items={expressive}
-          language={slug}
-          declaredDensity={language.density}
-        />
+        <ComponentGrid items={expressive} language={slug} />
 
         <PrimitiveStrip items={primitives} language={slug} />
 
@@ -177,17 +173,19 @@ function TokenPanel({ tokens }: { tokens: Tokens }) {
   );
 }
 
-function ComponentGrid({
-  items,
-  language,
-  declaredDensity,
-}: {
-  items: Item[];
-  language: string;
-  declaredDensity?: string[];
-}) {
+/**
+ * Density is deliberately absent from this UI.
+ *
+ * It is agent-facing metadata: it tells a coding agent whether a component is
+ * built to be studied or scanned, which is a decision made when generating code,
+ * not when browsing. A human looking at the grid can see the difference in a
+ * glance at the thumbnail, so a filter for it would be UI noise.
+ *
+ * It remains in the manifest, in each component's meta.json, in `nodex search
+ * --density`, and in DESIGN.md.
+ */
+function ComponentGrid({ items, language }: { items: Item[]; language: string }) {
   const [query, setQuery] = useState('');
-  const [density, setDensity] = useState<string | null>(null);
   const [type, setType] = useState<string | null>(null);
   const reduced = usePrefersReducedMotion();
   const gridRef = useRef<HTMLDivElement>(null);
@@ -197,7 +195,6 @@ function ComponentGrid({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return items.filter((item) => {
-      if (density && item.meta.density !== density) return false;
       if (type && item.meta.component !== type) return false;
       if (!q) return true;
       return (
@@ -207,7 +204,7 @@ function ComponentGrid({
         item.meta.tags.some((tag) => tag.includes(q))
       );
     });
-  }, [items, query, density, type]);
+  }, [items, query, type]);
 
   // Motivated motion: the set changed, so the new set announces itself. A
   // stagger reads as "these are the results" rather than a silent swap.
@@ -223,10 +220,10 @@ function ComponentGrid({
         overwrite: true,
       });
     },
-    { scope: gridRef, dependencies: [filtered.length, density, type], revertOnUpdate: true },
+    { scope: gridRef, dependencies: [filtered.length, type], revertOnUpdate: true },
   );
 
-  const active = density !== null || type !== null || query !== '';
+  const active = type !== null || query !== '';
 
   return (
     <section>
@@ -248,64 +245,20 @@ function ComponentGrid({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-end gap-5">
-          {/* Rendered only when the language declares the axis, so the shell
-              never hardcodes a distinction a future language may not have.
-
-              Labelled, because "Close read / Glance" says nothing about what it
-              filters if you have not read DESIGN.md. Two unexplained buttons in
-              a filter bar is the same failure as placeholder-as-label. */}
-          {declaredDensity?.length ? (
-            <fieldset className="nx-field m-0 border-0 p-0">
-              <legend className="nx-field__label p-0">
-                Reading{' '}
-                <span
-                  className="normal-case"
-                  style={{ letterSpacing: 0, fontWeight: 500 }}
-                  title="Close read draws one mark per record and rewards study. Glance shows aggregate shapes and reads instantly."
-                >
-                  (how it is read)
-                </span>
-              </legend>
-              <div className="flex flex-wrap items-center gap-2">
-                {declaredDensity.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className="nx-btn nx-btn--outline"
-                    aria-pressed={density === value}
-                    title={
-                      value === 'close-read'
-                        ? 'One mark per record. Rewards study, for reports.'
-                        : 'Aggregate shapes. Reads instantly, for dashboards.'
-                    }
-                    onClick={() => setDensity(density === value ? null : value)}
-                  >
-                    {value === 'close-read' ? 'Close read' : 'Glance'}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          ) : null}
-
-          <div className="nx-field">
-            <label className="nx-field__label" htmlFor="nx-type">
-              Type
-            </label>
-            <select
-              id="nx-type"
-              className="nx-select nx-select--auto"
-              value={type ?? ''}
-              onChange={(event) => setType(event.target.value || null)}
-            >
-              <option value="">All types</option>
-              {types.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            className="nx-select nx-select--auto"
+            value={type ?? ''}
+            aria-label="Filter by component type"
+            onChange={(event) => setType(event.target.value || null)}
+          >
+            <option value="">All types</option>
+            {types.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
 
           {active ? (
             <button
@@ -313,7 +266,6 @@ function ComponentGrid({
               className="nx-btn nx-btn--quiet"
               onClick={() => {
                 setQuery('');
-                setDensity(null);
                 setType(null);
               }}
             >
@@ -333,7 +285,6 @@ function ComponentGrid({
               className="nx-btn nx-btn--outline"
               onClick={() => {
                 setQuery('');
-                setDensity(null);
                 setType(null);
               }}
             >
@@ -368,7 +319,6 @@ function ComponentGrid({
                 style={{ color: 'var(--nx-faint)' }}
               >
                 {item.meta.component}
-                {item.meta.density ? ` · ${item.meta.density}` : ''}
               </p>
             </article>
           ))}
