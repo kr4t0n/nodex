@@ -1,0 +1,10 @@
+{
+  "slug": "table",
+  "title": "Table",
+  "description": "Hairline rules between rows, tabular numerals, emphasis by weight rather than fill",
+  "component": "table",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["data", "container"],
+  "dependencies": []
+}

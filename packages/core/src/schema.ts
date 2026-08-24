@@ -75,6 +75,13 @@ export const nodexMetaSchema = z.object({
   density: densitySchema.optional(),
   aspectRatio: aspectRatioSchema.optional(),
   tags: z.array(z.string()).default([]),
+  /**
+   * Runtime data fetches, carried through to the manifest so a consumer sees
+   * them before installing. A component that silently phones a third-party host
+   * is a supply-chain surface, and the whole point of declaring it is that the
+   * declaration reaches the person adding it.
+   */
+  externalData: z.array(z.string()).optional(),
 });
 
 export const registryItemSchema = z.object({

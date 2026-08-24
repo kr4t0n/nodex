@@ -1,0 +1,66 @@
+/* select - shared primitive, themed by the active language's tokens.
+
+   Presentational only. A native <select> is used deliberately: it is accessible,
+   keyboard-navigable, and correct on touch for free. Reach for a headless
+   listbox (Radix, Ark) only when you genuinely need custom option rendering,
+   then apply .nx-select to its trigger.
+
+   The chevron is drawn with a background gradient rather than an icon so the
+   primitive stays a single CSS file with no asset dependency. */
+
+.nx-select {
+  appearance: none;
+  width: 100%;
+  padding: 0.6em 2.2em 0.6em 0.95em;
+  border: var(--nx-hairline) solid var(--nx-grid);
+  border-radius: var(--nx-radius-pill);
+  background-color: var(--nx-bg);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  /* Two 1px bars rotated into a chevron. Sized to the hairline scale so it
+     matches the weight of everything else in the language. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) center,
+    calc(100% - 11px) center;
+  background-size:
+    4px 4px,
+    4px 4px;
+  background-repeat: no-repeat;
+  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nx-select:hover {
+  border-color: var(--nx-muted);
+}
+
+.nx-select:focus {
+  outline: none;
+  border-color: var(--nx-ink);
+}
+
+.nx-select:focus-visible {
+  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline-offset: 2px;
+}
+
+.nx-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Auto-width variant, for filter bars where a full-width control would be odd. */
+.nx-select--auto {
+  width: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-select {
+    transition: none;
+  }
+}

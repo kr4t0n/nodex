@@ -1,0 +1,13 @@
+{
+  "name": "@nodex/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fetch design languages and components from a nodex registry",
+  "type": "module",
+  "bin": {
+    "nodex": "./src/index.ts"
+  },
+  "dependencies": {
+    "@nodex/core": "0.1.0"
+  }
+}

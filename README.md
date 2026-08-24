@@ -19,8 +19,29 @@ on warm paper.
 
 ## Status
 
-The registry, the primitives, and the gallery app exist. The CLI and the
-accounts backend do not yet. See `AGENTS.md` for the architecture.
+The registry, the six primitives, the CLI, and the gallery app all work. The
+accounts backend does not exist yet, and authentication is stubbed because every
+language is currently public. See `AGENTS.md` for the architecture.
+
+## Using it in a project
+
+```bash
+nodex list                                  # what languages exist
+nodex init mono-editorial                   # set the project up
+nodex search heatmap --design mono-editorial
+nodex add mono-editorial/barcode-lollipop
+```
+
+`init` writes `nodex.json`, drops the language's `tokens.css` and `DESIGN.md`
+into the project, and appends a section to the project's `AGENTS.md` so a coding
+agent knows the rules exist. `add` then needs no flags.
+
+Point at a registry with `--registry <dir|url>` or `NODEX_REGISTRY`. Inside a
+checkout it is found automatically. A project initialised against a remote
+registry keeps using it.
+
+Until the package is published, invoke it as
+`node packages/cli/src/index.ts <command>`.
 
 ## Running the gallery
 
@@ -52,6 +73,7 @@ npm install
 | `npm run build:registry` | Validate, generate previews and `tokens.css`, emit the manifest |
 | `npm run check:registry` | Validate only, no writes — what CI runs |
 | `npm run smoke` | Mount all 64 components in a real DOM and assert they draw |
+| `npm run smoke:cli` | Run init and add against a temporary project |
 | `npm run dev` | Gallery dev server on port 4180 |
 | `npm run lint` | ESLint across the workspace |
 | `npm run typecheck` | Types across the workspace and the gallery |
@@ -95,10 +117,14 @@ registry/
   primitives/<name>/   button, card, badge, input. ONE implementation,
                        shared by every language, token variables only
 packages/core/       the registry contract: schemas, taxonomy, loader
+packages/cli/        the nodex CLI
 apps/gallery/        Vite + React + TS + Tailwind browse app
+skills/nodex/        the skill shipped to consumers
+.agents/skills/nodex-authoring/   how to add languages and components here
 scripts/
   build-registry.mjs      validate + generate + emit
   smoke-components.mjs    mount every component and assert it draws
+  smoke-cli.mjs           init and add against a temporary project
 tmp/                 throwaway: the one-shot extractor and its source
 ```
 
@@ -110,5 +136,11 @@ when accounts arrive.
 
 ## Adding a design language
 
-Not yet automated. `nodex new-language` lands in Phase 2. The authoring
-procedure will live in `.agents/skills/nodex-authoring/SKILL.md`.
+```bash
+node packages/cli/src/index.ts new-language <slug>
+```
+
+Scaffolds the standard folder shape, so a language never starts as a copy of an
+existing one. Languages are discovered by directory; nothing needs registering.
+
+The full procedure lives in `.agents/skills/nodex-authoring/SKILL.md`.

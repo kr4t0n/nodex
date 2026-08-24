@@ -294,6 +294,9 @@ function itemFor({ languageMeta, meta, componentDir }) {
       runtime: meta.runtime,
       ...(meta.density ? { density: meta.density } : {}),
       ...(meta.aspectRatio ? { aspectRatio: meta.aspectRatio } : {}),
+      // Must reach the manifest, or the CLI cannot warn about it and declaring
+      // it in the component's meta.json accomplishes nothing.
+      ...(meta.externalData?.length ? { externalData: meta.externalData } : {}),
       tags: meta.tags,
     },
   };

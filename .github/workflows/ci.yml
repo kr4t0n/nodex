@@ -30,6 +30,11 @@ jobs:
       - name: Smoke-test components
         run: npm run smoke
 
+      # Exercises the surface a coding agent actually touches: init and add
+      # against a temporary project, across all three component shapes.
+      - name: Smoke-test the CLI
+        run: npm run smoke:cli
+
       - name: Lint
         run: npm run lint
 

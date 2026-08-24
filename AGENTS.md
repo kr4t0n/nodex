@@ -170,6 +170,36 @@ its title, notes, and caption, so the generated preview posts its measured
 titles share a baseline. Content-driven heights leave every card a different size
 and the grid reads as broken.
 
+## One registry root, two kinds of address
+
+The CLI addresses a registry by its **root**, never by its manifest, and
+everything hangs off that root at a fixed shape: `r/registry.json` for the
+manifest, `<item.files[].path>` for sources. The root may be a local directory or
+an https base and no command knows the difference, which is what lets the
+registry move to a CDN later without touching a single command.
+
+One wrinkle, handled in `packages/cli/src/registry.ts`: a checkout does not match
+the served layout exactly, because the manifest is written into `public/` so a
+static host exposes it at `/r` while sources stay at the repo root. A single
+prefix rule reconciles them.
+
+Resolution precedence is flag, then `nodex.json`, then `NODEX_REGISTRY`, then the
+nearest checkout. The `nodex.json` step matters: without it a project set up
+against a remote registry would silently fall back to whatever local checkout
+happened to be above the cwd and fetch a different version of a component.
+
+## Two skills, two audiences
+
+- `skills/nodex/SKILL.md` ships to consumers. Pick a language, init, search,
+  add. It must never mention authoring, because a downstream agent working in
+  someone else's app has no business scaffolding languages.
+- `.agents/skills/nodex-authoring/SKILL.md` is repo-local and loaded on demand.
+  It holds the whole authoring procedure, which is long and rarely needed, and
+  so does not belong in the always-loaded `AGENTS.md`.
+
+`AGENTS.md` explains why and what. The authoring skill explains how. Keep the
+split, or they drift into each other.
+
 ## Gotchas
 
 - **`rnd` is a deterministic hash, not `Math.random()`.** Sample data must not

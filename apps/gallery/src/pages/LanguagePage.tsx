@@ -264,7 +264,7 @@ function ComponentGrid({
           ))}
 
           <select
-            className="nx-input w-auto"
+            className="nx-select nx-select--auto"
             value={type ?? ''}
             aria-label="Filter by component type"
             onChange={(event) => setType(event.target.value || null)}

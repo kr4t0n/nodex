@@ -1,0 +1,10 @@
+{
+  "slug": "select",
+  "title": "Select",
+  "description": "Native select with a CSS-drawn chevron, sized to the hairline scale",
+  "component": "select",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["form", "interactive"],
+  "dependencies": []
+}
