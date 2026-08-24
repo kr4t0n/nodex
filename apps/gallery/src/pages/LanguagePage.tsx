@@ -8,13 +8,12 @@ import { CommandRow, EmptyState, Loading, PageShell, TopBar } from '../component
 import { Preview } from '../components/Preview.tsx';
 import { useLanguageTokens, usePrefersReducedMotion, useText } from '../hooks.ts';
 import {
-  addCommand,
   designUrl,
   expressiveFor,
   facetValues,
   loadCatalog,
   previewUrl,
-  primitiveMarkupUrl,
+  primitivePreviewUrl,
   primitivesFor,
   tokensJsonUrl,
   type Catalog,
@@ -97,9 +96,11 @@ export function LanguagePage() {
           {tokens ? <TokenPanel tokens={tokens} /> : null}
         </section>
 
-        <ComponentGrid items={expressive} language={slug} />
-
+        {/* Primitives first: they are the language's vocabulary, and a reader
+            meeting a design language wants the alphabet before the essays. */}
         <PrimitiveStrip items={primitives} language={slug} />
+
+        <ComponentGrid items={expressive} language={slug} />
 
         {design.text ? <DesignDoc markdown={design.text} /> : null}
       </PageShell>
@@ -226,9 +227,12 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
   const active = type !== null || query !== '';
 
   return (
-    <section>
+    <section className="pt-20">
       <hr className="nx-rule" />
-      <div className="flex flex-wrap items-end justify-between gap-5 pt-7 pb-8">
+      <h2 className="mt-7 mb-8 text-[19px] font-extrabold tracking-[-0.02em]">
+        Charts
+      </h2>
+      <div className="flex flex-wrap items-end justify-between gap-5 pb-8">
         <div className="w-full max-w-[280px]">
           <div className="nx-field">
             <label className="nx-field__label" htmlFor="nx-q">
@@ -299,34 +303,38 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
         >
           {filtered.map((item) => (
             <article key={item.name} data-grid-cell>
+              {/* Title above the preview, mirroring the card anatomy DESIGN.md
+                  fixes for the components themselves: title, then sub, then the
+                  chart. */}
               <Link
                 to={`/l/${language}/${item.name}`}
                 className="block no-underline"
                 style={{ color: 'inherit' }}
               >
+                <h2 className="m-0 text-[14px] font-bold tracking-[-0.01em]">
+                  {item.title}
+                </h2>
+                <p
+                  className="mt-1.5 mb-0 text-[10.5px] tracking-[0.06em] uppercase"
+                  style={{ color: 'var(--nx-faint)' }}
+                >
+                  {item.meta.component}
+                </p>
                 <Preview
+                  className="mt-4"
                   src={previewUrl(language, item.name)}
                   title={item.title}
                   aspectRatio={item.meta.aspectRatio}
                   boxHeight={THUMB_HEIGHT}
                 />
-                <h2 className="mt-4 mb-0 text-[14px] font-bold tracking-[-0.01em]">
-                  {item.title}
-                </h2>
               </Link>
-              <p
-                className="mt-1.5 mb-0 text-[10.5px] tracking-[0.06em] uppercase"
-                style={{ color: 'var(--nx-faint)' }}
-              >
-                {item.meta.component}
-              </p>
             </article>
           ))}
         </div>
       )}
 
       <p className="mt-10 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-        {filtered.length} of {items.length} components. Each preview draws when it
+        {filtered.length} of {items.length} charts. Each preview draws when it
         scrolls into view; click a chart to replay it.
       </p>
     </section>
@@ -336,51 +344,36 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
 /** Primitives render inline, so they re-theme with the rest of the shell. */
 function PrimitiveStrip({ items, language }: { items: Item[]; language: string }) {
   return (
-    <section className="pt-20">
+    <section className="pt-4">
       <hr className="nx-rule" />
-      <h2 className="mt-7 mb-1 text-[19px] font-extrabold tracking-[-0.02em]">
+      <h2 className="mt-7 mb-9 text-[19px] font-extrabold tracking-[-0.02em]">
         Primitives
       </h2>
-      <p
-        className="mt-0 mb-9 max-w-[62ch] text-[11.5px] leading-[1.7]"
-        style={{ color: 'var(--nx-muted)' }}
-      >
-        One implementation shared by every design language, wearing this
-        language&apos;s tokens. Presentational only: apply the classes to a headless
-        component when you need real keyboard and ARIA behaviour.
-      </p>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-12 md:grid-cols-2">
         {items.map((item) => (
-          <PrimitiveCard key={item.name} item={item} language={language} />
+          <article key={item.name}>
+            <h3 className="m-0 text-[14px] font-bold tracking-[-0.01em]">
+              {item.title}
+            </h3>
+            {item.description ? (
+              <p
+                className="mt-1.5 mb-0 text-[10.5px] leading-[1.6]"
+                style={{ color: 'var(--nx-faint)' }}
+              >
+                {item.description}
+              </p>
+            ) : null}
+            {/* Fluid: a primitive is shown at the size it actually is. */}
+            <Preview
+              className="mt-4"
+              src={primitivePreviewUrl(item.name, language)}
+              title={item.title}
+              fluid
+            />
+          </article>
         ))}
       </div>
     </section>
-  );
-}
-
-function PrimitiveCard({ item, language }: { item: Item; language: string }) {
-  const markup = useText(primitiveMarkupUrl(item.name));
-
-  return (
-    <article className="nx-card">
-      <h3 className="nx-card__title text-[14px]">{item.title}</h3>
-      {item.description ? <p className="nx-card__sub">{item.description}</p> : null}
-      <div className="nx-card__body flex flex-wrap items-center gap-3">
-        {markup.text ? (
-          // Static markup from our own registry, no scripts. Inline rather than
-          // framed precisely so it inherits the live token layer.
-          <div
-            className="flex flex-wrap items-center gap-3"
-            dangerouslySetInnerHTML={{ __html: markup.text }}
-          />
-        ) : (
-          <span className="text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-            Loading
-          </span>
-        )}
-      </div>
-      <div className="nx-card__caption">{addCommand(language, item)}</div>
-    </article>
   );
 }
 

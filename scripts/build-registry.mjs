@@ -132,14 +132,91 @@ ${fragment.trim()}
      The card's real height depends on its title, subtitle, notes and caption, so
      a chart's viewBox ratio is only ever an approximation and guessing it clips
      the footer. Measuring and posting the true height removes the guess. */
+  /* Measure the content wrapper, not documentElement. scrollHeight can never
+     report less than the frame's own height, so a component shorter than the
+     embedder's initial guess would lock at that guess forever. */
   const post = () => {
-    parent.postMessage(
-      { type: 'nx-preview-size', height: document.documentElement.scrollHeight },
-      '*',
-    );
+    const pad = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+    const height = root
+      ? Math.ceil(root.getBoundingClientRect().height + pad * 2)
+      : document.documentElement.scrollHeight;
+    parent.postMessage({ type: 'nx-preview-size', height }, '*');
   };
   post();
-  new ResizeObserver(post).observe(document.documentElement);
+  new ResizeObserver(post).observe(root ?? document.documentElement);
+  addEventListener('load', post);
+</script>
+</body>
+</html>
+`;
+}
+
+/**
+ * Standalone preview for a shared primitive.
+ *
+ * Primitives belong to no single language, so the token layer is chosen at view
+ * time from a `?lang=` parameter rather than baked in. That keeps one file per
+ * primitive instead of one per primitive per language, and means a new language
+ * gets primitive previews for free.
+ *
+ * No module import here: primitives are presentational and ship no JavaScript.
+ */
+function renderPrimitivePreview({ meta, defaultLanguage }) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${meta.title} - nodex primitive</title>
+${FONT_LINKS}
+<link rel="stylesheet" href="./component.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--nx-bg);
+    color: var(--nx-ink);
+    font-family: var(--nx-font-sans);
+    padding: 28px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .nx-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 18px 20px;
+  }
+  .nx-preview > * { flex: 0 0 auto; }
+</style>
+</head>
+<body>
+<div class="nx-preview">
+${meta.markup.trim()}
+</div>
+<script>
+  /* Token layer by query parameter, so one preview serves every language. */
+  (function () {
+    var lang = new URLSearchParams(location.search).get('lang') || '${defaultLanguage}';
+    if (!/^[a-z0-9-]+$/.test(lang)) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '../../languages/' + lang + '/tokens.css';
+    document.head.insertBefore(link, document.head.firstChild);
+  })();
+
+  /* Measure the wrapper, not documentElement: scrollHeight cannot report less
+     than the frame height, so a short primitive would lock at the embedder's
+     initial guess and never shrink to its real size. */
+  var wrap = document.querySelector('.nx-preview');
+  var post = function () {
+    var pad = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+    var height = wrap
+      ? Math.ceil(wrap.getBoundingClientRect().height + pad * 2)
+      : document.documentElement.scrollHeight;
+    parent.postMessage({ type: 'nx-preview-size', height: height }, '*');
+  };
+  post();
+  new ResizeObserver(post).observe(wrap || document.documentElement);
   addEventListener('load', post);
 </script>
 </body>
@@ -159,9 +236,8 @@ ${fragment.trim()}
  * them under each language it renders: storage location and browse location are
  * decoupled, which is the manifest's whole job.
  *
- * They also need no generated preview. Unlike the charts they ship no global CSS
- * and no scripts, so the gallery renders them inline and they re-theme live when
- * the active language changes. An iframe would freeze them to one token set.
+ * Their preview takes the token layer from a `?lang=` parameter, so a single
+ * generated file serves every language rather than one per pairing.
  */
 function primitiveItem({ meta, dir }) {
   const rel = path.relative(REGISTRY_DIR, dir).split(path.sep).join('/');
@@ -336,6 +412,19 @@ async function main() {
         `hardcodes colour(s) ${literals.join(', ')} - primitives may only reference token variables`,
       );
     }
+
+    const markup = await readFile(
+      path.join(primitive.dir, 'component.html'),
+      'utf8',
+    );
+    generated.push({
+      file: path.join(primitive.dir, 'index.html'),
+      content: renderPrimitivePreview({
+        meta: { ...primitive.meta, markup },
+        defaultLanguage: source.languages[0]?.meta.slug ?? 'mono-editorial',
+      }),
+    });
+
     items.push(primitiveItem(primitive));
   }
 

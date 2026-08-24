@@ -28,6 +28,15 @@ interface PreviewProps {
    * component should take the room it needs.
    */
   boxHeight?: number;
+  /**
+   * Render at the container's own width with no scaling.
+   *
+   * Charts are authored for a full page, so they must be rendered wide and
+   * scaled down. Primitives are small already, and scaling a button down to a
+   * quarter size makes it illegible and misrepresents it. A button should be
+   * shown at the size a button actually is.
+   */
+  fluid?: boolean;
 }
 
 /**
@@ -47,6 +56,7 @@ export function Preview({
   className,
   replayable = false,
   boxHeight,
+  fluid = false,
 }: PreviewProps) {
   const [nearRef, near] = useNearViewport<HTMLDivElement>();
   const boxRef = useRef<HTMLDivElement>(null);
@@ -57,9 +67,17 @@ export function Preview({
   const [loaded, setLoaded] = useState(false);
 
   // Track the rendered width so the fixed-width frame can be scaled to fit.
+  //
+  // The initial read is deliberate rather than leaving it to the observer.
+  // ResizeObserver, like IntersectionObserver, does not deliver in a tab that
+  // is never painted, and the scale gates whether the frame mounts at all. One
+  // synchronous measurement means the preview is correct immediately and the
+  // observer is only responsible for later changes.
   useEffect(() => {
     const box = boxRef.current;
     if (!box) return;
+    const initial = box.getBoundingClientRect().width;
+    if (initial > 0) setWidth(initial);
     const ro = new ResizeObserver(([entry]) => {
       const next = entry?.contentRect.width ?? 0;
       if (next > 0) setWidth(next);
@@ -95,12 +113,16 @@ export function Preview({
   const logicalHeight = contentHeight ?? LOGICAL_WIDTH / fallbackRatio;
 
   // Fit to width, or to the smaller of width and box when a height is fixed.
-  const scale =
-    width === 0
+  const scale = fluid
+    ? 1
+    : width === 0
       ? 0
       : boxHeight
         ? Math.min(width / LOGICAL_WIDTH, boxHeight / logicalHeight)
         : width / LOGICAL_WIDTH;
+
+  const ready = fluid ? near : near && scale > 0;
+  const frameHeight = fluid ? (contentHeight ?? 160) : logicalHeight;
 
   return (
     <div className={className}>
@@ -109,8 +131,11 @@ export function Preview({
         className="nx-frame relative overflow-hidden rounded-[var(--radius-card)]"
         style={{ background: 'var(--nx-bg)' }}
       >
-        <div ref={boxRef} style={{ height: boxHeight ?? logicalHeight * scale }}>
-          {near && scale > 0 ? (
+        <div
+          ref={boxRef}
+          style={{ height: fluid ? frameHeight : (boxHeight ?? logicalHeight * scale) }}
+        >
+          {ready ? (
             <iframe
               key={nonce}
               ref={frameRef}
@@ -122,14 +147,18 @@ export function Preview({
               // is required for the preview's relative token and stylesheet
               // references, and for the height message.
               sandbox="allow-scripts allow-same-origin"
-              style={{
-                width: LOGICAL_WIDTH,
-                height: logicalHeight,
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                border: 0,
-                display: 'block',
-              }}
+              style={
+                fluid
+                  ? { width: '100%', height: frameHeight, border: 0, display: 'block' }
+                  : {
+                      width: LOGICAL_WIDTH,
+                      height: logicalHeight,
+                      transform: `scale(${scale})`,
+                      transformOrigin: 'top left',
+                      border: 0,
+                      display: 'block',
+                    }
+              }
             />
           ) : null}
         </div>

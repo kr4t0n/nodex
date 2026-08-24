@@ -87,8 +87,12 @@ export function tokensJsonUrl(language: string): string {
   return `/registry/languages/${language}/tokens.json`;
 }
 
-export function primitiveMarkupUrl(name: string): string {
-  return `/registry/primitives/${name}/component.html`;
+/**
+ * A primitive's preview takes its token layer from the query parameter, so one
+ * generated file serves every design language.
+ */
+export function primitivePreviewUrl(name: string, language: string): string {
+  return `/registry/primitives/${name}/index.html?lang=${encodeURIComponent(language)}`;
 }
 
 export function addCommand(language: string, item: Item): string {

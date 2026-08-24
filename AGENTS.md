@@ -158,13 +158,38 @@ The line between what the app owns and what the language owns:
 GSAP is app-only and never enters registry content. A component that depended on
 GSAP would force that dependency on everyone who copied it.
 
-### Primitives render inline, charts render in iframes
+### Everything previews in an iframe, primitives at true size
 
-Not an inconsistency. Charts carry global CSS resets and scripts, so they need
-frame isolation, and React will not execute `<script>` from innerHTML anyway.
-Primitives carry neither, so inlining them is both safe and better: they inherit
-the live token layer and re-theme instantly, where an iframe would freeze them to
-one language.
+Charts and primitives both render in frames pointed at generated preview
+documents, so the two sections of a language page read the same way.
+
+A primitive's preview takes its token layer from a `?lang=` query parameter
+rather than baking one in. One generated file therefore serves every design
+language, and a new language gets primitive previews for free.
+
+Primitives render **fluid**, at the container's own width with no scaling.
+Charts are authored for a full page and must be scaled down; a button is already
+button-sized, and shrinking it to a quarter both makes it illegible and
+misrepresents it.
+
+### Previews must not depend on an observer firing
+
+`IntersectionObserver` and `ResizeObserver` do not deliver in a tab that is never
+painted, which covers background tabs and various headless and embedded
+contexts. Gating the mount solely on them produces an empty gallery with no error
+to explain it.
+
+So `useNearViewport` carries a timeout fallback, and `Preview` reads its width
+once synchronously before handing off to the observer. The iframes' native
+`loading="lazy"` still defers the actual network work, so the deferral is not
+lost.
+
+### Preview height is measured from the wrapper, not the document
+
+`documentElement.scrollHeight` can never report less than the frame's own height.
+A component shorter than the embedder's initial guess would therefore lock at
+that guess forever, which is exactly what happened to the short primitives. Both
+preview templates measure the content wrapper plus body padding instead.
 
 ### Previews are scaled, not cropped
 

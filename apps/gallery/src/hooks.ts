@@ -74,12 +74,20 @@ export function useText(url: string | undefined): {
 /**
  * Mount only once the element is near the viewport.
  *
- * Sixty-four live iframes would be untenable, and each preview loads its own
- * fonts and possibly ECharts. Pleasingly symmetric: the charts themselves use
- * IntersectionObserver internally to decide when to draw.
+ * Seventy live iframes at once would be untenable, and each preview loads its
+ * own fonts and possibly ECharts.
+ *
+ * The timeout is not belt-and-braces, it is load-bearing. IntersectionObserver
+ * callbacks do not fire in a tab that is never painted, which includes
+ * background tabs, some headless and embedded contexts, and screenshot tooling.
+ * Gating solely on the observer means those environments show an empty gallery
+ * forever, with no error to explain it. The fallback mounts anyway, and the
+ * iframes' native `loading="lazy"` still defers the actual network work, so
+ * nothing is lost by being less clever here.
  */
 export function useNearViewport<T extends Element>(
   rootMargin = '300px',
+  fallbackMs = 1500,
 ): [React.RefObject<T | null>, boolean] {
   const ref = useRef<T | null>(null);
   const [near, setNear] = useState(false);
@@ -87,6 +95,7 @@ export function useNearViewport<T extends Element>(
   useEffect(() => {
     const node = ref.current;
     if (!node || near) return;
+
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
@@ -97,8 +106,14 @@ export function useNearViewport<T extends Element>(
       { rootMargin },
     );
     io.observe(node);
-    return () => io.disconnect();
-  }, [near, rootMargin]);
+
+    const timer = window.setTimeout(() => setNear(true), fallbackMs);
+
+    return () => {
+      io.disconnect();
+      window.clearTimeout(timer);
+    };
+  }, [near, rootMargin, fallbackMs]);
 
   return [ref, near];
 }
