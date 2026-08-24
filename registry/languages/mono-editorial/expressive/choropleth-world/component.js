@@ -25,14 +25,12 @@ export function mount(root) {
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   // ════ M1 · US choropleth ════
-  // 真轮廓地图：ECharts registerMap + GeoJSON（ECharts 官方示例数据，jsdelivr）。
-  // 阿拉斯加/夏威夷/波多黎各用 registerMap 第三参 specialAreas 收进左下角
-  // （官方 USA 示例同款，零额外依赖；d3 albersUsa 投影方案在部分环境渲染空白，弃用）。
-  // Mono 化三件事：piecewise 五档灰阶 visualMap（明度即数据）、
-  // 纸色描边当州界发丝、无数据州留 #E4E3DC（沉默可见）。
-  // 面积失真的坦白：州的大小是地理，不是数值（蒙大拿大 ≠ 蒙大拿多）。
-  // ⚠️ 如果换成中国地图：数据源必须含台湾省 + 南海诸岛 + 九段线
-  // （用 DataV GeoAtlas 100000_full 或其完整镜像），发布前核对当期审图号。
+  // ECharts registerMap + GeoJSONECharts jsdelivr
+  // // registerMap  specialAreas
+  //  USA d3 albersUsa
+  // Mono piecewise  visualMap
+  //  #E4E3DC
+  //  DataV GeoAtlas 100000_full
   const MAP_LEGEND={
     itemWidth:11,itemHeight:11,itemSymbol:'rect',
     textStyle:{fontFamily:'Inter',fontSize:9,color:'#8F8E88'},
@@ -40,8 +38,8 @@ export function mount(root) {
   };
 
   // ════ M2 · World choropleth ════
-  // 世界真轮廓版。同一套 Mono 化规则；用 boundingCoords 裁掉南极，
-  // 关键市场（≥39k）直接把数值标在版图上。
+  //  Mono  boundingCoords
+  // ≥39k
   (()=>{
   const D={'United States':95,'India':62,'United Kingdom':48,'Germany':41,'Brazil':39,'Canada':34,
     'France':30,'Australia':28,'China':26,'Japan':26,'Korea':21,'Spain':19,'Italy':17,'Singapore':16,

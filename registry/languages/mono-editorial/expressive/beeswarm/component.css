@@ -30,12 +30,6 @@
 
 .nx-beeswarm .draw {stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s cubic-bezier(.4,0,.2,1) both}
 
-.nx-beeswarm .pagehead h1 {font-size:22px;letter-spacing:-.02em;font-weight:800}
-
-.nx-beeswarm .pagehead p {font-size:12px;color:#8F8E88;margin-top:5px;line-height:1.7}
-
-.nx-beeswarm .pagehead .badge {margin:0 2px}
-
 .nx-beeswarm .badge {display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;
     padding:3px 10px;border-radius:99px;margin-bottom:10px}
 

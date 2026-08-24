@@ -22,12 +22,6 @@
 
 .nx-force-graph .pop {transform-box:fill-box;transform-origin:center;animation:pop .5s cubic-bezier(.2,.7,.3,1.3) both}
 
-.nx-force-graph .pagehead h1 {font-size:22px;letter-spacing:-.02em;font-weight:800}
-
-.nx-force-graph .pagehead p {font-size:12px;color:#8F8E88;margin-top:5px;line-height:1.7}
-
-.nx-force-graph .pagehead .badge {margin:0 2px}
-
 .nx-force-graph .badge {display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;
     padding:3px 10px;border-radius:99px;margin-bottom:10px}
 

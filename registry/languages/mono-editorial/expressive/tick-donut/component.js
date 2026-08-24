@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -38,8 +38,8 @@ export function mount(root) {
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
   // ════ B4 · tick donut ════
-  // 环形图的 Lupi 化：ballot tally 的百人队列绕成整圈表盘，1 tick = 1%，
-  // 四段来源用灰阶 ladder 分段，段间留一格呼吸。中心只放总数和单位说明。
+  //  Lupi ballot tally 1 tick = 1%
+  //  ladder
   (()=>{
   const D=[['ORGANIC',37,INK],['PAID',28,'#55554F'],['REFERRAL',21,'#8F8E88'],['SOCIAL',14,'#B0AFA9']];
   obsReveal('tickdonut',s=>{

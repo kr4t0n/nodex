@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,8 +34,8 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ C1 · tick rows ════
-  // 横向条形：一行 = 一支队伍的发布队列，1 tick = 1 次发布。
-  // tick 高度/透明度抖动，每 5 根一个点标，行尾大数。
+  //  = 1 tick = 1
+  // tick / 5
   (()=>{
   const D=[['PLATFORM',34],['GROWTH',28],['MOBILE',22],['INFRA',17],['ML',11],['DESIGN',8]];
   obsReveal('tickrows',s=>{

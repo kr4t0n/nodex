@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,7 +34,6 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ C2 · paired rungs ════
-  // 分组柱：每类两把梯子并肩，今年实档、去年淡档。差值一眼可数。
   (()=>{
   const D=[['FREE',31,38],['STARTER',22,27],['PRO',16,22],['TEAM',13,16],['ENT',6,9]];
   obsReveal('pairrungs',s=>{

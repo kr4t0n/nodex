@@ -43,16 +43,13 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ L16 · matrix heat ════
-  // 通用矩阵热力：任意 分类×分类×连续值。明度即数据——五档灰阶方块，
-  // 越黑越高。对角线不参与（自己×自己），零格留一粒小点（沉默可见）。
-  // 最强的一对上虚线框 + 标数。区别于 F10 dot heat：这里编码用明度不用面积，
-  // 值是占比/强度而不是可数件数。
+  //  +  F10 dot heat
   (()=>{
   const FEAT=['EDITOR','BOARDS','DOCS','CHAT','FLOWS','VAULT','PAGES','SYNC'];
   const v=(i,j)=>{
     if(i===j)return -1;
     const a=Math.min(i,j),b=Math.max(i,j);
-    const pop=(8-a)/8*(8-b)/8;                       // 头部功能重合度高
+    const pop=(8-a)/8*(8-b)/8;
     const raw=pop*62*(0.35+rnd(a*8+b+1,a+b+3)*.9);
     return Math.round(raw);
   };
@@ -99,16 +96,16 @@ export function mount(root) {
   })();
 
   // ════ L17 · calendar heat ════
-  // 日历热力：GitHub 贡献墙的 Lupi 皮。一格一天，52 周 × 7 天，
-  // 点面积 = 当天量（sqrt 换算），静默日一粒小点。月份写在上檐，
-  // 峰值日虚线圈 + 旁注引线。逐记录世界观：一年 365 天每天都在场。
+  // GitHub  Lupi 52  × 7
+  //  = sqrt
+  //  +  365
   (()=>{
   const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   const DAY=['MON','WED','FRI','SUN'];
   const val=(w,d)=>{
     const wd=d<5;
-    const season=1+.55*Math.sin((w-8)/9);            // 春秋两个发布季
-    if(!wd)return rnd(w*7+d+1,3)>.82?1:0;            // 周末基本静默
+    const season=1+.55*Math.sin((w-8)/9);
+    if(!wd)return rnd(w*7+d+1,3)>.82?1:0;
     const raw=season*(2.5+rnd(w*7+d+1,d+2)*9)*(rnd(w+1,d+5)>.12?1:0);
     return Math.round(raw);
   };
@@ -152,9 +149,8 @@ export function mount(root) {
   })();
 
   // ════ L18 · beeswarm ════
-  // 蜂群：violin 的 Lupi 姊妹。不聚合密度，把 120 条真实记录沿数值轴
-  // 逐颗排开，撞上了就往两边让——堆得高的地方就是分布的峰。
-  // 空心 = enterprise 单，虚线 = 中位数。每颗点背后是一条真实成交。
+  // violin  Lupi  120
+  //  = enterprise  =
   (()=>{
   const N=120;
   const deals=Array.from({length:N},(_,i)=>{
@@ -206,9 +202,9 @@ export function mount(root) {
   })();
 
   // ════ L19 · ridgeline ════
-  // 多组分布的 Lupi 皮：每行一条完成时长的密度山脊，面积由竖发丝组成
-  // （F3 hairline area 的语法），行与行轻微重叠，后排画在前、前排糊上
-  // 纸色 slab 遮挡（dotty matrix 的手法）。峰值点标中心时长。
+  //  Lupi
+  // F3 hairline area
+  //  slab dotty matrix
   (()=>{
   const ROWS=[['MOBILE',3.2,1.3],['DESKTOP',5.1,1.9],['API',7.4,2.3],['IMPORTS',10.8,3.2],['BATCH',15.2,4]];
   obsReveal('ridge',s=>{
@@ -258,9 +254,8 @@ export function mount(root) {
   })();
 
   // ════ L20 · parallel coordinates ════
-  // 多维记录对比的 Lupi 皮：一条发丝线 = 一个产品走过四根轴。
-  // 线束的形状就是数据结构（哪两维相关、谁全线领先）。
-  // 全线最优的上墨标名，其余发丝退后。轴顶名、轴脚 min/max。
+  //  Lupi  =
+  //  min/max
   (()=>{
   const DIMS=[['PRICE $',8,30],['CSAT',6,9.6],['RETENTION %',55,95],['GROWTH %',-5,40]];
   const P=[['Editor',12,9.1,91,22],['Boards',18,8.4,86,18],['Forms',9,8.8,78,31],

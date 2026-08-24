@@ -37,9 +37,8 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ G19 · violin ════
-  // 小提琴：提前聚合的密度剪影，Glance 世界观（beeswarm 的姊妹）。
-  // 四个 plan 各一把琴，宽度 = 该时长的工单密度（KDE），
-  // 明度按中位数快慢排：越快越黑。纸色横档 = 中位数。
+  // Glance beeswarm
+  //  plan  = KDE
   (()=>{
   const G=[['ENT',1.6,.8],['PRO',3.4,1.6],['STARTER',6.2,2.6],['FREE',9.5,4.2]];
   const M=64;
@@ -103,8 +102,8 @@ export function mount(root) {
   })();
 
   // ════ G20 · matrix heat ════
-  // 矩阵热力的 Glance 皮：粗笔画版本。大圆角色块、每格标数、3 秒读出
-  // 「新版本跑得黑」的对角线。和 P1 Lupi 皮同数据形状，读者时间不同。
+  //  Glance 3
+  //  P1 Lupi
   (()=>{
   const FEAT=['EDITOR','BOARDS','DOCS','CHAT','FLOWS','VAULT'];
   const VER=['v2.0','v1.9','v1.8','v1.7','v1.6'];
@@ -136,10 +135,9 @@ export function mount(root) {
   })();
 
   // ════ G21 · rank strip ════
-  // 排名随时间变的静态版，第二稿。第一稿是泳道 bump——灰线 X 交叉，
-  // 和 slope 同一种丑（catalog 实测三连败那条），废弃。
-  // 这版不画线：一行一个产品，一格一个季度，明度 = 名次（#1 最黑）。
-  // 攀升者的行自己从浅变黑，故事读行内渐变，不读交叉。
+  //  bump—— X
+  //  slope catalog
+  //  = #1
   (()=>{
   const RANKS=[['Flows',[5,3,2,1,1,1]],['Editor',[1,1,1,2,2,2]],['Boards',[2,2,3,3,3,4]],
     ['Vault',[4,5,5,4,4,3]],['Docs',[3,4,4,5,5,5]]];
@@ -179,9 +177,8 @@ export function mount(root) {
   })();
 
   // ════ G22 · aggregate sankey ════
-  // B3 Threads 是逐条丝线（每线一条记录）；这张是聚合版——
-  // 缎带宽度∝账号数。左渠道右套餐，缎带按渠道明度分。
-  // 交叉处必须读得清，缎带走 .5 透明度（同 convergence 连线的处理）。
+  // B3 Threads ——
+  //  .5  convergence
   (()=>{
   const SRC=[['SEARCH',[20,10,4]],['REFERRAL',[12,9,6]],['SOCIAL',[12,4,2]],['PAID',[6,3,3]],['OTHER',[5,2,2]]];
   const DST=['FREE','PRO','TEAM'];

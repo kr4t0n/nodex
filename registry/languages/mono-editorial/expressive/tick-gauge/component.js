@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -38,8 +38,8 @@ export function mount(root) {
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
   // ════ C7 · tick gauge ════
-  // 进度：ballot tick 弯成 210° 表盘，1 tick = 1% 目标。走到 73 上墨收笔。
-  // 里程碑 25/50/75/100 点标 + 小字。中心大数 + 剩余量小字。
+  // ballot tick  210° 1 tick = 1%  73
+  //  25/50/75/100  +  +
   (()=>{
   const GOAL=73;
   obsReveal('gauge',s=>{

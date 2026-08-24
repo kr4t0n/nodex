@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,8 +34,7 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ C8 · dumbbell queue ════
-  // 哑铃对比：空心点=改版前，实心点=改版后，两点之间的轨道上串珠，
-  // 一珠 = 省下的一分钟，可数。全部向左走（变快），没有交叉没有 X。
+  //  =  X
   (()=>{
   const D=[['INVITE FLOW',14,6],['FIRST BOARD',19,9],['IMPORT DATA',26,13],['TEAM SETUP',31,21],['GO LIVE',38,30]];
   obsReveal('dumbbell',s=>{

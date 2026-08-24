@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,8 +34,7 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ C6 · dot heat ════
-  // 热力图：punch card 的 Lupi 皮。7×12 网格，点面积 = 工单量，
-  // 静默格留一粒极小点（沉默可见）。最热格标数。
+  // punch card  Lupi 7×12  =
   (()=>{
   const DAY=['MON','TUE','WED','THU','FRI','SAT','SUN'];
   obsReveal('dotheat',s=>{

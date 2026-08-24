@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,8 +34,8 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ B1 · rung bars ════
-  // 柱状图的 Lupi 化：柱身 = 一格格横档，1 档 = 1 个诚实单位。
-  // 远看是柱状图剪影，近看每一档都数得出来。档长、透明度 rnd 抖动。
+  //  Lupi  = 1  = 1
+  //  rnd
   (()=>{
   const D=[['FREE',38],['STARTER',27],['PRO',22],['TEAM',16],['SCALE',11],['ENT',7]];
   obsReveal('rungs',s=>{

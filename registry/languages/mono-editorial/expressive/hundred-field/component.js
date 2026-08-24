@@ -40,7 +40,7 @@ export function mount(root) {
 
   // ════ 14 · hundred field ════
   // small data, unit-decomposed: four shares of 100% become 100 people.
-  // phyllotaxis discs (golden angle) so每簇自带肌理; share is countable, not just readable.
+  // phyllotaxis discs (golden angle) so; share is countable, not just readable.
   (()=>{
   const SEG=[['CHARGED',41,INK],['TORN',35,'#55554F'],['ADRIFT',12,'#8F8E88'],['AVERSE',12,'#B0AFA9']];
   const POS=[[132,140],[276,116],[186,252],[322,238]];

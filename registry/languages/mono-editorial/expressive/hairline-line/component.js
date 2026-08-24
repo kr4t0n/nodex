@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,8 +34,7 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ B2 · hairline line ════
-  // 折线图的 Lupi 化：barcode 的日历地板（每天一根发丝，无论有没有事）+
-  // 发丝折线 + 逐日圆点（周末空心）。峰值两个点放大标数。
+  //  Lupi barcode +
   (()=>{
   const N=30;
   const val=d=>46+22*Math.sin(d/4.6)+14*Math.sin(d/2.1)+rnd(d+1,5)*12;

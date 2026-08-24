@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,8 +34,7 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ B3 · hairline area ════
-  // 面积图的 Lupi 化：填充不是色块，是一天一根发丝立到自己的峰值。
-  // 面积由日子组成。顶边一根细线收轮廓，峰值日加点标数。
+  //  Lupi
   (()=>{
   const N=45;
   const val=d=>34+26*Math.sin(d/7.2)+12*Math.sin(d/2.8)+rnd(d+1,3)*16;

@@ -384,23 +384,40 @@ function splitCssBlocks(css) {
   return blocks;
 }
 
+/**
+ * Is this one selector part page chrome? Checks the leading compound too, so
+ * descendants like `.pagehead p` are dropped along with `.pagehead` — otherwise
+ * dead rules for elements that only existed on the demo page survive.
+ */
+function isChromePart(part) {
+  const s = part.trim();
+  if (!s) return true;
+  if (CHROME_SELECTORS.includes(s)) return true;
+  const head = s.split(/[\s>+~]+/)[0];
+  return CHROME_SELECTORS.includes(head);
+}
+
+/**
+ * Scope the component parts of a selector, dropping chrome parts individually
+ * rather than discarding a whole rule because one part of its comma list was
+ * chrome.
+ */
 function scopeSelector(selector, scope) {
-  return selector
+  const parts = selector
     .split(',')
-    .map((part) => {
-      const s = part.trim();
-      if (!s) return null;
-      return `${scope} ${s}`;
-    })
-    .filter(Boolean)
-    .join(',\n');
+    .map((p) => p.trim())
+    .filter((p) => p && !isChromePart(p))
+    .map((p) => (p === ':root' ? null : `${scope} ${p}`))
+    .filter(Boolean);
+  return parts.length > 0 ? parts.join(',\n') : null;
 }
 
 function isChrome(selector) {
   return selector
     .split(',')
     .map((s) => s.trim())
-    .some((s) => CHROME_SELECTORS.includes(s));
+    .filter(Boolean)
+    .every(isChromePart);
 }
 
 /**
@@ -447,7 +464,8 @@ function partitionCss(css, scope) {
     const { selector, body, atRule } = block;
     if (!atRule) {
       if (selector === ':root' || isChrome(selector)) continue;
-      component.push(`${scopeSelector(selector, scope)} {${body}}`);
+      const scoped = scopeSelector(selector, scope);
+      if (scoped) component.push(`${scoped} {${body}}`);
       continue;
     }
     if (selector.startsWith('@keyframes')) {
@@ -457,7 +475,11 @@ function partitionCss(css, scope) {
     if (selector.startsWith('@media')) {
       const inner = splitCssBlocks(body)
         .filter((b) => !isChrome(b.selector) && b.selector !== ':root')
-        .map((b) => `  ${scopeSelector(b.selector, scope)} {${b.body}}`)
+        .map((b) => {
+          const scoped = scopeSelector(b.selector, scope);
+          return scoped ? `  ${scoped} {${b.body}}` : null;
+        })
+        .filter(Boolean)
         .join('\n');
       if (inner.trim()) motion.push(`${selector} {\n${inner}\n}`);
       continue;
@@ -491,6 +513,47 @@ function extractCards(body) {
     if (depth !== 0) break;
   }
   return cards;
+}
+
+/**
+ * Strip CJK from code.
+ *
+ * The source is Chinese-authored and nodex is English-only. Verified safe: all
+ * CJK in the collection sits in comments — 231 full-line and 15 trailing — and
+ * none in string literals, so nothing rendered is lost.
+ */
+function stripCjk(code) {
+  const CJK_CHARS = /[\u3000-\u303f\u4e00-\u9fff\uff01-\uff60\u30fb]/g;
+  const HAS_CJK = /[\u4e00-\u9fff]/;
+  return code
+    .split('\n')
+    .map((line) => {
+      if (!HAS_CJK.test(line)) return line;
+      let out = line.replace(CJK_CHARS, '');
+      // A comment that held only CJK is now empty — drop the whole line.
+      const commentOnly = /^(\s*)\/\/(.*)$/.exec(out);
+      if (commentOnly && !/[A-Za-z0-9]/.test(commentOnly[2])) return null;
+      // A trailing comment that held only CJK: drop the marker, keep the code.
+      // Safe against URLs, which always contain alphanumerics after `//`.
+      out = out.replace(/\/\/[^A-Za-z0-9\n]*$/, '');
+      return out.trimEnd();
+    })
+    .filter((line) => line !== null)
+    .join('\n');
+}
+
+/**
+ * Drop the demo page's classification badges.
+ *
+ * All 30 read like "LUPI 编辑型 · 蜂群" — family plus chart type. That is
+ * precisely what `meta.density` and `meta.component` now carry, so the badges
+ * are redundant with the manifest as well as being non-English. The `.badge`
+ * CSS stays, since badge is one of the primitives.
+ */
+function stripBadges(markup) {
+  return markup
+    .replace(/[ \t]*<span class="badge[^"]*">[\s\S]*?<\/span>\s*\n?/g, '')
+    .replace(/\n{3,}/g, '\n\n');
 }
 
 function slugify(value) {
@@ -708,7 +771,7 @@ async function main() {
 
       // Mount points: rewrite ids so nothing depends on document-level IDs.
       const mountIds = mountIdsFor[n];
-      let markup = card.html;
+      let markup = stripBadges(card.html);
       for (const id of mountIds) {
         markup = markup.replace(` id="${id}"`, ` data-nx-mount="${id}"`);
       }
@@ -760,11 +823,13 @@ async function main() {
         // is a likely collision; `--nx-bg` is not.
         .replace(/var\(--(bg|dark|ink|muted|faint|grid|paper)\)/g, 'var(--nx-$1)');
 
-      const js = buildComponentJs({
-        preamble: effectivePreamble,
-        block,
-        usesEcharts: runtime === 'echarts',
-      });
+      const js = stripCjk(
+        buildComponentJs({
+          preamble: effectivePreamble,
+          block,
+          usesEcharts: runtime === 'echarts',
+        }),
+      );
 
       // Intrinsic proportions, so the gallery can reserve the box before the
       // iframe mounts and avoid layout shift.

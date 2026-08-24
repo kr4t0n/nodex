@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -34,8 +34,7 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ C5 · rung waterfall ════
-  // 瀑布：从毛收入走到净利，每级一把小梯子。加项实档、减项空心档（stroke 描边格）。
-  // 层与层之间虚线台阶承接。
+  // stroke
   (()=>{
   const D=[['GROSS',42,null],['REFUNDS',-6,null],['COGS',-11,null],['OPS',-8,null],['NET',17,'total']];
   obsReveal('fall',s=>{

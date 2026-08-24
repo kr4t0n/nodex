@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -32,8 +32,8 @@ export function mount(root) {
   const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
 
   // ════ C4 · plumb scatter ════
-  // 散点：每个点垂一根发丝铅垂线到地板，x 读线脚、y 读高度。
-  // 地板是 barcode 刻度。最好/最差两个点标名。
+  // x y
+  //  barcode /
   (()=>{
   const P=[['Editor',72,86],['Boards',58,74],['Docs',44,79],['Chat',38,62],['Flows',66,58],
            ['Vault',82,71],['Pages',28,55],['Sync',52,49],['Grid',88,44],['Views',20,68],

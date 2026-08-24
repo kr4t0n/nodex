@@ -23,10 +23,6 @@
 
 .nx-paired-rungs .draw {stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s cubic-bezier(.4,0,.2,1) both}
 
-.nx-paired-rungs .pagehead h1 {font-size:22px;letter-spacing:-.02em;font-weight:800}
-
-.nx-paired-rungs .pagehead p {font-size:12px;color:#8F8E88;margin-top:5px;line-height:1.7}
-
 @keyframes pop {from{transform:scale(0)}to{transform:none}}
 
 @keyframes fade {from{opacity:0}}

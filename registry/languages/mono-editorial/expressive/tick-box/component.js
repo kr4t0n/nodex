@@ -20,7 +20,7 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   const NS='http://www.w3.org/2000/svg';
@@ -43,9 +43,8 @@ export function mount(root) {
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   // ════ F14 · rung histogram ════
-  // 直方图的 Lupi Basics 皮：连续数值分箱，一箱一把梯子，1 档 = 1 张工单
-  // （百分之一）。箱界写在梯脚之间——直方图的箱是区间不是类目，
-  // 这是它和 F1 Rung Bars 的本质区别。峰值箱标数，中位数落点小旗标注。
+  //  Lupi Basics 1  = 1
+  //  F1 Rung Bars
   (()=>{
   const BIN=[6,14,22,19,13,9,6,4,3,2,1,1];       // 2h bins, sums to 100
   obsReveal('histo',s=>{
@@ -89,8 +88,7 @@ export function mount(root) {
   })();
 
   // ════ F15 · tick box ════
-  // 箱线图的 Basics 皮：发丝须线 + 胶囊箱体（IQR），纸色横档 = 中位数，
-  // 空心点 = 离群值。箱体明度按中位数快慢排：越快越黑。
+  //  Basics  + IQR =
   (()=>{
   const G=[['ENT',[.4,.9,1.5,2.6,4.4],[6.2]],
            ['PRO',[.8,2.1,3.3,5,7.8],[10.5]],
@@ -134,9 +132,8 @@ export function mount(root) {
   })();
 
   // ════ F16 · stream ribbon ════
-  // Streamgraph / ThemeRiver：多系列构成随时间此消彼长。轮廓对称于中轴
-  // （silhouette 基线），带宽 = 该系列当周量，纸色缝分带（treemap 同法）。
-  // 三带明度按当前份额排：现任霸主最黑。带名标在各自最宽处。
+  // Streamgraph / ThemeRiver
+  // silhouette  = treemap
   (()=>{
   const N=48;
   const mk=(base,trend,w1,w2,seed)=>Array.from({length:N},(_,t)=>
@@ -194,9 +191,9 @@ export function mount(root) {
   })();
 
   // ════ F17 · candlestick ════
-  // K 线的 Mono 化：不用红绿——实心墨 = 收跌，空心（纸底墨框）= 收涨，
-  // 和哑铃图 hollow/ink 的语义一脉。影线是发丝，柱体胶囊圆角。
-  // OHLC 四值都是真实记录，最高/最低两日标数。30 个交易日。
+  // K  Mono —— = =
+  //  hollow/ink
+  // OHLC /30
   (()=>{
   const N=30;
   // deterministic random walk with a dip-and-recover arc

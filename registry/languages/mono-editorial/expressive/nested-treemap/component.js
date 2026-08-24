@@ -3,11 +3,11 @@
 export function mount(root) {
   const q = (name) => root.querySelector(`[data-nx-mount="${name}"]`);
 
-  // ── shared Mono tokens（与 lupi-gallery 同源） ──
+  // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
   // ════ C9 · nested treemap ════
-  // 面积只编码工时；Mono 不用随机灰阶区分类目，父级靠标题带和组间留白分开。
+  // Mono
   (()=>{
   const TOTAL=1280,FILL='#55554F';
   const leaf=(name,value)=>({name,value,itemStyle:{color:FILL},label:{color:PAPER}});
