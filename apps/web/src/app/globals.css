@@ -25,6 +25,14 @@ html {
   background: var(--nx-bg, #f0efeb);
 }
 
+/* For the landing page's one in-page anchor. Gated, because a forced smooth
+   scroll is exactly the kind of motion someone asking for less of it means. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   margin: 0;
   background: var(--nx-bg, #f0efeb);

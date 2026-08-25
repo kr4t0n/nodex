@@ -5,6 +5,8 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
 
+import { signOut } from '@/app/login/actions.ts';
+
 /** Nav sits on one line and stays under 72px. */
 export function TopBar<T extends string>({
   back,
@@ -26,8 +28,10 @@ export function TopBar<T extends string>({
       }}
     >
       <div className="mx-auto flex h-[64px] max-w-[1400px] items-center gap-5 px-6 lg:px-10">
+        {/* Inside the app the wordmark returns to the app index, not to the
+            marketing page. `/` is the landing. */}
         <Link
-          href="/"
+          href="/languages"
           className="text-[13px] font-extrabold tracking-[0.1em] uppercase no-underline"
           style={{ color: 'var(--nx-ink)' }}
         >
@@ -40,12 +44,21 @@ export function TopBar<T extends string>({
           </span>
         ) : null}
 
-        {back ? (
-          <Link href={back.href} className="nx-btn nx-btn--quiet ml-auto no-underline">
-            <ArrowLeft size={13} weight="bold" aria-hidden />
-            {back.label}
-          </Link>
-        ) : null}
+        <div className="ml-auto flex items-center gap-1.5">
+          {back ? (
+            <Link href={back.href} className="nx-btn nx-btn--quiet no-underline">
+              <ArrowLeft size={13} weight="bold" aria-hidden />
+              {back.label}
+            </Link>
+          ) : null}
+
+          {/* A gate with no way back out is a trap, so the exit ships with it. */}
+          <form action={signOut}>
+            <button type="submit" className="nx-btn nx-btn--quiet">
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
     </header>
   );

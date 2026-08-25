@@ -103,11 +103,19 @@ All three are build artifacts and are gitignored.
 
 ## Looking at the components
 
-`npm run dev` and browse. Three routes, all prerendered from the manifest:
+`npm run dev` and browse:
 
-- `/` the language index, each language shown as a live composite of its own components
+- `/` the landing page, built from live registry components. Static
+- `/login` the sign-in gate
+- `/languages` the language index, each language a live composite of its own components
 - `/l/[slug]` the language: tokens, primitives, filterable chart grid, and the rendered `DESIGN.md`
 - `/l/[slug]/[name]` one component, full size, with its `nodex add` command
+
+The `/l/*` routes are prerendered from the manifest. `/languages` and `/login`
+read the session, so they render on demand.
+
+Sign-in is a sequencing gate, not authentication: there is no identity provider
+yet, and every language is public. See `AGENTS.md` before building on it.
 
 Charts draw when scrolled into view and replay on click. Individual previews are
 directly openable too, for example

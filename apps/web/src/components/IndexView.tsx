@@ -32,15 +32,15 @@ export function IndexView() {
     <>
       <TopBar />
       <PageShell>
+        {/* The pitch lives on the landing page. This is the app index, so it
+            states what is here and gets out of the way. */}
         <section className="max-w-[62ch] pt-16 pb-14 sm:pt-20">
           <h1 className="m-0 text-[38px] leading-[1.05] font-extrabold tracking-[-0.035em] sm:text-[52px]">
-            Components that belong to a design language.
+            Design languages
           </h1>
           <p className="mt-6 text-[14px] leading-[1.7]" style={{ color: 'var(--nx-muted)' }}>
-            Most libraries give you one component and let you theme it. That works
-            until the language changes the geometry rather than the paint. Pick a
-            language here and get its tokens, its written rules, and the components
-            built for it.
+            Each one brings its own tokens, its own written rules, and the
+            components built for it. Open one to read it.
           </p>
         </section>
 

@@ -171,6 +171,48 @@ The line between what the app owns and what the language owns:
 GSAP is app-only and never enters registry content. A component that depended on
 GSAP would force that dependency on everyone who copied it.
 
+### The landing page is written in the language it sells
+
+`/` is marketing, `/languages` is the app. The landing takes its dials from
+`DESIGN.md` rather than from landing-page convention, which overrides several
+things a generic taste pass would reach for:
+
+- **Motion is quiet.** The language says marks draw once on arrival and then
+  hold still, and that nothing loops or animates on hover. So the page reveals
+  on scroll and stops. No marquee, no parallax, no perpetual anything.
+- **Variance is restrained.** A predictable grid, because the language says the
+  interest belongs in the marks. The asymmetry is mild by intent.
+- **Inter and the warm-paper palette are not defaults**, they are `tokens.json`.
+  The landing loads the same `tokens.css` the registry ships, so the marketing
+  surface is themed by the product.
+- **No dark mode**, for the reason above: the theme is whatever language is
+  being shown.
+
+Every visual on the page is a running component from the registry. Not a
+screenshot, not a drawing, and specifically not a div dressed up as a product
+shot. That is both the honest thing to show and the strongest argument the
+product has.
+
+One consequence to preserve: `/` reads no cookie, so it stays static. Relabelling
+the button for signed-in visitors would make the highest-traffic page render on
+demand. `/login` redirects an already-signed-in visitor onward instead, which
+reaches the same place for one redirect and no dynamic render.
+
+### The sign-in gate is a sequence, not a security boundary
+
+`lib/session.ts` records that someone pressed the button. There is no identity
+provider yet, so it authenticates nobody, and it is safe today only because
+nothing behind it is restricted: every language is public and the registry is
+served as static files that never consult the cookie.
+
+It exists so the landing page comes before the app, and so Phase 5 has the shape
+it needs: the OAuth callback becomes the only thing that issues the cookie, and
+the value becomes a session identifier. Guarding real content is a separate job
+belonging to the route that serves it, never to a cookie a client could forge.
+
+Do not let this grow into an authorization check. If something needs guarding
+before OAuth lands, guard it on the server that serves the bytes.
+
 ### Why Next.js rather than Vite
 
 The app was a Vite SPA and did not need a server: the registry is static and the
@@ -456,3 +498,11 @@ split, or they drift into each other.
 - Licensing is still unanswered, and it gates a paid tier rather than merely
   postponing one. The 64 charts came from a found sample; their provenance has to
   be settled before anything is sold.
+- **The language's secondary text does not meet WCAG AA.** Measured on paper,
+  `--nx-muted` is 2.86:1 and `--nx-faint` is 1.5:1, against a 4.5:1 floor for
+  body text. Every subtitle and caption in the app inherits this, because it is
+  the design language rather than an app choice. The app now keeps full
+  sentences at `muted` or darker and leaves `faint` to captions, which is what
+  `DESIGN.md` already says it is for, but that only limits the damage. Fixing it
+  properly means darkening two token values, which is a change to the product
+  and needs a decision rather than a patch.
