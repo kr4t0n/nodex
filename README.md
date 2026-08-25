@@ -84,6 +84,7 @@ npm install
 | --- | --- |
 | `npm run build:registry` | Validate, generate previews and `tokens.css`, emit the manifest |
 | `npm run check:registry` | Validate only, no writes — what CI runs |
+| `npm run check:shell` | Fail if the app uses a primitive its layout does not load |
 | `npm run smoke` | Mount all 64 components in a real DOM and assert they draw |
 | `npm run smoke:cli` | Run init and add against a temporary project |
 | `npm run dev` | Next dev server on port 4180 |

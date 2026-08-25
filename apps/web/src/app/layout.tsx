@@ -23,11 +23,15 @@ const REGISTRY = (process.env.NEXT_PUBLIC_REGISTRY_URL ?? '').replace(/\/+$/, ''
  * these are the registry's own files, served as-is, so a broken primitive breaks
  * the app visibly instead of being quietly transformed by a bundler.
  *
- * This list tracks what the shell actually uses, so keep it honest. `table` and
- * `link` were dropped after the migration: the app renders no `.nx-table` and no
- * `.nx-link`, and the one table it does show is inside the rendered DESIGN.md,
- * which the prose primitive styles itself. Add a name back the moment a view
- * uses its classes, or that view renders unstyled.
+ * Curated rather than "all 24", because these are render-blocking and the
+ * landing page needs none of the other fourteen. Loading a stylesheet for a
+ * class nothing renders themes nothing: re-theming happens through the
+ * `--nx-*` variables in tokens.css, and there is no element for an unused
+ * primitive to apply to.
+ *
+ * Curation is the hazard, so it is enforced rather than remembered:
+ * `npm run check:shell` fails if any view writes a class this list does not
+ * cover. Add the name here when that fires; do not delete the class.
  */
 const SHELL_PRIMITIVES = [
   'button',

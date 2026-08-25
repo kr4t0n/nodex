@@ -35,6 +35,12 @@ jobs:
       - name: Smoke-test the CLI
         run: npm run smoke:cli
 
+      # The app links a curated set of primitive stylesheets. Using a primitive
+      # it does not load renders unstyled with nothing in the console to say so,
+      # which is exactly the kind of failure nobody notices in review.
+      - name: Check the shell loads what it uses
+        run: npm run check:shell
+
       - name: Lint
         run: npm run lint
 

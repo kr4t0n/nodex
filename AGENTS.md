@@ -135,8 +135,20 @@ extractor so re-running stays idempotent.
 
 ## Conformance lints
 
-In `scripts/build-registry.mjs`. These replace what a shared module would have
-enforced:
+`scripts/check-shell-primitives.mjs` guards one thing outside the registry: the
+app links a **curated** set of primitive stylesheets in `app/layout.tsx`, not all
+twenty-four, because they are render-blocking and the landing page needs almost
+none of them. Loading a stylesheet for a class nothing renders themes nothing,
+since re-theming happens through the `--nx-*` variables rather than through the
+presence of a file.
+
+The curation is the hazard, not the saving: a view that writes `.nx-slider`
+without the stylesheet renders unstyled with nothing in the console to explain
+it. So the lint records reality and freezes it, and CI fails the moment a view
+reaches past the list.
+
+The rest are in `scripts/build-registry.mjs`. These replace what a shared module
+would have enforced:
 
 - a primitive's markup only uses classes its own stylesheet defines
 - anything that animates ships a `prefers-reduced-motion` guard
