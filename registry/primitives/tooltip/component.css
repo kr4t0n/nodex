@@ -78,6 +78,56 @@
   transform: none;
 }
 
+/* Escape the clipping, and flip when there is no room.
+
+   The rules above position the label absolutely inside the trigger, which means
+   any ancestor with overflow hidden, a scroll container, or a card with a
+   radius will cut it off. It also cannot know when it is too near an edge to
+   open upwards.
+
+   Anchor positioning fixes both: `fixed` takes it out of the clipping ancestor,
+   and `position-try-fallbacks` makes the browser flip it when it would overflow,
+   with no JavaScript and no measuring. Layered behind @supports so browsers
+   without it keep the absolutely positioned version, which is correct in the
+   common case of a tooltip with room around it.
+
+   `anchor-scope` confines the anchor name to each trigger's own subtree.
+   Without it, every tooltip on the page would share one name and later ones
+   could capture earlier labels. */
+@supports (position-try-fallbacks: flip-block) {
+  .nx-tooltip {
+    anchor-name: --nx-tooltip;
+    anchor-scope: --nx-tooltip;
+  }
+
+  .nx-tooltip::after {
+    position: fixed;
+    position-anchor: --nx-tooltip;
+    position-area: block-start;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    /* Reset the manual placement the fallback above relies on. */
+    bottom: auto;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    margin: 0 0 7px;
+  }
+
+  .nx-tooltip--below::after {
+    position-area: block-end;
+    margin: 7px 0 0;
+  }
+
+  .nx-tooltip--start::after {
+    position-area: block-start span-inline-end;
+  }
+
+  .nx-tooltip--end::after {
+    position-area: block-start span-inline-start;
+  }
+}
+
 /* A dotted underline marks the trigger as explainable, which is the one honest
    affordance available: without it, nothing signals that hovering does
    anything.

@@ -281,6 +281,16 @@ split, or they drift into each other.
   `::picker-icon`, and `::checkmark`. Browsers without the customizable select
   API keep the CSS-drawn chevron and a legible list. Do not collapse the two
   layers into one; removing the fallback silently regresses older browsers.
+- **The tooltip escapes clipping with anchor positioning, layered.** An
+  absolutely positioned label is cut off by any ancestor that clips, and cannot
+  know when it is too near an edge to open upwards. Behind
+  `@supports (position-try-fallbacks: flip-block)` it switches to `position:
+  fixed` with `position-area` and flip fallbacks, so the browser both lifts it
+  out of the clipping ancestor and flips it when it would overflow. `anchor-scope`
+  confines the anchor name per trigger, or later tooltips would capture earlier
+  labels. Browsers without the API keep the absolute version, which is correct
+  whenever there is room. Nothing escapes an iframe, so a preview frame still
+  bounds it.
 - **A tooltip trigger must be focusable.** `.nx-tooltip` reveals on
   `:focus-within`, which can never match if the trigger is a bare `<span>`. Use a
   button or add `tabindex="0"`, or the tooltip is mouse-only. The CSS tooltip is
