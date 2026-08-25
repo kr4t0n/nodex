@@ -180,6 +180,13 @@ things a generic taste pass would reach for:
 - **Motion is quiet.** The language says marks draw once on arrival and then
   hold still, and that nothing loops or animates on hover. So the page reveals
   on scroll and stops. No marquee, no parallax, no perpetual anything.
+- **The horizontal run is scrubbed, never looped.** Scene two moves the
+  collection right to left, which an auto-scrolling marquee would also do, and
+  a marquee is banned: it moves whether or not anyone is reading. Tying travel
+  to scroll position keeps the same contract the charts keep. Its distance is
+  measured against the section's width rather than the viewport's, because the
+  page container clips it; measuring against `innerWidth` strands the last
+  cards off the right edge.
 - **Variance is restrained.** A predictable grid, because the language says the
   interest belongs in the marks. The asymmetry is mild by intent.
 - **Inter and the warm-paper palette are not defaults**, they are `tokens.json`.
@@ -396,6 +403,12 @@ split, or they drift into each other.
 
 ## Gotchas
 
+- **Markup must not branch on `usePrefersReducedMotion`.** The hook starts
+  `false` and corrects after mount, because reading `matchMedia` during the
+  first render makes the server and client disagree and React reports a
+  hydration mismatch. Gating an animation on it is fine, since GSAP reverts when
+  the value flips. Choosing a class name from it is not: use the CSS
+  `motion-reduce:` variant so both renders emit the same markup.
 - **Generated documents are built inside JS template literals.** A backtick or a
   `*/` in a comment you write into `renderPreview` closes the literal or the
   comment early. Both have already happened: a glob in a CSS comment silently

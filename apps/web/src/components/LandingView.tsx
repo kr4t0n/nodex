@@ -5,13 +5,14 @@ import { ArrowRight } from '@phosphor-icons/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { CommandRow } from '@/components/Chrome.tsx';
 import { LanguageTheme } from '@/components/LanguageTheme.tsx';
 import { Preview } from '@/components/Preview.tsx';
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
 import {
+  expressiveFor,
   loadCatalog,
   previewUrl,
   primitivePreviewUrl,
@@ -39,9 +40,13 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
  * the strongest argument the product has.
  */
 
-/** Reserved so the hero does not reflow when the catalog arrives. */
-const HERO_PREVIEW_HEIGHT = 340;
+/** Reserved so sections do not reflow when the catalog arrives. */
 const TILE_PREVIEW_HEIGHT = 210;
+
+/** One card in the horizontal run. Fixed, so the travel can be measured. */
+const RUN_CARD_WIDTH = 380;
+const RUN_CARD_HEIGHT = 260;
+const RUN_LENGTH = 10;
 
 interface Tokens {
   ramp?: { steps?: string[] };
@@ -56,6 +61,19 @@ export function LandingView() {
 
   const language = catalog?.languages[0];
   const featured = language?.featured ?? [];
+
+  // Spread across the collection rather than the first ten alphabetically, so
+  // the run shows how much the language's range actually varies.
+  const runNames = useMemo(() => {
+    if (!catalog || !language) return [];
+    const all = expressiveFor(catalog, language.slug);
+    if (all.length <= RUN_LENGTH) return all.map((item) => item.name);
+    const step = Math.floor(all.length / RUN_LENGTH);
+    return Array.from(
+      { length: RUN_LENGTH },
+      (_, i) => all[i * step]?.name,
+    ).filter((name): name is string => Boolean(name));
+  }, [catalog, language]);
 
   useEffect(() => {
     void loadCatalog().then(setCatalog);
@@ -143,7 +161,12 @@ export function LandingView() {
       </header>
 
       <main className="mx-auto max-w-[1400px] px-6 lg:px-10">
-        <Hero language={language?.slug} component={featured[0]} />
+        <Hero />
+        <ComponentRun
+          language={language?.slug}
+          names={runNames}
+          reduced={reduced}
+        />
         <TheSplit language={language?.slug} component={featured[1]} />
         <WhatALanguageCarries
           tokens={tokens}
@@ -167,31 +190,38 @@ export function LandingView() {
   );
 }
 
-function Hero({
-  language,
-  component,
-}: {
-  language?: string;
-  component?: string;
-}) {
+/**
+ * Scene one is the name and almost nothing else.
+ *
+ * The wordmark is the whole composition, so it is set as display type rather
+ * than as a logo: same face and same negative tracking as every heading in the
+ * language, just very large. `clamp` ties it to viewport width so it fills the
+ * line at any size without ever needing a second breakpoint.
+ */
+function Hero() {
   return (
-    <section className="grid grid-cols-1 gap-12 pt-14 pb-24 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-16 lg:pt-24">
-      <div className="min-w-0">
-        <h1
-          data-hero
-          className="m-0 text-[38px] leading-[1.03] font-extrabold tracking-[-0.04em] sm:text-[48px] lg:text-[54px]"
-        >
-          A chart is not a button with a theme.
-        </h1>
+    <section className="flex min-h-[calc(100dvh-64px)] flex-col justify-center pb-16">
+      {/* Sized to fill the measure rather than to a guessed step. At this weight
+          and tracking the word renders 2.63x its font size, so dividing the
+          content width by that lands it on the margins at any viewport. The cap
+          holds it there once the container stops growing at 1400. */}
+      <h1
+        data-hero
+        className="m-0 leading-[0.86] font-extrabold tracking-[-0.055em]"
+        style={{ fontSize: 'clamp(64px, calc((100vw - 5rem) / 2.63), 500px)' }}
+      >
+        nodex
+      </h1>
+
+      <div className="mt-10 flex flex-wrap items-end justify-between gap-8">
         <p
           data-hero
-          className="mt-6 mb-0 max-w-[46ch] text-[14px] leading-[1.75]"
+          className="m-0 max-w-[34ch] text-[14px] leading-[1.7]"
           style={{ color: 'var(--nx-muted, #8F8E88)' }}
         >
-          Most libraries theme one set of components. nodex ships design
-          languages: tokens, written rules, and the components built for them.
+          Components that belong to a design language.
         </p>
-        <div data-hero className="mt-9 flex flex-wrap items-center gap-3">
+        <div data-hero className="flex flex-wrap items-center gap-3">
           <Link href="/login" className="nx-btn nx-btn--solid no-underline">
             Sign in
             <ArrowRight size={13} weight="bold" aria-hidden />
@@ -201,21 +231,110 @@ function Hero({
           </a>
         </div>
       </div>
+    </section>
+  );
+}
 
-      {/* The product, running. Height is reserved so the arrival of the catalog
-          does not shove the headline around. */}
+/**
+ * Scene two: the collection travels right to left as you scroll.
+ *
+ * Scrubbed, not looped. `DESIGN.md` forbids looping animation, and an
+ * auto-scrolling marquee is a loop: it moves whether or not anyone is reading.
+ * Tying the travel to scroll position means the run advances under the reader's
+ * own hand and holds still the moment they stop, which is the same contract the
+ * charts keep when they draw once on arrival.
+ *
+ * Under reduced motion the section does not pin at all. It becomes an ordinary
+ * horizontally scrollable strip, so the components stay reachable rather than
+ * being clipped off the right edge.
+ */
+function ComponentRun({
+  language,
+  names,
+  reduced,
+}: {
+  language?: string;
+  names: string[];
+  reduced: boolean;
+}) {
+  const wrap = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (reduced || !wrap.current || !track.current || names.length === 0) {
+        return;
+      }
+
+      // Against the section's own width, not the viewport's. The run is clipped
+      // by the page container, so measuring against `innerWidth` would stop the
+      // travel short and leave the last cards permanently off the right edge.
+      // In a function so a resize recomputes it instead of baking in whatever
+      // the width happened to be on first paint.
+      const distance = () =>
+        Math.max(
+          0,
+          track.current!.scrollWidth - (wrap.current?.clientWidth ?? 0),
+        );
+
+      gsap.to(track.current, {
+        x: () => -distance(),
+        // Required. Any other ease breaks the one to one mapping between scroll
+        // position and horizontal position.
+        ease: 'none',
+        scrollTrigger: {
+          trigger: wrap.current,
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: 1,
+          invalidateOnRefresh: true,
+          // This sits above the reveals further down, but is created after them
+          // because it waits for the catalog. Refresh order has to be corrected
+          // by hand or the pin spacing throws their positions out.
+          refreshPriority: -1,
+        },
+      });
+    },
+    { scope: wrap, dependencies: [reduced, names.length], revertOnUpdate: true },
+  );
+
+  return (
+    <section
+      ref={wrap}
+      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden"
+    >
+      <div className="pb-10">
+        <h2 className="m-0 text-[26px] leading-[1.15] font-extrabold tracking-[-0.03em] sm:text-[32px]">
+          One language, drawn all the way through.
+        </h2>
+      </div>
+
+      {/* The reduced-motion fallback is a CSS variant, not a JS branch. Deciding
+          it in JavaScript would make the server and client markup differ and
+          trip hydration. Without the pan the track becomes an ordinary
+          horizontal scroller, so every card stays reachable. */}
       <div
-        data-hero
-        className="min-w-0"
-        style={{ minHeight: HERO_PREVIEW_HEIGHT }}
+        className="flex gap-6 will-change-transform motion-reduce:overflow-x-auto motion-reduce:pb-4 motion-reduce:will-change-auto"
+        ref={track}
       >
-        {language && component ? (
-          <Preview
-            src={previewUrl(language, component, { bare: true })}
-            title="A chart from the mono-editorial language"
-            boxHeight={HERO_PREVIEW_HEIGHT}
-          />
-        ) : null}
+        {names.map((name) => (
+          <figure
+            key={name}
+            className="m-0 shrink-0"
+            style={{ width: RUN_CARD_WIDTH }}
+          >
+            {language ? (
+              <Preview
+                src={previewUrl(language, name, { bare: true })}
+                title={name}
+                boxHeight={RUN_CARD_HEIGHT}
+              />
+            ) : (
+              <div style={{ height: RUN_CARD_HEIGHT }} />
+            )}
+          </figure>
+        ))}
       </div>
     </section>
   );

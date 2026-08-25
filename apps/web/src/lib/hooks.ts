@@ -120,17 +120,28 @@ export function useNearViewport<T extends Element>(
   return [ref, near];
 }
 
+/**
+ * Starts `false` on both server and client, then corrects in an effect.
+ *
+ * Reading `matchMedia` in the initial state looks better but is a server and
+ * client branch: the server has no media query and renders `false`, a reader who
+ * asked for less motion hydrates as `true`, and React reports a hydration
+ * mismatch. Correcting after mount costs one frame and keeps the two renders
+ * identical.
+ *
+ * Anything whose MARKUP differs under reduced motion should use the CSS
+ * `motion-reduce:` variant instead of this hook, for the same reason.
+ */
 export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  );
+  const [reduced, setReduced] = useState(false);
+
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(query.matches);
     const onChange = () => setReduced(query.matches);
     query.addEventListener('change', onChange);
     return () => query.removeEventListener('change', onChange);
   }, []);
+
   return reduced;
 }
