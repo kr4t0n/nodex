@@ -367,22 +367,28 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
             className="grid min-w-0 grid-rows-subgrid row-span-3"
             style={{ rowGap: 6 }}
           >
-            <h3 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
-              {item.title}
-            </h3>
-            <p
-              className="m-0 self-start text-[10.5px] leading-[1.6]"
-              style={{ color: 'var(--nx-faint)' }}
+            <Link
+              to={`/l/${language}/${item.name}`}
+              className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+              style={{ color: 'inherit', rowGap: 6 }}
             >
-              {item.description ?? ''}
-            </p>
-            {/* Fluid: a primitive is shown at the size it actually is. */}
-            <Preview
-              className="mt-3 self-start"
-              src={primitivePreviewUrl(item.name, language)}
-              title={item.title}
-              fluid
-            />
+              <h3 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
+                {item.title}
+              </h3>
+              <p
+                className="m-0 self-start text-[10.5px] leading-[1.6]"
+                style={{ color: 'var(--nx-faint)' }}
+              >
+                {item.description ?? ''}
+              </p>
+              {/* Fluid: a primitive is shown at the size it actually is. */}
+              <Preview
+                className="mt-3 self-start"
+                src={primitivePreviewUrl(item.name, language)}
+                title={item.title}
+                fluid
+              />
+            </Link>
           </article>
         ))}
       </div>

@@ -15,6 +15,7 @@ import {
   findItem,
   loadCatalog,
   previewUrl,
+  primitivePreviewUrl,
   type Catalog,
 } from '../registry.ts';
 
@@ -53,9 +54,18 @@ export function ComponentPage() {
     );
   }
 
+  // Primitives are stored once and browsed under every language, so their
+  // preview takes the viewed language as a parameter. They also render at true
+  // size rather than scaled: a button shrunk to a quarter misrepresents it.
+  const isPrimitive = item.meta.tier === 'primitive';
+  const src = isPrimitive
+    ? primitivePreviewUrl(item.name, slug)
+    : previewUrl(slug, item.name);
+
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
     ['Runtime', item.meta.runtime],
+    ['Tier', isPrimitive ? 'primitive, shared by every language' : 'expressive'],
   ];
   if (item.dependencies?.length) {
     facts.push(['Dependencies', item.dependencies.join(', ')]);
@@ -85,10 +95,11 @@ export function ComponentPage() {
 
             <div className="mt-9">
               <Preview
-                src={previewUrl(slug, item.name)}
+                src={src}
                 title={item.title}
                 aspectRatio={item.meta.aspectRatio}
-                replayable
+                fluid={isPrimitive}
+                replayable={!isPrimitive}
               />
             </div>
           </div>
@@ -127,7 +138,7 @@ export function ComponentPage() {
 
             <a
               className="nx-btn nx-btn--quiet mt-6 no-underline"
-              href={previewUrl(slug, item.name)}
+              href={src}
               target="_blank"
               rel="noreferrer"
             >

@@ -60,13 +60,26 @@ export function primitivesFor(catalog: Catalog): Item[] {
   return catalog.items.filter((item) => item.meta.tier === 'primitive');
 }
 
+/**
+ * Resolve a component within a language.
+ *
+ * Primitives carry `language: "shared"` because they are stored once, but they
+ * are browsed under whichever language is being viewed. So a lookup that fails
+ * against the language falls back to the shared set rather than 404ing on a
+ * card the user just clicked.
+ */
 export function findItem(
   catalog: Catalog,
   language: string,
   name: string,
 ): Item | undefined {
-  return catalog.items.find(
-    (item) => item.name === name && item.meta.language === language,
+  return (
+    catalog.items.find(
+      (item) => item.name === name && item.meta.language === language,
+    ) ??
+    catalog.items.find(
+      (item) => item.name === name && item.meta.language === 'shared',
+    )
   );
 }
 
