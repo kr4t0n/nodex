@@ -225,6 +225,29 @@ Charts are authored for a full page and must be scaled down; a button is already
 button-sized, and shrinking it to a quarter both makes it illegible and
 misrepresents it.
 
+### An embedded preview is bare; a standalone one is whole
+
+Every expressive fragment carries its own `h2` and `.sub`, because the card
+anatomy `DESIGN.md` fixes includes them and that is what a consumer receives.
+The app prints the same two strings from the manifest above each frame, so
+rendering both labelled all 64 charts twice.
+
+The generated preview therefore takes a `bare=1` parameter that hides the
+fragment's title and subtitle only. The app asks for it wherever it supplies its
+own heading — grid cells and the detail page — and leaves it off for "Open
+preview in a tab", so there is still one place that shows the component exactly
+as shipped. The index's featured composites are not bare either: nothing labels
+them, so there is nothing to duplicate.
+
+The fix belongs in the preview rather than in the fragments. A chart that lost
+its title would be a worse component for the consumer, and the app's grid needs
+a legible label because a chart scaled to a quarter cannot supply one.
+
+Two things this must not become: it hides the title and subtitle only, never the
+note, legend, or source caption, which are annotation rather than heading; and
+the attribute is set from a blocking script in `head`, because applying it after
+the module runs makes the header appear and then vanish.
+
 ### Previews must not depend on an observer firing
 
 `IntersectionObserver` and `ResizeObserver` do not deliver in a tab that is never
@@ -300,6 +323,11 @@ split, or they drift into each other.
 
 ## Gotchas
 
+- **Generated documents are built inside JS template literals.** A backtick or a
+  `*/` in a comment you write into `renderPreview` closes the literal or the
+  comment early. Both have already happened: a glob in a CSS comment silently
+  truncated a rule, and a backtick in another broke the build outright. Spell
+  such paths out in prose instead.
 - **`rnd` is a deterministic hash, not `Math.random()`.** Sample data must not
   change between page loads or previews and screenshots stop reproducing. Never
   replace it with `Math.random()`.

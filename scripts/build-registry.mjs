@@ -118,7 +118,25 @@ ${FONT_LINKS}
     -webkit-font-smoothing: antialiased;
   }
   .nx-preview { max-width: 1400px; margin: 0 auto; }
+
+  /* Embedded mode.
+     A fragment carries its own title and subtitle, because the card anatomy
+     DESIGN.md fixes includes them and that is what a consumer receives. An
+     embedder that prints those same two strings from the manifest above the
+     frame therefore labels every chart twice. A bare=1 query parameter drops
+     the fragment's copy so the embedder can own the label; opened directly, the
+     preview still shows the component whole. */
+  [data-nx-bare] .nx-preview h2,
+  [data-nx-bare] .nx-preview .sub { display: none; }
 </style>
+<script>
+  /* Applied before first paint. Doing this from the module below would let the
+     header render and then vanish, which reads as a layout glitch in a grid of
+     sixty-four frames. */
+  if (new URLSearchParams(location.search).get('bare') === '1') {
+    document.documentElement.setAttribute('data-nx-bare', '');
+  }
+</script>
 </head>
 <body>
 <div class="nx-preview">

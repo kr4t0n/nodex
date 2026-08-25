@@ -59,7 +59,15 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
   // preview takes the viewed language as a parameter. They also render at true
   // size rather than scaled: a button shrunk to a quarter misrepresents it.
   const isPrimitive = item.meta.tier === 'primitive';
-  const src = isPrimitive
+
+  // Two URLs for the same document. The embedded frame is bare, because the
+  // heading beside it already carries the title and description. The tab link
+  // is not, so it shows the component exactly as a consumer receives it —
+  // header included. Primitives have no header either way.
+  const embedSrc = isPrimitive
+    ? primitivePreviewUrl(item.name, slug)
+    : previewUrl(slug, item.name, { bare: true });
+  const openSrc = isPrimitive
     ? primitivePreviewUrl(item.name, slug)
     : previewUrl(slug, item.name);
 
@@ -96,7 +104,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
 
             <div className="mt-9">
               <Preview
-                src={src}
+                src={embedSrc}
                 title={item.title}
                 aspectRatio={item.meta.aspectRatio}
                 fluid={isPrimitive}
@@ -139,7 +147,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
 
             <a
               className="nx-btn nx-btn--quiet mt-6 no-underline"
-              href={src}
+              href={openSrc}
               target="_blank"
               rel="noreferrer"
             >

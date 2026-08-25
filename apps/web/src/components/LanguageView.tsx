@@ -327,9 +327,11 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                 >
                   {item.meta.component}
                 </p>
+                {/* Bare: the heading above already states the title, and the
+                    fragment's own copy is illegible at thumbnail scale anyway. */}
                 <Preview
                   className="mt-3 self-start"
-                  src={previewUrl(language, item.name)}
+                  src={previewUrl(language, item.name, { bare: true })}
                   title={item.title}
                   aspectRatio={item.meta.aspectRatio}
                   boxHeight={THUMB_HEIGHT}

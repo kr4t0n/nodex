@@ -93,9 +93,21 @@ export function findItem(
   );
 }
 
-/** URL of a component's generated standalone preview document. */
-export function previewUrl(language: string, name: string): string {
-  return `${BASE}/registry/languages/${language}/expressive/${name}/index.html`;
+/**
+ * URL of a component's generated standalone preview document.
+ *
+ * `bare` hides the fragment's own title and subtitle. Every chart carries them,
+ * and this app already prints the same two strings from the manifest above the
+ * frame, so an embedded preview must ask for bare or the chart is labelled
+ * twice. Anything that opens the preview on its own leaves it off.
+ */
+export function previewUrl(
+  language: string,
+  name: string,
+  options: { bare?: boolean } = {},
+): string {
+  const url = `${BASE}/registry/languages/${language}/expressive/${name}/index.html`;
+  return options.bare ? `${url}?bare=1` : url;
 }
 
 export function designUrl(language: string): string {
