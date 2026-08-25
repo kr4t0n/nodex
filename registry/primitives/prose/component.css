@@ -23,6 +23,15 @@
   margin-top: 0.9em;
 }
 
+/* Headings below set their own larger top margin to open a section. On the
+   FIRST child there is nothing above to separate from, so that margin becomes a
+   phantom gap that pushes the whole block down and makes the container taller
+   than its content. Markdown very often opens with a heading, so this is the
+   common case rather than the edge one. */
+.nx-prose > :first-child {
+  margin-top: 0;
+}
+
 .nx-prose h1,
 .nx-prose h2,
 .nx-prose h3,
@@ -109,6 +118,7 @@
 }
 
 .nx-prose pre {
+  margin: 0;
   padding: 14px 16px;
   border: var(--nx-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-card);
@@ -124,9 +134,12 @@
   font-size: inherit;
 }
 
-/* A quotation is marked by a rule in the margin, not by a fill or a glyph. */
+/* A quotation is marked by a rule in the margin, not by a fill or a glyph.
+   Margins are zeroed because the browser gives blockquote and pre a block
+   margin of their own, which would stack on top of the flow gap above and make
+   these two elements sit further from their neighbours than anything else. */
 .nx-prose blockquote {
-  margin-inline: 0;
+  margin: 0;
   padding-left: 1.1em;
   border-left: var(--nx-hairline) solid var(--nx-grid);
   color: var(--nx-muted);
