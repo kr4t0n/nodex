@@ -1,7 +1,7 @@
 {
   "slug": "select",
   "title": "Select",
-  "description": "Native select with a CSS-drawn chevron, sized to the hairline scale",
+  "description": "Native select with a hairline chevron and a fully styled dropdown where the browser supports it",
   "component": "select",
   "tier": "primitive",
   "runtime": "css",

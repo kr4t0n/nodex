@@ -81,8 +81,105 @@
   width: auto;
 }
 
+/* The dropdown list.
+
+   A native picker is drawn by the operating system, and the only properties
+   that reliably cross browsers are these. Set them so the list at least carries
+   the language's paper, ink, and face instead of the OS default. */
+.nx-select option {
+  background-color: var(--nx-bg);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+}
+
+/* Where the customizable select API exists, the picker stops being an OS
+   surface and becomes a real element we can style like anything else.
+   Browsers without it keep the block above and the CSS-drawn chevron, which is
+   why this is layered rather than replacing them. */
+@supports (appearance: base-select) {
+  .nx-select,
+  .nx-select::picker(select) {
+    appearance: base-select;
+  }
+
+  .nx-select {
+    /* base-select supplies its own layout, so the gradient chevron and the
+       padding reserved for it are no longer needed. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7em;
+    padding-right: 0.95em;
+    background-image: none;
+  }
+
+  /* A hairline chevron, at the language's stroke weight rather than a glyph. */
+  .nx-select::picker-icon {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-right: var(--nx-hairline) solid currentColor;
+    border-bottom: var(--nx-hairline) solid currentColor;
+    transform: translateY(-1px) rotate(45deg);
+    transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Motivated motion: the chevron points where the list now is. */
+  .nx-select:open::picker-icon {
+    transform: translateY(1px) rotate(-135deg);
+  }
+
+  .nx-select::picker(select) {
+    background: var(--nx-bg);
+    border: var(--nx-hairline) solid var(--nx-grid);
+    border-radius: var(--nx-radius-card);
+    padding: 6px;
+    margin-top: 6px;
+    /* No shadow: this language has no elevation model. The hairline separates. */
+    box-shadow: none;
+  }
+
+  .nx-select option {
+    display: flex;
+    align-items: center;
+    padding: 7px 12px;
+    border-radius: var(--nx-radius-pill);
+    background: transparent;
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+
+  .nx-select option:hover,
+  .nx-select option:focus {
+    background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
+    outline: none;
+  }
+
+  /* Selection reads by weight, consistent with how the table marks a total. */
+  .nx-select option:checked {
+    font-weight: 700;
+  }
+
+  /* The default checkmark is a glyph from the OS. Replace it with a mark that
+     belongs to the language, and move it to the end of the row. */
+  .nx-select option::checkmark {
+    order: 1;
+    margin-left: auto;
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--nx-ink);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nx-select {
+    transition: none;
+  }
+
+  .nx-select::picker-icon {
     transition: none;
   }
 }

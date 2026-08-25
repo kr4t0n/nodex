@@ -250,6 +250,13 @@ split, or they drift into each other.
 - **The palette is 37 greys, not a designed scale.** Several pairs differ by one
   or two values (`#D8D7D1` / `#D8D6CE`). Consolidating is open work; the ramp in
   `tokens.json` records what exists.
+- **The select's dropdown is styled progressively.** A native picker is drawn by
+  the operating system, so only a handful of properties cross browsers. The
+  primitive sets those, then layers full picker styling behind
+  `@supports (appearance: base-select)` using `::picker(select)`,
+  `::picker-icon`, and `::checkmark`. Browsers without the customizable select
+  API keep the CSS-drawn chevron and a legible list. Do not collapse the two
+  layers into one; removing the fallback silently regresses older browsers.
 - **A primitive may not borrow a class from a sibling primitive.** They are
   copied individually, so `nodex add select` referencing `.nx-field__label` from
   the input primitive hands the consumer markup with no styles for it. Duplicate
