@@ -8,6 +8,28 @@
    The chevron is drawn with a background gradient rather than an icon so the
    primitive stays a single CSS file with no asset dependency. */
 
+/* Field wrapper, intentionally duplicated from the input primitive.
+
+   Primitives are copied one at a time: `nodex add select` must produce
+   something that works on its own. Referencing a class defined in a sibling
+   primitive's stylesheet would hand the consumer markup with no styles for it.
+   Identical definitions collapse harmlessly if both are installed. */
+
+.nx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--nx-font-sans);
+}
+
+.nx-field__label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+}
+
 .nx-select {
   appearance: none;
   width: 100%;

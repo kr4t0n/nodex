@@ -417,6 +417,31 @@ async function main() {
       path.join(primitive.dir, 'component.html'),
       'utf8',
     );
+
+    // A primitive must be self-contained: it is copied on its own, so markup
+    // referencing a class defined in a sibling primitive's stylesheet hands the
+    // consumer something with no styles for it. Duplicating a shared wrapper is
+    // the correct fix, not importing across primitives.
+    const usedClasses = new Set();
+    for (const attr of markup.matchAll(/class="([^"]+)"/g)) {
+      for (const name of attr[1].split(/\s+/).filter(Boolean)) {
+        usedClasses.add(name);
+      }
+    }
+    const definedClasses = new Set(
+      [...css.matchAll(/\.([A-Za-z0-9_-]+)/g)].map((m) => m[1]),
+    );
+    const undefinedClasses = [...usedClasses].filter(
+      (name) => !definedClasses.has(name),
+    );
+    if (undefinedClasses.length > 0) {
+      fail(
+        where,
+        `markup uses class(es) its own stylesheet does not define: ` +
+          `${undefinedClasses.join(', ')}. Primitives are copied individually, ` +
+          `so duplicate the rules rather than relying on a sibling primitive`,
+      );
+    }
     generated.push({
       file: path.join(primitive.dir, 'index.html'),
       content: renderPrimitivePreview({

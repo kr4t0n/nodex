@@ -349,7 +349,7 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
       <h2 className="mt-7 mb-9 text-[19px] font-extrabold tracking-[-0.02em]">
         Primitives
       </h2>
-      <div className="grid grid-cols-1 gap-x-6 gap-y-12 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
           <article key={item.name}>
             <h3 className="m-0 text-[14px] font-bold tracking-[-0.01em]">

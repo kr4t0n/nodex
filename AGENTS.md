@@ -126,6 +126,7 @@ extractor so re-running stays idempotent.
 In `scripts/build-registry.mjs`. These replace what a shared module would have
 enforced:
 
+- a primitive's markup only uses classes its own stylesheet defines
 - anything that animates ships a `prefers-reduced-motion` guard
 - stroke widths stay within `tokens.stroke.lineMax` unless the component declares
   `strokeAsArea`
@@ -249,6 +250,11 @@ split, or they drift into each other.
 - **The palette is 37 greys, not a designed scale.** Several pairs differ by one
   or two values (`#D8D7D1` / `#D8D6CE`). Consolidating is open work; the ramp in
   `tokens.json` records what exists.
+- **A primitive may not borrow a class from a sibling primitive.** They are
+  copied individually, so `nodex add select` referencing `.nx-field__label` from
+  the input primitive hands the consumer markup with no styles for it. Duplicate
+  the rules instead; identical definitions collapse harmlessly when both are
+  installed, and the build lints for it.
 - **`packages/core` uses `.ts` import specifiers.** Node strips types natively;
   `.js` specifiers would not resolve against `.ts` files.
 - **`tmp/` is deliberately tracked** through Phase 1 so the extractor's history
