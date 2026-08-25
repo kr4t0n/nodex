@@ -1,12 +1,14 @@
+'use client';
+
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import { marked } from 'marked';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import Link from 'next/link';
 
-import { CommandRow, EmptyState, Loading, PageShell, TopBar } from '../components/Chrome.tsx';
-import { Preview } from '../components/Preview.tsx';
-import { useLanguageTokens, usePrefersReducedMotion, useText } from '../hooks.ts';
+import { CommandRow, EmptyState, Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
+import { Preview } from '@/components/Preview.tsx';
+import { useLanguageTokens, usePrefersReducedMotion, useText } from '@/lib/hooks.ts';
 import {
   designUrl,
   expressiveFor,
@@ -18,7 +20,7 @@ import {
   tokensJsonUrl,
   type Catalog,
   type Item,
-} from '../registry.ts';
+} from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP);
 
@@ -32,8 +34,7 @@ interface Tokens {
 /** Fixed thumbnail height, so grid titles stay on a common baseline. */
 const THUMB_HEIGHT = 250;
 
-export function LanguagePage() {
-  const { slug = '' } = useParams();
+export function LanguageView({ slug }: { slug: string }) {
   const [catalog, setCatalog] = useState<Catalog>();
   const themed = useLanguageTokens(slug);
   const design = useText(designUrl(slug));
@@ -56,7 +57,7 @@ export function LanguagePage() {
               title="No such design language"
               hint={`Nothing in the registry is named "${slug}".`}
               action={
-                <Link to="/" className="nx-btn nx-btn--outline no-underline">
+                <Link href="/" className="nx-btn nx-btn--outline no-underline">
                   Back to languages
                 </Link>
               }
@@ -313,8 +314,7 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
               {/* Title above the preview, mirroring the card anatomy DESIGN.md
                   fixes for the components themselves: title, then sub, then the
                   chart. */}
-              <Link
-                to={`/l/${language}/${item.name}`}
+              <Link href={`/l/${language}/${item.name}`}
                 className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
                 style={{ color: 'inherit', rowGap: 6 }}
               >
@@ -367,8 +367,7 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
             className="grid min-w-0 grid-rows-subgrid row-span-3"
             style={{ rowGap: 6 }}
           >
-            <Link
-              to={`/l/${language}/${item.name}`}
+            <Link href={`/l/${language}/${item.name}`}
               className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
               style={{ color: 'inherit', rowGap: 6 }}
             >

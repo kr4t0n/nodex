@@ -1,7 +1,9 @@
+'use client';
+
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useNearViewport } from '../hooks.ts';
+import { useNearViewport } from '@/lib/hooks.ts';
 
 /**
  * The logical width every preview is rendered at before being scaled down.

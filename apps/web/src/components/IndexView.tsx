@@ -1,11 +1,13 @@
+'use client';
+
 import { ArrowRight } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
-import { Loading, PageShell, TopBar } from '../components/Chrome.tsx';
-import { Preview } from '../components/Preview.tsx';
-import { useLanguageTokens } from '../hooks.ts';
-import { loadCatalog, previewUrl, type Catalog, type Language } from '../registry.ts';
+import { Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
+import { Preview } from '@/components/Preview.tsx';
+import { useLanguageTokens } from '@/lib/hooks.ts';
+import { loadCatalog, previewUrl, type Catalog, type Language } from '@/lib/registry.ts';
 
 /**
  * The index answers "which design language do I want", which is a judgment made
@@ -15,7 +17,7 @@ import { loadCatalog, previewUrl, type Catalog, type Language } from '../registr
  * Deliberately thin while one language exists: there is nothing to compare yet.
  * It grows into a comparison surface when a second arrives.
  */
-export function IndexPage() {
+export function IndexView() {
   const [catalog, setCatalog] = useState<Catalog>();
   const first = catalog?.languages[0]?.slug;
   const themed = useLanguageTokens(first);
@@ -82,7 +84,7 @@ function LanguageTile({ language }: { language: Language }) {
           </div>
         </div>
 
-        <Link to={`/l/${language.slug}`} className="nx-btn nx-btn--solid no-underline">
+        <Link href={`/l/${language.slug}`} className="nx-btn nx-btn--solid no-underline">
           Open {language.name}
           <ArrowRight size={13} weight="bold" aria-hidden />
         </Link>
@@ -94,7 +96,7 @@ function LanguageTile({ language }: { language: Language }) {
         {featured.map((name) => (
           <Link
             key={name}
-            to={`/l/${language.slug}/${name}`}
+            href={`/l/${language.slug}/${name}`}
             className="no-underline"
             aria-label={`${name} in ${language.name}`}
           >

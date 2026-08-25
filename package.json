@@ -15,11 +15,13 @@
     "build:registry": "node scripts/build-registry.mjs",
     "check:registry": "node scripts/build-registry.mjs --check",
     "smoke": "node scripts/smoke-components.mjs",
-    "typecheck": "tsc --build && npm run typecheck --workspace @nodex/gallery",
+    "typecheck": "tsc --build && npm run typecheck --workspace @nodex/web",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "dev": "npm run dev --workspace @nodex/gallery",
-    "smoke:cli": "node scripts/smoke-cli.mjs"
+    "dev": "npm run dev --workspace @nodex/web",
+    "smoke:cli": "node scripts/smoke-cli.mjs",
+    "build": "npm run build:registry && npm run build --workspace @nodex/web",
+    "start": "npm run start --workspace @nodex/web"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

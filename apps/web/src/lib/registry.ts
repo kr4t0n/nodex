@@ -1,7 +1,7 @@
 import type { Density, NodexMeta } from '@nodex/core/schema';
 
 /**
- * The gallery reads the built manifest at runtime rather than importing the
+ * The app reads the built manifest at runtime rather than importing the
  * registry source. Everything it needs is already in `public/r/`, which keeps
  * the app a static client with no build-time coupling to the registry tree, and
  * means the registry could later move to a CDN without touching the app.
@@ -31,6 +31,16 @@ export interface Catalog {
   items: Item[];
 }
 
+/**
+ * Where the registry is served from.
+ *
+ * Empty means same origin, which is how development works: the build copies the
+ * registry into `public/`. Production can point at a CDN instead, since registry
+ * content is static and needs no runtime. Keeping every URL in this file behind
+ * one base is what makes that a config change rather than a code change.
+ */
+const BASE = (process.env.NEXT_PUBLIC_REGISTRY_URL ?? '').replace(/\/+$/, '');
+
 let cache: Promise<Catalog> | undefined;
 
 async function json<T>(url: string): Promise<T> {
@@ -42,8 +52,8 @@ async function json<T>(url: string): Promise<T> {
 export function loadCatalog(): Promise<Catalog> {
   cache ??= (async () => {
     const [registry, languages] = await Promise.all([
-      json<{ items: Item[] }>('/r/registry.json'),
-      json<Language[]>('/r/languages.json'),
+      json<{ items: Item[] }>(`${BASE}/r/registry.json`),
+      json<Language[]>(`${BASE}/r/languages.json`),
     ]);
     return { languages, items: registry.items };
   })();
@@ -85,19 +95,19 @@ export function findItem(
 
 /** URL of a component's generated standalone preview document. */
 export function previewUrl(language: string, name: string): string {
-  return `/registry/languages/${language}/expressive/${name}/index.html`;
+  return `${BASE}/registry/languages/${language}/expressive/${name}/index.html`;
 }
 
 export function designUrl(language: string): string {
-  return `/registry/languages/${language}/DESIGN.md`;
+  return `${BASE}/registry/languages/${language}/DESIGN.md`;
 }
 
 export function tokensUrl(language: string): string {
-  return `/registry/languages/${language}/tokens.css`;
+  return `${BASE}/registry/languages/${language}/tokens.css`;
 }
 
 export function tokensJsonUrl(language: string): string {
-  return `/registry/languages/${language}/tokens.json`;
+  return `${BASE}/registry/languages/${language}/tokens.json`;
 }
 
 /**
@@ -105,7 +115,7 @@ export function tokensJsonUrl(language: string): string {
  * generated file serves every design language.
  */
 export function primitivePreviewUrl(name: string, language: string): string {
-  return `/registry/primitives/${name}/index.html?lang=${encodeURIComponent(language)}`;
+  return `${BASE}/registry/primitives/${name}/index.html?lang=${encodeURIComponent(language)}`;
 }
 
 export function addCommand(language: string, item: Item): string {

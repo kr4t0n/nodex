@@ -36,11 +36,12 @@ body {
 
 /*
   `.nx-rule`, `.nx-prose`, `.nx-code`, `.nx-command`, and `.nx-link` are NOT
-  defined here. They are registry primitives, loaded from
-  /registry/primitives/*/component.css in index.html.
+  defined here. They are registry primitives, linked from each primitive's
+  component.css under /registry/primitives/ in app/layout.tsx. (Spelling that
+  path with a glob would close this comment early.)
 
   That is the point: the shell is built from the same components it displays, so
-  a primitive that breaks breaks the gallery visibly. Anything the shell needs
+  a primitive that breaks breaks the site visibly. Anything the shell needs
   that is not yet a primitive is a gap in the registry, not a reason to write
   local CSS.
 */

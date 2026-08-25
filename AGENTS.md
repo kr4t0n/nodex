@@ -21,7 +21,7 @@ So nodex splits by tier:
   progress, prose, radio, rule, select, slider, stat, status, switch, table,
   textarea, tooltip.
 
-The gallery is the completeness test. It is built from primitives, so anything
+The web app is the completeness test. It is built from primitives, so anything
 it has to style itself is a gap in the registry. It is now down to one class of
 its own, `.nx-frame`, which is genuinely specific to embedding previews.
 
@@ -41,7 +41,7 @@ catalogue: one entry per component recording language, type, tier, runtime,
 density, and tags, so the same component is findable along any axis without
 moving files.
 
-This is why the gallery can group primitives under each design language even
+This is why the app can group primitives under each design language even
 though they are stored once, and why `nodex search --type bar --design X` is
 answerable at all.
 
@@ -110,7 +110,7 @@ authored. A future language may have no such distinction and omits the field. A
 language declares its legal values in `meta.json`; a component may only use a
 declared value.
 
-**Agent-facing only. It is deliberately absent from the gallery UI.** Density
+**Agent-facing only. It is deliberately absent from the app's UI.** Density
 answers a question an agent has when generating code, which is whether this
 component is built to be studied or scanned. A human browsing the grid can see
 that in the thumbnail, so a filter for it was noise. It stays in the manifest, in
@@ -151,9 +151,9 @@ lint enforces membership of the 37 greys actually present rather than a palette
 someone wished for, so it passes today and fails on any addition. Same for
 `strokeAsArea`.
 
-## The gallery re-themes rather than having a style
+## The web app re-themes rather than having a style
 
-`apps/gallery` has no palette, type stack, or radius of its own. Every value
+`apps/web` has no palette, type stack, or radius of its own. Every value
 resolves through `--nx-*`, and swapping the active language's `tokens.css`
 restyles the whole interface. That dogfoods the token system: a broken primitive
 is immediately visible in the app's own chrome.
@@ -170,6 +170,46 @@ The line between what the app owns and what the language owns:
 
 GSAP is app-only and never enters registry content. A component that depended on
 GSAP would force that dependency on everyone who copied it.
+
+### Why Next.js rather than Vite
+
+The app was a Vite SPA and did not need a server: the registry is static and the
+client fetches it. It moved to Next before the accounts backend, not after,
+because the alternative was standing up a second deployable next to the SPA and
+running auth across an origin boundary. Sessions, the GitHub OAuth callback, and
+the CLI device-code endpoints all want to be same-origin with the pages that read
+them, and route handlers give that for free.
+
+Nothing about the migration made the app dynamic. Every route still prerenders,
+the views are still client components fetching the manifest over HTTP, and the
+whole thing still deploys as static files. What changed is that there is now
+somewhere for a server to appear when Phase 5 needs one.
+
+Two consequences worth knowing:
+
+- **Params arrive as props, not from a hook.** Each `page.tsx` is a server
+  component that awaits `params` and passes plain strings down. The views never
+  import a routing hook, so they stay portable and testable.
+- **Routes come from the manifest.** `generateStaticParams` reads
+  `public/r/registry.json` at build time, so the registry stays the only place
+  that decides what exists. Adding a component adds its page; the app is never a
+  second list to keep in sync.
+
+### The registry is copied into `public/`, not served by a route handler
+
+`scripts/sync-registry-public.mjs` copies `registry/` and `public/r/` into
+`apps/web/public/` before dev and before build. A route handler streaming from
+the repo root would have worked too, and was rejected: it would tie serving the
+registry to a Node runtime, when the entire point of the registry being static is
+that it can sit on a CDN with no runtime at all.
+
+`NEXT_PUBLIC_REGISTRY_URL` switches to that CDN. Every registry URL in the app
+resolves through one `BASE` constant in `lib/registry.ts` (and once more in
+`app/layout.tsx`, which renders on the server before any client module runs), so
+pointing elsewhere is configuration rather than a code change.
+
+`apps/web/public/` is generated and gitignored. Never edit it, and never treat it
+as a source of truth.
 
 ### Everything previews in an iframe, primitives at true size
 
@@ -189,7 +229,7 @@ misrepresents it.
 
 `IntersectionObserver` and `ResizeObserver` do not deliver in a tab that is never
 painted, which covers background tabs and various headless and embedded
-contexts. Gating the mount solely on them produces an empty gallery with no error
+contexts. Gating the mount solely on them produces an empty page with no error
 to explain it.
 
 So `useNearViewport` carries a timeout fallback, and `Preview` reads its width
@@ -279,7 +319,7 @@ split, or they drift into each other.
   shimmer skeleton cannot exist in it. The progress primitive sidesteps this by
   showing an indeterminate state as a static dashed track rather than a moving
   stripe. If a language ever genuinely needs to decline a primitive, the
-  mechanism would be a list in its `meta.json` and the gallery skipping it. Not
+  mechanism would be a list in its `meta.json` and the app skipping it. Not
   built, because nothing has needed it yet.
 - **Behaviour-heavy controls ship as visual treatment only.** A two-thumb range
   slider, tabs, menus, and combobox all need JavaScript, which breaks the

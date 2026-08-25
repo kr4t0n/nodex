@@ -40,3 +40,8 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      # Prerendering every route reads the manifest, so a build failure here
+      # also catches a manifest the app can no longer make sense of.
+      - name: Build the site
+        run: npm run build --workspace @nodex/web

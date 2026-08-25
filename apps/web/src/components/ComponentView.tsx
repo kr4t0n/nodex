@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import Link from 'next/link';
 
 import {
   CommandRow,
@@ -7,9 +9,9 @@ import {
   Loading,
   PageShell,
   TopBar,
-} from '../components/Chrome.tsx';
-import { Preview } from '../components/Preview.tsx';
-import { useLanguageTokens } from '../hooks.ts';
+} from '@/components/Chrome.tsx';
+import { Preview } from '@/components/Preview.tsx';
+import { useLanguageTokens } from '@/lib/hooks.ts';
 import {
   addCommand,
   findItem,
@@ -17,10 +19,9 @@ import {
   previewUrl,
   primitivePreviewUrl,
   type Catalog,
-} from '../registry.ts';
+} from '@/lib/registry.ts';
 
-export function ComponentPage() {
-  const { slug = '', name = '' } = useParams();
+export function ComponentView({ slug, name }: { slug: string; name: string }) {
   const [catalog, setCatalog] = useState<Catalog>();
   const themed = useLanguageTokens(slug);
 
@@ -43,7 +44,7 @@ export function ComponentPage() {
               title="No such component"
               hint={`Nothing named "${name}" exists in ${slug}.`}
               action={
-                <Link to={`/l/${slug}`} className="nx-btn nx-btn--outline no-underline">
+                <Link href={`/l/${slug}`} className="nx-btn nx-btn--outline no-underline">
                   Back to the language
                 </Link>
               }
@@ -76,7 +77,7 @@ export function ComponentPage() {
     <>
       <TopBar
         language={language.name}
-        back={{ to: `/l/${slug}`, label: language.name }}
+        back={{ href: `/l/${slug}`, label: language.name }}
       />
       <PageShell>
         <div className="grid grid-cols-1 gap-10 pt-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14">

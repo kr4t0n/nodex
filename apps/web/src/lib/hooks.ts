@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 
 import { tokensUrl } from './registry.ts';
@@ -80,7 +82,7 @@ export function useText(url: string | undefined): {
  * The timeout is not belt-and-braces, it is load-bearing. IntersectionObserver
  * callbacks do not fire in a tab that is never painted, which includes
  * background tabs, some headless and embedded contexts, and screenshot tooling.
- * Gating solely on the observer means those environments show an empty gallery
+ * Gating solely on the observer means those environments show an empty page
  * forever, with no error to explain it. The fallback mounts anyway, and the
  * iframes' native `loading="lazy"` still defers the actual network work, so
  * nothing is lost by being less clever here.

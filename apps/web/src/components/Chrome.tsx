@@ -1,13 +1,20 @@
+'use client';
+
 import { ArrowLeft, Check, Copy } from '@phosphor-icons/react';
+import type { Route } from 'next';
+import Link from 'next/link';
 import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 /** Nav sits on one line and stays under 72px. */
-export function TopBar({
+export function TopBar<T extends string>({
   back,
   language,
 }: {
-  back?: { to: string; label: string };
+  // Generic over the href so typedRoutes can check it against the real route
+  // table: a link to a page that does not exist fails the build rather than
+  // becoming a 404 someone finds later. Interpolated slugs still validate,
+  // because it is the shape `/l/[slug]` that is checked, not the value.
+  back?: { href: Route<T>; label: string };
   language?: string;
 }) {
   return (
@@ -20,7 +27,7 @@ export function TopBar({
     >
       <div className="mx-auto flex h-[64px] max-w-[1400px] items-center gap-5 px-6 lg:px-10">
         <Link
-          to="/"
+          href="/"
           className="text-[13px] font-extrabold tracking-[0.1em] uppercase no-underline"
           style={{ color: 'var(--nx-ink)' }}
         >
@@ -34,7 +41,7 @@ export function TopBar({
         ) : null}
 
         {back ? (
-          <Link to={back.to} className="nx-btn nx-btn--quiet ml-auto no-underline">
+          <Link href={back.href} className="nx-btn nx-btn--quiet ml-auto no-underline">
             <ArrowLeft size={13} weight="bold" aria-hidden />
             {back.label}
           </Link>
@@ -45,7 +52,7 @@ export function TopBar({
 }
 
 /**
- * The command string is the only place the gallery hands anything to the CLI.
+ * The command string is the only place this app hands anything to the CLI.
  * Source code deliberately lives nowhere in this app: looking is this surface's
  * job, fetching is the CLI's.
  */
@@ -88,8 +95,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Both of these are registry primitives now (status and empty-state), not local
-// CSS. They were the last two pieces of the shell with no primitive behind them.
+// Both of these are registry primitives (status and empty-state), not local CSS.
 export function Loading({ label }: { label: string }) {
   return (
     <div className="nx-status-block" role="status">

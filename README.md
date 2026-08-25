@@ -19,9 +19,10 @@ on warm paper.
 
 ## Status
 
-The registry, the six primitives, the CLI, and the gallery app all work. The
-accounts backend does not exist yet, and authentication is stubbed because every
-language is currently public. See `AGENTS.md` for the architecture.
+The registry, the 24 primitives, the CLI, and the web app all work. The accounts
+backend does not exist yet, and authentication is stubbed because every language
+is currently public — the app runs on Next.js so that backend has somewhere to
+land. See `AGENTS.md` for the architecture.
 
 ## Using it in a project
 
@@ -43,7 +44,7 @@ registry keeps using it.
 Until the package is published, invoke it as
 `node packages/cli/src/index.ts <command>`.
 
-## Running the gallery
+## Running the site
 
 ```bash
 npm install
@@ -51,9 +52,20 @@ npm run build:registry   # generates tokens.css, previews, and the manifest
 npm run dev              # http://localhost:4180
 ```
 
-The gallery must be preceded by `build:registry` at least once: it reads the
-built manifest from `public/r/` and iframes the generated previews, neither of
-which is committed.
+`build:registry` has to run at least once first: the app reads the built manifest
+from `public/r/` and iframes the generated previews, neither of which is
+committed. `dev` and `build` then copy both into `apps/web/public/` so Next can
+serve them, which is why that directory is generated and gitignored.
+
+For a production build:
+
+```bash
+npm run build   # build:registry, then next build
+npm start       # http://localhost:4180
+```
+
+Set `NEXT_PUBLIC_REGISTRY_URL` to serve the registry from a CDN instead of from
+the app's own `public/`. It is static, so nothing else has to change.
 
 ## Prerequisites
 
@@ -74,9 +86,11 @@ npm install
 | `npm run check:registry` | Validate only, no writes — what CI runs |
 | `npm run smoke` | Mount all 64 components in a real DOM and assert they draw |
 | `npm run smoke:cli` | Run init and add against a temporary project |
-| `npm run dev` | Gallery dev server on port 4180 |
+| `npm run dev` | Next dev server on port 4180 |
+| `npm run build` | Build the registry, then the site |
+| `npm start` | Serve the production build on port 4180 |
 | `npm run lint` | ESLint across the workspace |
-| `npm run typecheck` | Types across the workspace and the gallery |
+| `npm run typecheck` | Types across the workspace and the site |
 
 `npm run build:registry` writes three kinds of output:
 
@@ -89,11 +103,11 @@ All three are build artifacts and are gitignored.
 
 ## Looking at the components
 
-`npm run dev` and browse. Three routes:
+`npm run dev` and browse. Three routes, all prerendered from the manifest:
 
 - `/` the language index, each language shown as a live composite of its own components
-- `/l/:slug` the language: tokens, filterable component grid, primitives, and the rendered `DESIGN.md`
-- `/l/:slug/:name` one component, full size, with its `nodex add` command
+- `/l/[slug]` the language: tokens, primitives, filterable chart grid, and the rendered `DESIGN.md`
+- `/l/[slug]/[name]` one component, full size, with its `nodex add` command
 
 Charts draw when scrolled into view and replay on click. Individual previews are
 directly openable too, for example
@@ -118,13 +132,18 @@ registry/
                        shared by every language, token variables only
 packages/core/       the registry contract: schemas, taxonomy, loader
 packages/cli/        the nodex CLI
-apps/gallery/        Vite + React + TS + Tailwind browse app
+apps/web/            Next.js + React + TS + Tailwind browse app
+  src/app/             routes; layout links the primitives the shell is built from
+  src/components/      the three views, plus Preview and the chrome
+  src/lib/             registry client, hooks, build-time manifest reads
+  public/              GENERATED copy of the registry, for Next to serve
 skills/nodex/        the skill shipped to consumers
 .agents/skills/nodex-authoring/   how to add languages and components here
 scripts/
-  build-registry.mjs      validate + generate + emit
-  smoke-components.mjs    mount every component and assert it draws
-  smoke-cli.mjs           init and add against a temporary project
+  build-registry.mjs        validate + generate + emit
+  sync-registry-public.mjs  copy the registry into apps/web/public
+  smoke-components.mjs      mount every component and assert it draws
+  smoke-cli.mjs             init and add against a temporary project
 tmp/                 gitignored scratch space
 ```
 

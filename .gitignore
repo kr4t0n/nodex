@@ -25,9 +25,12 @@ tmp/
 # editor / os
 .DS_Store
 *.log
-.vite/
 .turbo/
 
+# next
+apps/web/.next/
+apps/web/next-env.d.ts
 
-# gallery build output
-apps/gallery/dist/
+# registry copied into the web app by scripts/sync-registry-public.mjs so Next
+# can serve it from public/ — always regenerated, never a source of truth
+apps/web/public/

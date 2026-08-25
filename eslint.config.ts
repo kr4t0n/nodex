@@ -7,7 +7,10 @@ export default tseslint.config(
     ignores: [
       '**/node_modules/**',
       '**/dist/**',
+      '**/.next/**',
       'public/r/**',
+      // A build-time copy of the registry, for Next to serve from public/.
+      'apps/web/public/**',
       // Registry content is framework-free HTML/CSS/JS authored to be copied
       // verbatim into consumer projects. Linting it against app rules would
       // fight the point of it.

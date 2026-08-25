@@ -68,7 +68,7 @@ Omit it if it does not. It is optional precisely so that a language without the
 distinction is not forced to invent one. A component may only use a declared
 value, and CI enforces that.
 
-Also set `featured` to three or four component slugs. The gallery index renders
+Also set `featured` to three or four component slugs. The site's index renders
 them as a live composite, because a name and a paragraph cannot convey taste.
 
 ## Adding a component
@@ -180,7 +180,7 @@ membership, density against the language declaration, and the conformance lints.
 helpers were over-shaken, or whose mount attribute was renamed wrong, parses
 fine and draws nothing.
 
-To look at the result, `npm run dev` and open the gallery.
+To look at the result, `npm run dev` and open http://localhost:4180.
 
 ## Common failures
 
