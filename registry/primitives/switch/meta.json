@@ -1,0 +1,10 @@
+{
+  "slug": "switch",
+  "title": "Switch",
+  "description": "A checkbox with role=switch, for settings that take effect immediately rather than on submit",
+  "component": "switch",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["form", "interactive"],
+  "dependencies": []
+}

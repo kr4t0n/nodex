@@ -1,0 +1,10 @@
+{
+  "slug": "textarea",
+  "title": "Textarea",
+  "description": "Multi-line field with vertical-only resize, a monospace variant, and content sizing where supported",
+  "component": "textarea",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["form", "interactive"],
+  "dependencies": []
+}

@@ -1,0 +1,10 @@
+{
+  "slug": "dialog",
+  "title": "Dialog",
+  "description": "Native dialog with a mixed-ink backdrop, since a language with no elevation model cannot lift a panel with a shadow",
+  "component": "dialog",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["overlay", "interactive"],
+  "dependencies": []
+}

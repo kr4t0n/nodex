@@ -190,7 +190,7 @@ ${FONT_LINKS}
   /* Children may shrink. A flex value of 0 0 auto would forbid it, so any
      primitive naturally wider than its frame (prose sets a 68ch measure) would
      overflow and be clipped rather than wrapping. min-width 0 is required too,
-     since a flex item's default minimum is its content size. */
+     since a flex item's default minimum is its content size.
      Deliberately no max-width here: it would tie with a primitive's own
      max-width on specificity and, coming later, silently override the measure
      prose sets for itself. */

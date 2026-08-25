@@ -64,12 +64,14 @@ export type ComponentType = (typeof COMPONENT_TYPES)[number];
  */
 export const PRIMITIVE_TYPES = [
   'alert',
+  'avatar',
   'badge',
   'button',
   'card',
   'checkbox',
   'code',
   'details',
+  'dialog',
   'input',
   'link',
   'progress',
@@ -78,7 +80,10 @@ export const PRIMITIVE_TYPES = [
   'rule',
   'select',
   'slider',
+  'switch',
   'table',
+  'textarea',
+  'tooltip',
 ] as const;
 
 export type PrimitiveType = (typeof PRIMITIVE_TYPES)[number];

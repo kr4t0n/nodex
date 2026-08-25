@@ -1,0 +1,121 @@
+/* textarea - shared primitive, themed by the active language's tokens.
+
+   Kept separate from input rather than made a variant of it, because a
+   multi-line field has concerns a single-line one does not: resize behaviour, a
+   minimum height, and a corner radius that cannot be a pill.
+
+   The shape rule in this system is that interactive elements take the pill
+   radius and containers take the card radius. A textarea is the exception and
+   it is a deliberate one: a pill radius on a four-row box bows the corners into
+   the text. It takes the card radius instead.
+
+   The field wrapper is duplicated from the input primitive: primitives are
+   copied individually, so each must stand alone. */
+
+.nx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--nx-font-sans);
+}
+
+.nx-field__label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+}
+
+.nx-textarea {
+  width: 100%;
+  min-height: 5.5em;
+  padding: 0.7em 0.95em;
+  border: var(--nx-hairline) solid var(--nx-grid);
+  border-radius: var(--nx-radius-card);
+  background: var(--nx-bg);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+  font-size: 12px;
+  line-height: 1.65;
+  /* Vertical only. Horizontal resize breaks the measure, and both axes let a
+     reader drag the field into a shape no layout anticipated. */
+  resize: vertical;
+  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Grow with the content where the browser supports it, which removes the need
+   for the scroll-height JavaScript this pattern usually requires. Browsers
+   without it keep the min-height and the resize handle. */
+@supports (field-sizing: content) {
+  .nx-textarea--auto {
+    field-sizing: content;
+    resize: none;
+    max-height: 18em;
+  }
+}
+
+/* Placeholder uses the muted token, not faint: faint fails contrast at this
+   size against the field background. */
+.nx-textarea::placeholder {
+  color: var(--nx-muted);
+  opacity: 1;
+}
+
+.nx-textarea:hover {
+  border-color: var(--nx-muted);
+}
+
+.nx-textarea:focus {
+  outline: none;
+  border-color: var(--nx-ink);
+}
+
+.nx-textarea:focus-visible {
+  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline-offset: 2px;
+}
+
+.nx-textarea:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  resize: none;
+}
+
+/* Monospace, for a field holding tokens, config, or a chart option object. */
+.nx-textarea--mono {
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.nx-field__help {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--nx-muted);
+}
+
+/* A count sits with the helper text rather than inside the field, where it
+   would overlap the last line of a full textarea. */
+.nx-field__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  font-size: 10.5px;
+  color: var(--nx-muted);
+}
+
+.nx-field__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.nx-field[data-invalid='true'] .nx-textarea {
+  border-color: var(--nx-ink);
+  border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-textarea {
+    transition: none;
+  }
+}

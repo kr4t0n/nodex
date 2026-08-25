@@ -1,0 +1,104 @@
+/* avatar - shared primitive, themed by the active language's tokens.
+
+   A constraint worth naming: most avatar systems assign each person a colour
+   from a hashed palette. This language has no hue at all, so identity is carried
+   by position on the grey ramp instead. That is genuinely less distinguishable
+   than colour, which is why the initials do the identifying and the tone only
+   separates adjacent avatars in a stack. */
+
+.nx-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--nx-grid);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  /* Never let a long fallback string wrap or spill out of the circle. */
+  white-space: nowrap;
+  user-select: none;
+}
+
+.nx-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Square, for a repository or an organisation rather than a person. Rounding
+   follows the container radius so it matches cards. */
+.nx-avatar--square {
+  border-radius: calc(var(--nx-radius-card) / 3);
+}
+
+.nx-avatar--sm {
+  width: 20px;
+  height: 20px;
+  font-size: 8px;
+}
+
+.nx-avatar--lg {
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+}
+
+/* Tones. Not identity colours, just enough separation that two avatars beside
+   each other do not merge. */
+.nx-avatar--tone-1 {
+  background: var(--nx-grid);
+}
+
+.nx-avatar--tone-2 {
+  background: var(--nx-faint);
+}
+
+.nx-avatar--tone-3 {
+  background: var(--nx-muted);
+  color: var(--nx-bg);
+}
+
+.nx-avatar--tone-4 {
+  background: var(--nx-ink);
+  color: var(--nx-bg);
+}
+
+/* Outline, for an avatar sitting directly on a busy surface. */
+.nx-avatar--outline {
+  background: var(--nx-bg);
+  box-shadow: inset 0 0 0 var(--nx-hairline) var(--nx-muted);
+}
+
+/* A stack reads as a group rather than a list. The ring is the page ground, so
+   overlapping avatars stay separable without a border colour of their own. */
+.nx-avatar-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nx-avatar-group > .nx-avatar + .nx-avatar {
+  margin-left: -8px;
+}
+
+.nx-avatar-group > .nx-avatar {
+  box-shadow: 0 0 0 calc(var(--nx-hairline) * 3) var(--nx-bg);
+}
+
+/* Overflow count closes the stack. */
+.nx-avatar-group > .nx-avatar--count {
+  background: var(--nx-bg);
+  color: var(--nx-muted);
+  box-shadow:
+    0 0 0 calc(var(--nx-hairline) * 3) var(--nx-bg),
+    inset 0 0 0 var(--nx-hairline) var(--nx-grid);
+  font-size: 9px;
+}

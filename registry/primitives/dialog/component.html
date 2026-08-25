@@ -1,0 +1,20 @@
+<div style="display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 440px">
+  <!-- Rendered open and in flow so the styling is visible here. In use, omit
+       `open` and `nx-dialog--inline`, then call el.showModal() to get the top
+       layer, the focus trap, and the backdrop. -->
+  <dialog class="nx-dialog nx-dialog--inline" open>
+    <div class="nx-dialog__body">
+      <h2 class="nx-dialog__title">Replace this component?</h2>
+      <p class="nx-dialog__sub">
+        You have edited this file since adding it. Fetching it again overwrites
+        your changes, and nodex keeps no copy of them.
+      </p>
+    </div>
+    <div class="nx-dialog__actions">
+      <button class="nx-dialog__action" type="button">Keep mine</button>
+      <button class="nx-dialog__action nx-dialog__action--confirm" type="button">
+        Overwrite
+      </button>
+    </div>
+  </dialog>
+</div>

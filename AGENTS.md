@@ -16,9 +16,9 @@ So nodex splits by tier:
 - **Expressive** components (charts, and later heroes) are owned by a language.
   Their form *is* the language.
 - **Primitives** are shared once at `registry/primitives/` and themed by tokens.
-  A button is a button everywhere. Sixteen currently: alert, badge, button,
-  card, checkbox, code, details, input, link, progress, prose, radio, rule,
-  select, slider, table.
+  A button is a button everywhere. Twenty-one currently: alert, avatar, badge,
+  button, card, checkbox, code, details, dialog, input, link, progress, prose,
+  radio, rule, select, slider, switch, table, textarea, tooltip.
 
 The boundary is whether the language changes the **form** or only the **paint**.
 A slider is a track and a thumb in every language, so it is a primitive. A
@@ -276,6 +276,12 @@ split, or they drift into each other.
   `::picker-icon`, and `::checkmark`. Browsers without the customizable select
   API keep the CSS-drawn chevron and a legible list. Do not collapse the two
   layers into one; removing the fallback silently regresses older browsers.
+- **A tooltip trigger must be focusable.** `.nx-tooltip` reveals on
+  `:focus-within`, which can never match if the trigger is a bare `<span>`. Use a
+  button or add `tabindex="0"`, or the tooltip is mouse-only. The CSS tooltip is
+  also not announced by assistive technology at all, so where the text carries
+  real information, use these visuals on a headless tooltip. The charts avoid the
+  whole problem by using SVG `<title>`, which the browser announces natively.
 - **A primitive may not borrow a class from a sibling primitive.** They are
   copied individually, so `nodex add select` referencing `.nx-field__label` from
   the input primitive hands the consumer markup with no styles for it. Duplicate

@@ -1,0 +1,10 @@
+{
+  "slug": "avatar",
+  "title": "Avatar",
+  "description": "Image or initials in circle and square shapes, with tones drawn from the grey ramp and a stacked group",
+  "component": "avatar",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["identity", "media"],
+  "dependencies": []
+}

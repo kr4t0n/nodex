@@ -1,0 +1,10 @@
+{
+  "slug": "tooltip",
+  "title": "Tooltip",
+  "description": "CSS-only label on hover and focus. Not announced by assistive technology, so pair it with a headless tooltip when the text matters",
+  "component": "tooltip",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["overlay", "text"],
+  "dependencies": []
+}
