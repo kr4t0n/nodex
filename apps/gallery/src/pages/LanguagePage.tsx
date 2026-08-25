@@ -299,29 +299,36 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
       ) : (
         <div
           ref={gridRef}
-          className="grid grid-cols-1 gap-x-6 gap-y-12 md:grid-cols-2 xl:grid-cols-3"
+          className="grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3"
         >
           {filtered.map((item) => (
-            <article key={item.name} data-grid-cell>
+            // Same subgrid as the primitives above: a title that wraps to two
+            // lines must not push its preview out of line with its neighbours.
+            <article
+              key={item.name}
+              data-grid-cell
+              className="grid grid-rows-subgrid row-span-3"
+              style={{ rowGap: 6 }}
+            >
               {/* Title above the preview, mirroring the card anatomy DESIGN.md
                   fixes for the components themselves: title, then sub, then the
                   chart. */}
               <Link
                 to={`/l/${language}/${item.name}`}
-                className="block no-underline"
-                style={{ color: 'inherit' }}
+                className="grid grid-rows-subgrid row-span-3 no-underline"
+                style={{ color: 'inherit', rowGap: 6 }}
               >
-                <h2 className="m-0 text-[14px] font-bold tracking-[-0.01em]">
+                <h2 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
                   {item.title}
                 </h2>
                 <p
-                  className="mt-1.5 mb-0 text-[10.5px] tracking-[0.06em] uppercase"
+                  className="m-0 self-start text-[10.5px] tracking-[0.06em] uppercase"
                   style={{ color: 'var(--nx-faint)' }}
                 >
                   {item.meta.component}
                 </p>
                 <Preview
-                  className="mt-4"
+                  className="mt-3 self-start"
                   src={previewUrl(language, item.name)}
                   title={item.title}
                   aspectRatio={item.meta.aspectRatio}
@@ -349,23 +356,29 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
       <h2 className="mt-7 mb-9 text-[19px] font-extrabold tracking-[-0.02em]">
         Primitives
       </h2>
-      <div className="grid grid-cols-1 gap-x-6 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
+      {/* Subgrid, so every cell in a row shares row heights. Descriptions run to
+          one line or two, which without this leaves each header a different
+          height and starts each preview at a different point. A min-height would
+          hide that until something needed three lines. */}
+      <div className="grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
-          <article key={item.name}>
-            <h3 className="m-0 text-[14px] font-bold tracking-[-0.01em]">
+          <article
+            key={item.name}
+            className="grid grid-rows-subgrid row-span-3"
+            style={{ rowGap: 6 }}
+          >
+            <h3 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
               {item.title}
             </h3>
-            {item.description ? (
-              <p
-                className="mt-1.5 mb-0 text-[10.5px] leading-[1.6]"
-                style={{ color: 'var(--nx-faint)' }}
-              >
-                {item.description}
-              </p>
-            ) : null}
+            <p
+              className="m-0 self-start text-[10.5px] leading-[1.6]"
+              style={{ color: 'var(--nx-faint)' }}
+            >
+              {item.description ?? ''}
+            </p>
             {/* Fluid: a primitive is shown at the size it actually is. */}
             <Preview
-              className="mt-4"
+              className="mt-3 self-start"
               src={primitivePreviewUrl(item.name, language)}
               title={item.title}
               fluid
