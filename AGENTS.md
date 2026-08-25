@@ -173,9 +173,16 @@ GSAP would force that dependency on everyone who copied it.
 
 ### The landing page is written in the language it sells
 
-`/` is marketing, `/languages` is the app. The landing takes its dials from
-`DESIGN.md` rather than from landing-page convention, which overrides several
-things a generic taste pass would reach for:
+`/` is marketing, `/languages` is the app.
+
+It is **two scenes and nothing after them**: the name, then the work. Feature
+grids, token panels, and CLI walkthroughs were built and then cut, because
+anything that has to be explained belongs behind the sign-in where the reader
+has already decided they are interested. Resist re-adding sections here; the
+restraint is the argument.
+
+The landing takes its dials from `DESIGN.md` rather than from landing-page
+convention, which overrides several things a generic taste pass would reach for:
 
 - **Motion is quiet.** The language says marks draw once on arrival and then
   hold still, and that nothing loops or animates on hover. So the page reveals
