@@ -204,6 +204,18 @@ A component shorter than the embedder's initial guess would therefore lock at
 that guess forever, which is exactly what happened to the short primitives. Both
 preview templates measure the content wrapper plus body padding instead.
 
+### Grid items holding a preview need `min-width: 0`
+
+Not defensive, load-bearing. A grid item's default minimum is its content size,
+and a preview renders an iframe at a fixed wide logical width. Without
+`min-width: 0` the item refuses to shrink, forces the column open, and then
+reports that inflated width back as the measurement the scale is computed from,
+which cancels the scaling entirely and pushes charts outside their cells.
+
+This did not bite until the grids moved to subgrid, because a block child fills
+its parent while a grid item sizes to its content. Every element between a grid
+container and a `Preview` needs it.
+
 ### Previews are scaled, not cropped
 
 Components were authored for a full page, so dropping one into a 320px card shows

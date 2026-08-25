@@ -125,10 +125,15 @@ export function Preview({
   const frameHeight = fluid ? (contentHeight ?? 160) : logicalHeight;
 
   return (
-    <div className={className}>
+    // min-w-0 is load-bearing, not defensive. This sits inside a grid, and a
+    // grid item's default minimum is its content size. The iframe is rendered at
+    // a fixed wide logical width, so without this the item refuses to shrink,
+    // blows the column open, and reports that inflated width back as the
+    // measurement scale is computed from, which cancels the scaling entirely.
+    <div className={`min-w-0 ${className ?? ''}`}>
       <div
         ref={nearRef}
-        className="nx-frame relative overflow-hidden rounded-[var(--radius-card)]"
+        className="nx-frame relative w-full overflow-hidden rounded-[var(--radius-card)]"
         style={{ background: 'var(--nx-bg)' }}
       >
         <div
