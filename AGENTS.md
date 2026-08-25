@@ -184,16 +184,24 @@ restraint is the argument.
 The landing takes its dials from `DESIGN.md` rather than from landing-page
 convention, which overrides several things a generic taste pass would reach for:
 
-- **Motion is quiet.** The language says marks draw once on arrival and then
-  hold still, and that nothing loops or animates on hover. So the page reveals
-  on scroll and stops. No marquee, no parallax, no perpetual anything.
-- **The horizontal run is scrubbed, never looped.** Scene two moves the
-  collection right to left, which an auto-scrolling marquee would also do, and
-  a marquee is banned: it moves whether or not anyone is reading. Tying travel
-  to scroll position keeps the same contract the charts keep. Its distance is
-  measured against the section's width rather than the viewport's, because the
-  page container clips it; measuring against `innerWidth` strands the last
-  cards off the right edge.
+- **Scene one has no navigation; it becomes the navigation.** The wordmark and
+  the sign-in start as the composition and travel into the corners as the scene
+  is pushed away. There is one of each element on the page, laid out in its
+  final bar position and pushed back out to the hero, rather than a hero copy
+  crossfading into a bar copy. Only `y` and `scale` change, because both are
+  aligned to the same gutter at both ends, so there is no horizontal travel to
+  get wrong at any viewport. The bar carries no rule; it is separated from the
+  page by a backdrop that fades in.
+- **The belt loops, and that is a deliberate exception.** `DESIGN.md` forbids
+  looping animation, and scene two breaks it on the owner's instruction. The
+  rule governs what the registry ships; nothing on this page is shipped to
+  anyone. Do not read it as licence to loop anything inside `registry/`.
+- Two things about that belt are load-bearing. Each pass is **its own flex row
+  with a trailing gap**, so both halves are exactly equal and `xPercent: -50`
+  lands seamlessly; laid out as one row the halves differ by a single gap and
+  the belt jumps that much every cycle. And scene two is **a full viewport
+  tall**, which is what guarantees the page is long enough for the fold above to
+  reach its end state at all.
 - **Variance is restrained.** A predictable grid, because the language says the
   interest belongs in the marks. The asymmetry is mild by intent.
 - **Inter and the warm-paper palette are not defaults**, they are `tokens.json`.
