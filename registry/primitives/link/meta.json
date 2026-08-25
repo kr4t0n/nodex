@@ -1,0 +1,10 @@
+{
+  "slug": "link",
+  "title": "Link",
+  "description": "Hairline underline offset clear of descenders, with quiet, strong, and external treatments",
+  "component": "link",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["text", "interactive"],
+  "dependencies": []
+}

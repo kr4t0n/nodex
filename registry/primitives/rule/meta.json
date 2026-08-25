@@ -1,0 +1,10 @@
+{
+  "slug": "rule",
+  "title": "Rule",
+  "description": "Hairline separator in strong, faint, dashed, vertical, and inset treatments",
+  "component": "rule",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["structure", "separator"],
+  "dependencies": []
+}

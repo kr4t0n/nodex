@@ -1,0 +1,178 @@
+/* prose - shared primitive, themed by the active language's tokens.
+
+   Long-form text: rendered markdown, documentation, an article body. One class
+   on a wrapper styles everything inside, because the content is authored
+   elsewhere and cannot carry classes of its own.
+
+   This is the primitive a language's own DESIGN.md renders through, so a
+   language without one cannot present its written half in its own voice. */
+
+.nx-prose {
+  font-family: var(--nx-font-sans);
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--nx-ink);
+  /* A measure, not a width. Long lines are the most common failure in
+     documentation and the easiest to prevent. */
+  max-width: 68ch;
+}
+
+/* Flow spacing rather than margins on every element: the gap belongs between
+   siblings, so the first and last child never push against their container. */
+.nx-prose > * + * {
+  margin-top: 0.9em;
+}
+
+.nx-prose h1,
+.nx-prose h2,
+.nx-prose h3,
+.nx-prose h4 {
+  margin-bottom: 0;
+  letter-spacing: -0.02em;
+}
+
+.nx-prose h1 {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* Section headings are set as small caps rather than large type. Hierarchy by
+   tracking and colour, not by scale, which is how this language handles it
+   everywhere else. */
+.nx-prose h2 {
+  margin-top: 2em;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+}
+
+.nx-prose h3 {
+  margin-top: 1.6em;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.nx-prose h4 {
+  margin-top: 1.4em;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nx-muted);
+}
+
+.nx-prose p,
+.nx-prose li {
+  margin: 0;
+}
+
+.nx-prose ul,
+.nx-prose ol {
+  margin-block: 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+}
+
+.nx-prose li::marker {
+  color: var(--nx-faint);
+}
+
+.nx-prose strong {
+  font-weight: 700;
+}
+
+.nx-prose em {
+  font-style: italic;
+}
+
+.nx-prose a {
+  color: var(--nx-ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--nx-hairline);
+  text-decoration-color: var(--nx-faint);
+  text-underline-offset: 0.22em;
+}
+
+.nx-prose a:hover {
+  text-decoration-color: var(--nx-ink);
+}
+
+.nx-prose code {
+  font-family: var(--nx-font-mono);
+  font-size: 0.88em;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.nx-prose pre {
+  padding: 14px 16px;
+  border: var(--nx-hairline) solid var(--nx-grid);
+  border-radius: var(--nx-radius-card);
+  overflow-x: auto;
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.nx-prose pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+/* A quotation is marked by a rule in the margin, not by a fill or a glyph. */
+.nx-prose blockquote {
+  margin-inline: 0;
+  padding-left: 1.1em;
+  border-left: var(--nx-hairline) solid var(--nx-grid);
+  color: var(--nx-muted);
+}
+
+.nx-prose hr {
+  border: 0;
+  border-top: var(--nx-hairline) solid var(--nx-grid);
+  margin-block: 1.8em;
+}
+
+.nx-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+.nx-prose th {
+  text-align: left;
+  padding: 6px 12px 6px 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+  white-space: nowrap;
+}
+
+/* Rule below each row only, never above and below: doubling the line at every
+   boundary is the laziest possible table. */
+.nx-prose td {
+  padding: 6px 12px 6px 0;
+  border-top: var(--nx-hairline) solid var(--nx-grid);
+  vertical-align: top;
+}
+
+.nx-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--nx-radius-card);
+}
+
+/* Narrow, for a sidebar or an annotation column beside a chart. */
+.nx-prose--narrow {
+  font-size: 11px;
+  line-height: 1.7;
+  max-width: 46ch;
+  color: var(--nx-muted);
+}

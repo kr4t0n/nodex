@@ -52,6 +52,7 @@ function flattenTokens(tokens) {
     vars.push([`--nx-${key}`, value]);
   }
   vars.push(['--nx-font-sans', tokens.font?.sans ?? 'sans-serif']);
+  if (tokens.font?.mono) vars.push(['--nx-font-mono', tokens.font.mono]);
   for (const [key, value] of Object.entries(tokens.radius ?? {})) {
     vars.push([`--nx-radius-${key}`, value]);
   }
@@ -186,7 +187,17 @@ ${FONT_LINKS}
     align-items: flex-start;
     gap: 18px 20px;
   }
-  .nx-preview > * { flex: 0 0 auto; }
+  /* Children may shrink. A flex value of 0 0 auto would forbid it, so any
+     primitive naturally wider than its frame (prose sets a 68ch measure) would
+     overflow and be clipped rather than wrapping. min-width 0 is required too,
+     since a flex item's default minimum is its content size. */
+     Deliberately no max-width here: it would tie with a primitive's own
+     max-width on specificity and, coming later, silently override the measure
+     prose sets for itself. */
+  .nx-preview > * {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
 </style>
 </head>
 <body>

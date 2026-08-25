@@ -1,0 +1,10 @@
+{
+  "slug": "progress",
+  "title": "Progress",
+  "description": "A rule that fills rather than a container that drains, with a static dashed indeterminate state",
+  "component": "progress",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["feedback", "data"],
+  "dependencies": []
+}

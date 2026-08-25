@@ -1,0 +1,10 @@
+{
+  "slug": "prose",
+  "title": "Prose",
+  "description": "One class that styles authored long-form text: headings, lists, quotes, tables, and code",
+  "component": "prose",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["text", "documentation"],
+  "dependencies": []
+}

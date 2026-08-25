@@ -1,0 +1,27 @@
+<div class="nx-choice-group">
+  <label class="nx-choice">
+    <input class="nx-checkbox" type="checkbox" checked />
+    Hand-rolled SVG
+  </label>
+
+  <label class="nx-choice">
+    <input class="nx-checkbox" type="checkbox" />
+    ECharts
+  </label>
+
+  <label class="nx-choice">
+    <input class="nx-checkbox" type="checkbox" id="nx-mixed" />
+    All runtimes
+  </label>
+
+  <label class="nx-choice nx-choice--disabled">
+    <input class="nx-checkbox" type="checkbox" disabled />
+    Chart.js, removed
+  </label>
+</div>
+
+<script>
+  // Indeterminate cannot be set from markup, only from script. Present so the
+  // state is visible in the preview; it is not part of the primitive.
+  document.getElementById('nx-mixed').indeterminate = true;
+</script>

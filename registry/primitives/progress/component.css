@@ -1,0 +1,103 @@
+/* progress - shared primitive, themed by the active language's tokens.
+
+   A real <progress> element, so assistive technology announces the value and
+   the indeterminate state without any ARIA of our own.
+
+   Like the slider, each engine's pseudo-elements need their own rule: a
+   comma-joined list is discarded wholesale by a browser that does not know one
+   of its parts. */
+
+.nx-progress {
+  appearance: none;
+  display: block;
+  width: 100%;
+  /* Deliberately thin. This language measures with lines, so a progress bar is
+     a rule that fills rather than a container that drains. */
+  height: calc(var(--nx-hairline) * 4);
+  border: 0;
+  border-radius: var(--nx-radius-pill);
+  background: var(--nx-grid);
+  overflow: hidden;
+}
+
+/* Track */
+.nx-progress::-webkit-progress-bar {
+  background: var(--nx-grid);
+  border-radius: var(--nx-radius-pill);
+}
+
+/* Fill */
+.nx-progress::-webkit-progress-value {
+  background: var(--nx-ink);
+  border-radius: var(--nx-radius-pill);
+  transition: width 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nx-progress::-moz-progress-bar {
+  background: var(--nx-ink);
+  border-radius: var(--nx-radius-pill);
+}
+
+/* Quiet, for a secondary measure beside a primary one. */
+.nx-progress--quiet::-webkit-progress-value {
+  background: var(--nx-muted);
+}
+
+.nx-progress--quiet::-moz-progress-bar {
+  background: var(--nx-muted);
+}
+
+/* Thick, where the bar is the subject rather than an annotation. */
+.nx-progress--thick {
+  height: 9px;
+}
+
+/* Indeterminate: a <progress> with no value attribute.
+
+   Deliberately NOT an animated stripe. This language forbids looping animation,
+   so an unknown quantity is shown as a dashed track, which reads as "not yet
+   measured" without moving. A language that permits loops can override this. */
+.nx-progress:indeterminate {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--nx-muted) 0,
+    var(--nx-muted) 3px,
+    transparent 3px,
+    transparent 7px
+  );
+}
+
+.nx-progress:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+.nx-progress-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  font-family: var(--nx-font-sans);
+}
+
+.nx-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+}
+
+/* Numerals align so a column of measures can be read down. */
+.nx-progress-label > :last-child {
+  font-variant-numeric: tabular-nums;
+  color: var(--nx-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-progress::-webkit-progress-value {
+    transition: none;
+  }
+}

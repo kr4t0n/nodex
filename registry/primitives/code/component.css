@@ -1,0 +1,71 @@
+/* code - shared primitive, themed by the active language's tokens.
+
+   Inline code, keyboard keys, and code blocks. The tint is mixed from the grid
+   token rather than being its own colour, so it stays correct in any language
+   without adding a value to the palette. */
+
+.nx-code {
+  font-family: var(--nx-font-mono);
+  font-size: 0.88em;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
+  color: var(--nx-ink);
+  /* Long identifiers and URLs must not push a column wider than its container. */
+  overflow-wrap: anywhere;
+}
+
+/* A keyboard key reads as a physical object, which in a language with no
+   elevation model means a hairline outline rather than a shadow. */
+.nx-kbd {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 0.1em 0.4em;
+  border: var(--nx-hairline) solid var(--nx-grid);
+  border-bottom-width: calc(var(--nx-hairline) * 2);
+  border-radius: 4px;
+  background: var(--nx-bg);
+  font-family: var(--nx-font-mono);
+  font-size: 0.82em;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--nx-ink);
+}
+
+/* Block. Bordered rather than filled: a large tinted panel would read as a card
+   and this language separates with lines. */
+.nx-pre {
+  margin: 0;
+  padding: 14px 16px;
+  border: var(--nx-hairline) solid var(--nx-grid);
+  border-radius: var(--nx-radius-card);
+  background: var(--nx-bg);
+  overflow-x: auto;
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--nx-ink);
+  tab-size: 2;
+}
+
+.nx-pre .nx-code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+/* A command the reader is expected to run, rather than code they read. The pill
+   shape marks it as actionable, matching the button and badge radius. */
+.nx-command {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.55em 0.9em;
+  border: var(--nx-hairline) solid var(--nx-grid);
+  border-radius: var(--nx-radius-card);
+  font-family: var(--nx-font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--nx-ink);
+  overflow-wrap: anywhere;
+}

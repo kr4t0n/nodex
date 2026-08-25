@@ -1,0 +1,10 @@
+{
+  "slug": "slider",
+  "title": "Slider",
+  "description": "Single-value range on a hairline track with a filled or hollow thumb, plus optional ticks",
+  "component": "slider",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["form", "interactive"],
+  "dependencies": []
+}

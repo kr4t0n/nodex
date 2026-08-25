@@ -1,0 +1,76 @@
+/* alert - shared primitive, themed by the active language's tokens.
+
+   A note that interrupts the reading, for a caveat, a limit, or a consequence.
+
+   Severity is a genuine problem in a language with no hue: there is no red to
+   make something urgent with. So severity is carried by rule weight and text
+   weight instead, which is how this language handles every other hierarchy.
+   A language WITH an accent palette can override the modifiers to use colour
+   without changing the markup. */
+
+.nx-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  padding: 12px 0 12px 14px;
+  border-left: calc(var(--nx-hairline) * 2) solid var(--nx-grid);
+  font-family: var(--nx-font-sans);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--nx-ink);
+}
+
+.nx-alert__title {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+}
+
+.nx-alert__body {
+  margin: 0;
+  max-width: 62ch;
+}
+
+/* Note: the quietest. An aside the reader may skip. */
+.nx-alert--note {
+  border-left-color: var(--nx-faint);
+  color: var(--nx-muted);
+}
+
+/* Important: a thicker rule and ink title. The reader should not skip it. */
+.nx-alert--important {
+  border-left-color: var(--nx-ink);
+}
+
+.nx-alert--important .nx-alert__title {
+  color: var(--nx-ink);
+}
+
+/* Critical: the rule becomes solid ink and the body takes weight. This is as
+   loud as a language without colour can be, and it is loud enough because
+   nothing else on the page looks like it. */
+.nx-alert--critical {
+  border-left-width: calc(var(--nx-hairline) * 5);
+  border-left-color: var(--nx-ink);
+}
+
+.nx-alert--critical .nx-alert__title {
+  color: var(--nx-ink);
+}
+
+.nx-alert--critical .nx-alert__body {
+  font-weight: 600;
+}
+
+/* Inverted, for an alert on an inverted card. */
+.nx-alert--invert {
+  border-left-color: var(--nx-bg);
+  color: var(--nx-bg);
+}
+
+.nx-alert--invert .nx-alert__title {
+  color: var(--nx-muted);
+}

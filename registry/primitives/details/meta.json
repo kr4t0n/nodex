@@ -1,0 +1,10 @@
+{
+  "slug": "details",
+  "title": "Details",
+  "description": "Disclosure built on native details and summary, separated by rules rather than boxed",
+  "component": "details",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["structure", "interactive"],
+  "dependencies": []
+}

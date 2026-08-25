@@ -60,18 +60,11 @@ export function CommandRow({ command }: { command: string }) {
   }, [command]);
 
   return (
-    <div
-      className="flex items-center gap-3 rounded-[var(--radius-card)] py-2 pr-2 pl-4"
-      style={{ border: 'var(--nx-hairline) solid var(--nx-grid)' }}
-    >
+    // .nx-command is the code primitive, not local CSS.
+    <div className="nx-command">
       {/* Wraps rather than truncates. This string is the entire handoff to the
           CLI, so an ellipsis in the middle of it makes the page useless. */}
-      <code
-        className="min-w-0 flex-1 text-[11.5px] leading-[1.6] break-all"
-        style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}
-      >
-        {command}
-      </code>
+      <span className="min-w-0 flex-1">{command}</span>
       <button
         className="nx-btn nx-btn--outline"
         type="button"

@@ -34,94 +34,16 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Hairline rules are the language's structural device, so the shell uses them
-   for its own separators instead of borders or shadows. */
-.nx-rule {
-  border: 0;
-  border-top: var(--nx-hairline, 0.7px) solid var(--nx-grid, #deddd6);
-}
+/*
+  `.nx-rule`, `.nx-prose`, `.nx-code`, `.nx-command`, and `.nx-link` are NOT
+  defined here. They are registry primitives, loaded from
+  /registry/primitives/*/component.css in index.html.
 
-/* DESIGN.md is rendered from markdown. Styling it here keeps the language's
-   voice intact rather than dropping it into generic prose defaults. */
-.nx-prose {
-  font-size: 12.5px;
-  line-height: 1.75;
-  color: var(--nx-ink);
-}
-.nx-prose > * + * {
-  margin-top: 0.9em;
-}
-.nx-prose h1 {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-.nx-prose h2 {
-  margin-top: 2em;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--nx-muted);
-}
-.nx-prose h3 {
-  margin-top: 1.6em;
-  font-size: 12.5px;
-  font-weight: 700;
-}
-.nx-prose p,
-.nx-prose li {
-  max-width: 68ch;
-}
-.nx-prose ul,
-.nx-prose ol {
-  padding-left: 1.1em;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35em;
-}
-.nx-prose li::marker {
-  color: var(--nx-faint);
-}
-.nx-prose code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
-  background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
-}
-.nx-prose pre {
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: var(--nx-hairline) solid var(--nx-grid);
-  overflow-x: auto;
-}
-.nx-prose pre code {
-  background: none;
-  padding: 0;
-}
-.nx-prose strong {
-  font-weight: 700;
-}
-.nx-prose table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11.5px;
-}
-.nx-prose th {
-  text-align: left;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--nx-muted);
-  padding: 6px 10px 6px 0;
-}
-.nx-prose td {
-  padding: 6px 10px 6px 0;
-  border-top: var(--nx-hairline) solid var(--nx-grid);
-  vertical-align: top;
-}
+  That is the point: the shell is built from the same components it displays, so
+  a primitive that breaks breaks the gallery visibly. Anything the shell needs
+  that is not yet a primitive is a gap in the registry, not a reason to write
+  local CSS.
+*/
 
 /* Iframes are the only place a scrollbar would be noise: the preview document
    sizes itself and the frame reserves the box. */

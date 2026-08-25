@@ -1,0 +1,23 @@
+<div class="nx-prose">
+  <h2>Motion philosophy</h2>
+  <p>
+    One rule: <strong>marks draw themselves when they scroll into view, and
+    clicking replays.</strong> Nothing animates on a loop, and nothing animates
+    on hover except the native tooltip.
+  </p>
+  <p>
+    Implemented as an <code>IntersectionObserver</code> that disconnects after
+    firing once. Stagger delays are computed per index, so a field of marks
+    arrives as a wave rather than all at once.
+  </p>
+  <blockquote>
+    Read the field, not the numbers. The season has a texture before it has a
+    value.
+  </blockquote>
+  <h3>Anti-patterns</h3>
+  <ul>
+    <li>Never exceed the line maximum on a stroke that reads as a line.</li>
+    <li>Never introduce a hue. No accent, no semantic red or green.</li>
+    <li>Never aggregate in close-read mode. One mark per record, always.</li>
+  </ul>
+</div>

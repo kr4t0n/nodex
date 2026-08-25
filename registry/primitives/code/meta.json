@@ -1,0 +1,10 @@
+{
+  "slug": "code",
+  "title": "Code",
+  "description": "Inline code, keyboard keys, code blocks, and a runnable command row",
+  "component": "code",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["text", "technical"],
+  "dependencies": []
+}

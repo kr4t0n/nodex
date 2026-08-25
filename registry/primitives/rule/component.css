@@ -1,0 +1,46 @@
+/* rule - shared primitive, themed by the active language's tokens.
+
+   The most load-bearing primitive in a language with no elevation model. Where
+   another system would separate content with a card, a shadow, or a fill, this
+   one separates it with a line. Reach for a rule before reaching for a box. */
+
+.nx-rule {
+  border: 0;
+  border-top: var(--nx-hairline) solid var(--nx-grid);
+  margin: 0;
+  width: 100%;
+}
+
+/* Stronger, for a division between sections rather than between rows. Weight
+   carries the hierarchy, since there is no second colour to carry it. */
+.nx-rule--strong {
+  border-top-color: var(--nx-muted);
+}
+
+.nx-rule--faint {
+  border-top-color: var(--nx-faint);
+}
+
+/* Dashed reads as provisional: a boundary that is inferred rather than drawn,
+   such as a projection, a threshold, or an empty state. */
+.nx-rule--dashed {
+  border-top-style: dashed;
+}
+
+/* Vertical, for separating items along a row. Stretches to its flex parent so
+   it matches the content height rather than needing one set. */
+.nx-rule--vertical {
+  border-top: 0;
+  border-left: var(--nx-hairline) solid var(--nx-grid);
+  width: 0;
+  height: auto;
+  align-self: stretch;
+  margin-inline: 0.9em;
+}
+
+/* Inset, for a rule that separates rows inside a container without touching its
+   edges. Aligns to the text column rather than the container. */
+.nx-rule--inset {
+  width: auto;
+  margin-inline-start: 1.2em;
+}

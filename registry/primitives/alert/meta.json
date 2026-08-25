@@ -1,0 +1,10 @@
+{
+  "slug": "alert",
+  "title": "Alert",
+  "description": "Severity carried by rule weight rather than by hue, for a language with no accent colour",
+  "component": "alert",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["feedback", "text"],
+  "dependencies": []
+}

@@ -54,13 +54,30 @@ export const COMPONENT_TYPES = [
 
 export type ComponentType = (typeof COMPONENT_TYPES)[number];
 
-/** Primitives are not chart types, so they get their own vocabulary. */
+/**
+ * Primitives are not chart types, so they get their own vocabulary.
+ *
+ * A type belongs here when a design language changes only its paint, never its
+ * form: a button is a button everywhere, and only its colour, radius, and stroke
+ * differ. Anything whose geometry the language determines is expressive instead.
+ * A slider over a distribution, for example, is a chart with a control on it.
+ */
 export const PRIMITIVE_TYPES = [
+  'alert',
   'badge',
   'button',
   'card',
+  'checkbox',
+  'code',
+  'details',
   'input',
+  'link',
+  'progress',
+  'prose',
+  'radio',
+  'rule',
   'select',
+  'slider',
   'table',
 ] as const;
 

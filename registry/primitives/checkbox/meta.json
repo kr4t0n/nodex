@@ -1,0 +1,10 @@
+{
+  "slug": "checkbox",
+  "title": "Checkbox",
+  "description": "Native checkbox with a border-drawn tick, plus indeterminate and disabled states",
+  "component": "checkbox",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["form", "interactive"],
+  "dependencies": []
+}

@@ -15,8 +15,15 @@ So nodex splits by tier:
 
 - **Expressive** components (charts, and later heroes) are owned by a language.
   Their form *is* the language.
-- **Primitives** (button, input, select, table, card, badge) are shared once at
-  `registry/primitives/` and themed by tokens. A button is a button everywhere.
+- **Primitives** are shared once at `registry/primitives/` and themed by tokens.
+  A button is a button everywhere. Sixteen currently: alert, badge, button,
+  card, checkbox, code, details, input, link, progress, prose, radio, rule,
+  select, slider, table.
+
+The boundary is whether the language changes the **form** or only the **paint**.
+A slider is a track and a thumb in every language, so it is a primitive. A
+slider drawn over a distribution is a chart with a control on it, so it is
+expressive.
 
 The split is invisible at the CLI. `nodex add button --design mono-editorial`
 will give you a correctly styled button either way; the split exists so you
@@ -250,6 +257,18 @@ split, or they drift into each other.
 - **The palette is 37 greys, not a designed scale.** Several pairs differ by one
   or two values (`#D8D7D1` / `#D8D6CE`). Consolidating is open work; the ramp in
   `tokens.json` records what exists.
+- **Some primitives cannot exist in every language, and that is unresolved.**
+  mono-editorial's anti-patterns forbid looping animation, so a spinner or a
+  shimmer skeleton cannot exist in it. The progress primitive sidesteps this by
+  showing an indeterminate state as a static dashed track rather than a moving
+  stripe. If a language ever genuinely needs to decline a primitive, the
+  mechanism would be a list in its `meta.json` and the gallery skipping it. Not
+  built, because nothing has needed it yet.
+- **Behaviour-heavy controls ship as visual treatment only.** A two-thumb range
+  slider, tabs, menus, and combobox all need JavaScript, which breaks the
+  presentational rule. The pattern is the one used for select: style what the
+  platform provides, and document applying the classes to a headless Radix or
+  Ark component.
 - **The select's dropdown is styled progressively.** A native picker is drawn by
   the operating system, so only a handful of properties cross browsers. The
   primitive sets those, then layers full picker styling behind

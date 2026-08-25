@@ -1,0 +1,10 @@
+{
+  "slug": "radio",
+  "title": "Radio",
+  "description": "Native radio marked with a filled dot, echoing how the charts mark a chosen point",
+  "component": "radio",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["form", "interactive"],
+  "dependencies": []
+}
