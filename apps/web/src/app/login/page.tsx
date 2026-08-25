@@ -30,15 +30,7 @@ export default async function Page() {
           <h1 className="mt-14 mb-0 text-[30px] leading-[1.1] font-extrabold tracking-[-0.03em] sm:text-[36px]">
             Sign in to browse the languages.
           </h1>
-          <p
-            className="mt-5 mb-0 text-[13.5px] leading-[1.75]"
-            style={{ color: 'var(--nx-muted, #8F8E88)' }}
-          >
-            An account is how nodex will know which languages you can reach once
-            some of them stop being public.
-          </p>
-
-          <form action={signIn} className="mt-10">
+          <form action={signIn} className="mt-9">
             <button type="submit" className="nx-btn nx-btn--solid">
               <GithubLogo size={15} weight="fill" aria-hidden />
               Continue with GitHub
