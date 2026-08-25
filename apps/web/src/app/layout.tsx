@@ -22,6 +22,12 @@ const REGISTRY = (process.env.NEXT_PUBLIC_REGISTRY_URL ?? '').replace(/\/+$/, ''
  * tokens.css is active. That is also why they are linked rather than imported:
  * these are the registry's own files, served as-is, so a broken primitive breaks
  * the app visibly instead of being quietly transformed by a bundler.
+ *
+ * This list tracks what the shell actually uses, so keep it honest. `table` and
+ * `link` were dropped after the migration: the app renders no `.nx-table` and no
+ * `.nx-link`, and the one table it does show is inside the rendered DESIGN.md,
+ * which the prose primitive styles itself. Add a name back the moment a view
+ * uses its classes, or that view renders unstyled.
  */
 const SHELL_PRIMITIVES = [
   'button',
@@ -29,11 +35,9 @@ const SHELL_PRIMITIVES = [
   'badge',
   'input',
   'select',
-  'table',
   'rule',
   'prose',
   'code',
-  'link',
   'status',
   'empty-state',
 ];
