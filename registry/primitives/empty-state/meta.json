@@ -1,0 +1,10 @@
+{
+  "slug": "empty-state",
+  "title": "Empty state",
+  "description": "A dashed boundary marking something provisional, with a hint that says how to fill it",
+  "component": "empty-state",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["feedback", "structure"],
+  "dependencies": []
+}

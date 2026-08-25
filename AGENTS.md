@@ -16,9 +16,14 @@ So nodex splits by tier:
 - **Expressive** components (charts, and later heroes) are owned by a language.
   Their form *is* the language.
 - **Primitives** are shared once at `registry/primitives/` and themed by tokens.
-  A button is a button everywhere. Twenty-one currently: alert, avatar, badge,
-  button, card, checkbox, code, details, dialog, input, link, progress, prose,
-  radio, rule, select, slider, switch, table, textarea, tooltip.
+  A button is a button everywhere. Twenty-four currently: alert, avatar, badge,
+  button, card, checkbox, code, details, dialog, empty-state, input, link,
+  progress, prose, radio, rule, select, slider, stat, status, switch, table,
+  textarea, tooltip.
+
+The gallery is the completeness test. It is built from primitives, so anything
+it has to style itself is a gap in the registry. It is now down to one class of
+its own, `.nx-frame`, which is genuinely specific to embedding previews.
 
 The boundary is whether the language changes the **form** or only the **paint**.
 A slider is a track and a thumb in every language, so it is a primitive. A
@@ -287,6 +292,13 @@ split, or they drift into each other.
   the input primitive hands the consumer markup with no styles for it. Duplicate
   the rules instead; identical definitions collapse harmlessly when both are
   installed, and the build lints for it.
+- **Duplicated wrappers must stay byte-identical.** `.nx-field` lives in input,
+  select, and textarea; `.nx-choice` in checkbox, radio, and switch. The
+  duplication is deliberate, but the copies drift silently, and they already had:
+  three different gap values between them when the lint was first written. The
+  build now compares every selector defined by more than one primitive and fails
+  on a mismatch. If a difference is genuinely wanted, rename the class rather
+  than letting the copies diverge.
 - **`packages/core` uses `.ts` import specifiers.** Node strips types natively;
   `.js` specifiers would not resolve against `.ts` files.
 - **`tmp/` is deliberately tracked** through Phase 1 so the extractor's history

@@ -88,13 +88,11 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Both of these are registry primitives now (status and empty-state), not local
+// CSS. They were the last two pieces of the shell with no primitive behind them.
 export function Loading({ label }: { label: string }) {
   return (
-    <div
-      className="flex min-h-[40dvh] items-center justify-center text-[11.5px]"
-      style={{ color: 'var(--nx-muted)' }}
-      role="status"
-    >
+    <div className="nx-status-block" role="status">
       {label}
     </div>
   );
@@ -110,15 +108,10 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div
-      className="flex flex-col items-start gap-3 rounded-[var(--radius-card)] px-7 py-10"
-      style={{ border: 'var(--nx-hairline) dashed var(--nx-grid)' }}
-    >
-      <p className="m-0 text-[15px] font-bold tracking-[-0.02em]">{title}</p>
-      <p className="m-0 max-w-[46ch] text-[11.5px]" style={{ color: 'var(--nx-muted)' }}>
-        {hint}
-      </p>
-      {action}
+    <div className="nx-empty">
+      <p className="nx-empty__title">{title}</p>
+      <p className="nx-empty__hint">{hint}</p>
+      {action ? <div className="nx-empty__action">{action}</div> : null}
     </div>
   );
 }

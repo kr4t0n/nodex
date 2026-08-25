@@ -1,0 +1,133 @@
+/* stat - shared primitive, themed by the active language's tokens.
+
+   A measured figure with its label, for the row of numbers that usually sits
+   beside a chart. The most common thing in a data interface that is not itself
+   a chart.
+
+   Numerals are tabular throughout. A column of figures that does not align on
+   the decimal cannot be scanned, and scanning is the entire purpose. */
+
+.nx-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-family: var(--nx-font-sans);
+  color: var(--nx-ink);
+}
+
+/* Label above the value, not below. The reader needs to know what they are
+   looking at before they read it, and a label underneath makes the number
+   ambiguous for the length of a glance. */
+.nx-stat__label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-muted);
+}
+
+.nx-stat__value {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The unit rides with the value at a smaller size rather than being part of the
+   number, so a column of values still aligns. */
+.nx-stat__unit {
+  font-size: 0.55em;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--nx-muted);
+  margin-left: 0.15em;
+}
+
+.nx-stat__note {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--nx-muted);
+}
+
+/* Direction of change.
+
+   Without a hue there is no green-up and red-down, so direction is carried by a
+   drawn mark and the sign, and magnitude by weight. That is arguably clearer:
+   colour-coded deltas are invisible to a good share of readers anyway. */
+.nx-stat__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--nx-muted);
+}
+
+.nx-stat__delta::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+}
+
+.nx-stat__delta--up::before {
+  border-bottom: 5px solid var(--nx-ink);
+}
+
+.nx-stat__delta--down::before {
+  border-top: 5px solid var(--nx-ink);
+}
+
+/* Flat needs a mark too, or its absence reads as a rendering failure. */
+.nx-stat__delta--flat::before {
+  width: 7px;
+  height: 0;
+  border: 0;
+  border-top: calc(var(--nx-hairline) * 2) solid var(--nx-muted);
+}
+
+.nx-stat__delta--strong {
+  color: var(--nx-ink);
+  font-weight: 700;
+}
+
+/* Sizes. Small for a dense row, large for a single headline figure. */
+.nx-stat--sm .nx-stat__value {
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.nx-stat--lg .nx-stat__value {
+  font-size: 38px;
+  letter-spacing: -0.035em;
+}
+
+/* A group separated by hairlines rather than cards, consistent with a language
+   that has no elevation model. */
+.nx-stat-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+.nx-stat-group--ruled > .nx-stat + .nx-stat {
+  padding-left: 28px;
+  border-left: var(--nx-hairline) solid var(--nx-grid);
+}
+
+/* Stacked, for a sidebar beside a chart. */
+.nx-stat-group--stack {
+  flex-direction: column;
+  gap: 0;
+}
+
+.nx-stat-group--stack > .nx-stat {
+  padding: 14px 0;
+}
+
+.nx-stat-group--stack > .nx-stat + .nx-stat {
+  border-top: var(--nx-hairline) solid var(--nx-grid);
+}

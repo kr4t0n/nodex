@@ -1,0 +1,10 @@
+{
+  "slug": "stat",
+  "title": "Stat",
+  "description": "A measured figure with its label and direction of change, carried by a drawn mark rather than by colour",
+  "component": "stat",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["data", "text"],
+  "dependencies": []
+}

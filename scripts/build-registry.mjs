@@ -389,11 +389,79 @@ function itemFor({ languageMeta, meta, componentDir }) {
   };
 }
 
+/**
+ * Split a stylesheet into top-level rules keyed by selector, with bodies
+ * normalised so formatting differences do not read as drift.
+ */
+function topLevelRules(css) {
+  const rules = new Map();
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  let depth = 0;
+  let head = '';
+  let body = '';
+  for (const char of withoutComments) {
+    if (char === '{') {
+      depth += 1;
+      if (depth === 1) continue;
+    } else if (char === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        const selector = head.trim().replace(/\s+/g, ' ');
+        // At-rules nest and are not comparable this way.
+        if (selector && !selector.startsWith('@')) {
+          rules.set(selector, body.trim().replace(/\s+/g, ' '));
+        }
+        head = '';
+        body = '';
+        continue;
+      }
+    }
+    if (depth === 0) head += char;
+    else body += char;
+  }
+  return rules;
+}
+
+/**
+ * Primitives are copied individually, so a wrapper needed by several of them is
+ * duplicated on purpose rather than imported. The cost is that the copies can
+ * drift apart silently: `.nx-field` lives in three primitives and `.nx-choice`
+ * in three more, so changing a label treatment is a multi-file edit with nothing
+ * checking the edit was complete.
+ *
+ * This compares every selector defined by more than one primitive and fails when
+ * the bodies differ. Selectors unique to one primitive are untouched, so a
+ * primitive may still add modifiers of its own.
+ */
+function lintDuplicatedRules(sheets) {
+  const bySelector = new Map();
+  for (const [name, css] of sheets) {
+    for (const [selector, body] of topLevelRules(css)) {
+      if (!bySelector.has(selector)) bySelector.set(selector, []);
+      bySelector.get(selector).push({ name, body });
+    }
+  }
+
+  for (const [selector, copies] of bySelector) {
+    if (copies.length < 2) continue;
+    const bodies = new Set(copies.map((c) => c.body));
+    if (bodies.size === 1) continue;
+    const where = copies.map((c) => c.name).join(', ');
+    fail(
+      `primitives: ${selector}`,
+      `defined differently in ${where}. A wrapper shared across primitives is ` +
+        `duplicated deliberately, so the copies must stay identical. Either ` +
+        `make them match, or rename one if the difference is intentional`,
+    );
+  }
+}
+
 async function main() {
   const source = await loadSource(REGISTRY_DIR);
   const items = [];
   const slugs = new Map();
   const generated = [];
+  const primitiveSheets = [];
 
   // Primitives first: shared, no preview document, rendered inline by the app.
   for (const primitive of source.primitives) {
@@ -461,8 +529,11 @@ async function main() {
       }),
     });
 
+    primitiveSheets.push([primitive.meta.slug, css]);
     items.push(primitiveItem(primitive));
   }
+
+  lintDuplicatedRules(primitiveSheets);
 
   for (const language of source.languages) {
     const tokens = JSON.parse(

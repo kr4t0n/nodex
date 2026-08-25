@@ -1,0 +1,10 @@
+{
+  "slug": "status",
+  "title": "Status",
+  "description": "Inline state where the label carries the meaning, since there is no hue for failure and no loop for waiting",
+  "component": "status",
+  "tier": "primitive",
+  "runtime": "css",
+  "tags": ["feedback", "text"],
+  "dependencies": []
+}

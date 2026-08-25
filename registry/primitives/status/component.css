@@ -1,0 +1,118 @@
+/* status - shared primitive, themed by the active language's tokens.
+
+   An inline state indicator: what a process is doing right now.
+
+   Two constraints shaped this one. There is no hue, so a failed state cannot be
+   red. And looping animation is forbidden, so a working state cannot spin. Both
+   push the same way: the LABEL carries the meaning and the mark is only a
+   secondary cue. That is the honest arrangement anyway, since a coloured dot
+   alone is unreadable to a good share of people and announces nothing to a
+   screen reader.
+
+   Always write a real label. "Working" beside a mark, never a bare mark. */
+
+.nx-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  font-family: var(--nx-font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--nx-muted);
+}
+
+.nx-status__mark {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--nx-faint);
+}
+
+/* Idle: hollow, the same way the charts draw a weekend against a weekday. */
+.nx-status--idle .nx-status__mark {
+  background: var(--nx-bg);
+  box-shadow: inset 0 0 0 var(--nx-hairline) var(--nx-muted);
+}
+
+/* Working: a dashed bar rather than a spinner, matching how progress shows an
+   unknown quantity. Static, and deliberately so. */
+.nx-status--working .nx-status__mark {
+  width: 14px;
+  height: calc(var(--nx-hairline) * 2);
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    to right,
+    var(--nx-muted) 0,
+    var(--nx-muted) 3px,
+    transparent 3px,
+    transparent 6px
+  );
+}
+
+.nx-status--done .nx-status__mark {
+  background: var(--nx-ink);
+}
+
+.nx-status--done {
+  color: var(--nx-ink);
+}
+
+/* Failed: the mark is a drawn cross, because a filled dot cannot be told from
+   "done" without colour. Weight does the rest. */
+.nx-status--failed {
+  color: var(--nx-ink);
+  font-weight: 700;
+}
+
+.nx-status--failed .nx-status__mark {
+  position: relative;
+  background: none;
+}
+
+.nx-status--failed .nx-status__mark::before,
+.nx-status--failed .nx-status__mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 9px;
+  height: calc(var(--nx-hairline) * 2);
+  background: var(--nx-ink);
+}
+
+.nx-status--failed .nx-status__mark::before {
+  transform: rotate(45deg);
+}
+
+.nx-status--failed .nx-status__mark::after {
+  transform: rotate(-45deg);
+}
+
+/* A block-level waiting message, for a region that has nothing to show yet.
+   Text, not a spinner. */
+.nx-status-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40dvh;
+  font-family: var(--nx-font-sans);
+  font-size: 11.5px;
+  color: var(--nx-muted);
+}
+
+.nx-status-block--inline {
+  min-height: 0;
+  padding: 26px 0;
+}
+
+/* Timestamp or count trailing the label. */
+.nx-status__meta {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nx-faint);
+  font-variant-numeric: tabular-nums;
+}

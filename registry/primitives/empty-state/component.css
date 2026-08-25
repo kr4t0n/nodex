@@ -1,0 +1,59 @@
+/* empty-state - shared primitive, themed by the active language's tokens.
+
+   For a region with nothing in it yet. The job is to say what would be here and
+   how to put it there; an empty region with no explanation reads as a bug.
+
+   Bounded by a dashed rule rather than a solid one, which is this language's
+   way of marking something provisional: a boundary that is inferred rather than
+   drawn. It is the same treatment progress uses for an unknown quantity. */
+
+.nx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 30px 28px;
+  border: var(--nx-hairline) dashed var(--nx-grid);
+  border-radius: var(--nx-radius-card);
+  font-family: var(--nx-font-sans);
+  color: var(--nx-ink);
+}
+
+.nx-empty__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Say what to do, not that something is missing. "Nothing matches" alone leaves
+   the reader stuck; the hint is the part that unsticks them. */
+.nx-empty__hint {
+  margin: 0;
+  max-width: 48ch;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--nx-muted);
+}
+
+.nx-empty__action {
+  margin-top: 4px;
+}
+
+/* Centred, for a full-width region rather than a panel in a grid. */
+.nx-empty--center {
+  align-items: center;
+  text-align: center;
+  padding: 52px 28px;
+}
+
+.nx-empty--center .nx-empty__hint {
+  max-width: 42ch;
+}
+
+/* Quiet, for a small slot where a dashed box would be louder than the absence
+   it describes. */
+.nx-empty--quiet {
+  border: 0;
+  padding: 20px 0;
+}

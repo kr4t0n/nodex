@@ -114,7 +114,7 @@ registry/
       component.js     exports mount(root)
       meta.json        type, density, runtime, aspect ratio, tags
       index.html       GENERATED standalone preview
-  primitives/<name>/   21 shared primitives. ONE implementation,
+  primitives/<name>/   24 shared primitives. ONE implementation,
                        shared by every language, token variables only
 packages/core/       the registry contract: schemas, taxonomy, loader
 packages/cli/        the nodex CLI

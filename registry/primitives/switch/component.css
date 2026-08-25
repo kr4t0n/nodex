@@ -14,7 +14,7 @@
 .nx-choice {
   display: inline-flex;
   align-items: center;
-  gap: 0.7em;
+  gap: 0.65em;
   font-family: var(--nx-font-sans);
   font-size: 12px;
   line-height: 1.4;
@@ -100,7 +100,7 @@
 .nx-choice-group {
   display: flex;
   flex-direction: column;
-  gap: 0.8em;
+  gap: 0.7em;
   width: 100%;
 }
 
