@@ -125,8 +125,12 @@ scripts/
   build-registry.mjs      validate + generate + emit
   smoke-components.mjs    mount every component and assert it draws
   smoke-cli.mjs           init and add against a temporary project
-tmp/                 throwaway: the one-shot extractor and its source
+tmp/                 gitignored scratch space
 ```
+
+The 64 charts were extracted once from a single-file sample by a throwaway script
+that has since been removed. The registry is the source of truth now; see
+`AGENTS.md` if you need to recover the extractor from history.
 
 ## Configuration
 

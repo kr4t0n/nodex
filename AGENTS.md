@@ -323,8 +323,20 @@ split, or they drift into each other.
   than letting the copies diverge.
 - **`packages/core` uses `.ts` import specifiers.** Node strips types natively;
   `.js` specifiers would not resolve against `.ts` files.
-- **`tmp/` is deliberately tracked** through Phase 1 so the extractor's history
-  is preserved, then deleted in its own commit. It is not gitignored yet.
+- **The extractor is gone, but recoverable.** `tmp/extract-charts.mjs` turned
+  `source-charts.html` into the 64 expressive components and was deleted once the
+  output was verified. It is one-time per source, and the registry is now the
+  source of truth. If a chart looks wrong and you need to know what transform
+  produced it, the last commit holding it is `eaf2136`:
+
+  ```
+  git show eaf2136:tmp/extract-charts.mjs
+  git show eaf2136:tmp/source-charts.html
+  ```
+
+  Ingesting a different collection is a new importer, not a revival of this one.
+- **`tmp/` is now a gitignored scratch space.** Nothing in it is tracked, so put
+  throwaway work there freely and expect it never to be committed.
 - **jsdom timers hang the smoke test** if the window is not closed — several
   charts stream via `setInterval`.
 

@@ -12,8 +12,10 @@ registry/**/index.html
 registry/languages/*/tokens.css
 public/r/
 
-# generated contact sheet — rebuilt by tmp/make-verify.mjs
-tmp/verify.html
+# scratch space. The one-shot extractor lived here and was deleted once its
+# output was verified; recover it from git history if a chart's provenance is
+# ever in question (see AGENTS.md).
+tmp/
 
 # env — never commit secrets
 .env
@@ -26,9 +28,6 @@ tmp/verify.html
 .vite/
 .turbo/
 
-# NOTE: tmp/ is intentionally NOT ignored during Phase 1.
-# It holds the one-shot extractor and its source, which are committed once
-# for provenance and then deleted. Add `tmp/` here in the cleanup commit.
 
 # gallery build output
 apps/gallery/dist/
