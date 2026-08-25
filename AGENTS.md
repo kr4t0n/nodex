@@ -309,6 +309,37 @@ nearest checkout. The `nodex.json` step matters: without it a project set up
 against a remote registry would silently fall back to whatever local checkout
 happened to be above the cwd and fetch a different version of a component.
 
+### Public content must never route through the server
+
+Decided before Phase 5 was built, so it is not accidentally designed away.
+
+The CLI does not know the app exists. It reads static paths under a root, which
+is why pointing `NODEX_REGISTRY` at the running app already works: the app serves
+those paths out of `public/` and no application code runs.
+
+Keep it that way for everything public. Putting an API in front of content that
+needs no authorization costs a server round trip per download and adds a failure
+point in front of the CDN, and buys only download counts, which CDN logs already
+give. Authentication exists for restricted languages and for nothing else.
+
+**Restricted content is streamed by the API, not handed off as a signed CDN
+URL.** Signed URLs keep bytes off the server and are the better endgame, but they
+need a signing-capable CDN and are wasted work at zero paying users. Streaming is
+reversible: the manifest carries each file's address, so moving to signed URLs
+later changes what the server returns, not the CLI.
+
+That reversibility is the load-bearing part. `add` already resolves sources from
+`item.files[].path`, so a restricted item whose path points at `api/r/...`
+flows through the existing code with no policy branch — the manifest decides
+what is guarded. The token is attached only to `api/` paths, so it is never sent
+to a CDN.
+
+**The blocker to fix first:** `init`, `tokens`, and `design` build their paths by
+convention rather than reading them from the manifest, and those three are what
+deliver the design language itself — the thing a restricted tier sells. Until
+`languages.json` carries explicit file addresses the way items do, language-level
+assets cannot be guarded without special-casing them in the CLI.
+
 ## Two skills, two audiences
 
 - `skills/nodex/SKILL.md` ships to consumers. Pick a language, init, search,
@@ -417,3 +448,11 @@ split, or they drift into each other.
   language exists; revisit when a second arrives.
 - The extractor leaves a few orphaned trailing comments where a `//` comment
   followed a statement on the same line.
+- `languages.json` has no file addresses, so `init`, `tokens`, and `design`
+  hardcode `registry/languages/<slug>/...` while `add` reads addresses from the
+  manifest. Harmless today because every language is public and every path
+  resolves statically; a prerequisite for restricted languages, since those three
+  commands are what deliver the paid artifact.
+- Licensing is still unanswered, and it gates a paid tier rather than merely
+  postponing one. The 64 charts came from a found sample; their provenance has to
+  be settled before anything is sold.
