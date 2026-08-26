@@ -67,10 +67,35 @@ npm start       # http://localhost:4180
 Set `NEXT_PUBLIC_REGISTRY_URL` to serve the registry from a CDN instead of from
 the app's own `public/`. It is static, so nothing else has to change.
 
+## Accounts and sign-in
+
+Optional. The registry, the CLI, and every public page work without any of this.
+Only `/languages` and `/login` need it.
+
+```bash
+cp .env.example .env
+npm run db:up        # Postgres in Docker, on host port 5433
+npm run db:migrate
+```
+
+Then register a GitHub OAuth app at
+[github.com/settings/developers](https://github.com/settings/developers):
+
+- Homepage URL: `http://localhost:4180`
+- Authorization callback URL: `http://localhost:4180/api/auth/github/callback`
+
+Put the client ID and secret in `.env` and restart the dev server. `.env` is
+gitignored; if the secret is ever exposed, rotate it in GitHub rather than
+deleting the message.
+
+Without a GitHub app the login page says so and the rest of the site is
+unaffected. `npm run db:down` stops the database.
+
 ## Prerequisites
 
 - Node.js 20 or newer (developed on 25)
 - npm 10 or newer
+- Docker, only for the accounts database
 
 ## Setup
 
@@ -85,6 +110,8 @@ npm install
 | `npm run build:registry` | Validate, generate previews and `tokens.css`, emit the manifest |
 | `npm run check:registry` | Validate only, no writes — what CI runs |
 | `npm run check:shell` | Fail if the app uses a primitive its layout does not load |
+| `npm run db:up` / `db:down` | Start or stop the accounts database |
+| `npm run db:migrate` | Apply pending SQL migrations, once each |
 | `npm run smoke` | Mount all 64 components in a real DOM and assert they draw |
 | `npm run smoke:cli` | Run init and add against a temporary project |
 | `npm run dev` | Next dev server on port 4180 |
@@ -143,14 +170,18 @@ packages/core/       the registry contract: schemas, taxonomy, loader
 packages/cli/        the nodex CLI
 apps/web/            Next.js + React + TS + Tailwind browse app
   src/app/             routes; layout links the primitives the shell is built from
-  src/components/      the three views, plus Preview and the chrome
-  src/lib/             registry client, hooks, build-time manifest reads
+  src/app/api/         OAuth start and callback
+  src/components/      the views, plus Preview and the chrome
+  src/lib/             registry client, hooks, session, database, GitHub
+  migrations/          numbered SQL, applied once each by scripts/migrate.mjs
   public/              GENERATED copy of the registry, for Next to serve
 skills/nodex/        the skill shipped to consumers
 .agents/skills/nodex-authoring/   how to add languages and components here
 scripts/
   build-registry.mjs        validate + generate + emit
   sync-registry-public.mjs  copy the registry into apps/web/public
+  check-shell-primitives.mjs  the app loads every primitive it uses
+  migrate.mjs               apply SQL migrations
   smoke-components.mjs      mount every component and assert it draws
   smoke-cli.mjs             init and add against a temporary project
 tmp/                 gitignored scratch space

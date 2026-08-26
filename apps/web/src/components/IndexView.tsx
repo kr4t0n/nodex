@@ -17,7 +17,11 @@ import { loadCatalog, previewUrl, type Catalog, type Language } from '@/lib/regi
  * Deliberately thin while one language exists: there is nothing to compare yet.
  * It grows into a comparison surface when a second arrives.
  */
-export function IndexView() {
+export function IndexView({
+  user,
+}: {
+  user?: { login: string; avatarUrl: string | null };
+}) {
   const [catalog, setCatalog] = useState<Catalog>();
   const first = catalog?.languages[0]?.slug;
   const themed = useLanguageTokens(first);
@@ -30,7 +34,7 @@ export function IndexView() {
 
   return (
     <>
-      <TopBar />
+      <TopBar user={user} />
       <PageShell>
         {/* The pitch lives on the landing page. This is the app index, so it
             states what is here and gets out of the way. */}

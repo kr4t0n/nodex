@@ -11,6 +11,7 @@ import { signOut } from '@/app/login/actions.ts';
 export function TopBar<T extends string>({
   back,
   language,
+  user,
 }: {
   // Generic over the href so typedRoutes can check it against the real route
   // table: a link to a page that does not exist fails the build rather than
@@ -18,6 +19,9 @@ export function TopBar<T extends string>({
   // because it is the shape `/l/[slug]` that is checked, not the value.
   back?: { href: Route<T>; label: string };
   language?: string;
+  // Passed down from the server page rather than fetched here. The views are
+  // client components, and a session lookup belongs on the server.
+  user?: { login: string; avatarUrl: string | null };
 }) {
   return (
     <header
@@ -50,6 +54,30 @@ export function TopBar<T extends string>({
               <ArrowLeft size={13} weight="bold" aria-hidden />
               {back.label}
             </Link>
+          ) : null}
+
+          {user ? (
+            <span
+              className="hidden items-center gap-2 pr-1 pl-2 text-[11.5px] sm:inline-flex"
+              style={{ color: 'var(--nx-muted)' }}
+            >
+              {user.avatarUrl ? (
+                // Plain img, not next/image: this is a 20px avatar from a host
+                // we do not control, and routing it through the optimiser buys
+                // nothing while adding a remote-pattern config entry per domain.
+                <img
+                  src={user.avatarUrl}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                  style={{
+                    border: 'var(--nx-hairline) solid var(--nx-grid)',
+                  }}
+                />
+              ) : null}
+              {user.login}
+            </span>
           ) : null}
 
           {/* A gate with no way back out is a trap, so the exit ships with it. */}

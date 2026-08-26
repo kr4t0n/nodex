@@ -232,20 +232,57 @@ the button for signed-in visitors would make the highest-traffic page render on
 demand. `/login` redirects an already-signed-in visitor onward instead, which
 reaches the same place for one redirect and no dynamic render.
 
-### The sign-in gate is a sequence, not a security boundary
+### Accounts are real, but they still guard nothing
 
-`lib/session.ts` records that someone pressed the button. There is no identity
-provider yet, so it authenticates nobody, and it is safe today only because
-nothing behind it is restricted: every language is public and the registry is
-served as static files that never consult the cookie.
+GitHub OAuth issues the session. The cookie carries an opaque random token and
+the database stores only its SHA-256, so a leaked database read hands the reader
+nothing usable: the server only ever compares a token, never reproduces one.
 
-It exists so the landing page comes before the app, and so Phase 5 has the shape
-it needs: the OAuth callback becomes the only thing that issues the cookie, and
-the value becomes a session identifier. Guarding real content is a separate job
-belonging to the route that serves it, never to a cookie a client could forge.
+What has not changed is what the session is *for*. It still only sequences the
+landing page ahead of the app. Every language is public, and the registry is
+served as static files that never consult a cookie. When a restricted language
+exists, the check belongs on the route that streams its bytes; a page-level
+check protects the page and not the content behind it.
 
-Do not let this grow into an authorization check. If something needs guarding
-before OAuth lands, guard it on the server that serves the bytes.
+Three decisions worth keeping:
+
+- **Keyed on GitHub's numeric id, not the login.** Logins are renameable, and
+  keying on one silently creates a second account the first time someone renames.
+- **`state` is not optional.** Without it an attacker can hand someone a crafted
+  callback URL and sign them into an account they do not own. It is generated on
+  the way out, stored httpOnly, compared in constant time on the way back, and
+  deleted after one use so a replayed callback cannot mint a second session.
+- **Failures redirect with a fixed token, never an upstream message.** Anything
+  GitHub says can quote the request, and the request carried the client secret.
+  `lib/github.ts` throws the detail; the callback converts it to `?error=state`
+  and similar, which the login page maps to prose.
+
+Two tables and nothing else. Entitlements, teams, and billing belong to the tier
+that does not exist yet, and guessing their shape now means migrating a guess.
+
+### `currentUser` reads the cookie before it checks configuration
+
+Looks backwards, and is load-bearing. Touching `cookies()` is what marks a route
+dynamic. Returning early when `DATABASE_URL` is absent would make that marking
+depend on whether the build machine happened to have one, and a route that
+prerendered without it serves a cached "signed out" to everyone forever. That is
+exactly what happened to `/languages` the first time: it built as static and
+would have been a permanent redirect to the login page.
+
+`/languages` also declares `dynamic = 'force-dynamic'`, which is belt and braces
+on purpose: the cookie ordering is another module's implementation detail, and
+the page should not silently break when someone refactors it.
+
+### The monorepo has one `.env`, and Next has to be told
+
+Next reads `.env` relative to the app directory, which in a workspace means
+`apps/web/.env`. Secrets in two places is how one goes stale, and
+`.env.example`, the migration runner, and `docker-compose.yml` all sit at the
+root. `next.config.ts` loads the root file explicitly before the server starts.
+
+A missing `.env` is not an error. The registry, every public page, the CLI, and
+the whole build work without one; only the accounts layer needs it, and it
+reports itself unconfigured rather than crashing.
 
 ### Why Next.js rather than Vite
 

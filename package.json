@@ -13,6 +13,9 @@
   ],
   "scripts": {
     "build:registry": "node scripts/build-registry.mjs",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:down": "docker compose down",
+    "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
     "check:registry": "node scripts/build-registry.mjs --check",
     "check:shell": "node scripts/check-shell-primitives.mjs",
     "smoke": "node scripts/smoke-components.mjs",

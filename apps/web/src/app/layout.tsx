@@ -34,6 +34,7 @@ const REGISTRY = (process.env.NEXT_PUBLIC_REGISTRY_URL ?? '').replace(/\/+$/, ''
  * cover. Add the name here when that fires; do not delete the class.
  */
 const SHELL_PRIMITIVES = [
+  'alert',
   'button',
   'card',
   'badge',
