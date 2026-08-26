@@ -513,6 +513,18 @@ touching a real home directory.
 `AGENTS.md` explains why and what. The authoring skill explains how. Keep the
 split, or they drift into each other.
 
+### `apps/web/AGENTS.md` is generated, and is not this file
+
+`next dev` writes `apps/web/AGENTS.md` and `apps/web/CLAUDE.md` on every boot and
+re-adds them if deleted. They are committed deliberately: deleting them from a
+diff only recreates the change, and the content is a genuinely useful warning
+that this Next version differs from what most models were trained on.
+
+It is scoped to the app and says nothing about nodex. **This root file remains
+the single source of truth for the project.** Do not move architecture notes into
+the generated one; the next `next dev` will not remove them, but the next person
+reading it will not expect them either.
+
 ## Gotchas
 
 - **Markup must not branch on `usePrefersReducedMotion`.** The hook starts
