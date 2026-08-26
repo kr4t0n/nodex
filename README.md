@@ -135,6 +135,24 @@ repository secrets, and optionally `DOCKERHUB_REPOSITORY` and
 `NEXT_PUBLIC_REGISTRY_URL` as repository variables. The image is `linux/amd64`
 only; see the workflow comments for what an arm64 build would need.
 
+## Deploying with Helm
+
+```bash
+helm repo add nodex https://kr4t0n.github.io/nodex/helm
+helm install nodex nodex/nodex --set siteUrl=https://nodex.example.com
+```
+
+The chart lives in `helm/nodex` and deploys the app alone: no database is
+bundled and none is required. Accounts turn on by setting `database.url` and
+the GitHub credentials, and schema migrations then run as a pre-upgrade Job
+from the same image.
+
+`.github/workflows/helm-publish.yml` packages the chart to the `gh-pages`
+branch whenever `helm/**` changes on `main`. Releasing is bumping `version:` in
+`helm/nodex/Chart.yaml`: `helm package` refuses to overwrite an existing
+tarball, so a run without a bump is a no-op. Serving it needs GitHub Pages
+pointed at `gh-pages`, which is a one-time setting.
+
 ## Prerequisites
 
 - Node.js 20 or newer (developed on 25)

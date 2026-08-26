@@ -1,0 +1,36 @@
+apiVersion: v2
+name: nodex
+description: |
+  nodex — a component registry organised by design language. This chart deploys
+  the web app, which serves the browsable registry and the accounts layer.
+
+  PostgreSQL is NOT bundled and is NOT required. Without a database the site
+  serves every public page and the sign-in page reports itself unconfigured;
+  point `database.url` at a managed instance when you want accounts.
+type: application
+
+# Chart version is independent of the app it ships. Bump on chart changes.
+# Releasing only requires bumping this field: `helm package` refuses to
+# overwrite an existing tarball, so publishing without a bump is a no-op.
+version: 0.1.0
+
+# Tracks the container image tag pulled by default. Bump in lockstep with
+# `version` when the chart starts requiring something only newer images have;
+# otherwise it can lag.
+#
+# 0.1.0 is the first packaged release. It deploys a single Deployment running
+# the standalone Next server on port 4180, an optional Ingress, and an optional
+# pre-upgrade Job that applies database migrations from the same image.
+appVersion: "latest"
+
+home: https://github.com/kr4t0n/nodex
+sources:
+  - https://github.com/kr4t0n/nodex
+keywords:
+  - nodex
+  - design-system
+  - component-registry
+  - design-tokens
+maintainers:
+  - name: kr4t0n
+    url: https://github.com/kr4t0n

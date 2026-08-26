@@ -1,0 +1,48 @@
+nodex {{ .Chart.AppVersion }} is installed as {{ .Release.Name }}.
+
+{{- if .Values.ingress.enabled }}
+
+Reachable at:
+{{- range .Values.ingress.hosts }}
+{{- $scheme := "http" }}
+{{- range $.Values.ingress.tls }}{{ if has (index $.Values.ingress.hosts 0).host .hosts }}{{ $scheme = "https" }}{{ end }}{{ end }}
+  {{ $scheme }}://{{ .host }}
+{{- end }}
+{{- else if eq .Values.service.type "ClusterIP" }}
+
+No Ingress. To look at it locally:
+
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "nodex.fullname" . }} 8080:{{ .Values.service.port }}
+  open http://localhost:8080
+{{- end }}
+
+{{ if include "nodex.databaseConfigured" . -}}
+Accounts are configured.
+{{- if .Values.migrations.enabled }} The schema was applied by a pre-upgrade Job.{{ end }}
+{{- if not .Values.github.clientId }}
+{{- if not .Values.github.existingSecret }}
+
+  No GitHub app is set, so the sign-in page will say it is unconfigured.
+  Set github.clientId and github.clientSecret, with the callback URL
+  {{ .Values.siteUrl | default "<siteUrl>" }}/api/auth/github/callback
+{{- end }}
+{{- end }}
+{{- else }}
+Running WITHOUT a database, which is a supported mode: every language is
+public and the registry is static files, so the site and the CLI both work.
+Only the /languages index is gated, and it will send visitors to sign in.
+
+  Set database.url to enable accounts.
+{{- end }}
+
+{{ if not .Values.siteUrl -}}
+WARNING: siteUrl is unset, so links the server generates fall back to
+http://localhost:4180. Set it to the address browsers actually use.
+{{ end -}}
+
+The CLI reads this deployment as a registry without any credentials:
+
+  NODEX_REGISTRY={{ .Values.siteUrl | default "http://localhost:8080" }} nodex list
+
+Note: pointing the browser bundle at a CDN is NOT a chart value. It is
+baked at image build time with --build-arg NEXT_PUBLIC_REGISTRY_URL.

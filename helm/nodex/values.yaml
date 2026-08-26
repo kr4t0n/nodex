@@ -1,0 +1,122 @@
+# ─────────────────────────────────────────────────────────────────────
+# nodex Helm chart values
+#
+# Deploys the web app only. The registry itself is baked into the image,
+# so there is no volume to provision and nothing to seed.
+#
+# ONE SETTING IS NOT HERE, and cannot be: NEXT_PUBLIC_REGISTRY_URL, which
+# points the browser at a CDN instead of the app's own /registry. Next
+# inlines NEXT_PUBLIC_* into the browser bundle at build time, so it is a
+# `docker build --build-arg`, not a runtime value. No Helm value can
+# change it after the fact.
+# ─────────────────────────────────────────────────────────────────────
+
+# Optional overrides; default to the release name, the standard Helm pattern.
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: kr4t0n/nodex
+  # Falls back to .Chart.AppVersion. Override to pin a release without
+  # bumping the chart. `sha-<short>` tags are immutable and are the safer
+  # choice for anything you care about.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# References existing Secrets of type kubernetes.io/dockerconfigjson.
+imagePullSecrets: []
+# - name: my-registry-creds
+
+# ─── Public address ──────────────────────────────────────────────────
+# The URL browsers reach this install on. Read at runtime, so one image
+# serves any hostname. It is what OAuth redirects and the CLI's device
+# verification URL are built from, so a wrong value breaks sign-in while
+# the rest of the site keeps working.
+siteUrl: ""
+
+# ─── Accounts: entirely optional ─────────────────────────────────────
+# Leave all of this empty for a public, read-only deployment. Every
+# language is public, the registry is static files, and the CLI reads it
+# anonymously. Accounts only gate the /languages index today.
+database:
+  # Either set `url` and the chart puts it in a generated Secret...
+  url: ""
+  # ...or point at a Secret you manage elsewhere (sealed-secrets,
+  # external-secrets, vault) and the chart references it directly.
+  existingSecret: ""
+  existingSecretKey: DATABASE_URL
+
+github:
+  # From https://github.com/settings/developers. The callback URL must be
+  # exactly <siteUrl>/api/auth/github/callback.
+  clientId: ""
+  clientSecret: ""
+  # A Secret carrying GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET.
+  existingSecret: ""
+
+# ─── Schema migrations ───────────────────────────────────────────────
+# Runs `node scripts/migrate.mjs` from the same image as a pre-install and
+# pre-upgrade hook, so the schema is in place before any new pod serves
+# traffic. Migrations are idempotent: applied files are skipped.
+#
+# Ignored entirely when no database is configured.
+migrations:
+  enabled: true
+  backoffLimit: 3
+  # Deleted on success so a namespace does not fill with completed Jobs.
+  # Set to hook-failed only while debugging one.
+  hookDeletePolicy: hook-succeeded,before-hook-creation
+
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  # - host: nodex.example.com
+  #   paths:
+  #     - path: /
+  #       pathType: Prefix
+  hosts: []
+  tls: []
+
+# Unset by default: the right numbers depend on the cluster, and a guessed
+# limit that throttles the Node server is worse than none.
+resources: {}
+# limits:
+#   cpu: 500m
+#   memory: 512Mi
+# requests:
+#   cpu: 100m
+#   memory: 256Mi
+
+# The image already runs as the non-root `node` user.
+podSecurityContext: {}
+securityContext: {}
+# readOnlyRootFilesystem: true
+# allowPrivilegeEscalation: false
+
+# The app answers before the database is reachable, by design, so `/` is a
+# liveness signal and not a readiness one for accounts.
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 20
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podAnnotations: {}
