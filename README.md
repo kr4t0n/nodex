@@ -33,6 +33,17 @@ nodex search heatmap --design mono-editorial
 nodex add mono-editorial/barcode-lollipop
 ```
 
+Signing in is only needed for restricted languages, of which there are none yet:
+
+```bash
+nodex login     # prints a code, waits for approval in a browser
+nodex whoami
+nodex logout
+```
+
+Credentials go to `~/.nodex/auth.json`, mode `0600`, keyed by registry. Set
+`NODEX_TOKEN` instead in CI, where nobody can approve anything.
+
 `init` writes `nodex.json`, drops the language's `tokens.css` and `DESIGN.md`
 into the project, and appends a section to the project's `AGENTS.md` so a coding
 agent knows the rules exist. `add` then needs no flags.

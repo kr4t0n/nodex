@@ -138,10 +138,19 @@ is the expected workflow, not a workaround.
 
 ## Restricted languages
 
-Some languages may require authentication. `nodex login` uses a GitHub
-device-code flow and honours a `NODEX_TOKEN` environment variable so it works in
-containers and CI. Public languages need no login at all, so do not run it
-unless a command tells you to.
+Some languages may require authentication. Public languages need none at all, so
+do not sign in unless a command tells you to.
+
+`nodex login` prints a URL and a short code, waits while a human approves it in a
+browser, and stores a token in `~/.nodex/auth.json`. Because it needs a person,
+it is not something to run unattended.
+
+**In CI or a container, set `NODEX_TOKEN` instead.** It overrides the stored file
+entirely and needs no interactive step. `nodex whoami` says who the current token
+belongs to, and `nodex logout` forgets it.
+
+The token is sent only to guarded paths, never to the public registry files, so
+a public `add` works signed in or out.
 
 ## Command reference
 
@@ -152,7 +161,9 @@ nodex tokens <language> [--json]   print tokens as CSS, or JSON
 nodex search [query] [filters]     find components
 nodex init <language>              set the project up
 nodex add <ref...> [--to <dir>]    copy components in
-nodex login                        authenticate for restricted languages
+nodex login                        sign in, by device code
+nodex logout                       forget the stored token
+nodex whoami                       who the token belongs to
 ```
 
 Global: `--registry <dir|url>` to point at a specific registry, or

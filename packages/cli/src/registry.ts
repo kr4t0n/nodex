@@ -4,6 +4,8 @@ import process from 'node:process';
 
 import type { Density, NodexMeta } from '@nodex/core/schema';
 
+import { tokenFor } from './config.ts';
+
 /**
  * A registry is addressed by its ROOT, not by its manifest.
  *
@@ -94,10 +96,33 @@ export async function resolveRegistry(explicit?: string): Promise<Registry> {
       ? path.join(root, 'public', clean)
       : path.join(root, clean);
 
+  /**
+   * Read a file addressed relative to the registry root.
+   *
+   * The token is attached ONLY to paths under `api/`, never to the static ones.
+   * Public content is served straight off a CDN, and a bearer token sent there
+   * is handed to a third party for nothing: those paths need no authorization at
+   * all. The manifest decides which is which by where it points a file, so this
+   * needs no per-language policy.
+   */
   const read = async (relative: string): Promise<string> => {
     const clean = relative.replace(/^\/+/, '');
     if (remote) {
-      const res = await fetch(`${root}/${clean}`);
+      const guarded = clean.startsWith('api/');
+      const token = guarded ? await tokenFor(root) : undefined;
+
+      const res = await fetch(`${root}/${clean}`, {
+        headers: token ? { authorization: `Bearer ${token}` } : undefined,
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        throw new Error(
+          `${root}/${clean} requires access you do not have.\n` +
+            (token
+              ? '  Your sign in may have expired. Try `nodex login` again.'
+              : '  Run `nodex login` first.'),
+        );
+      }
       if (!res.ok) {
         throw new Error(`${root}/${clean} returned ${res.status}`);
       }

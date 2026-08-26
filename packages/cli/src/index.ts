@@ -19,6 +19,8 @@ import {
   type Item,
   type Registry,
 } from './registry.ts';
+import { clearToken, credentialsFor, saveToken } from './config.ts';
+import { apiBase, awaitApproval, startDevice, whoami } from './device.ts';
 import { bold, dim, fail, heading, out, rows } from './ui.ts';
 
 const FONT_LINK =
@@ -35,7 +37,9 @@ ${bold('Commands')}
   init <language>                  set this project up to use a language
   add <ref...> [--to <dir>]        copy components into this project
   new-language <slug>              scaffold a new language in a nodex checkout
-  login                            authenticate for restricted languages
+  login                            sign in to a registry, by device code
+  logout                           forget this registry's stored token
+  whoami                           who the stored token belongs to
 
 ${bold('Filters for search')}
   --design <slug>   --type <enum>   --tag <tag>
@@ -383,26 +387,105 @@ that still looks wrong.
   out();
 }
 
-function cmdLogin(registry: Registry): void {
-  const restricted = registry.languages.filter(
-    (l) => l.visibility === 'restricted',
-  );
-
+/**
+ * Sign in by device code.
+ *
+ * The CLI cannot receive a redirect, so the browser does the authenticating and
+ * the terminal polls. What comes back is a nodex session, not a GitHub token, so
+ * signing out only has to delete it in one place.
+ */
+async function cmdLogin(registry: Registry): Promise<void> {
   heading('Login');
   out();
-  if (restricted.length === 0) {
-    out('  Not needed yet. Every language in this registry is public, and');
-    out('  reads of public languages are anonymous by design.');
+
+  if (!registry.isRemote) {
+    out('  This is a local checkout, so there is nothing to sign in to.');
+    out(`  ${dim('Point at a served registry with --registry <url> or NODEX_REGISTRY.')}`);
     out();
-    out(`  ${dim('Authentication arrives with the first restricted language. It will')}`);
-    out(`  ${dim('use the GitHub device-code flow and honour NODEX_TOKEN, so agents')}`);
-    out(`  ${dim('and CI can be provisioned without an interactive step.')}`);
-  } else {
-    out('  This registry contains restricted languages:');
-    for (const l of restricted) out(`    ${l.slug}`);
-    out();
-    out('  Authentication is not implemented yet.');
+    return;
   }
+
+  if (process.env.NODEX_TOKEN) {
+    out(`  ${bold('NODEX_TOKEN')} is set, and it takes precedence.`);
+    out(`  ${dim('Unset it to sign in interactively instead.')}`);
+    out();
+    return;
+  }
+
+  const api = apiBase(registry.root);
+
+  let start;
+  try {
+    start = await startDevice(api);
+  } catch (cause) {
+    fail(cause instanceof Error ? cause.message : 'Could not start sign in.');
+  }
+
+  out(`  Open  ${bold(start.verificationUri)}`);
+  out(`  Code  ${bold(start.userCode)}`);
+  out();
+  out(`  ${dim('Waiting for approval. Ctrl-C to cancel.')}`);
+  out();
+
+  let granted;
+  try {
+    granted = await awaitApproval(api, start);
+  } catch (cause) {
+    fail(cause instanceof Error ? cause.message : 'Sign in failed.');
+  }
+
+  const where = await saveToken(registry.root, {
+    token: granted.token,
+    login: granted.login ?? undefined,
+  });
+
+  out(`  ${bold('Signed in')}${granted.login ? ` as ${granted.login}` : ''}.`);
+  out(`  ${dim(`Token stored in ${where} (readable only by you).`)}`);
+  out();
+}
+
+async function cmdLogout(registry: Registry): Promise<void> {
+  heading('Logout');
+  out();
+
+  if (process.env.NODEX_TOKEN) {
+    out(`  ${bold('NODEX_TOKEN')} is set in this environment.`);
+    out(`  ${dim('Unset it; there is nothing on disk to remove.')}`);
+    out();
+    return;
+  }
+
+  const removed = await clearToken(registry.root);
+  out(
+    removed
+      ? `  Signed out of ${registry.root}.`
+      : `  Was not signed in to ${registry.root}.`,
+  );
+  out();
+}
+
+/** Who the stored token belongs to, checked against the server. */
+async function cmdWhoami(registry: Registry): Promise<void> {
+  heading('Whoami');
+  out();
+
+  const credentials = await credentialsFor(registry.root);
+  if (!credentials) {
+    out(`  Not signed in to ${registry.root}.`);
+    out(`  ${dim('Run `nodex login`.')}`);
+    out();
+    return;
+  }
+
+  const who = await whoami(apiBase(registry.root), credentials.token);
+  if (!who) {
+    out('  The stored token is no longer valid.');
+    out(`  ${dim('Run `nodex login` again.')}`);
+    out();
+    return;
+  }
+
+  out(`  ${bold(who.login)} at ${registry.root}`);
   out();
 }
 
@@ -488,7 +571,13 @@ async function main(argv: string[]): Promise<void> {
       return;
     }
     case 'login':
-      cmdLogin(registry);
+      await cmdLogin(registry);
+      return;
+    case 'logout':
+      await cmdLogout(registry);
+      return;
+    case 'whoami':
+      await cmdWhoami(registry);
       return;
     default:
       fail(`Unknown command "${command}". Run \`nodex --help\`.`);

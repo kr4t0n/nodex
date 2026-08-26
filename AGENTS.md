@@ -458,6 +458,49 @@ deliver the design language itself — the thing a restricted tier sells. Until
 `languages.json` carries explicit file addresses the way items do, language-level
 assets cannot be guarded without special-casing them in the CLI.
 
+### The CLI signs in by device code, and holds a nodex session
+
+A terminal cannot receive a redirect, so `nodex login` takes two codes: a long
+one it keeps and polls with, and a short one a person types into `/activate`.
+The shape is RFC 8628's, including the odd-looking convention that
+`authorization_pending` is returned as an error.
+
+What the CLI ends up holding is **a nodex session with `origin = 'cli'`, not a
+GitHub token.** That is why the `sessions` table had an `origin` column from the
+first migration. Revoking a terminal is one delete, and it does not touch the
+browser or anything at GitHub.
+
+Details that are load-bearing rather than incidental:
+
+- **The token attaches only to paths under `api/`.** Public files are served
+  straight off a CDN, and a bearer token sent there is handed to a third party
+  for nothing. Verified on the wire, not by reading the code: a logging proxy
+  saw ten requests during a signed-in `init` and `add`, and none carried the
+  header.
+- **The user code avoids `0/O`, `1/I/L`, `U`, and `V`**, and is generated with
+  `randomInt` rather than `randomBytes` modulo the alphabet. The modulo is
+  biased whenever the alphabet does not divide 256, and 29 does not.
+- **One exchange per request.** The row is deleted when the token is issued, so a
+  replayed poll cannot mint a second session. An unknown device code reports as
+  `expired_token` rather than as unknown, or polling becomes an oracle for
+  whether a code was ever real.
+- **Approving is a form post**, not a link. A link would let a prefetch, a
+  crawler, or an image tag on another site authorise someone's terminal.
+
+### `~/.nodex` holds credentials; `nodex.json` holds the project
+
+Two config files, deliberately. `nodex.json` records which language a project
+uses and belongs in the repository. `~/.nodex/auth.json` holds tokens, is written
+`0600` inside a `0700` directory, and must never be committed.
+
+It is keyed by registry origin, because one machine can talk to several
+registries and a token for one is not a token for another. `NODEX_TOKEN`
+overrides the file entirely, so CI and agents can be provisioned without an
+interactive step and without writing anything to disk.
+
+`NODEX_CONFIG_DIR` relocates it, which is what makes the flow testable without
+touching a real home directory.
+
 ## Two skills, two audiences
 
 - `skills/nodex/SKILL.md` ships to consumers. Pick a language, init, search,
