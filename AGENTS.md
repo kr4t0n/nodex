@@ -633,6 +633,35 @@ reading it will not expect them either.
 - **jsdom timers hang the smoke test** if the window is not closed — several
   charts stream via `setInterval`.
 
+## The second language is a test, not decoration
+
+`signal-console` exists to prove the tier split is real. One language cannot: if
+expressive components only ever wore one set of paint, "the language decides the
+geometry" was an assertion nobody had checked.
+
+It was chosen to invert as many axes as possible at once. Dark against paper,
+monospace against Inter, hue-with-meaning against no hue at all, filled marks
+from a `1px` floor against hairlines under a `1.4px` ceiling, aggregated against
+one-mark-per-record, and looping motion against draw-once-then-hold.
+
+Two of those inversions are deliberate contradictions and should stay that way.
+mono-editorial forbids looping animation; signal-console requires it for live
+state. mono-editorial demands negative tracking on headings; signal-console
+forbids it, because monospace is already evenly spaced. Neither is a mistake:
+they are the clearest evidence that motion and tracking belong to a language
+rather than to taste in general.
+
+**It omits `density` on purpose.** mono-editorial declares both values, which
+proves nothing about whether the axis is optional. A language that is only ever
+glance-read and names no distinction is what makes it a real option rather than
+a field everyone fills in.
+
+Adding it immediately found two generator bugs that one language had hidden:
+`$comment` keys leaking into `tokens.css` as invalid custom properties, and a
+hardcoded Inter link in every generated preview and in `nodex init`. Both were
+invisible while one language existed and wrong the moment a second arrived. The
+font now comes from `font.webfont` in each language's tokens.
+
 ## Technical debt
 
 - Vendor the choropleth geo data; remove the runtime fetches.
