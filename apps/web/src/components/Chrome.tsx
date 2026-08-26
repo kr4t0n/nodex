@@ -23,12 +23,14 @@ export function TopBar<T extends string>({
   // client components, and a session lookup belongs on the server.
   user?: { login: string; avatarUrl: string | null };
 }) {
+  // No rule under the bar, matching the landing page. The backdrop is what
+  // separates it from the content scrolling beneath; a hairline as well reads
+  // as two separations doing one job.
   return (
     <header
       className="sticky top-0 z-10 backdrop-blur-[6px]"
       style={{
         background: 'color-mix(in oklab, var(--nx-bg) 88%, transparent)',
-        borderBottom: 'var(--nx-hairline) solid var(--nx-grid)',
       }}
     >
       <div className="mx-auto flex h-[64px] max-w-[1400px] items-center gap-5 px-6 lg:px-10">
