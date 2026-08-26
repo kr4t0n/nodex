@@ -82,8 +82,13 @@ export function TopBar<T extends string>({
             </span>
           ) : null}
 
-          {/* A gate with no way back out is a trap, so the exit ships with it. */}
-          <form action={signOut}>
+          {/* A gate with no way back out is a trap, so the exit ships with it.
+              `flex` is not cosmetic: as a block, the form wraps the button in a
+              line box whose descender space sits below it, pushing the button
+              off the row's centre line. Next to a visually identical link that
+              is centred, that reads as a wobble. Flex makes the button the flex
+              item directly, so there is no line box to offset it. */}
+          <form action={signOut} className="flex">
             <button type="submit" className="nx-btn nx-btn--quiet">
               Sign out
             </button>
