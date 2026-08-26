@@ -7,7 +7,13 @@ import Link from 'next/link';
 import { Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
 import { useLanguageTokens } from '@/lib/hooks.ts';
-import { loadCatalog, previewUrl, type Catalog, type Language } from '@/lib/registry.ts';
+import {
+  loadCatalog,
+  previewUrl,
+  primitivePreviewUrl,
+  type Catalog,
+  type Language,
+} from '@/lib/registry.ts';
 
 /**
  * The index answers "which design language do I want", which is a judgment made
@@ -58,8 +64,27 @@ export function IndexView({
   );
 }
 
+/**
+ * Shown for a language with no charts yet.
+ *
+ * Between them these carry the four things a language decides that a still
+ * image can show: how colour is used (status), the type face (link), shape and
+ * radius (slider), and mark weight (progress).
+ *
+ * Chosen for compatible natural height as well as for coverage. Primitives
+ * render fluid, at true size, so the row is only as tidy as the components in
+ * it: `stat` and `alert` are more characterful but measure 274px and 361px
+ * against `badge`'s 63px, and a composite with a sixfold height spread reads as
+ * broken rather than as varied. These four sit within 151px to 185px.
+ */
+const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
+
 function LanguageTile({ language }: { language: Language }) {
   const featured = language.featured.slice(0, 4);
+
+  // A language under construction has tokens and primitives before it has a
+  // single chart. Rendering nothing there makes a real language look broken.
+  const showing = featured.length > 0 ? 'expressive' : 'primitives';
 
   return (
     <section>
@@ -97,21 +122,48 @@ function LanguageTile({ language }: { language: Language }) {
       {/* The composite IS the description. A name and a paragraph cannot convey
           taste, and these are real running components rather than screenshots. */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {featured.map((name) => (
-          <Link
-            key={name}
-            href={`/l/${language.slug}/${name}`}
-            className="no-underline"
-            aria-label={`${name} in ${language.name}`}
-          >
-            <Preview
-              src={previewUrl(language.slug, name)}
-              title={`${name} in ${language.name}`}
-              boxHeight={200}
-            />
-          </Link>
-        ))}
+        {showing === 'expressive'
+          ? featured.map((name) => (
+              <Link
+                key={name}
+                href={`/l/${language.slug}/${name}`}
+                className="min-w-0 no-underline"
+                aria-label={`${name} in ${language.name}`}
+              >
+                <Preview
+                  src={previewUrl(language.slug, name)}
+                  title={`${name} in ${language.name}`}
+                  boxHeight={200}
+                />
+              </Link>
+            ))
+          : SAMPLE_PRIMITIVES.map((name) => (
+              <Link
+                key={name}
+                href={`/l/${language.slug}/${name}`}
+                className="min-w-0 no-underline"
+                aria-label={`${name} in ${language.name}`}
+              >
+                {/* Fluid, like everywhere else primitives appear: a button
+                    scaled to a quarter misrepresents it. */}
+                <Preview
+                  src={primitivePreviewUrl(name, language.slug)}
+                  title={`${name} in ${language.name}`}
+                  fluid
+                />
+              </Link>
+            ))}
       </div>
+
+      {showing === 'primitives' ? (
+        <p
+          className="mt-6 mb-0 text-[11.5px] leading-[1.7]"
+          style={{ color: 'var(--nx-muted)' }}
+        >
+          No charts yet. These are shared primitives wearing this language&apos;s
+          tokens, which is what it looks like before a chart is drawn.
+        </p>
+      ) : null}
     </section>
   );
 }
