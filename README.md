@@ -119,7 +119,7 @@ npm install
 | Command | What it does |
 | --- | --- |
 | `npm run build:registry` | Validate, generate previews and `tokens.css`, emit the manifest |
-| `npm run check:registry` | Validate only, no writes — what CI runs |
+| `npm run check:registry` | Validate only, no writes. Handy before committing |
 | `npm run check:shell` | Fail if the app uses a primitive its layout does not load |
 | `npm run db:up` / `db:down` | Start or stop the accounts database |
 | `npm run db:migrate` | Apply pending SQL migrations, once each |

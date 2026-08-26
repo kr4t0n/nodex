@@ -22,8 +22,15 @@ jobs:
       # values against each language's declaration, and the design-language
       # conformance lints. The slug and enum checks are what stop a future
       # import from silently corrupting search.
-      - name: Validate registry
-        run: npm run check:registry
+      #
+      # `build:registry` rather than `check:registry`, and the difference
+      # matters: `--check` validates without writing, so a fresh checkout is
+      # left with no `public/r/`. That directory is a build artifact and is
+      # gitignored, and both the CLI smoke test and the site build need it.
+      # Building runs every check that `--check` runs, and then emits what the
+      # later steps read.
+      - name: Build registry
+        run: npm run build:registry
 
       # Proves components still mount and draw. Parsing is not enough: a chart
       # with an over-shaken helper set parses fine and renders nothing.
