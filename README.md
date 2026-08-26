@@ -149,9 +149,9 @@ from the same image.
 
 `.github/workflows/helm-publish.yml` packages the chart to the `gh-pages`
 branch whenever `helm/**` changes on `main`. Releasing is bumping `version:` in
-`helm/nodex/Chart.yaml`: `helm package` refuses to overwrite an existing
-tarball, so a run without a bump is a no-op. Serving it needs GitHub Pages
-pointed at `gh-pages`, which is a one-time setting.
+`helm/nodex/Chart.yaml`: a version already published is never repackaged, so a
+run without a bump is a no-op. Serving it needs GitHub Pages pointed at
+`gh-pages`, which is a one-time setting.
 
 ## Prerequisites
 

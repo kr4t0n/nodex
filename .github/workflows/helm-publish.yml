@@ -5,9 +5,9 @@ name: helm-publish
 # (the `helm/` subfolder of the gh-pages branch).
 #
 # Trigger: any push to main touching `helm/**` or this workflow.
-# Bumping `helm/nodex/Chart.yaml`'s `version:` is the release action —
-# `helm package` will not overwrite an existing tarball, so re-running
-# without a bump is harmless and idempotent.
+# Bumping `helm/nodex/Chart.yaml`'s `version:` is the release action. A
+# version already on gh-pages is never repackaged, so re-running without a
+# bump is harmless and idempotent.
 #
 # Requires GitHub Pages to be serving the gh-pages branch. The branch is
 # created by this workflow on first run if it does not exist yet; enabling
@@ -88,9 +88,27 @@ jobs:
           set -euo pipefail
           mkdir -p pages/helm
 
-          # Refuses to overwrite a tarball of the same name-version, which is
-          # the safety net: the only way to publish is to bump Chart.yaml.
-          helm package helm/nodex --destination pages/helm
+          # Turns off the legacy Jekyll build. A chart repo is static files that
+          # need no processing, and Jekyll silently drops anything whose name
+          # starts with an underscore, so a future chart or subchart could
+          # vanish from the published index with no error anywhere.
+          touch pages/.nojekyll
+
+          # A published version is never rewritten.
+          #
+          # `helm package` DOES overwrite an existing tarball, despite the
+          # folklore. Its output is reproducible for a given chart and Helm
+          # version, so an unchanged chart repackages to identical bytes and the
+          # commit below finds nothing to do. But editing a template without
+          # bumping the version would otherwise republish different content
+          # under a version somebody has already pinned. Skipping explicitly is
+          # what makes that impossible.
+          CHART_VERSION="$(helm show chart helm/nodex | awk '/^version:/ { print $2 }')"
+          if [ -f "pages/helm/nodex-${CHART_VERSION}.tgz" ]; then
+            echo "::notice title=Chart version already published::nodex-${CHART_VERSION}.tgz exists and was left untouched. Bump version in helm/nodex/Chart.yaml to release changes."
+          else
+            helm package helm/nodex --destination pages/helm
+          fi
 
           # --merge carries forward entries for versions already published, so
           # a user can still pin an older release after a new one ships.
@@ -108,7 +126,9 @@ jobs:
         working-directory: pages
         run: |
           set -euo pipefail
-          git add helm
+          # `.nojekyll` sits at the branch root, so staging only `helm` would
+          # silently leave it out of every commit.
+          git add helm .nojekyll
           # Skip when nothing changed, which is the normal case for a run where
           # Chart.yaml's version was not bumped: the tarball already exists and
           # `helm repo index --merge` produced identical YAML.
