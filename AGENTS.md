@@ -347,10 +347,15 @@ rendering both labelled all 64 charts twice.
 
 The generated preview therefore takes a `bare=1` parameter that hides the
 fragment's title and subtitle only. The app asks for it wherever it supplies its
-own heading — grid cells and the detail page — and leaves it off for "Open
-preview in a tab", so there is still one place that shows the component exactly
-as shipped. The index's featured composites are not bare either: nothing labels
-them, so there is nothing to duplicate.
+own heading, which is the grid cells and the detail page. The index's featured
+composites are not bare: nothing labels them, so there is nothing to duplicate.
+
+**The app no longer links to the whole version anywhere.** A "Open preview in a
+tab" link on the detail page used to be that escape hatch and was removed as
+clutter. The document is unchanged and still served at the same URL without the
+parameter, so opening a preview directly still shows the component exactly as a
+consumer receives it. Nothing generates the bare version separately; `bare=1`
+only hides two elements at view time.
 
 The fix belongs in the preview rather than in the fragments. A chart that lost
 its title would be a worse component for the consumer, and the app's grid needs

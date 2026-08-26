@@ -60,16 +60,13 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
   // size rather than scaled: a button shrunk to a quarter misrepresents it.
   const isPrimitive = item.meta.tier === 'primitive';
 
-  // Two URLs for the same document. The embedded frame is bare, because the
-  // heading beside it already carries the title and description. The tab link
-  // is not, so it shows the component exactly as a consumer receives it —
-  // header included. Primitives have no header either way.
+  // Bare, because the heading beside it already carries the title and the
+  // description, and printing both labels the component twice. The non-bare
+  // document still exists at the same URL without `?bare=1`, and is still what
+  // opening a preview directly gives you; this page just does not link to it.
   const embedSrc = isPrimitive
     ? primitivePreviewUrl(item.name, slug)
     : previewUrl(slug, item.name, { bare: true });
-  const openSrc = isPrimitive
-    ? primitivePreviewUrl(item.name, slug)
-    : previewUrl(slug, item.name);
 
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
@@ -144,15 +141,6 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                 </div>
               ))}
             </dl>
-
-            <a
-              className="nx-btn nx-btn--quiet mt-6 no-underline"
-              href={openSrc}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Open preview in a tab
-            </a>
           </aside>
         </div>
       </PageShell>
