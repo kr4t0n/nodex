@@ -273,6 +273,21 @@ would have been a permanent redirect to the login page.
 on purpose: the cookie ordering is another module's implementation detail, and
 the page should not silently break when someone refactors it.
 
+### One env var is baked into the image; the rest are not
+
+`NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, and the GitHub credentials are all read
+at runtime, so one container image serves any hostname. Verified rather than
+assumed: an image built with no site URL, run with one, produces OAuth redirects
+pointing at the runtime value.
+
+`NEXT_PUBLIC_REGISTRY_URL` is the exception and has to be a **build argument**.
+Next inlines `NEXT_PUBLIC_*` into the browser bundle, and `lib/registry.ts` runs
+in the browser, so by runtime there is no lookup left to override. The compiled
+bundle contains the resolved path and no reference to the variable name.
+
+The asymmetry is confusing enough to be worth stating plainly: the prefix does
+not decide when a value is read. Where the code runs does.
+
 ### The monorepo has one `.env`, and Next has to be told
 
 Next reads `.env` relative to the app directory, which in a workspace means

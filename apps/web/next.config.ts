@@ -26,6 +26,14 @@ const config: NextConfig = {
   // directory when bundling for deployment.
   outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
   typedRoutes: true,
+  /**
+   * For the container image: emits a self-contained server plus only the
+   * `node_modules` actually reached, so the runtime stage copies a few hundred
+   * files instead of the whole workspace install.
+   *
+   * Harmless for `next dev` and `next start`, which ignore it.
+   */
+  output: 'standalone',
 };
 
 export default config;

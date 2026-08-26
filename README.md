@@ -102,6 +102,39 @@ deleting the message.
 Without a GitHub app the login page says so and the rest of the site is
 unaffected. `npm run db:down` stops the database.
 
+## Running it as a container
+
+The `Dockerfile` at the root builds the web app. The context is the repository
+root, not `apps/web`, because the image builds the registry before the app.
+
+```bash
+docker build -t nodex .
+docker run -p 4180:4180 \
+  -e DATABASE_URL=postgres://user:pass@host:5432/nodex \
+  -e NEXT_PUBLIC_SITE_URL=https://your.host \
+  -e GITHUB_CLIENT_ID=... -e GITHUB_CLIENT_SECRET=... \
+  nodex
+```
+
+Everything above is runtime configuration, so one image serves any hostname.
+The app starts and serves public pages even with none of it set; only accounts
+need it. Migrations travel in the image, so a deployment can apply its own
+schema with `node scripts/migrate.mjs`.
+
+One value is different. `NEXT_PUBLIC_REGISTRY_URL` is a **build argument**, not
+runtime config, because Next inlines `NEXT_PUBLIC_*` into the browser bundle and
+the code reading it runs in the browser:
+
+```bash
+docker build --build-arg NEXT_PUBLIC_REGISTRY_URL=https://cdn.example.com -t nodex .
+```
+
+`.github/workflows/docker.yml` publishes to Docker Hub on every push to `main`
+and on `v*` tags. It needs `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` as
+repository secrets, and optionally `DOCKERHUB_REPOSITORY` and
+`NEXT_PUBLIC_REGISTRY_URL` as repository variables. The image is `linux/amd64`
+only; see the workflow comments for what an arm64 build would need.
+
 ## Prerequisites
 
 - Node.js 20 or newer (developed on 25)
