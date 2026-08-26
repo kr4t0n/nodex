@@ -112,13 +112,6 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
 
           <aside className="lg:pt-3">
             <CommandRow command={addCommand(slug, item)} />
-            <p
-              className="mt-3 text-[10.5px] leading-[1.6]"
-              style={{ color: 'var(--nx-muted)' }}
-            >
-              The CLI delivers the source. This page is for judging whether you want
-              it.
-            </p>
 
             <dl className="mt-9 grid grid-cols-[86px_minmax(0,1fr)] gap-x-4 gap-y-0">
               {facts.map(([label, value]) => (
