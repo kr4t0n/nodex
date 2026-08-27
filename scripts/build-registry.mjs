@@ -29,11 +29,27 @@ const OUT_DIR = path.join(ROOT, 'public', 'r');
 const CHECK_ONLY = process.argv.includes('--check');
 
 const HOMEPAGE = 'https://nodex.dev';
-const FONT_LINKS = [
-  '<link rel="preconnect" href="https://fonts.googleapis.com">',
-  '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
-  '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">',
-].join('\n');
+/**
+ * Web font links for a language's previews.
+ *
+ * Was a hardcoded Inter link shared by every language, which was invisible
+ * while one language existed and wrong the moment a second one arrived: a
+ * console language asking for Inter renders in the fallback stack and looks
+ * nothing like itself.
+ *
+ * The family comes from `tokens.json` `font.webfont`. A language that omits it
+ * ships no link and relies on locally installed faces, which is the honest
+ * behaviour for a face that is not on Google Fonts.
+ */
+function fontLinks(tokens) {
+  const spec = tokens.font?.webfont;
+  if (!spec) return '';
+  return [
+    '<link rel="preconnect" href="https://fonts.googleapis.com">',
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+    `<link href="https://fonts.googleapis.com/css2?family=${spec}&display=swap" rel="stylesheet">`,
+  ].join('\n');
+}
 const ECHARTS_CDN =
   'https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js';
 
@@ -46,23 +62,39 @@ function fail(where, message) {
 
 /* --------------------------------------------------------------- tokens.css */
 
+/**
+ * `$comment` is documentation, not a token.
+ *
+ * It is legal anywhere in `tokens.json`, and the nested ones under `ramp` and
+ * `stroke` were always skipped because those objects are read field by field.
+ * The maps below are iterated wholesale, so a comment inside `color` or
+ * `radius` used to emit `--nx-$comment: <prose>;`, which is not a valid custom
+ * property and drops silently in the browser. Found by adding a second
+ * language, which is the first one to document those two groups.
+ */
+const isComment = (key) => key.startsWith('$');
+
 function flattenTokens(tokens) {
   const vars = [];
   for (const [key, value] of Object.entries(tokens.color ?? {})) {
+    if (isComment(key)) continue;
     vars.push([`--nx-${key}`, value]);
   }
   vars.push(['--nx-font-sans', tokens.font?.sans ?? 'sans-serif']);
   if (tokens.font?.mono) vars.push(['--nx-font-mono', tokens.font.mono]);
   for (const [key, value] of Object.entries(tokens.radius ?? {})) {
+    if (isComment(key)) continue;
     vars.push([`--nx-radius-${key}`, value]);
   }
   for (const [key, value] of Object.entries(tokens.stroke ?? {})) {
+    if (isComment(key)) continue;
     if (typeof value === 'string' && value.endsWith('px')) {
       vars.push([`--nx-stroke-${key}`, value]);
     }
   }
   vars.push(['--nx-hairline', tokens.stroke?.hairline ?? '0.7px']);
   for (const [key, value] of Object.entries(tokens.space ?? {})) {
+    if (isComment(key)) continue;
     vars.push([`--nx-space-${key}`, value]);
   }
   return vars;
@@ -74,11 +106,19 @@ function renderTokensCss(language, tokens) {
   const body = vars
     .map(([name, value]) => `  ${name.padEnd(width)}: ${value};`)
     .join('\n');
+  const face = tokens.font?.webfont
+    ? tokens.font.webfont.split(':')[0].replace(/\+/g, ' ')
+    : undefined;
+  const fontNote = face
+    ? `${face} is expected on the page. Add the Google Fonts links, or run
+   \`nodex init ${language.slug}\`, which prints them.`
+    : `This language names no web font, so it renders in whatever the stack in
+   \`font.sans\` resolves to locally.`;
+
   return `/* ${language.name} — generated from tokens.json by scripts/build-registry.mjs.
    Do not edit by hand.
 
-   Inter is expected on the page. Add the Google Fonts links, or run
-   \`nodex init ${language.slug}\`, which prints them. */
+   ${fontNote} */
 
 :root {
 ${body}
@@ -93,7 +133,7 @@ ${body}
  * the fragment: `body { padding }` is page padding, not component padding, and a
  * global `*` reset would trash a consumer's layout.
  */
-function renderPreview({ language, meta, fragment, needsEcharts }) {
+function renderPreview({ language, tokens, meta, fragment, needsEcharts }) {
   const echarts = needsEcharts
     ? `\n<script src="${ECHARTS_CDN}"></script>`
     : '';
@@ -103,7 +143,7 @@ function renderPreview({ language, meta, fragment, needsEcharts }) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${meta.title} — ${language.name}</title>
-${FONT_LINKS}
+${fontLinks(tokens)}
 <link rel="stylesheet" href="../../tokens.css">
 <link rel="stylesheet" href="./component.css">${echarts}
 <style>
@@ -180,14 +220,14 @@ ${fragment.trim()}
  *
  * No module import here: primitives are presentational and ship no JavaScript.
  */
-function renderPrimitivePreview({ meta, defaultLanguage }) {
+function renderPrimitivePreview({ meta, defaultLanguage, allTokens }) {
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${meta.title} - nodex primitive</title>
-${FONT_LINKS}
+${allTokens.map(fontLinks).filter(Boolean).join('\n')}
 <link rel="stylesheet" href="./component.css">
 <style>
   * { box-sizing: border-box; }
@@ -481,6 +521,21 @@ async function main() {
   const generated = [];
   const primitiveSheets = [];
 
+  /**
+   * Every language's token layer, read once.
+   *
+   * A primitive's preview picks its tokens at view time from `?lang=`, so one
+   * generated file serves every language and it cannot know at build time which
+   * face it will need. It therefore links all of them. That is a handful of
+   * extra font requests on a preview page, against the alternative of one
+   * generated file per primitive per language.
+   */
+  const allTokens = await Promise.all(
+    source.languages.map(async (language) =>
+      JSON.parse(await readFile(path.join(language.dir, 'tokens.json'), 'utf8')),
+    ),
+  );
+
   // Primitives first: shared, no preview document, rendered inline by the app.
   for (const primitive of source.primitives) {
     const where = `primitives/${primitive.meta.slug}`;
@@ -541,10 +596,11 @@ async function main() {
     }
     generated.push({
       file: path.join(primitive.dir, 'index.html'),
-      content: renderPrimitivePreview({
-        meta: { ...primitive.meta, markup },
-        defaultLanguage: source.languages[0]?.meta.slug ?? 'mono-editorial',
-      }),
+        content: renderPrimitivePreview({
+          meta: { ...primitive.meta, markup },
+          defaultLanguage: source.languages[0]?.meta.slug ?? 'mono-editorial',
+          allTokens,
+        }),
     });
 
     primitiveSheets.push([primitive.meta.slug, css]);
@@ -606,12 +662,13 @@ async function main() {
 
       generated.push({
         file: path.join(dir, 'index.html'),
-        content: renderPreview({
-          language: language.meta,
-          meta,
-          fragment,
-          needsEcharts: meta.runtime === 'echarts',
-        }),
+          content: renderPreview({
+            language: language.meta,
+            tokens,
+            meta,
+            fragment,
+            needsEcharts: meta.runtime === 'echarts',
+          }),
       });
 
       items.push(

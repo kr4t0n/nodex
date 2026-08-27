@@ -32,6 +32,22 @@ of marks, never from color.
 Cards may invert to ink ground with paper text. On inverted cards, captions drop
 to `#55554F` so they recede the same amount they do on paper.
 
+**No chart in the collection currently inverts.** Seven did — `circular-graph`,
+`circular-graph-dense`, `dot-cascade`, `force-graph`, `force-graph-dense`,
+`petal-rose`, and `thread-triptych` — and were moved onto paper so a page of
+them reads as one language rather than two. The affordance and its CSS stay,
+because inversion is a legitimate choice for a single card that has to stand
+apart; it is just not something to reach for while building a set.
+
+Note that only four carried the `card dark` modifier. The other three set a dark
+background on `.card` itself, so grepping for the modifier finds the wrong
+answer; check the resolved background instead.
+
+Inverting is not a background swap. Mark colour encodes rank, so the ramp has to
+be reversed with it: on ink the brightest mark carries the most, on paper the
+darkest does. A card whose ground flipped but whose marks did not will read with
+its emphasis exactly backwards.
+
 Chart marks are drawn in JavaScript with literal hex from the warm-grey ramp in
 `tokens.json`. That is deliberate: SVG attributes are set imperatively, so there
 is no `var()` to reference. The conformance lint therefore checks that literals
@@ -50,26 +66,52 @@ is barely larger than body text — the hierarchy comes from weight and from the
 uppercase tracking of the captions, not from size jumps. Captions run `9.5px`
 uppercase at `0.08em`, small enough to read as a printed credit line.
 
+No chart currently uses that caption size: it belonged to the `div.src` footer,
+which was removed. The token stays because it is the language's vocabulary for
+an annotation smaller than a legend, and a consumer captioning their own data
+needs a size to reach for. Do not read its absence from the shipped charts as a
+reason to delete it.
+
 Negative tracking on headings, positive tracking on anything uppercase. Never
 the reverse.
 
 ## Component behaviors
 
-Every chart card follows the same four-part anatomy, in this order, always:
+Every chart card follows the same three-part anatomy, in this order, always:
 
 ```
 h2.title      what the chart says, as a sentence
 div.sub       the reading instructions — units, span, what one mark means
 [the chart]
-div.src       CHART TYPE · LANGUAGE · DATA SOURCE, uppercase
 ```
+
+The drawing is **left-aligned to the title, never centred**. Every SVG carries
+`preserveAspectRatio="xMinYMid meet"` and no `margin: 0 auto`. A chart with a
+`max-height` reaches its cap before it runs out of width, so in any container
+wider than its aspect ratio needs there is slack — and the default `xMidYMid`
+spends that slack centring the drawing away from the title and subtitle sitting
+at the card's left edge. Left-aligned, a wall of these cards shares one starting
+edge and reads as a set. Centred, each one floats at its own offset.
+
+This aligns the SVG's own box. A chart that centres its composition *inside* its
+viewBox — a donut, a network — still sits wherever it was drawn, because that is
+a property of the drawing rather than of the box. Fix those by moving the marks
+in the viewBox, not by re-centring the box.
 
 The subtitle is not decoration. It tells the reader what one mark represents,
 which is the only way a one-mark-per-record chart is legible. Write it as
 instructions, not as a description.
 
-The `.src` footer is a printed credit line. Keep it uppercase, keep it three
-segments, keep it dry.
+There is deliberately **no footer credit line.** An earlier anatomy ended each
+card with a `div.src` reading `CHART TYPE · LANGUAGE · DATA SOURCE`, and it was
+removed for two reasons. It states facts the manifest already records, so it
+went stale the moment a component was renamed or moved — 53 of 64 ended up
+naming a design language that had never existed. And it is the only left-aligned
+element under a chart that centres itself, so it read as misalignment on every
+card wide enough to letterbox.
+
+A caption naming the *data* rather than the component is a different thing and
+still belongs, when a chart genuinely needs sourcing. Write it as a `div.note`.
 
 Interactive marks carry an SVG `<title>` child so hovering yields a native
 tooltip with no JavaScript. Prefer that over a custom tooltip layer.

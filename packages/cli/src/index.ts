@@ -23,8 +23,23 @@ import { clearToken, credentialsFor, saveToken } from './config.ts';
 import { apiBase, awaitApproval, startDevice, whoami } from './device.ts';
 import { bold, dim, fail, heading, out, rows } from './ui.ts';
 
-const FONT_LINK =
-  '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">';
+/**
+ * The web font a language asks for, from its own tokens.
+ *
+ * Was a hardcoded Inter link, which was invisible while one language existed
+ * and wrong the moment a second arrived: telling someone installing a
+ * monospace console language to add Inter is worse than saying nothing.
+ * Returns undefined for a language that names no web font.
+ */
+function fontLink(spec: string | undefined): string | undefined {
+  if (!spec) return undefined;
+  return `<link href="https://fonts.googleapis.com/css2?family=${spec}&display=swap" rel="stylesheet">`;
+}
+
+/** `JetBrains+Mono:wght@400;700` reads back as `JetBrains Mono`. */
+function faceName(spec: string | undefined): string {
+  return (spec ?? '').split(':')[0]?.replace(/\+/g, ' ') ?? '';
+}
 
 const USAGE = `
 ${bold('nodex')} - fetch design languages and components from a registry
@@ -194,12 +209,28 @@ async function cmdInit(
     out(`  ${dim('AGENTS.md already documents a design language, left alone')}`);
   }
 
-  out();
+    out();
   out(`  ${bold('Next')}`);
   out(`    1. Import ${config.paths.tokens} once, at your app root.`);
-  out(`    2. Add the Inter stylesheet to your document head:`);
-  out(`       ${dim(FONT_LINK)}`);
-  out(`    3. nodex add ${slug}/<component>`);
+
+  // Read from the language rather than assumed, so a monospace language does
+  // not tell someone to install Inter.
+  let webfont: string | undefined;
+  try {
+    const raw = await registry.read(`registry/languages/${slug}/tokens.json`);
+    webfont = (JSON.parse(raw) as { font?: { webfont?: string } }).font?.webfont;
+  } catch {
+    // A registry predating font.webfont. Skip the step rather than guess.
+  }
+
+  const link = fontLink(webfont);
+  if (link) {
+    out(`    2. Add the ${faceName(webfont)} stylesheet to your document head:`);
+    out(`       ${dim(link)}`);
+    out(`    3. nodex add ${slug}/<component>`);
+  } else {
+    out(`    2. nodex add ${slug}/<component>`);
+  }
   out();
 }
 

@@ -6,13 +6,9 @@
 
 .nx-bar-race .card.dark .sub {color:#8F8E88}
 
-.nx-bar-race .card.dark .src {color:#55554F}
-
 .nx-bar-race h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
 
 .nx-bar-race .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
-.nx-bar-race .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
 
 .nx-bar-race .ch {height:320px}
 

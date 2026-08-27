@@ -1,7 +1,6 @@
 'use client';
 
-import { ArrowsClockwise } from '@phosphor-icons/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useNearViewport } from '@/lib/hooks.ts';
 
@@ -9,11 +8,31 @@ import { useNearViewport } from '@/lib/hooks.ts';
  * The logical width every preview is rendered at before being scaled down.
  *
  * Components were authored for a full page, so embedding one directly in a
- * 320px card shows the top-left corner of a 1400px layout. Rendering at a fixed
- * wide viewport and scaling the whole frame keeps the composition intact and the
- * type proportional, which is how a thumbnail should behave.
+ * 320px card shows the top-left corner of a much wider layout. Rendering at a
+ * fixed viewport and scaling the whole frame keeps the composition intact and
+ * the type proportional, which is how a thumbnail should behave.
+ *
+ * The value is the width the charts were drawn for, not a guess at a desktop
+ * viewport. They came from a two-column grid capped at 1400px, so a card was
+ * about 690px and a full-width one about 1400px.
+ *
+ * This was 1180 and letterboxed almost everything. An expressive SVG carries
+ * `max-height: 330px` with `preserveAspectRatio="xMidYMid meet"`, so past a
+ * certain width the height caps first and its aspect ratio decides how much of
+ * the box it can occupy — the browser pads the rest to centre it. At 1180 the
+ * box was 1044px and a 400x320 chart drew 488px of it. Measured fill going to
+ * 660: dotty-matrix 34 to 68%, arc-matrix 41 to 82%, hairline-line 47 to 93%,
+ * and the wide charts from ~95 to 100%. Nothing regresses.
+ *
+ * Do not fix letterboxing by removing `max-height` from the components. That
+ * cap is what stops a chart being ~900px tall in a consumer's wide container;
+ * dropping it would degrade what the registry ships in order to flatter this
+ * preview. The width belongs here, where it only affects previews.
+ *
+ * Lower bound: below about 550 the width binds before the height cap and charts
+ * start shrinking again rather than filling.
  */
-const LOGICAL_WIDTH = 1180;
+const LOGICAL_WIDTH = 660;
 
 interface PreviewProps {
   src: string;
@@ -21,7 +40,6 @@ interface PreviewProps {
   /** From meta.aspectRatio. Only reserves initial space; real height is measured. */
   aspectRatio?: string;
   className?: string;
-  replayable?: boolean;
   /**
    * Fixed thumbnail height. In a grid, content-driven heights leave every card
    * a different size and the titles beneath them fall out of alignment, which
@@ -56,14 +74,12 @@ export function Preview({
   title,
   aspectRatio,
   className,
-  replayable = false,
   boxHeight,
   fluid = false,
 }: PreviewProps) {
   const [nearRef, near] = useNearViewport<HTMLDivElement>();
   const boxRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
-  const [nonce, setNonce] = useState(0);
   const [width, setWidth] = useState(0);
   const [contentHeight, setContentHeight] = useState<number>();
   const [loaded, setLoaded] = useState(false);
@@ -102,29 +118,47 @@ export function Preview({
     return () => window.removeEventListener('message', onMessage);
   }, []);
 
-  const replay = useCallback(() => {
-    setLoaded(false);
-    setContentHeight(undefined);
-    setNonce((n) => n + 1);
-  }, []);
-
   const fallbackRatio = aspectRatio
     ? Number.parseFloat(aspectRatio.split('/')[0] ?? '4') /
       Number.parseFloat(aspectRatio.split('/')[1] ?? '3')
     : 4 / 3;
   const logicalHeight = contentHeight ?? LOGICAL_WIDTH / fallbackRatio;
 
-  // Fit to width, or to the smaller of width and box when a height is fixed.
+  /**
+   * Fit to width, or to the smaller of width and box when a height is fixed.
+   *
+   * Capped at 1, so a preview shrinks but never enlarges. Past that the frame
+   * would show the component bigger than its own container could ever draw it,
+   * which is a size the reader cannot reproduce by copying it. Below the cap
+   * the frame is a faithful scale model; above it, it is a magnifying glass.
+   */
   const scale = fluid
     ? 1
     : width === 0
       ? 0
-      : boxHeight
-        ? Math.min(width / LOGICAL_WIDTH, boxHeight / logicalHeight)
-        : width / LOGICAL_WIDTH;
+      : Math.min(
+          1,
+          boxHeight
+            ? Math.min(width / LOGICAL_WIDTH, boxHeight / logicalHeight)
+            : width / LOGICAL_WIDTH,
+        );
 
-  const ready = fluid ? near : near && scale > 0;
-  const frameHeight = fluid ? (contentHeight ?? 160) : logicalHeight;
+    const ready = fluid ? near : near && scale > 0;
+
+    /**
+     * A fluid preview normally sizes to its content, which is right on a detail
+     * page and wrong in a grid: four primitives at true size come out four
+     * different heights and the row reads as broken.
+     *
+     * With `boxHeight` the frame is pinned and the content sits at the top of
+     * it, still unscaled. The spare room fills with the preview's own
+     * background, so the box reads as one surface rather than as a letterbox.
+     * Pick a height that clears the tallest component in the row: anything
+     * taller than the box is clipped, not shrunk.
+     */
+    const frameHeight = fluid
+      ? (boxHeight ?? contentHeight ?? 160)
+      : logicalHeight;
 
   return (
     // min-w-0 is load-bearing, not defensive. This sits inside a grid, and a
@@ -136,7 +170,12 @@ export function Preview({
       <div
         ref={nearRef}
         className="nx-frame relative w-full overflow-hidden rounded-[var(--radius-card)]"
-        style={{ background: 'var(--nx-bg)' }}
+        // Never wider than the document inside it. Once the scale is capped at
+        // 1 a wide column would otherwise leave a band of empty frame beside a
+        // component already at full size. This converges rather than looping:
+        // the frame settles at the logical width, and the measurement taken
+        // inside it then agrees.
+        style={{ background: 'var(--nx-bg)', maxWidth: fluid ? undefined : LOGICAL_WIDTH }}
       >
         <div
           ref={boxRef}
@@ -144,7 +183,6 @@ export function Preview({
         >
           {ready ? (
             <iframe
-              key={nonce}
               ref={frameRef}
               src={src}
               title={title}
@@ -184,14 +222,6 @@ export function Preview({
         ) : null}
       </div>
 
-      {replayable ? (
-        <div className="mt-3 flex justify-end">
-          <button className="nx-btn nx-btn--quiet" type="button" onClick={replay}>
-            <ArrowsClockwise size={13} weight="bold" aria-hidden />
-            Replay
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -6,21 +6,17 @@
 
 .nx-dot-cascade .card.dark .sub {color:#8F8E88}
 
-.nx-dot-cascade .card.dark .src {color:#55554F}
-
 .nx-dot-cascade .split {display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start}
 
 .nx-dot-cascade h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
 
 .nx-dot-cascade .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
 
-.nx-dot-cascade .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
-
 .nx-dot-cascade .note {font-size:11px;color:#6A6963;line-height:1.65;margin-bottom:16px}
 
 .nx-dot-cascade .legend {font-size:9px;letter-spacing:.1em;font-weight:600;color:var(--nx-muted);line-height:2}
 
-.nx-dot-cascade svg {width:100%;max-height:330px;display:block;margin:0 auto}
+.nx-dot-cascade svg {width:100%;max-height:330px;display:block}
 
 .nx-dot-cascade svg text {font-family:'Inter',sans-serif}
 

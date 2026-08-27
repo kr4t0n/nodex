@@ -1,0 +1,7 @@
+{
+  "slug": "signal-console",
+  "name": "Signal Console",
+  "description": "Dense instrumentation on a dark ground. Monospace throughout, aggregated rather than per-record, and hue reserved for meaning. Built for charts scanned at a glance while several are watched at once.",
+  "visibility": "public",
+  "featured": []
+}

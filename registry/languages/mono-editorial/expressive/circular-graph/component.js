@@ -32,9 +32,9 @@ export function mount(root) {
   // ── shared Mono tokens ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
-  const tipDark={backgroundColor:PAPER,borderWidth:0,textStyle:{color:INK,fontFamily:'Inter',fontSize:12},padding:[10,14]};
+  const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy · 2: circular graph on dark ════
+  // ════ mono-fancy · 2: circular graph ════
   (()=>{
   const teams=[
     ['Product',52],['Design',38],['Frontend',46],['Backend',44],
@@ -46,20 +46,20 @@ export function mount(root) {
   ];
   eReveal('circular',{
     animationDuration:1200,animationEasing:'quarticOut',
-    tooltip:tipDark,
+    tooltip:tipLight,
     series:[{
       type:'graph',layout:'circular',circular:{rotateLabel:false},
       left:52,right:52,top:34,bottom:34,
       data:teams.map(([n,v],i)=>({
         name:n,value:v,symbolSize:v*.62,
-        itemStyle:{color:i<4?PAPER:i<8?'#8F8E88':'#4A4944',borderWidth:0},
-        label:{show:true,position:'right',distance:7,color:'#B3B0A4',fontFamily:'Inter',fontSize:9.5,fontWeight:600},
+        itemStyle:{color:i<4?INK:i<8?'#8F8E88':'#B0AFA9',borderWidth:0},
+        label:{show:true,position:'right',distance:7,color:'#6A6963',fontFamily:'Inter',fontSize:9.5,fontWeight:600},
       })),
       links:links.map(([s,t,w])=>({
         source:s,target:t,
-        lineStyle:{width:w*.7,color:'#4A4840',opacity:.55,curveness:.28},
+        lineStyle:{width:w*.7,color:'#B0AFA9',opacity:.55,curveness:.28},
       })),
-      emphasis:{focus:'adjacency',lineStyle:{color:PAPER,opacity:.8}},
+      emphasis:{focus:'adjacency',lineStyle:{color:INK,opacity:.8}},
     }],
   });
   })();

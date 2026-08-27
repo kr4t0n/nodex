@@ -6,13 +6,9 @@
 
 .nx-aggregate-sankey .card.dark .sub {color:#8F8E88}
 
-.nx-aggregate-sankey .card.dark .src {color:#55554F}
-
 .nx-aggregate-sankey h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
 
 .nx-aggregate-sankey .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
-.nx-aggregate-sankey .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
 
 .nx-aggregate-sankey .ch {height:320px}
 

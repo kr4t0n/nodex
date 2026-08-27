@@ -12,6 +12,74 @@ import { tokensUrl } from './registry.ts';
  * restyles the entire interface. It also dogfoods the token system, since a
  * broken primitive is immediately visible in the app's own chrome.
  */
+/**
+ * Applies several languages' token layers at once, each scoped to its own
+ * subtree, so more than one can be shown honestly on the same page.
+ *
+ * `useLanguageTokens` swaps a single `:root` layer for the whole document. That
+ * is right on a page showing one language and impossible on the index, where
+ * several sit on screen together and the last one loaded would win.
+ *
+ * The generated `tokens.css` is one `:root` block and nothing else, so
+ * re-pointing that selector at an attribute produces the same values bound to
+ * an element instead of the document. Deliberately a rename of the build's own
+ * output rather than a second artifact or a client-side reimplementation of its
+ * flattening: there is no third place for the two to drift apart.
+ *
+ * Custom properties inherit, but inherited *values* do not re-resolve. An
+ * element inside the scope still shows the document's colour unless it declares
+ * `color: var(--nx-ink)` itself, because `body` already resolved that var
+ * against `:root`. Scoped subtrees must restate the properties they want.
+ */
+export function useScopedLanguageTokens(slugs: string[]): boolean {
+  const [ready, setReady] = useState(false);
+  // Joined, so the effect keys on the contents rather than the array identity.
+  const key = slugs.join(',');
+
+  useEffect(() => {
+    if (!key) return;
+    let live = true;
+    const ID = 'nx-scoped-language-tokens';
+
+    void Promise.all(
+      key.split(',').map(async (slug) => {
+        try {
+          const res = await fetch(tokensUrl(slug));
+          if (!res.ok) return '';
+          const css = await res.text();
+          // Skip rather than inject. A template that stopped emitting `:root`
+          // would otherwise ship one language unscoped, and it would silently
+          // override every other language on the page.
+          if (!css.includes(':root')) return '';
+          return css.replace(':root', `[data-nx-scope="${slug}"]`);
+        } catch {
+          return '';
+        }
+      }),
+    ).then((sheets) => {
+      if (!live) return;
+      let style = document.getElementById(ID);
+      if (!style) {
+        style = document.createElement('style');
+        style.id = ID;
+        document.head.appendChild(style);
+      }
+      style.textContent = sheets.filter(Boolean).join('\n');
+      // Ready even when every fetch failed. This decides whether the page
+      // renders at all, and a tile with no scoped layer inherits the document's
+      // instead — the old behaviour, which is a far better outcome than an
+      // index stuck on its loading state.
+      setReady(true);
+    });
+
+    return () => {
+      live = false;
+    };
+  }, [key]);
+
+  return ready;
+}
+
 export function useLanguageTokens(slug: string | undefined): boolean {
   const [ready, setReady] = useState(false);
 

@@ -183,6 +183,38 @@ The line between what the app owns and what the language owns:
 GSAP is app-only and never enters registry content. A component that depended on
 GSAP would force that dependency on everyone who copied it.
 
+### The index wears every language at once, one scope per tile
+
+`useLanguageTokens` swaps a single `:root` layer for the whole document, which is
+right on a page showing one language. `/languages` shows several, and the last
+layer loaded would simply win — so its tiles used to sit in the first language's
+paint while previewing a second, which quietly contradicts the claim above.
+
+`useScopedLanguageTokens` fixes that. The generated `tokens.css` is one `:root`
+block and nothing else, so re-pointing that selector at
+`[data-nx-scope="<slug>"]` yields the same values bound to an element. It is
+deliberately a rename of the build's own output, not a second generated artifact
+and not a client-side reimplementation of its flattening — there is no third
+place for the two to drift apart. If the template ever stops emitting `:root`,
+that language is skipped rather than injected unscoped, since an unscoped layer
+would override every other language on the page.
+
+Two things to keep in mind when scoping a token layer:
+
+- **Inherited values do not re-resolve.** `body` already resolved `--nx-ink`
+  against `:root`, and descendants inherit the resulting colour, not the `var()`.
+  A scoped subtree has to restate the properties it wants — the tile sets
+  `background`, `color`, `font-family`, and `border-radius` itself. Setting the
+  scope attribute alone changes nothing visible.
+- **The hook is ready even when every fetch fails.** It gates whether the page
+  renders, and a tile with no scoped layer inherits the document's, which is the
+  old behaviour and a far better outcome than an index stuck loading.
+
+This is the strongest demonstration the project has: the badges, the button and
+the rules inside each tile are shared primitives, and they re-theme with no
+per-language code. Signal Console's solid button comes out paper-on-ink while
+Mono Editorial's is ink-on-paper, from the same markup.
+
 ### The landing page is written in the language it sells
 
 `/` is marketing, `/languages` is the app.
@@ -377,9 +409,36 @@ its title would be a worse component for the consumer, and the app's grid needs
 a legible label because a chart scaled to a quarter cannot supply one.
 
 Two things this must not become: it hides the title and subtitle only, never the
-note, legend, or source caption, which are annotation rather than heading; and
-the attribute is set from a blocking script in `head`, because applying it after
-the module runs makes the header appear and then vanish.
+note or legend, which are annotation rather than heading; and the attribute is
+set from a blocking script in `head`, because applying it after the module runs
+makes the header appear and then vanish.
+
+This rule used to name the source caption alongside note and legend. That
+caption no longer exists — see below — so nothing is being hidden that a reader
+would miss, and the rule still holds for the annotation that remains.
+
+### The `div.src` credit line was removed from every chart
+
+Each chart used to end with `CHART TYPE · LANGUAGE · DATA SOURCE`, uppercase, as
+the fourth part of the card anatomy. All 64 were stripped and `DESIGN.md` now
+fixes a three-part anatomy.
+
+It restated what the manifest already holds, so it could only ever drift out of
+date, and it had: 53 of 64 named a section of the source document the extractor
+read rather than a design language, including `MONO-FANCY4`, `MONO-EDITORIAL2`,
+and `NEW`. A consumer running `nodex add mono-editorial/bar-race` received a
+chart crediting a language that has never existed.
+
+It also read as a layout bug. An SVG carrying `max-height` with
+`preserveAspectRatio="xMidYMid meet"` centres itself in a box wider than its
+aspect ratio, while the caption is left-aligned HTML — so on every card wide
+enough to letterbox, the chart visibly drifted away from its own credit line.
+
+Two consequences to keep in mind. The `type.caption` token now has no consumer
+among the shipped charts and is deliberately kept, because it is the language's
+vocabulary for an annotation smaller than a legend. And a caption naming the
+*data* is a different thing that still belongs when a chart needs sourcing; it
+is written as a `div.note`, which is annotation and is never hidden by `bare=1`.
 
 ### Previews must not depend on an observer firing
 
@@ -419,10 +478,38 @@ the top-left corner of a 1400px layout. `Preview` renders at a fixed logical
 width and scales the frame, keeping composition and type proportion intact.
 
 Height is not guessed from the chart's `viewBox`: a card's real height depends on
-its title, notes, and caption, so the generated preview posts its measured
-`scrollHeight` to the parent. In grids a fixed `boxHeight` is applied anyway, so
-titles share a baseline. Content-driven heights leave every card a different size
-and the grid reads as broken.
+its title and notes, so the generated preview posts its measured `scrollHeight`
+to the parent. In grids a fixed `boxHeight` is applied anyway, so titles share a
+baseline. Content-driven heights leave every card a different size and the grid
+reads as broken.
+
+**`LOGICAL_WIDTH` is the width the charts were drawn for, not a desktop
+viewport.** They came from a two-column grid capped at 1400px, so a card was
+about 690px. It was set to 1180 and letterboxed nearly everything: an expressive
+SVG carries `max-height: 330px` with `preserveAspectRatio="xMidYMid meet"`, so
+past a certain width the height caps first and the chart's aspect ratio decides
+how little of the box it can fill, with the browser padding the rest to centre
+it. At 1180 a 400x320 chart drew 488 of 1044 available pixels. At 660 the
+measured fill roughly doubles — `dotty-matrix` 34 to 68%, `arc-matrix` 41 to
+82%, `hairline-line` 47 to 93% — and the wide charts reach 100%. It also fixes
+the vertical gap, because the scale stops being width-bound and the card fills
+its `boxHeight` exactly.
+
+Do not chase letterboxing by removing `max-height` from the components. That cap
+is what stops a chart rendering ~900px tall in a consumer's wide container;
+removing it would degrade what the registry ships to flatter the app's own
+preview. Below roughly 550 the width binds before the height cap and charts
+start shrinking again, so the useful range is narrow.
+
+**The scale is capped at 1, so a preview shrinks but never enlarges.** Past that
+the frame shows the component larger than its container could draw it, which is
+a size the reader cannot reproduce by copying it. It also inflates apparent type
+size, and type is identity rather than craft — a language whose signature is
+tiny uppercase captions must not have them magnified into ordinary ones. The
+frame therefore also carries `max-width: LOGICAL_WIDTH`, or a wide column would
+leave a band of empty frame beside a component already at full size. That
+converges rather than looping: the frame settles at the logical width and the
+measurement taken inside it then agrees.
 
 ## One registry root, two kinds of address
 
@@ -614,6 +701,15 @@ reading it will not expect them either.
   build now compares every selector defined by more than one primitive and fails
   on a mismatch. If a difference is genuinely wanted, rename the class rather
   than letting the copies diverge.
+- **A component's CSS must not select a mount by `#id`.** The extractor rewrote
+  every mount point from `id="ch"` to `data-nx-mount="ch"` in the markup but
+  left the stylesheets selecting `#ch`, so the rule silently stopped matching.
+  Three charts — `circular-graph-dense`, `force-graph-dense`, and
+  `thread-triptych` — set their height that way, so their containers collapsed
+  to `0` and they rendered nothing at all. Two were on a dark ground, which is
+  why it read as a stray black bar rather than as a missing chart, and it
+  survived the smoke test because jsdom reports a canvas as present regardless
+  of layout. Select `[data-nx-mount="name"]` instead.
 - **`packages/core` uses `.ts` import specifiers.** Node strips types natively;
   `.js` specifiers would not resolve against `.ts` files.
 - **The extractor is gone, but recoverable.** `tmp/extract-charts.mjs` turned
@@ -632,6 +728,35 @@ reading it will not expect them either.
   throwaway work there freely and expect it never to be committed.
 - **jsdom timers hang the smoke test** if the window is not closed — several
   charts stream via `setInterval`.
+
+## The second language is a test, not decoration
+
+`signal-console` exists to prove the tier split is real. One language cannot: if
+expressive components only ever wore one set of paint, "the language decides the
+geometry" was an assertion nobody had checked.
+
+It was chosen to invert as many axes as possible at once. Dark against paper,
+monospace against Inter, hue-with-meaning against no hue at all, filled marks
+from a `1px` floor against hairlines under a `1.4px` ceiling, aggregated against
+one-mark-per-record, and looping motion against draw-once-then-hold.
+
+Two of those inversions are deliberate contradictions and should stay that way.
+mono-editorial forbids looping animation; signal-console requires it for live
+state. mono-editorial demands negative tracking on headings; signal-console
+forbids it, because monospace is already evenly spaced. Neither is a mistake:
+they are the clearest evidence that motion and tracking belong to a language
+rather than to taste in general.
+
+**It omits `density` on purpose.** mono-editorial declares both values, which
+proves nothing about whether the axis is optional. A language that is only ever
+glance-read and names no distinction is what makes it a real option rather than
+a field everyone fills in.
+
+Adding it immediately found two generator bugs that one language had hidden:
+`$comment` keys leaking into `tokens.css` as invalid custom properties, and a
+hardcoded Inter link in every generated preview and in `nodex init`. Both were
+invisible while one language existed and wrong the moment a second arrived. The
+font now comes from `font.webfont` in each language's tokens.
 
 ## Technical debt
 

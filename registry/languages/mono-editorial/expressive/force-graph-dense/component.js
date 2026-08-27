@@ -9,9 +9,9 @@ export function mount(root) {
 
   // ── 8 domain hubs, each with a swarm of services; hubs interconnect ──
   const DOMAINS=[
-    ['auth',26,'#F0EFEB'],['billing',24,'#DCDAD2'],['content',28,'#C9C7BD'],
-    ['search',20,'#B3B0A4'],['notify',22,'#9C9A91'],['media',20,'#8F8E88'],
-    ['analytics',18,'#7C7A72'],['edge',14,'#6A6963'],
+    ['auth',26,'#1C1C1A'],['billing',24,'#33322D'],['content',28,'#4A4944'],
+    ['search',20,'#6A6963'],['notify',22,'#7C7A72'],['media',20,'#8F8E88'],
+    ['analytics',18,'#9C9A91'],['edge',14,'#B0AFA9'],
   ];
   const nodes=[],links=[];
   DOMAINS.forEach(([dom,count,shade],di)=>{
@@ -24,11 +24,11 @@ export function mount(root) {
       nodes.push({name,value:Math.round(v),hub:false,shade,dom:di});
       // satellite -> its hub
       links.push({source:name,target:dom,
-        lineStyle:{width:.5+v*.05,color:'#3F3E38',opacity:.5}});
+        lineStyle:{width:.5+v*.05,color:'#C6C5BF',opacity:.5}});
       // occasional satellite-to-satellite shortcut inside the domain
       if(i>1&&rnd(di+3,i+11)<.22){
         links.push({source:name,target:dom+'-'+String(1+Math.floor(rnd(di+4,i+13)*i)).padStart(2,'0'),
-          lineStyle:{width:.5,color:'#33322D',opacity:.4}});
+          lineStyle:{width:.5,color:'#DEDDD6',opacity:.4}});
       }
     }
   });
@@ -37,7 +37,7 @@ export function mount(root) {
   for(let a=0;a<H;a++)for(let b=a+1;b<H;b++){
     if(rnd(a+7,b+9)<.42){
       links.push({source:DOMAINS[a][0],target:DOMAINS[b][0],
-        lineStyle:{width:1.6+rnd(a+2,b+3)*2.2,color:'#55534B',opacity:.65,curveness:.08}});
+        lineStyle:{width:1.6+rnd(a+2,b+3)*2.2,color:'#B0AFA9',opacity:.65,curveness:.08}});
     }
   }
   // a few cross-domain satellite shortcuts — the messy real-world wires
@@ -46,15 +46,15 @@ export function mount(root) {
     const b=nodes[1+Math.floor(rnd(k+3,23)*(nodes.length-1))];
     if(a.name!==b.name&&a.dom!==b.dom&&!a.hub&&!b.hub){
       links.push({source:a.name,target:b.name,
-        lineStyle:{width:.5,color:'#2E2D29',opacity:.38,curveness:.15}});
+        lineStyle:{width:.5,color:'#E3E2DB',opacity:.38,curveness:.15}});
     }
   }
 
   const g=echarts.init(q('ch'));
   const opt={
     animationDuration:300,
-    tooltip:{backgroundColor:PAPER,borderWidth:0,
-      textStyle:{color:INK,fontFamily:'Inter',fontSize:12},padding:[10,14],
+    tooltip:{backgroundColor:INK,borderWidth:0,
+      textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14],
       formatter:p=>p.dataType==='node'?p.name+' — '+p.value+'k calls/day':''},
     series:[{
       type:'graph',layout:'force',
@@ -64,15 +64,15 @@ export function mount(root) {
       data:nodes.map(n=>({
         name:n.name,value:n.value,
         symbolSize:n.hub?16+Math.sqrt(n.value)*1.6:2.5+Math.sqrt(n.value)*1.5,
-        itemStyle:{color:n.shade,borderWidth:n.hub?2:0,borderColor:INK},
+        itemStyle:{color:n.shade,borderWidth:n.hub?2:0,borderColor:PAPER},
         label:{show:n.hub,position:'inside',
-          color:INK,fontFamily:'Inter',fontSize:9.5,fontWeight:800},
+          color:PAPER,fontFamily:'Inter',fontSize:9.5,fontWeight:800},
       })),
       links,
       emphasis:{
         focus:'adjacency',
-        lineStyle:{color:PAPER,opacity:.9,width:1.4},
-        label:{show:true,color:PAPER,position:'right'},
+        lineStyle:{color:INK,opacity:.9,width:1.4},
+        label:{show:true,color:INK,position:'right'},
       },
       blur:{itemStyle:{opacity:.1},lineStyle:{opacity:.03}},
     }],
