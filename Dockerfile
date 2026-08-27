@@ -65,8 +65,11 @@ COPY --from=build --chown=node:node /app/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /app/apps/web/.next/static ./apps/web/.next/static
 
 # Migrations travel with the image so a deployment can apply its own schema
-# rather than depending on someone having run them from a laptop.
-COPY --from=build --chown=node:node /app/apps/web/migrations ./migrations
+# rather than depending on someone having run them from a laptop. The path must
+# mirror the monorepo layout: migrate.mjs resolves its directory relative to its
+# own location as `../apps/web/migrations`, so flattening it to `/app/migrations`
+# leaves the script scanning a path that does not exist.
+COPY --from=build --chown=node:node /app/apps/web/migrations ./apps/web/migrations
 COPY --from=build --chown=node:node /app/scripts/migrate.mjs ./scripts/migrate.mjs
 
 USER node
