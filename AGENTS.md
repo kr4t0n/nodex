@@ -183,6 +183,38 @@ The line between what the app owns and what the language owns:
 GSAP is app-only and never enters registry content. A component that depended on
 GSAP would force that dependency on everyone who copied it.
 
+### The index wears every language at once, one scope per tile
+
+`useLanguageTokens` swaps a single `:root` layer for the whole document, which is
+right on a page showing one language. `/languages` shows several, and the last
+layer loaded would simply win — so its tiles used to sit in the first language's
+paint while previewing a second, which quietly contradicts the claim above.
+
+`useScopedLanguageTokens` fixes that. The generated `tokens.css` is one `:root`
+block and nothing else, so re-pointing that selector at
+`[data-nx-scope="<slug>"]` yields the same values bound to an element. It is
+deliberately a rename of the build's own output, not a second generated artifact
+and not a client-side reimplementation of its flattening — there is no third
+place for the two to drift apart. If the template ever stops emitting `:root`,
+that language is skipped rather than injected unscoped, since an unscoped layer
+would override every other language on the page.
+
+Two things to keep in mind when scoping a token layer:
+
+- **Inherited values do not re-resolve.** `body` already resolved `--nx-ink`
+  against `:root`, and descendants inherit the resulting colour, not the `var()`.
+  A scoped subtree has to restate the properties it wants — the tile sets
+  `background`, `color`, `font-family`, and `border-radius` itself. Setting the
+  scope attribute alone changes nothing visible.
+- **The hook is ready even when every fetch fails.** It gates whether the page
+  renders, and a tile with no scoped layer inherits the document's, which is the
+  old behaviour and a far better outcome than an index stuck loading.
+
+This is the strongest demonstration the project has: the badges, the button and
+the rules inside each tile are shared primitives, and they re-theme with no
+per-language code. Signal Console's solid button comes out paper-on-ink while
+Mono Editorial's is ink-on-paper, from the same markup.
+
 ### The landing page is written in the language it sells
 
 `/` is marketing, `/languages` is the app.

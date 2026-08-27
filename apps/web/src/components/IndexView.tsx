@@ -1,12 +1,12 @@
 'use client';
 
 import { ArrowRight } from '@phosphor-icons/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
 import { Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
-import { useLanguageTokens } from '@/lib/hooks.ts';
+import { useLanguageTokens, useScopedLanguageTokens } from '@/lib/hooks.ts';
 import {
   loadCatalog,
   previewUrl,
@@ -32,11 +32,18 @@ export function IndexView({
   const first = catalog?.languages[0]?.slug;
   const themed = useLanguageTokens(first);
 
+  // The page chrome wears the first language; each tile then wears its own.
+  const slugs = useMemo(
+    () => catalog?.languages.map((l) => l.slug) ?? [],
+    [catalog],
+  );
+  const scoped = useScopedLanguageTokens(slugs);
+
   useEffect(() => {
     void loadCatalog().then(setCatalog);
   }, []);
 
-  if (!catalog || !themed) return <Loading label="Loading languages" />;
+  if (!catalog || !themed || !scoped) return <Loading label="Loading languages" />;
 
   return (
     <>
@@ -54,7 +61,7 @@ export function IndexView({
           </p>
         </section>
 
-        <div className="flex flex-col gap-20">
+        <div className="flex flex-col gap-10">
           {catalog.languages.map((language) => (
             <LanguageTile key={language.slug} language={language} />
           ))}
@@ -98,9 +105,35 @@ function LanguageTile({ language }: { language: Language }) {
   const showing = featured.length > 0 ? 'expressive' : 'primitives';
 
   return (
-    <section>
-      <hr className="nx-rule" />
-      <div className="flex flex-wrap items-end justify-between gap-6 pt-7 pb-9">
+    /**
+     * The tile wears the language it is showing, rather than the one the page
+     * happens to be themed in.
+     *
+     * This is the claim the whole project makes — that a language is tokens,
+     * not a palette we paint on — so the index is the one page that has to
+     * demonstrate it with two at once. The badges, the button, and the rule
+     * inside are shared primitives and re-theme for free; that they do is the
+     * evidence.
+     *
+     * The four properties are restated because inherited values do not
+     * re-resolve: `body` already resolved `--nx-ink` against `:root`, so
+     * descendants carry that colour until something in scope asks again.
+     */
+    <section
+      data-nx-scope={language.slug}
+      className="overflow-hidden p-8 sm:p-10"
+      style={{
+        background: 'var(--nx-bg)',
+        color: 'var(--nx-ink)',
+        fontFamily: 'var(--nx-font-sans)',
+        borderRadius: 'var(--nx-radius-card)',
+        // A language whose ground matches the page would otherwise have no
+        // edge at all, and the two tiles would read as different kinds of
+        // thing rather than as the same thing wearing different paint.
+        border: '1px solid var(--nx-grid)',
+      }}
+    >
+      <div className="flex flex-wrap items-end justify-between gap-6 pb-9">
         <div>
           <h2 className="m-0 text-[24px] font-extrabold tracking-[-0.025em]">
             {language.name}
