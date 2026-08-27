@@ -63,8 +63,7 @@ ${bold('Filters for search')}
 
 ${bold('Global')}
   --registry <dir|url>   registry root. Also NODEX_REGISTRY.
-                         Defaults to the nearest nodex checkout,
-                         then to ${DEFAULT_REGISTRY}.
+                         Defaults to ${DEFAULT_REGISTRY}.
   --help
 
 ${bold('Examples')}
@@ -435,15 +434,13 @@ async function cmdLogin(registry: Registry): Promise<void> {
     // Name the root. Without it this reads as a non-sequitur to anyone who
     // installed the CLI globally and happened to run it inside a checkout,
     // which is exactly where someone working on nodex runs everything.
-    out('  This resolved to a local checkout, which is read straight off disk,');
-    out('  so there is no server to sign in to.');
+    out('  This registry is a directory, read straight off disk, so there is');
+    out('  no server to sign in to.');
     out();
     out(`    ${registry.root}`);
     out();
-    out(`  ${dim('A checkout at or above the working directory outranks the hosted')}`);
-    out(`  ${dim('registry, so this is what you get inside the nodex repo itself.')}`);
-    out(`  ${dim('To sign in to the hosted one:')}`);
-    out(`    ${dim(`nodex login --registry ${DEFAULT_REGISTRY}`)}`);
+    out(`  ${dim('Drop --registry, or unset NODEX_REGISTRY, to use the hosted one:')}`);
+    out(`    ${dim(DEFAULT_REGISTRY)}`);
     out();
     return;
   }
@@ -515,7 +512,7 @@ async function cmdWhoami(registry: Registry): Promise<void> {
   // Same trap as login: "not signed in to /Users/..." invites someone to sign
   // in to a directory, which is not a thing.
   if (!registry.isRemote) {
-    out('  This resolved to a local checkout, which has no sessions.');
+    out('  This registry is a directory, which has no sessions.');
     out();
     out(`    ${registry.root}`);
     out();
@@ -571,11 +568,11 @@ async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  // A project initialised against a remote registry must keep talking to it.
-  // Without this, a later `add` with no --registry would silently fall back to
-  // whatever local checkout happened to be above the cwd and fetch the wrong
-  // version of a component. Precedence: flag, then project config, then env,
-  // then the nearest checkout.
+  // A project initialised against a remote registry must keep talking to it,
+  // or a later `add` with no --registry would fetch a component from somewhere
+  // else. Precedence: flag, then project config, then env, then the default.
+  // The project file outranks the environment on purpose: a pin recorded in the
+  // repository should not be overridden by a stray shell variable.
   const project = await findConfig();
   const registry = await resolveRegistry(
     values.registry ?? project?.config.registry,

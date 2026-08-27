@@ -51,7 +51,8 @@ Filters for `search`: `--design`, `--type`, `--tag`, `--tier`, `--density`.
 The CLI talks to <https://nodex.kubitnodes.com> unless told otherwise, so it
 needs no configuration. To point somewhere else, pass `--registry <dir|url>` or
 set `NODEX_REGISTRY`. Resolution order is the flag, then `nodex.json`, then the
-environment variable, then a local nodex checkout, then the default.
+environment variable, then the default. Nothing is inferred from the directory
+you run in, so the registry a command uses is always something you can point at.
 
 `init` writes `nodex.json` in your project recording the language and the
 registry it used, so later `add` calls need no flags.

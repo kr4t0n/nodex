@@ -524,28 +524,46 @@ the served layout exactly, because the manifest is written into `public/` so a
 static host exposes it at `/r` while sources stay at the repo root. A single
 prefix rule reconciles them.
 
-Resolution precedence is flag, then `nodex.json`, then `NODEX_REGISTRY`, then the
-nearest checkout, then `DEFAULT_REGISTRY`. The `nodex.json` step matters: without
-it a project set up against a remote registry would silently fall back to
-whatever local checkout happened to be above the cwd and fetch a different
-version of a component.
+Resolution precedence is flag, then `nodex.json`, then `NODEX_REGISTRY`, then
+`DEFAULT_REGISTRY`, the deployed app. Every step is something someone wrote
+down. **Nothing is inferred from where the command was run**, so the resolved
+root is predictable from the arguments and the project alone.
 
-**The default is the deployed app**, so the CLI works with no configuration at
-all. Two things about where it sits in that order:
+`nodex.json` outranks the environment so a project pinned to one registry cannot
+be silently served by another, and `init` records the root whenever it is
+remote, which is what makes that pin exist.
 
-- **Behind the checkout, deliberately.** Ahead of it, every command run inside
-  this repo would quietly read production instead of the build you just made,
-  and registry work would look like it had no effect. `findLocalRoot` only walks
-  up from the cwd, so it can only match inside a checkout anyway.
-- **It makes `init` self-pinning.** `init` already records the root whenever it
-  is remote, so a project set up against the default gets that URL written into
-  its `nodex.json` — and is then immune to a checkout appearing above it later.
+### Why the checkout is no longer auto-detected
+
+There used to be a `findLocalRoot` step between the environment and the default:
+walk up from the cwd looking for `public/r/registry.json` and prefer it, so
+working in this repo read local work. It was removed, and it should not come
+back, because implicit resolution failed in both directions on the same evening:
+
+- Inside the checkout, a globally installed `nodex login` reported *"this is a
+  local checkout, so there is nothing to sign in to"* — correct, and unreadable
+  as anything but a bug, because nothing said which root it had chosen or why.
+- Then an `init` run one directory **above** the checkout wrote a `nodex.json`
+  there, which outranks the checkout, so every command inside the repo silently
+  flipped back to production. Two implicit rules, in opposite directions, with
+  no output naming either.
+
+A local root is still reachable, and registry development still works: pass
+`--registry .` or set `NODEX_REGISTRY`. `scripts/smoke-cli.mjs` always passed
+the root explicitly, so it never relied on the detection. The cost is one flag
+while working on the registry; the saving is that nobody has to reason about the
+cwd to know what a command will read.
+
+Two other things about the default worth keeping:
+
+- **It makes `init` self-pinning.** A project set up against the default gets
+  that URL written into its `nodex.json`, so it stays put.
+- **The "no registry found" error is gone**, because there is now always one. A
+  network failure surfaces from the manifest read instead, which is why that
+  message mentions connectivity.
 
 It is a plain registry root reached by the same fixed shape as any other, so no
 command knows it is the default and moving to a CDN is a change to one string.
-The "no registry found" error is gone, because there is now always one; a
-network failure surfaces from the manifest read instead, which is why that
-message mentions connectivity.
 
 ### Public content must never route through the server
 

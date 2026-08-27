@@ -50,10 +50,14 @@ agent knows the rules exist. `add` then needs no flags.
 
 The CLI talks to <https://nodex.kubitnodes.com> unless told otherwise, so it
 works with no configuration. Resolution runs `--registry <dir|url>`, then
-`nodex.json`, then `NODEX_REGISTRY`, then the nearest checkout, then that
-default. A checkout outranks the default, so working in this repo reads the
-build you just made rather than production. A project initialised against a
-remote registry has the root written into its `nodex.json` and keeps using it.
+`nodex.json`, then `NODEX_REGISTRY`, then that default — every step something
+someone wrote down, nothing inferred from where the command was run. A project
+initialised against a remote registry has the root written into its
+`nodex.json` and keeps using it.
+
+**To read this checkout rather than the deployment, say so:** `--registry .`,
+or `NODEX_REGISTRY=.`. Running inside the repo is not enough and deliberately
+so — see `AGENTS.md`.
 
 Inside this repo, invoke it as `node packages/cli/src/index.ts <command>` — the
 source runs directly, so there is nothing to build first.

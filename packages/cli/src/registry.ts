@@ -55,9 +55,14 @@ export interface Registry {
  * sources. No command knows it is the default, and moving it to a CDN later is
  * a change to this string alone.
  *
- * It is the last resort, behind a local checkout, so working inside the nodex
- * repo still reads the build you just made rather than silently reaching past
- * it to production.
+ * It is the last resort, and there is no longer anything between it and the
+ * environment. The CLI used to walk up from the cwd looking for a built
+ * manifest and prefer that, which meant running any command inside a nodex
+ * checkout silently addressed the working tree instead of the deployment —
+ * `login` reported there was nothing to sign in to, and a stray `nodex.json`
+ * anywhere above the checkout flipped it back again. Both are confusing in a
+ * way that is hard to attribute. A local root is still reachable, but only by
+ * asking for it: `--registry .` or `NODEX_REGISTRY`.
  */
 export const DEFAULT_REGISTRY = 'https://nodex.kubitnodes.com';
 
@@ -66,38 +71,20 @@ function isUrl(value: string): boolean {
 }
 
 /**
- * Walk up from the cwd looking for a built manifest, so running inside the
- * nodex repo just works without configuration.
- */
-async function findLocalRoot(from: string): Promise<string | undefined> {
-  let dir = path.resolve(from);
-  for (;;) {
-    try {
-      await readFile(path.join(dir, 'public', 'r', 'registry.json'), 'utf8');
-      return dir;
-    } catch {
-      const parent = path.dirname(dir);
-      if (parent === dir) return undefined;
-      dir = parent;
-    }
-  }
-}
-
-/**
  * Precedence: `--registry`, then `nodex.json`, then `NODEX_REGISTRY`, then the
- * nearest checkout, then the hosted default.
+ * hosted default.
  *
- * A checkout outranks the default so nodex development reads local work, and
+ * Every step is something someone wrote down. Nothing is inferred from where
+ * the command happened to be run, which is what makes the resolved root
+ * predictable from the arguments and the project alone.
+ *
  * `nodex.json` outranks the environment so a project pinned to one registry
  * cannot be silently served by another. `init` records the root it used
  * whenever it is remote, which is what makes that pin exist at all.
  */
 export async function resolveRegistry(explicit?: string): Promise<Registry> {
   const candidate =
-    explicit ??
-    process.env.NODEX_REGISTRY ??
-    (await findLocalRoot(process.cwd())) ??
-    DEFAULT_REGISTRY;
+    explicit ?? process.env.NODEX_REGISTRY ?? DEFAULT_REGISTRY;
 
   const remote = isUrl(candidate);
   const root = remote ? candidate.replace(/\/+$/, '') : path.resolve(candidate);
