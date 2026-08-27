@@ -6,15 +6,11 @@
 
 .nx-barcode-lollipop .card.dark .sub {color:#8F8E88}
 
-.nx-barcode-lollipop .card.dark .src {color:#55554F}
-
 .nx-barcode-lollipop .split {display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start}
 
 .nx-barcode-lollipop h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
 
 .nx-barcode-lollipop .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
-.nx-barcode-lollipop .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
 
 .nx-barcode-lollipop .note {font-size:11px;color:#6A6963;line-height:1.65;margin-bottom:16px}
 

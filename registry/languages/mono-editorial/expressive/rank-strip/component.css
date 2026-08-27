@@ -6,13 +6,9 @@
 
 .nx-rank-strip .card.dark .sub {color:#8F8E88}
 
-.nx-rank-strip .card.dark .src {color:#55554F}
-
 .nx-rank-strip h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
 
 .nx-rank-strip .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
-.nx-rank-strip .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
 
 .nx-rank-strip .ch {height:320px}
 

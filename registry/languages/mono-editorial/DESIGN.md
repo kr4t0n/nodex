@@ -50,26 +50,39 @@ is barely larger than body text — the hierarchy comes from weight and from the
 uppercase tracking of the captions, not from size jumps. Captions run `9.5px`
 uppercase at `0.08em`, small enough to read as a printed credit line.
 
+No chart currently uses that caption size: it belonged to the `div.src` footer,
+which was removed. The token stays because it is the language's vocabulary for
+an annotation smaller than a legend, and a consumer captioning their own data
+needs a size to reach for. Do not read its absence from the shipped charts as a
+reason to delete it.
+
 Negative tracking on headings, positive tracking on anything uppercase. Never
 the reverse.
 
 ## Component behaviors
 
-Every chart card follows the same four-part anatomy, in this order, always:
+Every chart card follows the same three-part anatomy, in this order, always:
 
 ```
 h2.title      what the chart says, as a sentence
 div.sub       the reading instructions — units, span, what one mark means
 [the chart]
-div.src       CHART TYPE · LANGUAGE · DATA SOURCE, uppercase
 ```
 
 The subtitle is not decoration. It tells the reader what one mark represents,
 which is the only way a one-mark-per-record chart is legible. Write it as
 instructions, not as a description.
 
-The `.src` footer is a printed credit line. Keep it uppercase, keep it three
-segments, keep it dry.
+There is deliberately **no footer credit line.** An earlier anatomy ended each
+card with a `div.src` reading `CHART TYPE · LANGUAGE · DATA SOURCE`, and it was
+removed for two reasons. It states facts the manifest already records, so it
+went stale the moment a component was renamed or moved — 53 of 64 ended up
+naming a design language that had never existed. And it is the only left-aligned
+element under a chart that centres itself, so it read as misalignment on every
+card wide enough to letterbox.
+
+A caption naming the *data* rather than the component is a different thing and
+still belongs, when a chart genuinely needs sourcing. Write it as a `div.note`.
 
 Interactive marks carry an SVG `<title>` child so hovering yields a native
 tooltip with no JavaScript. Prefer that over a custom tooltip layer.

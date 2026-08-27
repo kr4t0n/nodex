@@ -377,9 +377,36 @@ its title would be a worse component for the consumer, and the app's grid needs
 a legible label because a chart scaled to a quarter cannot supply one.
 
 Two things this must not become: it hides the title and subtitle only, never the
-note, legend, or source caption, which are annotation rather than heading; and
-the attribute is set from a blocking script in `head`, because applying it after
-the module runs makes the header appear and then vanish.
+note or legend, which are annotation rather than heading; and the attribute is
+set from a blocking script in `head`, because applying it after the module runs
+makes the header appear and then vanish.
+
+This rule used to name the source caption alongside note and legend. That
+caption no longer exists — see below — so nothing is being hidden that a reader
+would miss, and the rule still holds for the annotation that remains.
+
+### The `div.src` credit line was removed from every chart
+
+Each chart used to end with `CHART TYPE · LANGUAGE · DATA SOURCE`, uppercase, as
+the fourth part of the card anatomy. All 64 were stripped and `DESIGN.md` now
+fixes a three-part anatomy.
+
+It restated what the manifest already holds, so it could only ever drift out of
+date, and it had: 53 of 64 named a section of the source document the extractor
+read rather than a design language, including `MONO-FANCY4`, `MONO-EDITORIAL2`,
+and `NEW`. A consumer running `nodex add mono-editorial/bar-race` received a
+chart crediting a language that has never existed.
+
+It also read as a layout bug. An SVG carrying `max-height` with
+`preserveAspectRatio="xMidYMid meet"` centres itself in a box wider than its
+aspect ratio, while the caption is left-aligned HTML — so on every card wide
+enough to letterbox, the chart visibly drifted away from its own credit line.
+
+Two consequences to keep in mind. The `type.caption` token now has no consumer
+among the shipped charts and is deliberately kept, because it is the language's
+vocabulary for an annotation smaller than a legend. And a caption naming the
+*data* is a different thing that still belongs when a chart needs sourcing; it
+is written as a `div.note`, which is annotation and is never hidden by `bare=1`.
 
 ### Previews must not depend on an observer firing
 

@@ -6,15 +6,11 @@
 
 .nx-type-colonnade .card.dark .sub {color:#8F8E88}
 
-.nx-type-colonnade .card.dark .src {color:#55554F}
-
 .nx-type-colonnade .split {display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start}
 
 .nx-type-colonnade h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
 
 .nx-type-colonnade .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
-.nx-type-colonnade .src {font-size:9.5px;color:var(--nx-faint);margin-top:10px;letter-spacing:.08em;font-weight:500}
 
 .nx-type-colonnade .note {font-size:11px;color:#6A6963;line-height:1.65;margin-bottom:16px}
 
