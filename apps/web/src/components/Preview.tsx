@@ -123,8 +123,22 @@ export function Preview({
         ? Math.min(width / LOGICAL_WIDTH, boxHeight / logicalHeight)
         : width / LOGICAL_WIDTH;
 
-  const ready = fluid ? near : near && scale > 0;
-  const frameHeight = fluid ? (contentHeight ?? 160) : logicalHeight;
+    const ready = fluid ? near : near && scale > 0;
+
+    /**
+     * A fluid preview normally sizes to its content, which is right on a detail
+     * page and wrong in a grid: four primitives at true size come out four
+     * different heights and the row reads as broken.
+     *
+     * With `boxHeight` the frame is pinned and the content sits at the top of
+     * it, still unscaled. The spare room fills with the preview's own
+     * background, so the box reads as one surface rather than as a letterbox.
+     * Pick a height that clears the tallest component in the row: anything
+     * taller than the box is clipped, not shrunk.
+     */
+    const frameHeight = fluid
+      ? (boxHeight ?? contentHeight ?? 160)
+      : logicalHeight;
 
   return (
     // min-w-0 is load-bearing, not defensive. This sits inside a grid, and a

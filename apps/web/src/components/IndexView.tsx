@@ -79,6 +79,17 @@ export function IndexView({
  */
 const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
 
+/**
+ * One box height for every tile on this page, charts and primitives alike.
+ *
+ * Charts scale to fit, so any value works for them. Primitives do not: they
+ * render at true size and are clipped by a box smaller than they are. 260px
+ * clears the tallest of the four at every column width the grid produces, with
+ * the widest column being the tightest case because the narrow ones let a
+ * primitive wrap taller.
+ */
+const TILE_HEIGHT = 260;
+
 function LanguageTile({ language }: { language: Language }) {
   const featured = language.featured.slice(0, 4);
 
@@ -133,7 +144,7 @@ function LanguageTile({ language }: { language: Language }) {
                 <Preview
                   src={previewUrl(language.slug, name)}
                   title={`${name} in ${language.name}`}
-                  boxHeight={200}
+                  boxHeight={TILE_HEIGHT}
                 />
               </Link>
             ))
@@ -144,11 +155,12 @@ function LanguageTile({ language }: { language: Language }) {
                 className="min-w-0 no-underline"
                 aria-label={`${name} in ${language.name}`}
               >
-                {/* Fluid, like everywhere else primitives appear: a button
-                    scaled to a quarter misrepresents it. */}
+                {/* Fluid, so the component is shown at the size it really is,
+                    but inside the same box as every other tile. */}
                 <Preview
                   src={primitivePreviewUrl(name, language.slug)}
                   title={`${name} in ${language.name}`}
+                  boxHeight={TILE_HEIGHT}
                   fluid
                 />
               </Link>
