@@ -1,7 +1,6 @@
 'use client';
 
-import { ArrowsClockwise } from '@phosphor-icons/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useNearViewport } from '@/lib/hooks.ts';
 
@@ -21,7 +20,6 @@ interface PreviewProps {
   /** From meta.aspectRatio. Only reserves initial space; real height is measured. */
   aspectRatio?: string;
   className?: string;
-  replayable?: boolean;
   /**
    * Fixed thumbnail height. In a grid, content-driven heights leave every card
    * a different size and the titles beneath them fall out of alignment, which
@@ -56,14 +54,12 @@ export function Preview({
   title,
   aspectRatio,
   className,
-  replayable = false,
   boxHeight,
   fluid = false,
 }: PreviewProps) {
   const [nearRef, near] = useNearViewport<HTMLDivElement>();
   const boxRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
-  const [nonce, setNonce] = useState(0);
   const [width, setWidth] = useState(0);
   const [contentHeight, setContentHeight] = useState<number>();
   const [loaded, setLoaded] = useState(false);
@@ -100,12 +96,6 @@ export function Preview({
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, []);
-
-  const replay = useCallback(() => {
-    setLoaded(false);
-    setContentHeight(undefined);
-    setNonce((n) => n + 1);
   }, []);
 
   const fallbackRatio = aspectRatio
@@ -158,7 +148,6 @@ export function Preview({
         >
           {ready ? (
             <iframe
-              key={nonce}
               ref={frameRef}
               src={src}
               title={title}
@@ -198,14 +187,6 @@ export function Preview({
         ) : null}
       </div>
 
-      {replayable ? (
-        <div className="mt-3 flex justify-end">
-          <button className="nx-btn nx-btn--quiet" type="button" onClick={replay}>
-            <ArrowsClockwise size={13} weight="bold" aria-hidden />
-            Replay
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }

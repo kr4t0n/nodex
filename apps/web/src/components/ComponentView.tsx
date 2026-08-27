@@ -105,7 +105,6 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                 title={item.title}
                 aspectRatio={item.meta.aspectRatio}
                 fluid={isPrimitive}
-                replayable={!isPrimitive}
               />
             </div>
           </div>
