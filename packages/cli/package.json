@@ -1,5 +1,5 @@
 {
-  "name": "@nodex/cli",
+  "name": "@kubitnodes/nodex",
   "version": "0.1.0",
   "description": "Fetch design languages and components from a nodex registry",
   "keywords": [
@@ -29,8 +29,7 @@
     "node": ">=20"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.publish.json"

@@ -1,6 +1,6 @@
 name: npm
 
-# Publishes packages/cli to npm as @nodex/cli.
+# Publishes packages/cli to npm as @kubitnodes/nodex.
 #
 # Needs one repository secret:
 #   NPM_TOKEN   an npm automation token with publish rights on the @nodex scope
@@ -27,9 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # Required for npm provenance, which package.json opts into. It signs the
-      # published tarball against this workflow run, so a consumer can verify
-      # the bytes came from this repository rather than someone's laptop.
+      # Required for npm provenance, which is generated automatically when
+      # publishing from CI. It signs the tarball against this workflow run, so a
+      # consumer can verify the bytes came from this repository rather than
+      # someone's laptop.
+      #
+      # Deliberately not set as `provenance: true` in publishConfig: npm can
+      # only generate it inside a supported CI environment, so the flag turns
+      # every local `npm publish` into an error. Under trusted publishing it is
+      # automatic and the flag is redundant anyway.
       id-token: write
 
     steps:
@@ -45,7 +51,7 @@ jobs:
             echo 'configured=true' >> "$GITHUB_OUTPUT"
           else
             echo 'configured=false' >> "$GITHUB_OUTPUT"
-            echo '::notice title=npm not configured::Set the NPM_TOKEN secret to publish @nodex/cli.'
+            echo '::notice title=npm not configured::Set the NPM_TOKEN secret to publish @kubitnodes/nodex.'
           fi
 
       - if: steps.guard.outputs.configured == 'true'
@@ -69,9 +75,9 @@ jobs:
         run: |
           VERSION="$(node -p "require('./packages/cli/package.json').version")"
           echo "value=$VERSION" >> "$GITHUB_OUTPUT"
-          if npm view "@nodex/cli@$VERSION" version >/dev/null 2>&1; then
+          if npm view "@kubitnodes/nodex@$VERSION" version >/dev/null 2>&1; then
             echo 'published=true' >> "$GITHUB_OUTPUT"
-            echo "::notice title=Version already published::@nodex/cli@$VERSION exists on npm and was left untouched. Bump the version in packages/cli/package.json to release changes."
+            echo "::notice title=Version already published::@kubitnodes/nodex@$VERSION exists on npm and was left untouched. Bump the version in packages/cli/package.json to release changes."
           else
             echo 'published=false' >> "$GITHUB_OUTPUT"
           fi
@@ -94,13 +100,16 @@ jobs:
       # same as being runnable, and `files` narrows what ships.
       - if: steps.guard.outputs.configured == 'true' && steps.version.outputs.published == 'false'
         run: |
-          npm pack --workspace @nodex/cli --pack-destination "$RUNNER_TEMP"
+          npm pack --workspace @kubitnodes/nodex --pack-destination "$RUNNER_TEMP"
           mkdir -p "$RUNNER_TEMP/verify" && cd "$RUNNER_TEMP/verify"
           npm init -y >/dev/null
-          npm install "$RUNNER_TEMP"/nodex-cli-*.tgz
+          # Whatever npm named it. A scoped package packs to
+          # <scope>-<name>-<version>.tgz, so hardcoding that spelling breaks
+          # silently the next time the package is renamed.
+          npm install "$RUNNER_TEMP"/*.tgz
           ./node_modules/.bin/nodex list
 
       - if: steps.guard.outputs.configured == 'true' && steps.version.outputs.published == 'false'
-        run: npm publish --workspace @nodex/cli
+        run: npm publish --workspace @kubitnodes/nodex
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,4 +1,4 @@
-# @nodex/cli
+# @kubitnodes/nodex
 
 Fetch design languages and components from a [nodex](https://nodex.kubitnodes.com)
 registry.
@@ -9,14 +9,14 @@ components built for it. You pick a language once; everything you add after that
 already agrees with it.
 
 ```bash
-npx @nodex/cli init mono-editorial
-npx @nodex/cli add mono-editorial/barcode-lollipop
+npx @kubitnodes/nodex init mono-editorial
+npx @kubitnodes/nodex add mono-editorial/barcode-lollipop
 ```
 
 Or install it:
 
 ```bash
-npm install -g @nodex/cli
+npm install -g @kubitnodes/nodex
 nodex list
 ```
 

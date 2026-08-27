@@ -60,7 +60,7 @@ source runs directly, so there is nothing to build first.
 
 ### Publishing the CLI
 
-`@nodex/cli` publishes to npm from `.github/workflows/npm-publish.yml`, on a
+`@kubitnodes/nodex` publishes to npm from `.github/workflows/npm-publish.yml`, on a
 `v*` tag or a manual run, and needs one repository secret:
 
 | Secret | What it is |
