@@ -85,6 +85,19 @@ div.sub       the reading instructions — units, span, what one mark means
 [the chart]
 ```
 
+The drawing is **left-aligned to the title, never centred**. Every SVG carries
+`preserveAspectRatio="xMinYMid meet"` and no `margin: 0 auto`. A chart with a
+`max-height` reaches its cap before it runs out of width, so in any container
+wider than its aspect ratio needs there is slack — and the default `xMidYMid`
+spends that slack centring the drawing away from the title and subtitle sitting
+at the card's left edge. Left-aligned, a wall of these cards shares one starting
+edge and reads as a set. Centred, each one floats at its own offset.
+
+This aligns the SVG's own box. A chart that centres its composition *inside* its
+viewBox — a donut, a network — still sits wherever it was drawn, because that is
+a property of the drawing rather than of the box. Fix those by moving the marks
+in the viewBox, not by re-centring the box.
+
 The subtitle is not decoration. It tells the reader what one mark represents,
 which is the only way a one-mark-per-record chart is legible. Write it as
 instructions, not as a description.

@@ -446,10 +446,38 @@ the top-left corner of a 1400px layout. `Preview` renders at a fixed logical
 width and scales the frame, keeping composition and type proportion intact.
 
 Height is not guessed from the chart's `viewBox`: a card's real height depends on
-its title, notes, and caption, so the generated preview posts its measured
-`scrollHeight` to the parent. In grids a fixed `boxHeight` is applied anyway, so
-titles share a baseline. Content-driven heights leave every card a different size
-and the grid reads as broken.
+its title and notes, so the generated preview posts its measured `scrollHeight`
+to the parent. In grids a fixed `boxHeight` is applied anyway, so titles share a
+baseline. Content-driven heights leave every card a different size and the grid
+reads as broken.
+
+**`LOGICAL_WIDTH` is the width the charts were drawn for, not a desktop
+viewport.** They came from a two-column grid capped at 1400px, so a card was
+about 690px. It was set to 1180 and letterboxed nearly everything: an expressive
+SVG carries `max-height: 330px` with `preserveAspectRatio="xMidYMid meet"`, so
+past a certain width the height caps first and the chart's aspect ratio decides
+how little of the box it can fill, with the browser padding the rest to centre
+it. At 1180 a 400x320 chart drew 488 of 1044 available pixels. At 660 the
+measured fill roughly doubles — `dotty-matrix` 34 to 68%, `arc-matrix` 41 to
+82%, `hairline-line` 47 to 93% — and the wide charts reach 100%. It also fixes
+the vertical gap, because the scale stops being width-bound and the card fills
+its `boxHeight` exactly.
+
+Do not chase letterboxing by removing `max-height` from the components. That cap
+is what stops a chart rendering ~900px tall in a consumer's wide container;
+removing it would degrade what the registry ships to flatter the app's own
+preview. Below roughly 550 the width binds before the height cap and charts
+start shrinking again, so the useful range is narrow.
+
+**The scale is capped at 1, so a preview shrinks but never enlarges.** Past that
+the frame shows the component larger than its container could draw it, which is
+a size the reader cannot reproduce by copying it. It also inflates apparent type
+size, and type is identity rather than craft — a language whose signature is
+tiny uppercase captions must not have them magnified into ordinary ones. The
+frame therefore also carries `max-width: LOGICAL_WIDTH`, or a wide column would
+leave a band of empty frame beside a component already at full size. That
+converges rather than looping: the frame settles at the logical width and the
+measurement taken inside it then agrees.
 
 ## One registry root, two kinds of address
 

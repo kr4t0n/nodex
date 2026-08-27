@@ -16,7 +16,7 @@
 
 .nx-bubble-almanac .legend {font-size:9px;letter-spacing:.1em;font-weight:600;color:var(--nx-muted);line-height:2}
 
-.nx-bubble-almanac svg {width:100%;max-height:330px;display:block;margin:0 auto}
+.nx-bubble-almanac svg {width:100%;max-height:330px;display:block}
 
 .nx-bubble-almanac svg text {font-family:'Inter',sans-serif}
 

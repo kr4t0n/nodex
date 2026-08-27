@@ -16,7 +16,7 @@
 
 .nx-calendar-heat .legend {font-size:9px;letter-spacing:.1em;font-weight:600;color:var(--nx-muted);line-height:2}
 
-.nx-calendar-heat svg {width:100%;max-height:330px;display:block;margin:0 auto}
+.nx-calendar-heat svg {width:100%;max-height:330px;display:block}
 
 .nx-calendar-heat svg text {font-family:'Inter',sans-serif}
 
