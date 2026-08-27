@@ -67,7 +67,12 @@ jobs:
 
           if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
             git fetch origin gh-pages --depth 1
-            git worktree add pages origin/gh-pages
+            # -B creates a local `gh-pages` branch at the fetched tip. Without
+            # it the worktree checks out detached at origin/gh-pages, and the
+            # final `git push origin gh-pages` then fails with
+            # "src refspec gh-pages does not match any" because no local branch
+            # of that name exists.
+            git worktree add -B gh-pages pages origin/gh-pages
           else
             # An orphan branch, so the chart repo carries no source history.
             echo "gh-pages does not exist yet, creating it"
