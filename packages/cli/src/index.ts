@@ -432,8 +432,18 @@ async function cmdLogin(registry: Registry): Promise<void> {
   out();
 
   if (!registry.isRemote) {
-    out('  This is a local checkout, so there is nothing to sign in to.');
-    out(`  ${dim('Point at a served registry with --registry <url> or NODEX_REGISTRY.')}`);
+    // Name the root. Without it this reads as a non-sequitur to anyone who
+    // installed the CLI globally and happened to run it inside a checkout,
+    // which is exactly where someone working on nodex runs everything.
+    out('  This resolved to a local checkout, which is read straight off disk,');
+    out('  so there is no server to sign in to.');
+    out();
+    out(`    ${registry.root}`);
+    out();
+    out(`  ${dim('A checkout at or above the working directory outranks the hosted')}`);
+    out(`  ${dim('registry, so this is what you get inside the nodex repo itself.')}`);
+    out(`  ${dim('To sign in to the hosted one:')}`);
+    out(`    ${dim(`nodex login --registry ${DEFAULT_REGISTRY}`)}`);
     out();
     return;
   }
@@ -501,6 +511,18 @@ async function cmdLogout(registry: Registry): Promise<void> {
 async function cmdWhoami(registry: Registry): Promise<void> {
   heading('Whoami');
   out();
+
+  // Same trap as login: "not signed in to /Users/..." invites someone to sign
+  // in to a directory, which is not a thing.
+  if (!registry.isRemote) {
+    out('  This resolved to a local checkout, which has no sessions.');
+    out();
+    out(`    ${registry.root}`);
+    out();
+    out(`  ${dim(`Try: nodex whoami --registry ${DEFAULT_REGISTRY}`)}`);
+    out();
+    return;
+  }
 
   const credentials = await credentialsFor(registry.root);
   if (!credentials) {
