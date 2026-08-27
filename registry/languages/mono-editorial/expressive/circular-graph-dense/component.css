@@ -1,10 +1,10 @@
 /* Six hundred collaborations, one ring — mono-editorial */
 
-.nx-circular-graph-dense .card {background:var(--nx-dark);color:#F0EFEB;border-radius:24px;padding:34px 34px 24px;
+.nx-circular-graph-dense .card {background:var(--nx-bg);border-radius:24px;padding:34px 34px 24px;
     width:min(1100px,100%)}
 
 .nx-circular-graph-dense h2 {font-weight:700;font-size:19px;letter-spacing:-.02em;margin-bottom:4px}
 
 .nx-circular-graph-dense .sub {font-size:12px;color:#8F8E88;margin-bottom:10px}
 
-.nx-circular-graph-dense #ch {height:78vh;min-height:620px;cursor:pointer}
+.nx-circular-graph-dense [data-nx-mount="ch"] {height:78vh;min-height:620px;cursor:pointer}

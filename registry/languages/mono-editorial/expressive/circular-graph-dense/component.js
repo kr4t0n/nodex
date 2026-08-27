@@ -9,11 +9,11 @@ export function mount(root) {
 
   // ── 60 repos in 5 org clusters; cluster = shade family ──
   const ORGS=[
-    ['platform',16,'#F0EFEB'],   // paper — the core
-    ['product',14,'#C9C7BD'],
-    ['data',12,'#A5A39A'],
+    ['platform',16,'#1C1C1A'],   // ink — the core
+    ['product',14,'#4A4944'],
+    ['data',12,'#6A6963'],
     ['infra',10,'#8F8E88'],
-    ['labs',8,'#6A6963'],
+    ['labs',8,'#B0AFA9'],
   ];
   const nodes=[];
   ORGS.forEach(([org,count],oi)=>{
@@ -44,8 +44,8 @@ export function mount(root) {
   const g=echarts.init(q('ch'));
   const opt={
     animationDuration:1800,animationEasing:'quarticOut',
-    tooltip:{backgroundColor:PAPER,borderWidth:0,
-      textStyle:{color:INK,fontFamily:'Inter',fontSize:12},padding:[10,14],
+    tooltip:{backgroundColor:INK,borderWidth:0,
+      textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14],
       formatter:p=>p.dataType==='node'
         ?p.name+' — '+p.value+' contributors'
         :p.data.rawS+' ↔ '+p.data.rawT+' — '+p.data.w+' shared'},
@@ -59,22 +59,22 @@ export function mount(root) {
         itemStyle:{color:ORGS[n.org][2],borderWidth:0},
         // only the giants get a label — 60 names would be soup
         label:{show:n.value>=26,position:'right',distance:4,
-          color:'#B3B0A4',fontFamily:'Inter',fontSize:8.5,fontWeight:600},
+          color:'#6A6963',fontFamily:'Inter',fontSize:8.5,fontWeight:600},
       })),
       links:links.map(l=>({
         source:l.source,target:l.target,
         rawS:nodes[l.source].name,rawT:nodes[l.target].name,w:l.w,
         lineStyle:{
           width:.4+l.w*.28,
-          color:l.same?'#55534B':'#3A3934',
+          color:l.same?'#C0BFB8':'#DEDDD6',
           opacity:l.same?.5:.32,
           curveness:.3,
         },
       })),
       emphasis:{
         focus:'adjacency',
-        lineStyle:{color:PAPER,opacity:.9,width:1.6},
-        label:{show:true,color:PAPER},
+        lineStyle:{color:INK,opacity:.9,width:1.6},
+        label:{show:true,color:INK},
       },
       blur:{itemStyle:{opacity:.12},lineStyle:{opacity:.03}},
     }],

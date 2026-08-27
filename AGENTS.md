@@ -641,6 +641,15 @@ reading it will not expect them either.
   build now compares every selector defined by more than one primitive and fails
   on a mismatch. If a difference is genuinely wanted, rename the class rather
   than letting the copies diverge.
+- **A component's CSS must not select a mount by `#id`.** The extractor rewrote
+  every mount point from `id="ch"` to `data-nx-mount="ch"` in the markup but
+  left the stylesheets selecting `#ch`, so the rule silently stopped matching.
+  Three charts — `circular-graph-dense`, `force-graph-dense`, and
+  `thread-triptych` — set their height that way, so their containers collapsed
+  to `0` and they rendered nothing at all. Two were on a dark ground, which is
+  why it read as a stray black bar rather than as a missing chart, and it
+  survived the smoke test because jsdom reports a canvas as present regardless
+  of layout. Select `[data-nx-mount="name"]` instead.
 - **`packages/core` uses `.ts` import specifiers.** Node strips types natively;
   `.js` specifiers would not resolve against `.ts` files.
 - **The extractor is gone, but recoverable.** `tmp/extract-charts.mjs` turned

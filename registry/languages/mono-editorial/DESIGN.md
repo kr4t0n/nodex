@@ -32,6 +32,22 @@ of marks, never from color.
 Cards may invert to ink ground with paper text. On inverted cards, captions drop
 to `#55554F` so they recede the same amount they do on paper.
 
+**No chart in the collection currently inverts.** Seven did — `circular-graph`,
+`circular-graph-dense`, `dot-cascade`, `force-graph`, `force-graph-dense`,
+`petal-rose`, and `thread-triptych` — and were moved onto paper so a page of
+them reads as one language rather than two. The affordance and its CSS stay,
+because inversion is a legitimate choice for a single card that has to stand
+apart; it is just not something to reach for while building a set.
+
+Note that only four carried the `card dark` modifier. The other three set a dark
+background on `.card` itself, so grepping for the modifier finds the wrong
+answer; check the resolved background instead.
+
+Inverting is not a background swap. Mark colour encodes rank, so the ramp has to
+be reversed with it: on ink the brightest mark carries the most, on paper the
+darkest does. A card whose ground flipped but whose marks did not will read with
+its emphasis exactly backwards.
+
 Chart marks are drawn in JavaScript with literal hex from the warm-grey ramp in
 `tokens.json`. That is deliberate: SVG attributes are set imperatively, so there
 is no `var()` to reference. The conformance lint therefore checks that literals

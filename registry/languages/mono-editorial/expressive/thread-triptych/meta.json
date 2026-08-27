@@ -1,7 +1,7 @@
 {
   "slug": "thread-triptych",
   "title": "Where the data actually goes — now answerable",
-  "description": "source → processor → destination · one thread per data path · hover to trace a route · hover any label to pull its whole bundle · click to pin, click dark space to release",
+  "description": "source → processor → destination · one thread per data path · hover to trace a route · hover any label to pull its whole bundle · click to pin, click empty space to release",
   "component": "sankey",
   "tier": "expressive",
   "runtime": "svg",

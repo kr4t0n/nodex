@@ -2,7 +2,7 @@ export function mount(root) {
   const q = (name) => root.querySelector(`[data-nx-mount="${name}"]`);
 
 
-  const PAPER='#F0EFEB',NS='http://www.w3.org/2000/svg';
+  const INK='#1C1C1A',NS='http://www.w3.org/2000/svg';
   const el=(p,t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);p.appendChild(n);return n};
   const txt=(p,a,s)=>{const n=el(p,'text',a);n.textContent=s;return n};
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
@@ -41,12 +41,12 @@ export function mount(root) {
 
   // column headers
   [[X1,'① SOURCE'],[X2,'② PROCESSOR'],[X3,'③ DESTINATION']].forEach(([x,t])=>
-    txt(svg,{x,y:14,'font-size':9,'font-weight':800,fill:PAPER,'letter-spacing':'.14em','text-anchor':'middle'},t));
+    txt(svg,{x,y:14,'font-size':9,'font-weight':800,fill:INK,'letter-spacing':'.14em','text-anchor':'middle'},t));
 
   // threads (drawn first, under labels)
   const gThreads=el(svg,'g',{});
   routes.forEach((r,ri)=>{
-    r.el=el(gThreads,'path',{d:path(r),fill:'none',stroke:PAPER,
+    r.el=el(gThreads,'path',{d:path(r),fill:'none',stroke:INK,
       'stroke-width':Math.max(.6,r.v*.14),class:'thread',
       opacity:.06+Math.min(.2,r.v*.012),'stroke-linecap':'round'});
     // invisible fat twin: the hover/click target
@@ -59,20 +59,20 @@ export function mount(root) {
   const mkNode=(x,y,label,anchor,cls,meta,size,fill)=>{
     const g=el(svg,'g',{class:'nodelab'});
     g.dataset.kind=meta.kind;g.dataset.idx=meta.idx;
-    el(g,'rect',{x:x-3,y:y-1.6,width:6,height:3.2,fill:PAPER,opacity:.85});
+    el(g,'rect',{x:x-3,y:y-1.6,width:6,height:3.2,fill:INK,opacity:.85});
     txt(g,{x:anchor==='end'?x-9:x+9,y:y+2.6,'font-size':size,'font-weight':600,
       fill,'text-anchor':anchor},label);
     // generous invisible hit zone
     el(g,'rect',{x:anchor==='end'?x-92:x-6,y:y-6.5,width:98,height:13,fill:'#000','fill-opacity':0,class:'hit'});
     return g;
   };
-  SRC.forEach((s,i)=>mkNode(X1,sy(i),s,'end','',{kind:'s',idx:i},7.5,'#B3B0A4'));
-  MID.forEach((m,i)=>mkNode(X2,my(i),m,'start','',{kind:'m',idx:i},5.4,'#6A6963'));
+  SRC.forEach((s,i)=>mkNode(X1,sy(i),s,'end','',{kind:'s',idx:i},7.5,'#6A6963'));
+  MID.forEach((m,i)=>mkNode(X2,my(i),m,'start','',{kind:'m',idx:i},5.4,'#8F8E88'));
   DST.forEach((d,i)=>{
     const g=el(svg,'g',{class:'nodelab'});
     g.dataset.kind='d';g.dataset.idx=i;
-    el(g,'circle',{cx:X3,cy:dy(i),r:3.4,fill:PAPER});
-    txt(g,{x:X3+12,y:dy(i)+3,'font-size':8.5,'font-weight':700,fill:'#B3B0A4','letter-spacing':'.08em'},d);
+    el(g,'circle',{cx:X3,cy:dy(i),r:3.4,fill:INK});
+    txt(g,{x:X3+12,y:dy(i)+3,'font-size':8.5,'font-weight':700,fill:'#6A6963','letter-spacing':'.08em'},d);
     el(g,'rect',{x:X3-8,y:dy(i)-10,width:120,height:20,fill:'#000','fill-opacity':0,class:'hit'});
   });
 
@@ -117,7 +117,7 @@ export function mount(root) {
   svg.addEventListener('mouseleave',()=>{if(!pinned)clear()});
   svg.addEventListener('click',e=>{
     const f=apply(e.target);
-    if(f){pinned=f;f();spin.textContent='PINNED · CLICK DARK SPACE TO RELEASE'}
+    if(f){pinned=f;f();spin.textContent='PINNED · CLICK EMPTY SPACE TO RELEASE'}
     else{pinned=null;clear()}
   });
 
