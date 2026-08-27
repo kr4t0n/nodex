@@ -55,8 +55,30 @@ default. A checkout outranks the default, so working in this repo reads the
 build you just made rather than production. A project initialised against a
 remote registry has the root written into its `nodex.json` and keeps using it.
 
-Until the package is published, invoke it as
-`node packages/cli/src/index.ts <command>`.
+Inside this repo, invoke it as `node packages/cli/src/index.ts <command>` — the
+source runs directly, so there is nothing to build first.
+
+### Publishing the CLI
+
+`@nodex/cli` publishes to npm from `.github/workflows/npm-publish.yml`, on a
+`v*` tag or a manual run, and needs one repository secret:
+
+| Secret | What it is |
+| --- | --- |
+| `NPM_TOKEN` | an npm automation token with publish rights on the `@nodex` scope |
+
+The workflow lints, typechecks, smoke-tests the CLI, builds, then installs the
+packed tarball into a scratch project and runs the binary before publishing —
+compiling is not the same as being runnable, and `files` narrows what ships. A
+version already on npm is left alone with a notice rather than failing, so
+re-running a tag is safe; bump `version` in `packages/cli/package.json` to
+release.
+
+The repo runs TypeScript directly, but the published package is compiled
+JavaScript, since someone installing it may be on a Node without type
+stripping. `npm run build:cli` produces it via `packages/cli/tsconfig.publish.json`.
+The one `@nodex/core` import is `import type` and erases completely, so the
+package has **no dependencies** and `@nodex/core` is not published.
 
 ## Running the site
 

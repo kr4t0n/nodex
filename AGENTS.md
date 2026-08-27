@@ -607,6 +607,35 @@ Details that are load-bearing rather than incidental:
 - **Approving is a form post**, not a link. A link would let a prefetch, a
   crawler, or an image tag on another site authorise someone's terminal.
 
+### The CLI is published compiled, and has no dependencies
+
+The repo runs TypeScript directly: `tsconfig.base.json` is `emitDeclarationOnly`
+and every specifier ends in `.ts`, because Node strips types natively. That is
+right for development and wrong for a package a stranger installs, who may be on
+a Node without type stripping. So `packages/cli/tsconfig.publish.json` emits real
+JavaScript, using `rewriteRelativeImportExtensions` to turn the `.ts` specifiers
+into `.js` on the way out — which is what lets the source keep the extension the
+rest of the repo uses instead of maintaining a second copy of it.
+
+**The package has no dependencies at all**, and that is not luck worth losing.
+The only `@nodex/core` import in the CLI is `import type`, so `verbatimModuleSyntax`
+erases it entirely and `@nodex/core` never needs publishing alongside. Everything
+else is a `node:` builtin. Adding one runtime import of core would drag a second
+package onto npm and `zod` with it, so keep core imports type-only.
+
+Two details in the workflow that are corrections rather than decoration:
+
+- **The build clears `dist` first.** `tsc --build` writes `.d.ts` there for
+  typechecking and the publish config writes `.js` there, so without the clean
+  the tarball's contents would depend on which ran last.
+- **It installs the packed tarball and runs the binary before publishing.**
+  Compiling is not the same as being runnable, and `files` narrows what ships,
+  so the only honest check is the one a consumer performs.
+
+A version already on npm is skipped with a notice rather than failing, the same
+record-reality-then-freeze shape the Helm chart uses: publishing is only ever
+reached by bumping the version.
+
 ### `~/.nodex` holds credentials; `nodex.json` holds the project
 
 Two config files, deliberately. `nodex.json` records which language a project

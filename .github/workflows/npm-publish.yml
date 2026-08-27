@@ -1,0 +1,106 @@
+name: npm
+
+# Publishes packages/cli to npm as @nodex/cli.
+#
+# Needs one repository secret:
+#   NPM_TOKEN   an npm automation token with publish rights on the @nodex scope
+#
+# Triggered by a v* tag, and manually. Not by pushes to main: the version lives
+# in package.json, so publishing on every push would either republish the same
+# version and fail, or quietly ship whatever happened to be committed.
+#
+# The repo runs TypeScript directly — tsconfig.base.json is emitDeclarationOnly
+# and every specifier ends in `.ts`, because Node strips types natively. That is
+# wrong for a package a stranger installs, who may be on a Node without type
+# stripping, so publishing compiles real JavaScript through
+# tsconfig.publish.json. The single @nodex/core import is `import type` and
+# erases completely, which is why the published package has no dependencies and
+# @nodex/core does not need publishing alongside it.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required for npm provenance, which package.json opts into. It signs the
+      # published tarball against this workflow run, so a consumer can verify
+      # the bytes came from this repository rather than someone's laptop.
+      id-token: write
+
+    steps:
+      # Skip rather than fail when the token is absent, so a fork does not
+      # collect a red cross on every tag. Read through `env` rather than
+      # interpolated into the script body, which keeps the value off the shell
+      # command line.
+      - id: guard
+        env:
+          TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then
+            echo 'configured=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'configured=false' >> "$GITHUB_OUTPUT"
+            echo '::notice title=npm not configured::Set the NPM_TOKEN secret to publish @nodex/cli.'
+          fi
+
+      - if: steps.guard.outputs.configured == 'true'
+        uses: actions/checkout@v5
+
+      - if: steps.guard.outputs.configured == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - if: steps.guard.outputs.configured == 'true'
+        run: npm ci
+
+      # A published version is immutable, and npm rejects a republish with an
+      # error that reads like a credentials problem. Check first so a re-run of
+      # an already-published tag reports the real reason and passes.
+      - if: steps.guard.outputs.configured == 'true'
+        id: version
+        run: |
+          VERSION="$(node -p "require('./packages/cli/package.json').version")"
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          if npm view "@nodex/cli@$VERSION" version >/dev/null 2>&1; then
+            echo 'published=true' >> "$GITHUB_OUTPUT"
+            echo "::notice title=Version already published::@nodex/cli@$VERSION exists on npm and was left untouched. Bump the version in packages/cli/package.json to release changes."
+          else
+            echo 'published=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      # The CLI is the one artifact a stranger runs unsupervised, so it is worth
+      # proving it works before shipping rather than after. smoke:cli drives a
+      # real init and add against a built registry.
+      - if: steps.guard.outputs.configured == 'true' && steps.version.outputs.published == 'false'
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run build:registry
+          npm run smoke:cli
+
+      - if: steps.guard.outputs.configured == 'true' && steps.version.outputs.published == 'false'
+        run: npm run build:cli
+
+      # Prove the tarball is what a consumer actually gets: install it into a
+      # scratch project and run the binary. Compiling successfully is not the
+      # same as being runnable, and `files` narrows what ships.
+      - if: steps.guard.outputs.configured == 'true' && steps.version.outputs.published == 'false'
+        run: |
+          npm pack --workspace @nodex/cli --pack-destination "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/verify" && cd "$RUNNER_TEMP/verify"
+          npm init -y >/dev/null
+          npm install "$RUNNER_TEMP"/nodex-cli-*.tgz
+          ./node_modules/.bin/nodex list
+
+      - if: steps.guard.outputs.configured == 'true' && steps.version.outputs.published == 'false'
+        run: npm publish --workspace @nodex/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

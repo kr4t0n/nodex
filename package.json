@@ -13,6 +13,7 @@
   ],
   "scripts": {
     "build:registry": "node scripts/build-registry.mjs",
+    "build:cli": "npm run build --workspace @nodex/cli",
     "db:up": "docker compose up -d --wait postgres",
     "db:down": "docker compose down",
     "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",

@@ -1,13 +1,41 @@
 {
   "name": "@nodex/cli",
   "version": "0.1.0",
-  "private": true,
   "description": "Fetch design languages and components from a nodex registry",
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "components",
+    "registry",
+    "charts",
+    "cli"
+  ],
+  "homepage": "https://nodex.kubitnodes.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kr4t0n/nodex.git",
+    "directory": "packages/cli"
+  },
+  "bugs": "https://github.com/kr4t0n/nodex/issues",
+  "license": "MIT",
   "type": "module",
   "bin": {
-    "nodex": "./src/index.ts"
+    "nodex": "./dist/index.js"
   },
-  "dependencies": {
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.publish.json"
+  },
+  "devDependencies": {
     "@nodex/core": "0.1.0"
   }
 }

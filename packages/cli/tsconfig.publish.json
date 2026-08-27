@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  // The repo runs TypeScript directly: tsconfig.base.json sets
+  // emitDeclarationOnly, and every specifier ends in `.ts` because Node strips
+  // types natively. That is right for development and wrong for a package a
+  // stranger installs, who may be on a Node without type stripping.
+  //
+  // So publishing emits real JavaScript. rewriteRelativeImportExtensions turns
+  // the `.ts` specifiers into `.js` on the way out, which is what lets the
+  // source keep the extension the rest of the repo uses without a second copy
+  // of it. Nothing here is used by `npm run typecheck`.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "types": ["node"],
+
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "composite": false,
+    "rewriteRelativeImportExtensions": true,
+
+    // The one @nodex/core import is `import type`, so verbatimModuleSyntax
+    // erases it entirely and the published package has no dependencies at all.
+    // Nothing needs the workspace package at runtime.
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src/**/*.ts"]
+}
