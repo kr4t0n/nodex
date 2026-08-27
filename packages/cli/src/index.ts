@@ -13,6 +13,7 @@ import {
   type ProjectConfig,
 } from './project.ts';
 import {
+  DEFAULT_REGISTRY,
   findItem,
   findLanguage,
   resolveRegistry,
@@ -62,7 +63,8 @@ ${bold('Filters for search')}
 
 ${bold('Global')}
   --registry <dir|url>   registry root. Also NODEX_REGISTRY.
-                         Defaults to the nearest nodex checkout.
+                         Defaults to the nearest nodex checkout,
+                         then to ${DEFAULT_REGISTRY}.
   --help
 
 ${bold('Examples')}

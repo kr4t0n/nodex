@@ -167,4 +167,5 @@ nodex whoami                       who the token belongs to
 ```
 
 Global: `--registry <dir|url>` to point at a specific registry, or
-`NODEX_REGISTRY`.
+`NODEX_REGISTRY`. Neither is needed normally — the CLI defaults to the hosted
+registry, and `init` pins whichever root it used into `nodex.json`.

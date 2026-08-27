@@ -47,6 +47,20 @@ export interface Registry {
   read(relative: string): Promise<string>;
 }
 
+/**
+ * Where the CLI looks when nothing else says otherwise.
+ *
+ * It is a plain registry root, so it is reached by exactly the path any other
+ * root is: `r/registry.json` for the manifest, `<item.files[].path>` for
+ * sources. No command knows it is the default, and moving it to a CDN later is
+ * a change to this string alone.
+ *
+ * It is the last resort, behind a local checkout, so working inside the nodex
+ * repo still reads the build you just made rather than silently reaching past
+ * it to production.
+ */
+export const DEFAULT_REGISTRY = 'https://nodex.kubitnodes.com';
+
 function isUrl(value: string): boolean {
   return /^https?:\/\//.test(value);
 }
@@ -69,17 +83,21 @@ async function findLocalRoot(from: string): Promise<string | undefined> {
   }
 }
 
+/**
+ * Precedence: `--registry`, then `nodex.json`, then `NODEX_REGISTRY`, then the
+ * nearest checkout, then the hosted default.
+ *
+ * A checkout outranks the default so nodex development reads local work, and
+ * `nodex.json` outranks the environment so a project pinned to one registry
+ * cannot be silently served by another. `init` records the root it used
+ * whenever it is remote, which is what makes that pin exist at all.
+ */
 export async function resolveRegistry(explicit?: string): Promise<Registry> {
   const candidate =
-    explicit ?? process.env.NODEX_REGISTRY ?? (await findLocalRoot(process.cwd()));
-
-  if (!candidate) {
-    throw new Error(
-      'No registry found.\n' +
-        '  Pass one with --registry <dir|url>, set NODEX_REGISTRY,\n' +
-        '  or run inside a nodex checkout after `npm run build:registry`.',
-    );
-  }
+    explicit ??
+    process.env.NODEX_REGISTRY ??
+    (await findLocalRoot(process.cwd())) ??
+    DEFAULT_REGISTRY;
 
   const remote = isUrl(candidate);
   const root = remote ? candidate.replace(/\/+$/, '') : path.resolve(candidate);
@@ -138,7 +156,8 @@ export async function resolveRegistry(explicit?: string): Promise<Registry> {
     throw new Error(
       `Could not read the manifest for ${root}.\n` +
         (remote
-          ? '  Check the URL is a registry root, not the manifest itself.'
+          ? '  Check you are online, and that the URL is a registry root\n' +
+            '  rather than the manifest itself.'
           : '  Run `npm run build:registry` in the nodex checkout first.'),
       { cause },
     );

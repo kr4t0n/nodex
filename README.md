@@ -48,9 +48,12 @@ Credentials go to `~/.nodex/auth.json`, mode `0600`, keyed by registry. Set
 into the project, and appends a section to the project's `AGENTS.md` so a coding
 agent knows the rules exist. `add` then needs no flags.
 
-Point at a registry with `--registry <dir|url>` or `NODEX_REGISTRY`. Inside a
-checkout it is found automatically. A project initialised against a remote
-registry keeps using it.
+The CLI talks to <https://nodex.kubitnodes.com> unless told otherwise, so it
+works with no configuration. Resolution runs `--registry <dir|url>`, then
+`nodex.json`, then `NODEX_REGISTRY`, then the nearest checkout, then that
+default. A checkout outranks the default, so working in this repo reads the
+build you just made rather than production. A project initialised against a
+remote registry has the root written into its `nodex.json` and keeps using it.
 
 Until the package is published, invoke it as
 `node packages/cli/src/index.ts <command>`.

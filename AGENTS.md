@@ -525,9 +525,27 @@ static host exposes it at `/r` while sources stay at the repo root. A single
 prefix rule reconciles them.
 
 Resolution precedence is flag, then `nodex.json`, then `NODEX_REGISTRY`, then the
-nearest checkout. The `nodex.json` step matters: without it a project set up
-against a remote registry would silently fall back to whatever local checkout
-happened to be above the cwd and fetch a different version of a component.
+nearest checkout, then `DEFAULT_REGISTRY`. The `nodex.json` step matters: without
+it a project set up against a remote registry would silently fall back to
+whatever local checkout happened to be above the cwd and fetch a different
+version of a component.
+
+**The default is the deployed app**, so the CLI works with no configuration at
+all. Two things about where it sits in that order:
+
+- **Behind the checkout, deliberately.** Ahead of it, every command run inside
+  this repo would quietly read production instead of the build you just made,
+  and registry work would look like it had no effect. `findLocalRoot` only walks
+  up from the cwd, so it can only match inside a checkout anyway.
+- **It makes `init` self-pinning.** `init` already records the root whenever it
+  is remote, so a project set up against the default gets that URL written into
+  its `nodex.json` — and is then immune to a checkout appearing above it later.
+
+It is a plain registry root reached by the same fixed shape as any other, so no
+command knows it is the default and moving to a CDN is a change to one string.
+The "no registry found" error is gone, because there is now always one; a
+network failure surfaces from the manifest read instead, which is why that
+message mentions connectivity.
 
 ### Public content must never route through the server
 
