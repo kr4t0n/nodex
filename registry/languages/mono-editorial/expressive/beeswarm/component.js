@@ -290,7 +290,7 @@ export function mount(root) {
         d+=` C${mx} ${ys[k].toFixed(1)} ${mx} ${ys[k+1].toFixed(1)} ${AX[k+1]} ${ys[k+1].toFixed(1)}`;
       }
       const ln=el(s,'path',{d,fill:'none',
-        stroke:isHero?INK:'#8F8E88','stroke-width':isHero?2:.65,
+        stroke:isHero?INK:'#8F8E88','stroke-width':isHero?1.1:.65,
         opacity:isHero?1:.5+rnd(i+1,5)*.3,pathLength:1,
         class:'draw',style:`animation-delay:${.2+i*.05}s;animation-duration:.8s`});
       tip(ln,`${p[0]} — $${p[1]} · CSAT ${p[2]} · ${p[3]}% retained · ${p[4]}% growth`);

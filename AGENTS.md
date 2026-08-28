@@ -135,6 +135,39 @@ extractor so re-running stays idempotent.
 
 ## Conformance lints
 
+The checks live in `packages/cli/src/lint.ts` and are imported by both
+`scripts/build-registry.mjs` and `nodex lint`, so the registry and a consumer's
+project are held to the same rules **by the same code**. That is not tidiness.
+They were two implementations, and only the registry had one:
+
+- `DESIGN.md` ships to consumers via `nodex init` saying "the conformance lint
+  checks that literals are members of the ramp" and "this is not optional and CI
+  checks for it". Both were true of this repository and of nowhere the reader
+  could reach. Describing enforcement a reader cannot run is worse than
+  describing none, because it invites them to assume something is checking.
+- The registry's own copy had a hole. It read widths with
+  `/'stroke-width'\s*:\s*([0-9.]+)/`, which needs a digit straight after the
+  colon, so it could not see `isHero?2:.65` — and **five components shipped a
+  2px mark under a 1.4px ceiling**: `beeswarm`, `calendar-heat`, `matrix-heat`,
+  `parallel-coords`, `ridgeline`. A consumer reported it, having written their
+  own checker because ours was not reachable. `bubble-almanac` was separately
+  over, computing up to 1.499px.
+
+Two rules the stroke reader follows, both learned from that:
+
+- **Read both branches of a ternary**, since that is how a width is normally
+  written when a series is emphasised.
+- **Report what cannot be decided rather than guessing.**
+  `.6+rnd(i+3,j+11)*.9` contains `3` and `11` as function arguments, so
+  "largest number wins" would call it an 11px stroke. Unverifiable widths are a
+  warning, and warnings do not fail: a lint that blocks on a judgement call gets
+  switched off.
+
+`lint.ts` imports nothing, which is what keeps the published CLI at zero
+dependencies while the build script shares its logic.
+
+### The registry-only lints
+
 `scripts/check-shell-primitives.mjs` guards one thing outside the registry: the
 app links a **curated** set of primitive stylesheets in `app/layout.tsx`, not all
 twenty-four, because they are render-blocking and the landing page needs almost

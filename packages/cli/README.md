@@ -39,12 +39,35 @@ nodex tokens <language>            print a language's tokens.css
 nodex design <language>            print a language's DESIGN.md
 nodex init <language>              set the project up
 nodex add <ref...> [--to <dir>]    copy components in
+nodex lint [path...]               check components against the language
 nodex login                        sign in, by device code
 nodex logout                       forget the stored token
 nodex whoami                       who the token belongs to
 ```
 
 Filters for `search`: `--design`, `--type`, `--tag`, `--tier`, `--density`.
+
+## Verifying conformance
+
+`DESIGN.md` states rules that tokens cannot express. `nodex lint` checks the
+ones a machine can decide, against the language recorded in your `nodex.json`:
+
+- every hex literal is a member of the language's ramp
+- no `stroke-width` exceeds its `lineMax`
+- anything that animates ships a `prefers-reduced-motion` guard
+- no `Math.random()`, so previews reproduce
+
+It exits non-zero on an error and zero on a warning, because a warning marks a
+judgement call and a lint that blocks on those gets switched off. A width it
+cannot decide statically, like `.6 + rnd(i, j) * .9`, is reported rather than
+guessed at.
+
+Where a stroke genuinely is the area and its width carries the magnitude — a
+ribbon, a band, a violin — put an empty `.nodex-stroke-as-area` file in the
+component's directory to exempt it.
+
+This is the same module the registry itself is built with, so a component that
+passes here would pass there.
 
 ## Configuration
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { parseArgs } from 'node:util';
@@ -20,6 +20,7 @@ import {
   type Item,
   type Registry,
 } from './registry.ts';
+import { lint, rulesFromTokens } from './lint.ts';
 import { clearToken, credentialsFor, saveToken } from './config.ts';
 import { apiBase, awaitApproval, startDevice, whoami } from './device.ts';
 import { bold, dim, fail, heading, out, rows } from './ui.ts';
@@ -52,6 +53,7 @@ ${bold('Commands')}
   search [query] [filters]         find components
   init <language>                  set this project up to use a language
   add <ref...> [--to <dir>]        copy components into this project
+  lint [path...]                   check components against the language's rules
   new-language <slug>              scaffold a new language in a nodex checkout
   login                            sign in to a registry, by device code
   logout                           forget this registry's stored token
@@ -233,6 +235,137 @@ async function cmdInit(
     out(`    2. nodex add ${slug}/<component>`);
   }
   out();
+}
+
+/**
+ * Check a project's components against the rules of the language it uses.
+ *
+ * The point is that an agent can verify instead of asserting. `DESIGN.md` ships
+ * to consumers saying "the conformance lint checks that literals are members of
+ * the ramp" and "this is not optional and CI checks for it" — both true of this
+ * repository and, until now, of nowhere the reader could reach. Describing
+ * enforcement that a reader cannot run is worse than describing none, because
+ * it invites them to assume something is being checked.
+ *
+ * Runs the same module the registry build runs, so a component that passes here
+ * would pass there.
+ */
+async function cmdLint(
+  registry: Registry,
+  paths: string[],
+  options: { design?: string },
+): Promise<void> {
+  heading('Lint');
+  out();
+
+  const found = await findConfig();
+  const design = options.design ?? found?.config.language;
+  if (!design) {
+    fail(
+      'Which language should these be checked against?\n' +
+        '  Run `nodex init <language>` first, or pass --design <language>.',
+    );
+  }
+
+  const language = findLanguage(registry, design);
+  if (!language) fail(`No design language named "${design}".`);
+
+  let tokens: Parameters<typeof rulesFromTokens>[0];
+  try {
+    tokens = JSON.parse(
+      await registry.read(`registry/languages/${design}/tokens.json`),
+    ) as Parameters<typeof rulesFromTokens>[0];
+  } catch (cause) {
+    fail(`Could not read tokens for "${design}".\n  ${String(cause)}`);
+  }
+  const rules = rulesFromTokens(tokens);
+
+  const projectDir = found?.dir ?? process.cwd();
+  const roots = paths.length
+    ? paths
+    : [found?.config.paths.components ?? 'src/components/nodex'];
+
+  const dirs: string[] = [];
+  for (const root of roots) {
+    const abs = path.isAbsolute(root) ? root : path.join(projectDir, root);
+    dirs.push(...(await componentDirs(abs)));
+  }
+
+  if (dirs.length === 0) {
+    out(`  Nothing to check under ${roots.join(', ')}.`);
+    out(`  ${dim('Pass a path, or run from a project with components installed.')}`);
+    out();
+    return;
+  }
+
+  let errors = 0;
+  let warnings = 0;
+
+  for (const dir of dirs.sort()) {
+    const read = async (name: string): Promise<string | undefined> => {
+      try {
+        return await readFile(path.join(dir, name), 'utf8');
+      } catch {
+        return undefined;
+      }
+    };
+    const css = await read('component.css');
+    const js = await read('component.js');
+    const html = await read('component.html');
+
+    // A consumer has no meta.json, so the exemption is a marker file. Naming it
+    // after the flag keeps the vocabulary the same as the registry's.
+    const strokeAsArea = (await read('.nodex-stroke-as-area')) !== undefined;
+
+    const findings = lint({ html, css, js }, rules, { strokeAsArea });
+    if (findings.length === 0) continue;
+
+    out(`  ${bold(path.relative(projectDir, dir) || dir)}`);
+    for (const f of findings) {
+      const tag = f.severity === 'error' ? 'error  ' : 'warning';
+      out(`    ${tag} ${dim(f.rule)}  ${f.message}`);
+      if (f.severity === 'error') errors++;
+      else warnings++;
+    }
+    out();
+  }
+
+  const checked = `${dirs.length} component${dirs.length === 1 ? '' : 's'}`;
+  if (errors === 0 && warnings === 0) {
+    out(`  ${checked} conform to ${language.name}.`);
+    out();
+    return;
+  }
+
+  out(`  ${checked} checked against ${language.name}.`);
+  out(`  ${errors} error(s), ${warnings} warning(s).`);
+  out();
+  // Warnings do not fail. They mark something a human has to judge, and a lint
+  // that blocks on a judgement call gets disabled.
+  if (errors > 0) process.exit(1);
+}
+
+/** Directories holding a component, found by looking for the fragment files. */
+async function componentDirs(root: string): Promise<string[]> {
+  const found: string[] = [];
+  const walk = async (dir: string): Promise<void> => {
+    let entries;
+    try {
+      entries = await readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    if (entries.some((e) => e.isFile() && /^component\.(css|js|html)$/.test(e.name))) {
+      found.push(dir);
+    }
+    for (const e of entries) {
+      if (e.isDirectory() && e.name !== 'node_modules' && !e.name.startsWith('.')) {
+        await walk(path.join(dir, e.name));
+      }
+    }
+  };
+  await walk(root);
+  return found;
 }
 
 async function cmdAdd(
@@ -594,6 +727,9 @@ async function main(argv: string[]): Promise<void> {
       await cmdTokens(registry, slug, values.json);
       return;
     }
+    case 'lint':
+      await cmdLint(registry, rest, { design: values.design });
+      return;
     case 'search':
       cmdSearch(registry, rest[0], {
         design: values.design,

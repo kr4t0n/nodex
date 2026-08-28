@@ -116,8 +116,8 @@ an inconsistency between the two languages; it is the clearest evidence that
 motion is part of a design language rather than a global preference.
 
 Every animated component must ship a `prefers-reduced-motion: reduce` block that
-stops loops and resolves to the final state. This is not optional and CI checks
-for it. A looping language has more to answer for here, not less.
+stops loops and resolves to the final state. This is not optional, and
+`nodex lint` checks for it. A looping language has more to answer for here, not less.
 
 ## Runtime token bindings
 

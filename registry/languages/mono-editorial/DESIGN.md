@@ -53,6 +53,10 @@ Chart marks are drawn in JavaScript with literal hex from the warm-grey ramp in
 is no `var()` to reference. The conformance lint therefore checks that literals
 are **members of the ramp**, not that they use custom properties.
 
+Run it yourself with `nodex lint`. It checks this project's components against
+this language and reports what fails, so a claim of conformance can be verified
+rather than asserted.
+
 Known debt: 37 distinct greys appear across the collection. The ramp in
 `tokens.json` records the load-bearing steps; consolidating the rest is a
 cleanup task, not a redesign.
@@ -140,7 +144,7 @@ marks arrives as a wave rather than all at once.
 
 Every animated component must ship a `prefers-reduced-motion: reduce` block that
 disables the animations and resets `stroke-dashoffset` to `0`. This is not
-optional and CI checks for it.
+optional, and `nodex lint` checks for it.
 
 ## Runtime token bindings
 

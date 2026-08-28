@@ -22,6 +22,11 @@ import path from 'node:path';
 import process from 'node:process';
 
 import { loadSource, registrySchema } from '@nodex/core';
+// The same checks `nodex lint` runs, from the same file. They used to be two
+// implementations, and only this one existed — which is how five components
+// shipped a 2px mark under a 1.4px ceiling: the regex here could not read a
+// ternary, and nothing downstream could check at all.
+import { lint as lintSource, rulesFromTokens } from '../packages/cli/src/lint.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const REGISTRY_DIR = path.join(ROOT, 'registry');
@@ -333,55 +338,19 @@ function primitiveItem({ meta, dir }) {
 }
 
 function lintComponent({ languageMeta, tokens, meta, css, js, where }) {
-  // 1. Reduced motion. Anything that animates needs an escape hatch.
-  if (/animation\s*:/.test(css) && !/prefers-reduced-motion/.test(css)) {
-    fail(where, 'animates but ships no prefers-reduced-motion guard');
+  // Reduced motion, stroke discipline, palette membership and determinism all
+  // come from the shared module, so the registry and a consumer's project are
+  // held to the same rules by the same code.
+  for (const finding of lintSource({ css, js }, rulesFromTokens(tokens), {
+    strokeAsArea: meta.strokeAsArea,
+  })) {
+    if (finding.severity === 'error') fail(where, finding.message);
+    else notes.push(`${where}: ${finding.message}`);
   }
 
-  // 2. Stroke discipline. Hairlines are the language's signature. A component
-  //    may opt out via `strokeAsArea` when the stroke IS the area and its width
-  //    encodes magnitude — thinning it would lose information. Declared per
-  //    component rather than inferred from type, since the same chart type can
-  //    be drawn either way.
-  const lineMax = Number.parseFloat(tokens.stroke?.lineMax ?? '1.4');
-  if (js && !meta.strokeAsArea) {
-    const widths = [...js.matchAll(/'stroke-width'\s*:\s*([0-9.]+)/g)]
-      .map((m) => Number.parseFloat(m[1]))
-      .filter((w) => w > lineMax);
-    if (widths.length > 0) {
-      fail(
-        where,
-        `stroke-width ${[...new Set(widths)].join(', ')} exceeds lineMax ${lineMax}px. ` +
-          `If the stroke is the area rather than an outline, set "strokeAsArea": true`,
-      );
-    }
-  }
+  // The rest are registry-only: they check metadata a consumer does not have.
 
-  // 3. Palette membership. Marks are drawn imperatively in JS with literal hex,
-  //    so there is no var() to check. Enforce membership of the recorded ramp
-  //    instead: this freezes today's palette and catches additions.
-  const ramp = new Set(
-    (tokens.ramp?.steps ?? []).map((s) => s.toUpperCase()),
-  );
-  const semantic = new Set(
-    Object.values(tokens.color ?? {}).map((s) => String(s).toUpperCase()),
-  );
-  const strays = [
-    ...new Set(
-      [...`${js ?? ''}\n${css}`.matchAll(/#[0-9A-Fa-f]{6}/g)]
-        .map((m) => m[0].toUpperCase())
-        .filter((hex) => !ramp.has(hex) && !semantic.has(hex)),
-    ),
-  ];
-  if (strays.length > 0) {
-    fail(
-      where,
-      `colour(s) outside the recorded ramp: ${strays.join(', ')} — ` +
-        `add to tokens.json ramp.steps if intended`,
-    );
-  }
-
-  // 4. Density must be a value the language declares.
+  // Density must be a value the language declares.
   if (meta.density) {
     if (!languageMeta.density?.includes(meta.density)) {
       fail(

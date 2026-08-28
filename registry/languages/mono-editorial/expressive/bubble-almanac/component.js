@@ -89,7 +89,7 @@ export function mount(root) {
       const dot=el(g,'path',beta
         ?{d:blob(x,y,r,seed),fill:'none',stroke:'#8F8E88','stroke-width':1,'stroke-dasharray':'3 3'}
         :{d:blob(x,y,r,seed),fill:INK,'fill-opacity':.09+rnd(i+2,j+4)*.1,
-          stroke:INK,'stroke-opacity':.3+rnd(i+5,j+7)*.35,'stroke-width':.6+rnd(i+3,j+11)*.9});
+          stroke:INK,'stroke-opacity':.3+rnd(i+5,j+7)*.35,'stroke-width':.6+rnd(i+3,j+11)*.8});
       tip(dot,`${a} · ${yr} — ${v*10} tickets${beta?' (beta)':''}`);
       // escalation core: small wobbly blot, nudged off-center like a press mark
       if(!beta){
