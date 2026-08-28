@@ -730,6 +730,40 @@ prints them and `add --json` reports them alongside `files`, `exports` and
 Primitives have no mounts and correctly report none: they are markup and CSS
 with no script to wire up.
 
+### The extractor split by chart family, not by chart
+
+Thirteen components shipped their neighbours' code. `beeswarm/component.js` held
+five chart blocks — matrix heat, calendar heat, beeswarm, ridgeline, parallel
+coordinates — while its markup declared one mount, so four called
+`obsReveal('matheat')` against an element that does not exist and silently did
+nothing. 44 dead blocks across the 13, and consumers received all of it.
+
+Removing them cut those files by 67%. More importantly it was the reason the
+sample data was hard to identify: a reader opening `beeswarm` found five
+datasets and no indication which one the chart drew. A consumer reported
+reverse-engineering the data contract, and this is most of why that was hard.
+
+The live block in each was verified byte-identical before and after, by brace
+matching rather than by pattern, so the prune provably removed only dead code.
+
+**If a component's JS reveals a mount its markup does not declare, that block is
+dead.** That is the check worth re-running after any future import.
+
+### The data contract is derived, not authored
+
+`meta.data` records the shape of each sample dataset — `dumbbell-queue` reports
+`[string, number, number]` with 5 rows — so "would this fit my numbers?" is one
+`nodex show` away rather than add, read, infer, discard.
+
+Derived from the source at build time on purpose. Authoring 64 of these by hand
+is how they end up half-written and drifting from the file. The 21 components
+that generate data procedurally report no shape and say so, which is better than
+a guess.
+
+What derivation cannot supply is what a field *means*. `fields` is optional
+prose for a human to add per component where it is worth saying, and is
+deliberately not invented by the build.
+
 ### `~/.nodex` holds credentials; `nodex.json` holds the project
 
 Two config files, deliberately. `nodex.json` records which language a project

@@ -161,6 +161,7 @@ nodex tokens <language> [--json]   print tokens as CSS, or JSON
 nodex search [query] [filters]     find components
 nodex init <language>              set the project up
 nodex add <ref...> [--to <dir>]    copy components in
+nodex show <ref>                   what it is, and the data it draws
 nodex lint [path...]               check components against the language
 nodex login                        sign in, by device code
 nodex logout                       forget the stored token

@@ -388,7 +388,51 @@ function mountNames(fragment) {
   ];
 }
 
-function itemFor({ languageMeta, meta, componentDir, mounts }) {
+/**
+ * The sample datasets a component draws, described without running it.
+ *
+ * A consumer asked how they were meant to know that `dumbbell-queue` wants
+ * `[label, before, after]` with three to six rows. The honest answer was: add
+ * it, read the source, infer. Recording the shape turns that into one lookup.
+ *
+ * Derived rather than authored, so it cannot drift from the data actually in
+ * the file — and because authoring 64 of these by hand is how they end up
+ * half-written. What it cannot supply is what each field *means*; `fields` is
+ * left for a human to add to meta.json where it is worth saying.
+ */
+function dataShapes(js) {
+  const series = [];
+  for (const m of js.matchAll(/^\s*const ([A-Z][A-Z0-9_]*)\s*=\s*(\[[\s\S]*?\]);/gm)) {
+    const described = describeLiteral(m[2]);
+    if (described) series.push({ name: m[1], ...described });
+  }
+  return series;
+}
+
+function describeLiteral(src) {
+  let value;
+  try {
+    // Single quotes and trailing commas are JS, not JSON.
+    value = JSON.parse(src.replace(/'/g, '"').replace(/,\s*([\]}])/g, '$1'));
+  } catch {
+    return undefined;
+  }
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+
+  const kind = (x) =>
+    Array.isArray(x)
+      ? `[${x.map(kind).join(', ')}]`
+      : x === null
+        ? 'null'
+        : typeof x === 'object'
+          ? `{${Object.keys(x).join(', ')}}`
+          : typeof x;
+
+  const kinds = [...new Set(value.map(kind))];
+  return { rows: value.length, of: kinds.length === 1 ? kinds[0] : kinds.join(' | ') };
+}
+
+function itemFor({ languageMeta, meta, componentDir, mounts, data }) {
   const rel = path
     .relative(REGISTRY_DIR, componentDir)
     .split(path.sep)
@@ -427,6 +471,7 @@ function itemFor({ languageMeta, meta, componentDir, mounts }) {
       ...(meta.density ? { density: meta.density } : {}),
       ...(meta.aspectRatio ? { aspectRatio: meta.aspectRatio } : {}),
       ...(mounts?.length ? { mounts } : {}),
+      ...(data?.length ? { data } : {}),
       // Must reach the manifest, or the CLI cannot warn about it and declaring
       // it in the component's meta.json accomplishes nothing.
       ...(meta.externalData?.length ? { externalData: meta.externalData } : {}),
@@ -665,6 +710,7 @@ async function main() {
           meta,
           componentDir: dir,
           mounts: mountNames(fragment),
+          data: dataShapes(js),
         }),
       );
     }

@@ -92,6 +92,16 @@ const COMMAND_HELP: Record<string, string> = {
   Components arrive as component.html, .css and .js. mount(root) fills the
   data-nx-mount elements in the markup, and those names are printed.`,
 
+  show: `${bold('nodex show')} <ref> [--json]
+
+  Everything the registry knows about a component without installing it:
+  its type, runtime, viewBox, mount names, and the shape of the sample
+  data it draws.
+
+  The data shape answers "would this fit my numbers?" — dumbbell-queue
+  reports [string, number, number] with 5 rows, so it wants a label and a
+  before/after pair. Row counts are the sample's own, not a hard limit.`,
+
   lint: `${bold('nodex lint')} [path...]
 
   Check components against the rules of the language in nodex.json:
@@ -138,6 +148,7 @@ ${bold('Commands')}
   tokens <language> [--json]       print tokens as CSS (default) or JSON
   search [query] [filters]         find components
   init <language>                  set this project up to use a language
+  show <ref>                       what a component is, and the data it draws
   add <ref...> [--to <dir>]        copy components into this project
   lint [path...]                   check components against the language's rules
   new-language <slug>              scaffold a new language in a nodex checkout
@@ -522,6 +533,101 @@ async function componentDirs(root: string): Promise<string[]> {
   };
   await walk(root);
   return found;
+}
+
+/**
+ * Everything the registry knows about one component, without installing it.
+ *
+ * Answering "would this fit my data?" used to mean add, read the source, infer,
+ * then rewrite or discard. This is the lookup that replaces the first three
+ * steps.
+ */
+function cmdShow(
+  registry: Registry,
+  ref: string,
+  options: { design?: string; json?: boolean },
+): void {
+  const resolved = findItem(registry, ref, options.design);
+  if ('error' in resolved) fail(resolved.error);
+  const { item, language } = resolved;
+  const { meta } = item;
+
+  if (options.json) {
+    emit({
+      ref: meta.language === 'shared' ? item.name : `${meta.language}/${item.name}`,
+      name: item.name,
+      title: item.title,
+      ...(item.description ? { description: item.description } : {}),
+      language,
+      tier: meta.tier,
+      component: meta.component,
+      runtime: meta.runtime,
+      ...(meta.density ? { density: meta.density } : {}),
+      ...(meta.aspectRatio ? { aspectRatio: meta.aspectRatio } : {}),
+      ...(meta.mounts?.length ? { mounts: meta.mounts } : {}),
+      ...(meta.data?.length ? { data: meta.data } : {}),
+      ...(item.dependencies?.length ? { dependencies: item.dependencies } : {}),
+      ...(meta.externalData?.length ? { externalData: meta.externalData } : {}),
+      tags: meta.tags,
+      files: (item.files ?? []).map((f) => path.basename(f.path)),
+    });
+    return;
+  }
+
+  heading(item.title);
+  if (item.description) out(`  ${dim(item.description)}`);
+  out();
+
+  rows([
+    ['language', language],
+    ['type', meta.component],
+    ['runtime', meta.runtime],
+    ['tier', meta.tier],
+    ...(meta.density ? ([['density', meta.density]] as Array<[string, string]>) : []),
+    ...(meta.aspectRatio
+      ? ([['viewBox', meta.aspectRatio]] as Array<[string, string]>)
+      : []),
+    ['tags', meta.tags.join(', ') || '—'],
+  ]);
+
+  if (meta.data?.length) {
+    out();
+    out(`  ${bold('Sample data')}`);
+    out(`    ${dim('The shapes it draws. Row counts are the sample, not a limit.')}`);
+    for (const d of meta.data) {
+      out(`    ${d.name}  ${dim(`${d.of} × ${d.rows}`)}`);
+      if (d.fields?.length) out(`      ${dim(d.fields.join(' · '))}`);
+    }
+  } else if (meta.tier === 'expressive') {
+    out();
+    out(`  ${bold('Sample data')}`);
+    out(`    ${dim('Generated in the component rather than written as a literal,')}`);
+    out(`    ${dim('so there is no shape to report. Read component.js.')}`);
+  }
+
+  if (meta.mounts?.length) {
+    out();
+    out(`  ${bold('Mounting')}`);
+    out(`    ${dim('import { mount } from "./component.js"; mount(rootEl)')}`);
+    out(`    ${dim('fills these data-nx-mount elements:')} ${meta.mounts.join(', ')}`);
+  }
+
+  if (item.dependencies?.length) {
+    out();
+    out(`  ${bold('Install')}`);
+    out(`    npm install ${item.dependencies.join(' ')}`);
+  }
+
+  if (meta.externalData?.length) {
+    out();
+    out(`  ${bold('Heads up')}`);
+    out(`    ${dim('Fetches from a third party at runtime; will not work offline:')}`);
+    for (const url of meta.externalData) out(`      ${dim(url)}`);
+  }
+
+  out();
+  out(`  ${dim(`nodex add ${meta.language === 'shared' ? item.name : `${meta.language}/${item.name}`}`)}`);
+  out();
 }
 
 async function cmdAdd(
@@ -951,6 +1057,14 @@ async function main(argv: string[]): Promise<void> {
       const slug = rest[0] ?? values.design;
       if (!slug) fail('Which language? Try `nodex tokens mono-editorial`.');
       await cmdTokens(registry, slug, values.json);
+      return;
+    }
+    case 'show': {
+      const ref = rest[0];
+      if (!ref) {
+        fail('Which component? Try `nodex show mono-editorial/dumbbell-queue`.');
+      }
+      cmdShow(registry, ref, { design: values.design, json: values.json });
       return;
     }
     case 'lint':

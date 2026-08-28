@@ -39,6 +39,7 @@ nodex tokens <language>            print a language's tokens.css
 nodex design <language>            print a language's DESIGN.md
 nodex init <language>              set the project up
 nodex add <ref...> [--to <dir>]    copy components in
+nodex show <ref>                   what it is, and the data it draws
 nodex lint [path...]               check components against the language
 nodex login                        sign in, by device code
 nodex logout                       forget the stored token

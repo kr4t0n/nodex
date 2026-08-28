@@ -91,6 +91,25 @@ export const nodexMetaSchema = z.object({
    * has to read the source to find the contract between them.
    */
   mounts: z.array(z.string()).optional(),
+  /**
+   * The shape of each sample dataset the component draws, derived from the
+   * source at build time. `rows` is the sample's own arity, which is a hint at
+   * a workable range rather than a hard bound.
+   *
+   * Derived rather than authored so it cannot drift from the data in the file.
+   * What it cannot say is what a field *means*, which is why `fields` is
+   * optional prose a human adds where it is worth saying.
+   */
+  data: z
+    .array(
+      z.object({
+        name: z.string(),
+        of: z.string(),
+        rows: z.number(),
+        fields: z.array(z.string()).optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const registryItemSchema = z.object({
