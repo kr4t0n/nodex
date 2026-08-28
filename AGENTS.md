@@ -88,6 +88,27 @@ The cost is that no module can enforce the language contract. That job moved to
 `scripts/build-registry.mjs`, which is a better place for it: the contract is
 specified in prose in `DESIGN.md` and enforced mechanically by lints.
 
+**The copies must stay byte-identical, and now a lint says so.** Nothing was
+holding them together and they drifted: six components carried an `rnd` missing
+its `Math.abs`, so the XOR could go negative and the seed returned a value below
+zero on 26–49% of the inputs those components actually use. Every chart still
+drew, which is why it survived for so long — wrong sample data still looks like
+sample data. `lintPrelude` now pins `rnd`, `el`, `txt` and `tip` to one spelling,
+ignoring trailing comments, which is the same shape as `lintDuplicatedRules`
+already applies to the primitives' shared CSS.
+
+A consumer proposed extracting the prelude to a `_shared.js` instead, on the
+grounds that copying is what let it drift. The diagnosis was right and the
+remedy is the wrong trade: sharing makes `add` resolve a dependency graph and
+ends "one file is the whole component", which costs every consumer to save
+context for an agent reading several at once. Duplicate on purpose, then refuse
+to let the copies differ.
+
+The context cost is real, though — the prelude is 29 of an average 81 lines, so
+36% of every file is boilerplate an agent has already read. `nodex show` answers
+most discovery questions without opening the source, which is the part worth
+extending if this comes up again.
+
 ## Promote on second use
 
 The guiding rule for anything shared. Leave a thing inside its language until a

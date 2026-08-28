@@ -337,7 +337,52 @@ function primitiveItem({ meta, dir }) {
   };
 }
 
+/**
+ * The prelude every component inlines, and its one legal spelling.
+ *
+ * Self-containment is deliberate — a consumer lifts one chart and it works with
+ * no shared file to fetch — but nothing was holding the copies together, and
+ * they drifted. Six components carried an `rnd` missing its `Math.abs`, so the
+ * XOR could go negative and the "random" seed returned a value below zero on
+ * 26–49% of the inputs they actually use. Every chart still drew, which is why
+ * it survived: wrong sample data looks like sample data.
+ *
+ * Same shape as `lintDuplicatedRules` does for the primitives' shared CSS:
+ * duplicate on purpose, then refuse to let the copies differ.
+ */
+const PRELUDE = new Map([
+  ['rnd', 'const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;'],
+  [
+    'el',
+    "const el=(p,t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);p.appendChild(n);return n};",
+  ],
+  ['txt', "const txt=(p,a,s)=>{const n=el(p,'text',a);n.textContent=s;return n};"],
+  [
+    'tip',
+    "const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};",
+  ],
+]);
+
+function lintPrelude(js, where) {
+  for (const [name, canonical] of PRELUDE) {
+    const found = js.match(new RegExp(`^\\s*const ${name}\\s*=[^\\n]*`, 'm'));
+    if (!found) continue;
+    // A trailing comment is annotation, not drift.
+    const squash = (s) => s.replace(/\/\/[^\n]*$/, '').trim().replace(/\s+/g, '');
+    if (squash(found[0]) !== squash(canonical)) {
+      fail(
+        where,
+        `its copy of "${name}" differs from every other component's.\n` +
+          `      expected  ${canonical}\n` +
+          `      found     ${found[0].trim()}`,
+      );
+    }
+  }
+}
+
 function lintComponent({ languageMeta, tokens, meta, css, js, where }) {
+  if (js) lintPrelude(js, where);
+
   // Reduced motion, stroke discipline, palette membership and determinism all
   // come from the shared module, so the registry and a consumer's project are
   // held to the same rules by the same code.

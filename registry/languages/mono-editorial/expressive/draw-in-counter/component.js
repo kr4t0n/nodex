@@ -25,7 +25,7 @@ export function mount(root) {
   // ── shared Mono tokens ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
-  const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000;
+  const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   (()=>{
   const days=Array.from({length:180},(_,i)=>i);

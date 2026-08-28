@@ -27,7 +27,7 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000;
+  const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
   (()=>{
   const WIN=50;
