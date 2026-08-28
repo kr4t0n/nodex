@@ -47,7 +47,7 @@ export function mount(root) {
       yAxis:{show:false,min:20,max:130},
       series:[{
         type:'line',data:[...data],smooth:.45,symbol:'none',
-        lineStyle:{color:INK,width:2.4},
+        lineStyle:{color:INK,width:1.1},
         endLabel:{show:true,fontFamily:'Inter',fontSize:14,fontWeight:800,color:INK,
           formatter:p=>p.value+'k'},
         areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,

@@ -72,9 +72,22 @@ function asNumber(text: string): number | undefined {
  */
 export function strokeUses(source: string): StrokeUse[] {
   const uses: StrokeUse[] = [];
-  // Quoted attribute form only. A `stroke-width:3px` inside a style string is a
-  // paint-order halo behind text, which is legibility rather than a data mark.
-  const re = /['"]stroke-width['"]\s*:\s*/g;
+  /**
+   * Both runtimes, because a hairline is `stroke-width` in SVG and
+   * `lineStyle.width` in ECharts. Checking only the first left 22 components
+   * unexamined, and five of them drawing lines up to 2.6px under a 1.4px
+   * ceiling.
+   *
+   * The SVG form is matched only as a quoted attribute: a `stroke-width:3px`
+   * inside a `style` string is a paint-order halo behind text, which is
+   * legibility rather than a data mark.
+   *
+   * `itemStyle.borderWidth` is deliberately absent. Almost every use of it here
+   * is a knockout gap — a border painted in the page colour to separate
+   * adjacent segments — which reads as absence rather than as a line, so
+   * checking it would report mostly false positives.
+   */
+  const re = /(?:['"]stroke-width['"]|lineStyle\s*:\s*\{[^{}]*?\bwidth)\s*:\s*/g;
 
   for (let m = re.exec(source); m; m = re.exec(source)) {
     const start = m.index + m[0].length;

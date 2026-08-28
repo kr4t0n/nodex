@@ -30,7 +30,7 @@ export function mount(root) {
           formatter:p=>p.treePathInfo.length<=1?'':p.treePathInfo.length===2?p.name:`${p.name}\n${p.value} h`},
         upperLabel:{show:true,height:32,padding:[0,10],color:INK,fontSize:10,fontWeight:700,backgroundColor:PAPER},
         itemStyle:{borderColor:PAPER,borderWidth:2,gapWidth:2},
-        emphasis:{focus:'ancestor',itemStyle:{borderColor:INK,borderWidth:1.5}},
+        emphasis:{focus:'ancestor',itemStyle:{borderColor:INK,borderWidth:1.1}},
         levels:[{itemStyle:{borderWidth:0,gapWidth:5}},
           {upperLabel:{show:true,height:32},itemStyle:{borderColor:PAPER,borderWidth:3,gapWidth:3}},
           {upperLabel:{show:false},itemStyle:{borderColor:PAPER,borderWidth:2,gapWidth:2}}]}]});

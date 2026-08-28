@@ -73,7 +73,7 @@ export function mount(root) {
       })),
       emphasis:{
         focus:'adjacency',
-        lineStyle:{color:INK,opacity:.9,width:1.6},
+        lineStyle:{color:INK,opacity:.9,width:1.1},
         label:{show:true,color:INK},
       },
       blur:{itemStyle:{opacity:.12},lineStyle:{opacity:.03}},

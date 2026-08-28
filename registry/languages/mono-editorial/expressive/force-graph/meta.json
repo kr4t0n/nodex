@@ -5,6 +5,7 @@
   "component": "network",
   "tier": "expressive",
   "runtime": "echarts",
+  "strokeAsArea": true,
   "density": "glance",
   "tags": [
     "integration",

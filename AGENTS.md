@@ -166,6 +166,25 @@ Two rules the stroke reader follows, both learned from that:
 `lint.ts` imports nothing, which is what keeps the published CLI at zero
 dependencies while the build script shares its logic.
 
+**A hairline is `stroke-width` in SVG and `lineStyle.width` in ECharts**, and
+the first version read only the former. That left all 22 ECharts components
+unexamined, five of them drawing lines up to 2.6px: `circular-graph-dense`,
+`diverging-bar`, `draw-in-counter`, `dual-area`, `dynamic-data`. Any new
+runtime needs its own spelling added here, which is a standing argument against
+a third one.
+
+`itemStyle.borderWidth` is deliberately **not** checked. Almost every use of it
+in the registry is a knockout gap — a border painted in the page colour to
+separate adjacent segments — which reads as absence rather than as a line, so
+checking it would report mostly false positives. The one genuine ink border it
+would have caught, in `nested-treemap`, was fixed by hand. That is a known hole:
+an ink-coloured border above `lineMax` will not be caught.
+
+`strokeAsArea` is for a stroke whose **width carries data**, and the four
+network and chord components declare it because their link width encodes edge
+weight — thinning those would destroy information. It is not a way to silence
+the lint, and a component that merely draws a thick line does not qualify.
+
 ### The registry-only lints
 
 `scripts/check-shell-primitives.mjs` guards one thing outside the registry: the

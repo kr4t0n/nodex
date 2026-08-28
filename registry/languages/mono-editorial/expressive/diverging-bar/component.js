@@ -59,7 +59,7 @@ export function mount(root) {
         position:'outside',
         formatter:p=>(p.value>0?'+':'')+p.value,color:INK},
       markLine:{symbol:'none',silent:true,label:{show:false},
-        lineStyle:{color:'#8F8E88',width:1.5},
+        lineStyle:{color:'#8F8E88',width:1.1},
         data:[{xAxis:0}]},
     }],
   });

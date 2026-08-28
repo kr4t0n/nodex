@@ -65,7 +65,7 @@ export function mount(root) {
       {name:'spend',type:'bar',xAxisIndex:0,yAxisIndex:0,data:rain,
        itemStyle:{color:'#B0AFA9',borderRadius:[0,0,4,4]},barWidth:'55%'},
       {name:'sign-ups',type:'line',xAxisIndex:1,yAxisIndex:1,data:flow,
-       smooth:.4,symbol:'none',lineStyle:{color:INK,width:2.2},
+       smooth:.4,symbol:'none',lineStyle:{color:INK,width:1.1},
        areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,
          colorStops:[{offset:0,color:'rgba(28,28,26,.22)'},{offset:1,color:'rgba(28,28,26,0)'}]}}},
     ],

@@ -50,7 +50,7 @@ export function mount(root) {
       yAxis:{show:false,max:TOTAL*1.06},
       series:[{
         type:'line',data:cum.map(x=>Math.round(x)),smooth:.2,symbol:'none',
-        lineStyle:{color:INK,width:2.6},
+        lineStyle:{color:INK,width:1.1},
         areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,
           colorStops:[{offset:0,color:'rgba(28,28,26,.14)'},{offset:1,color:'rgba(28,28,26,0)'}]}},
       }],
