@@ -20,7 +20,6 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  const L=['#1C1C1A','#4A4944','#6A6963','#8F8E88','#B0AFA9','#C6C5BF'];
 
   (()=>{
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
