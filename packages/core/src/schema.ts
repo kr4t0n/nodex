@@ -82,6 +82,15 @@ export const nodexMetaSchema = z.object({
    * declaration reaches the person adding it.
    */
   externalData: z.array(z.string()).optional(),
+  /**
+   * The `data-nx-mount` names `mount(root)` looks for.
+   *
+   * Derived from the markup at build time rather than authored, because the
+   * name is chosen in the JS and only 3 of 64 match their slug — `arc-matrix`
+   * mounts `arcmatrix`. Without this a consumer holding all three files still
+   * has to read the source to find the contract between them.
+   */
+  mounts: z.array(z.string()).optional(),
 });
 
 export const registryItemSchema = z.object({

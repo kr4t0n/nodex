@@ -170,3 +170,15 @@ nodex whoami                       who the token belongs to
 Global: `--registry <dir|url>` to point at a specific registry, or
 `NODEX_REGISTRY`. Neither is needed normally — the CLI defaults to the hosted
 registry, and `init` pins whichever root it used into `nodex.json`.
+
+`--help` after a command describes that command.
+
+**Use `--json` on `list`, `search`, `add` and `tokens`.** The default output is
+aligned columns meant for people; the JSON is the stable shape.
+
+`add --json` reports where each file landed, the component's `exports`, its
+`aspectRatio` (the viewBox), and its `mounts`. That last one matters: `mount(root)`
+fills elements marked `data-nx-mount="<name>"` inside the root you pass, and the
+names are chosen in the JS rather than derived from the slug, so you cannot
+guess them. Neither is needed normally — the CLI defaults to the hosted
+registry, and `init` pins whichever root it used into `nodex.json`.

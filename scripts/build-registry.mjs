@@ -370,7 +370,25 @@ function lintComponent({ languageMeta, tokens, meta, css, js, where }) {
 
 /* ------------------------------------------------------------------- build */
 
-function itemFor({ languageMeta, meta, componentDir }) {
+/**
+ * The names the JS mounts into, read from the markup it ships with.
+ *
+ * `mount(root)` finds its elements by `data-nx-mount="<name>"`, and the name is
+ * chosen in the JS rather than derived from the slug — only 3 of 64 match. A
+ * consumer who has the three files still cannot see the contract between them
+ * without reading the source, and one reported grepping the JS for
+ * `obsReveal('...')` to find it. Recording it makes `nodex add --json` able to
+ * state it.
+ */
+function mountNames(fragment) {
+  return [
+    ...new Set(
+      [...fragment.matchAll(/data-nx-mount="([^"]+)"/g)].map((m) => m[1]),
+    ),
+  ];
+}
+
+function itemFor({ languageMeta, meta, componentDir, mounts }) {
   const rel = path
     .relative(REGISTRY_DIR, componentDir)
     .split(path.sep)
@@ -408,6 +426,7 @@ function itemFor({ languageMeta, meta, componentDir }) {
       runtime: meta.runtime,
       ...(meta.density ? { density: meta.density } : {}),
       ...(meta.aspectRatio ? { aspectRatio: meta.aspectRatio } : {}),
+      ...(mounts?.length ? { mounts } : {}),
       // Must reach the manifest, or the CLI cannot warn about it and declaring
       // it in the component's meta.json accomplishes nothing.
       ...(meta.externalData?.length ? { externalData: meta.externalData } : {}),
@@ -641,7 +660,12 @@ async function main() {
       });
 
       items.push(
-        itemFor({ languageMeta: language.meta, meta, componentDir: dir }),
+        itemFor({
+          languageMeta: language.meta,
+          meta,
+          componentDir: dir,
+          mounts: mountNames(fragment),
+        }),
       );
     }
   }

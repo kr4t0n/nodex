@@ -43,6 +43,92 @@ function faceName(spec: string | undefined): string {
   return (spec ?? '').split(':')[0]?.replace(/\+/g, ' ') ?? '';
 }
 
+/**
+ * Per-command help.
+ *
+ * `nodex add --help` used to print the global page, so `--to` — the only flag
+ * `add` has — was documented nowhere anyone would look for it.
+ */
+const COMMAND_HELP: Record<string, string> = {
+  list: `${bold('nodex list')} [--json]
+
+  Design languages in the registry, with component counts.`,
+
+  design: `${bold('nodex design')} <language>
+
+  Print the language's DESIGN.md: the rules tokens cannot express.
+  Read this before writing UI in the language.`,
+
+  tokens: `${bold('nodex tokens')} <language> [--json]
+
+  Print the token layer. CSS custom properties by default, or the raw
+  token tree with --json.`,
+
+  search: `${bold('nodex search')} [query] [filters] [--json]
+
+  Find components. The query matches name, title, type and tags.
+
+  --design <slug>   only this language
+  --type <enum>     mark and encoding, e.g. bar, donut, sankey
+  --tag <tag>       data domain, e.g. billing, deploy
+  --tier <t>        primitive | expressive
+  --density <d>     close-read | glance, where the language declares it`,
+
+  init: `${bold('nodex init')} <language>
+
+  Set this project up: writes the token layer and DESIGN.md, records the
+  choice in nodex.json, and appends a section to AGENTS.md so an agent
+  working here knows the rules exist. Later "add" calls then need no flags.`,
+
+  add: `${bold('nodex add')} <ref...> [--to <dir>] [--json]
+
+  Copy components in. A ref is <language>/<name>, or a bare name for a
+  shared primitive when the project or --design says which language.
+
+  --to <dir>        write here instead of the path in nodex.json
+  --design <slug>   language for bare refs
+  --json            report files, mounts, exports and aspectRatio
+
+  Components arrive as component.html, .css and .js. mount(root) fills the
+  data-nx-mount elements in the markup, and those names are printed.`,
+
+  lint: `${bold('nodex lint')} [path...]
+
+  Check components against the rules of the language in nodex.json:
+  palette membership, stroke maximum, a reduced-motion guard, and
+  determinism. Defaults to the components directory.
+
+  Exits non-zero on an error, zero on a warning.
+  An empty .nodex-stroke-as-area file in a component's directory exempts
+  it from the stroke maximum, for a stroke whose width carries data.`,
+
+  login: `${bold('nodex login')}
+
+  Sign in to a served registry by device code. Prints a URL and a short
+  code to type into it. Stores the token in ~/.nodex/auth.json, 0600.
+  In CI, set NODEX_TOKEN instead; nobody can approve a code there.`,
+
+  logout: `${bold('nodex logout')}
+
+  Forget the token stored for this registry.`,
+
+  whoami: `${bold('nodex whoami')}
+
+  Who the stored token belongs to.`,
+
+  'new-language': `${bold('nodex new-language')} <slug>
+
+  Scaffold a language inside a nodex checkout. Authoring only.`,
+};
+
+function commandHelp(command: string): string {
+  const help = COMMAND_HELP[command];
+  if (!help) {
+    return `\n  No command named "${command}".\n${USAGE}`;
+  }
+  return `\n${help}\n\n  ${dim('Global: --registry <dir|url>, --help')}\n`;
+}
+
 const USAGE = `
 ${bold('nodex')} - fetch design languages and components from a registry
 
@@ -77,7 +163,50 @@ ${bold('Examples')}
 
 /* ------------------------------------------------------------------ reading */
 
-function cmdList(registry: Registry): void {
+/**
+ * Machine-readable output.
+ *
+ * Printed alone, with no heading and no dim text, so the whole of stdout parses.
+ * This CLI is run by coding agents at least as often as by people, and an agent
+ * given aligned columns has to scrape them — which means inventing a parser for
+ * a format nobody promised to keep stable.
+ */
+function emit(value: unknown): void {
+  out(JSON.stringify(value, null, 2));
+}
+
+/** What `add --json` reports per component. */
+interface AddedComponent {
+  ref: string;
+  name: string;
+  title: string;
+  dir: string;
+  files: string[];
+  language: string;
+  tier: string;
+  runtime: string;
+  /** The viewBox, as `width/height`. */
+  aspectRatio?: string;
+  /** `data-nx-mount` names `mount(root)` looks for inside the markup. */
+  mounts?: string[];
+  exports: string[];
+  externalData?: string[];
+}
+
+function cmdList(registry: Registry, asJson = false): void {
+  if (asJson) {
+    emit(
+      registry.languages.map((l) => ({
+        slug: l.slug,
+        name: l.name,
+        description: l.description,
+        visibility: l.visibility,
+        ...(l.counts ? { counts: l.counts } : {}),
+      })),
+    );
+    return;
+  }
+
   if (registry.languages.length === 0) {
     out('\nThe registry contains no design languages.\n');
     return;
@@ -122,6 +251,7 @@ function cmdSearch(
     density?: string;
     tier?: string;
   },
+  asJson = false,
 ): void {
   const q = query?.toLowerCase();
   const matches = registry.items.filter((item) => {
@@ -143,6 +273,32 @@ function cmdSearch(
       meta.tags.some((tag) => tag.includes(q))
     );
   });
+
+  if (asJson) {
+    emit(
+      matches.map((item) => ({
+        ref:
+          item.meta.language === 'shared'
+            ? item.name
+            : `${item.meta.language}/${item.name}`,
+        name: item.name,
+        title: item.title,
+        ...(item.description ? { description: item.description } : {}),
+        language: item.meta.language,
+        tier: item.meta.tier,
+        component: item.meta.component,
+        runtime: item.meta.runtime,
+        ...(item.meta.density ? { density: item.meta.density } : {}),
+        ...(item.meta.aspectRatio ? { aspectRatio: item.meta.aspectRatio } : {}),
+        ...(item.meta.mounts?.length ? { mounts: item.meta.mounts } : {}),
+        ...(item.meta.externalData?.length
+          ? { externalData: item.meta.externalData }
+          : {}),
+        tags: item.meta.tags,
+      })),
+    );
+    return;
+  }
 
   if (matches.length === 0) {
     out('\nNothing matched. Try `nodex search` with no filters to see everything.\n');
@@ -371,7 +527,7 @@ async function componentDirs(root: string): Promise<string[]> {
 async function cmdAdd(
   registry: Registry,
   refs: string[],
-  options: { to?: string; design?: string },
+  options: { to?: string; design?: string; json?: boolean },
 ): Promise<void> {
   const found = await findConfig();
 
@@ -391,6 +547,7 @@ async function cmdAdd(
   const deps = new Set<string>();
   const external = new Set<string>();
   const added: Array<[string, string]> = [];
+  const report: AddedComponent[] = [];
 
   for (const ref of refs) {
     const resolved = findItem(registry, ref, design);
@@ -400,10 +557,14 @@ async function cmdAdd(
     const targetDir = path.join(projectDir, baseDir, item.name);
     await mkdir(targetDir, { recursive: true });
 
+    const written: string[] = [];
+    let js: string | undefined;
     for (const file of item.files ?? []) {
       const contents = await registry.read(file.path);
       const name = path.basename(file.path);
       await writeFile(path.join(targetDir, name), contents);
+      written.push(path.join(baseDir, item.name, name));
+      if (name === 'component.js') js = contents;
     }
 
     for (const dep of item.dependencies ?? []) deps.add(dep);
@@ -412,6 +573,35 @@ async function cmdAdd(
       path.join(baseDir, item.name),
       `${item.title}  ${item.meta.component}`,
     ]);
+
+    report.push({
+      ref:
+        item.meta.language === 'shared'
+          ? item.name
+          : `${item.meta.language}/${item.name}`,
+      name: item.name,
+      title: item.title,
+      dir: path.join(baseDir, item.name),
+      files: written,
+      language: item.meta.language,
+      tier: item.meta.tier,
+      runtime: item.meta.runtime,
+      ...(item.meta.aspectRatio ? { aspectRatio: item.meta.aspectRatio } : {}),
+      ...(item.meta.mounts?.length ? { mounts: item.meta.mounts } : {}),
+      exports: js ? exportedNames(js) : [],
+      ...(item.meta.externalData?.length
+        ? { externalData: item.meta.externalData }
+        : {}),
+    });
+  }
+
+  if (options.json) {
+    emit({
+      added: report,
+      ...(deps.size ? { dependencies: [...deps] } : {}),
+      ...(external.size ? { externalData: [...external] } : {}),
+    });
+    return;
   }
 
   heading(`Added ${added.length} component${added.length === 1 ? '' : 's'}`);
@@ -432,9 +622,38 @@ async function cmdAdd(
     for (const url of external) out(`      ${dim(url)}`);
   }
 
+  // The three files are not self-explanatory together. `mount(root)` finds its
+  // elements by `data-nx-mount="<name>"`, and the name is chosen in the JS
+  // rather than derived from the slug — arc-matrix mounts "arcmatrix", and only
+  // 3 of 64 match. Printing the names is what stops the reader having to grep
+  // the source to find the contract between the files they were just handed.
+  const mounted = report.filter((r) => r.mounts?.length);
+  if (mounted.length > 0) {
+    out();
+    out(`  ${bold('Mounting')}`);
+    out(`    ${dim('import { mount } from "./component.js"; mount(rootEl)')}`);
+    out(
+      `    ${dim('It fills the data-nx-mount elements in component.html, within rootEl:')}`,
+    );
+    for (const r of mounted) {
+      out(`      ${r.name}  ${dim(r.mounts!.join(', '))}`);
+    }
+  }
+
   out();
-  out(`  ${dim('Mount a component with: import { mount } from "./component.js"')}`);
+  out(`  ${dim('Machine-readable: add --json')}`);
   out();
+}
+
+/** Top-level `export function NAME` and `export const NAME`. */
+function exportedNames(js: string): string[] {
+  return [
+    ...new Set(
+      [...js.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map(
+        (m) => m[1] as string,
+      ),
+    ),
+  ];
 }
 
 async function cmdNewLanguage(registry: Registry, slug: string): Promise<void> {
@@ -696,6 +915,13 @@ async function main(argv: string[]): Promise<void> {
 
   const [command, ...rest] = positionals;
 
+  // `--help` after a command describes that command. Printing the global page
+  // for `nodex add --help` means the one flag it has, --to, is documented
+  // nowhere the reader thought to look.
+  if (values.help && command && command !== 'help') {
+    out(commandHelp(command));
+    return;
+  }
   if (values.help || !command || command === 'help') {
     out(USAGE);
     return;
@@ -713,7 +939,7 @@ async function main(argv: string[]): Promise<void> {
 
   switch (command) {
     case 'list':
-      cmdList(registry);
+      cmdList(registry, values.json);
       return;
     case 'design': {
       const slug = rest[0] ?? values.design;
@@ -731,13 +957,18 @@ async function main(argv: string[]): Promise<void> {
       await cmdLint(registry, rest, { design: values.design });
       return;
     case 'search':
-      cmdSearch(registry, rest[0], {
-        design: values.design,
-        type: values.type,
-        tag: values.tag,
-        density: values.density,
-        tier: values.tier,
-      });
+      cmdSearch(
+        registry,
+        rest[0],
+        {
+          design: values.design,
+          type: values.type,
+          tag: values.tag,
+          density: values.density,
+          tier: values.tier,
+        },
+        values.json,
+      );
       return;
     case 'init': {
       const slug = rest[0];
@@ -749,7 +980,11 @@ async function main(argv: string[]): Promise<void> {
       if (rest.length === 0) {
         fail('What should I add? Try `nodex add mono-editorial/barcode-lollipop`.');
       }
-      await cmdAdd(registry, rest, { to: values.to, design: values.design });
+      await cmdAdd(registry, rest, {
+        to: values.to,
+        design: values.design,
+        json: values.json,
+      });
       return;
     }
     case 'new-language': {

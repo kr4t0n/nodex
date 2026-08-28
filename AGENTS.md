@@ -706,6 +706,30 @@ A version already on npm is skipped with a notice rather than failing, the same
 record-reality-then-freeze shape the Helm chart uses: publishing is only ever
 reached by bumping the version.
 
+### The CLI is read by agents, so it has a parseable shape
+
+`list`, `search`, `add` and `tokens` take `--json`, printed alone on stdout with
+no heading and no dim text. Only `tokens` had it, and a consumer reported
+scraping the aligned columns — which means inventing a parser for a format
+nobody promised to keep stable. `--help` after a command describes that command;
+it used to print the global page, so `add`'s only flag, `--to`, was documented
+nowhere anyone would look.
+
+**`meta.mounts` is the important one.** A component ships three files, and
+nothing in them says how they connect: `mount(root)` fills elements marked
+`data-nx-mount="<name>"`, and the name is chosen in the JS rather than derived
+from the slug. Only 3 of 64 match — `arc-matrix` mounts `arcmatrix`. A consumer
+reported grepping the JS for `obsReveal('...')` to find it, which is a fair
+thing to do and a bad thing to have to do.
+
+The build extracts the names from the markup, so it cannot drift from what
+`mount` actually looks for; authoring it in `meta.json` would let it. `add`
+prints them and `add --json` reports them alongside `files`, `exports` and
+`aspectRatio`, which is the viewBox.
+
+Primitives have no mounts and correctly report none: they are markup and CSS
+with no script to wire up.
+
 ### `~/.nodex` holds credentials; `nodex.json` holds the project
 
 Two config files, deliberately. `nodex.json` records which language a project

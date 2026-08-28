@@ -47,6 +47,34 @@ nodex whoami                       who the token belongs to
 
 Filters for `search`: `--design`, `--type`, `--tag`, `--tier`, `--density`.
 
+`--help` after any command describes that command, not the whole CLI.
+
+## For agents
+
+`list`, `search`, `add` and `tokens` all take `--json`, which prints parseable
+output alone on stdout with no headings. Prefer it to scraping the aligned
+columns, which are for people and are not a stable format.
+
+`add --json` also states the contract between the three files you were handed:
+
+```json
+{
+  "added": [{
+    "ref": "mono-editorial/arc-matrix",
+    "dir": "src/components/nodex/arc-matrix",
+    "files": ["...component.html", "...component.css", "...component.js"],
+    "mounts": ["arcmatrix"],
+    "exports": ["mount"],
+    "aspectRatio": "430/320"
+  }]
+}
+```
+
+`mount(root)` fills the elements marked `data-nx-mount="<name>"` in the markup,
+searching only within the root you pass it. **The names are chosen in the JS,
+not derived from the slug** — `arc-matrix` mounts `arcmatrix`, and only three of
+sixty-four match. `mounts` is how you find them without reading the source.
+
 ## Verifying conformance
 
 `DESIGN.md` states rules that tokens cannot express. `nodex lint` checks the
