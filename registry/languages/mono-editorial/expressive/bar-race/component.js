@@ -31,7 +31,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000;
 
-  // ════ mono-fancy4 · 1: bar race ════
   (()=>{
   const P=['Editor','Boards','Docs','Chat','Flows','Vault','Pages','Sync'];
   const YEARS=[2019,2020,2021,2022,2023,2024,2025,2026];

@@ -34,7 +34,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-demo · 2: petal rose ════
   (()=>{
   const EMO=[
     ['Happiness',12],['Awe',10],['Admiration',5],['Surprise',12],

@@ -20,20 +20,6 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens ──
-  const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
-
-  const NS='http://www.w3.org/2000/svg';
-
-  const el=(p,t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);p.appendChild(n);return n};
-
-  const txt=(p,a,s)=>{const n=el(p,'text',a);n.textContent=s;return n};
-
-  const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
-
-  const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
-
-  // ── New chart-family helpers (scoped to the added templates) ──
   (()=>{
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
   const NS='http://www.w3.org/2000/svg';
@@ -42,8 +28,6 @@ export function mount(root) {
   const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ L16 · matrix heat ════
-  //  +  F10 dot heat
   (()=>{
   const FEAT=['EDITOR','BOARDS','DOCS','CHAT','FLOWS','VAULT','PAGES','SYNC'];
   const v=(i,j)=>{

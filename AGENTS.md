@@ -749,6 +749,21 @@ matching rather than by pattern, so the prune provably removed only dead code.
 **If a component's JS reveals a mount its markup does not declare, that block is
 dead.** That is the check worth re-running after any future import.
 
+Pruning the blocks was not the end of it. The same 13 carried the family
+wrapper's **duplicate prelude**, shadowing the one at the top of `mount`, so 62
+declarations were unreachable. Removing them needed care rather than a blanket
+dedup: four — `aggregate-sankey`, `matrix-heat-glance`, `rank-strip`, `violin` —
+have a *different* `rnd` inside, and `rnd` seeds the sample data, so deleting the
+wrong copy would have silently changed what the chart draws. Only shadowed outer
+declarations went.
+
+The block banners were also removed. `// ════ L18 · beeswarm ════` numbers a
+position in a document no consumer has seen, and with one chart per file the
+filename already says it. Both passes were verified by stripping comments and
+requiring the remaining code to be byte-identical.
+
+`beeswarm` went from roughly 340 lines to 83.
+
 ### The data contract is derived, not authored
 
 `meta.data` records the shape of each sample dataset — `dumbbell-queue` reports

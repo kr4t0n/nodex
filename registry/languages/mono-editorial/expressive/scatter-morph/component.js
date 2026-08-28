@@ -29,7 +29,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy · 5: universal transition morph ════
   (()=>{
   const P12=[
     ['Editor',12,9.1,486],['Boards',18,8.4,391],['Forms',9,8.8,274],

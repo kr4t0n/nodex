@@ -3,7 +3,6 @@
 export function mount(root) {
   const q = (name) => root.querySelector(`[data-nx-mount="${name}"]`);
 
-
   const INK='#1C1C1A',PAPER='#F0EFEB';
   const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000; // deterministic
 

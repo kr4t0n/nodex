@@ -36,7 +36,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy3 · 3: single-axis small multiples ════
   (()=>{
   const days=['MON','TUE','WED','THU','FRI','SAT','SUN'];
   const hours=Array.from({length:24},(_,i)=>i);

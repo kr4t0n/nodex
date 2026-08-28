@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ C3 · stacked rungs ════
   (()=>{
   const D=[['NA',[18,11,7]],['EU',[14,9,5]],['APAC',[9,7,6]],['LATAM',[5,4,2]]];
   const SHADE=[INK,'#8F8E88','#C0BFB8'];

@@ -33,8 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ C8 · dumbbell queue ════
-  //  =  X
   (()=>{
   const D=[['INVITE FLOW',14,6],['FIRST BOARD',19,9],['IMPORT DATA',26,13],['TEAM SETUP',31,21],['GO LIVE',38,30]];
   obsReveal('dumbbell',s=>{

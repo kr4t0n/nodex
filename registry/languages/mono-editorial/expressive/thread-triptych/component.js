@@ -1,7 +1,6 @@
 export function mount(root) {
   const q = (name) => root.querySelector(`[data-nx-mount="${name}"]`);
 
-
   const INK='#1C1C1A',NS='http://www.w3.org/2000/svg';
   const el=(p,t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);p.appendChild(n);return n};
   const txt=(p,a,s)=>{const n=el(p,'text',a);n.textContent=s;return n};

@@ -37,7 +37,6 @@ export function mount(root) {
 
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
-  // ════ B4 · tick donut ════
   //  Lupi ballot tally 1 tick = 1%
   //  ladder
   (()=>{

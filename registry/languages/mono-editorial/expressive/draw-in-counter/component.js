@@ -27,7 +27,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000;
 
-  // ════ mono-fancy4 · 3: draw-in + counter ════
   (()=>{
   const days=Array.from({length:180},(_,i)=>i);
   const daily=days.map(i=>14+10*Math.sin(i/29)+i*.12+rnd(i+1,3)*6);

@@ -24,7 +24,6 @@ export function mount(root) {
 
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
-  // ════ M1 · US choropleth ════
   // ECharts registerMap + GeoJSONECharts jsdelivr
   // // registerMap  specialAreas
   //  USA d3 albersUsa

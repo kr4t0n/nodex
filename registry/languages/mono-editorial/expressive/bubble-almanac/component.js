@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ 3 · bubble almanac ════
   // the vintage-almanac feel lives in three things: ledger-paper hairlines
   // under everything, bubbles big enough to collide, and marginalia. do all three.
   (()=>{

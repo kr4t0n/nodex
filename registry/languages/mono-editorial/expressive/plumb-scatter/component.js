@@ -31,7 +31,6 @@ export function mount(root) {
 
   const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
 
-  // ════ C4 · plumb scatter ════
   // x y
   //  barcode /
   (()=>{

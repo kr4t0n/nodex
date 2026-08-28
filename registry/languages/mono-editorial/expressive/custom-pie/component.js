@@ -36,7 +36,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy3 · 1: custom double-encoded pie ════
   (()=>{
   const D=[
     ['Editor',34,42],['Boards',22,31],['Docs',18,38],

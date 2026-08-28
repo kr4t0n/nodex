@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ B3 · hairline area ════
   //  Lupi
   (()=>{
   const N=45;

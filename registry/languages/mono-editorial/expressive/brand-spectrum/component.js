@@ -31,7 +31,6 @@ export function mount(root) {
 
   const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
 
-  // ════ 1 · brand spectrum ════
   // paired opposites; the pale ribbon threads our position down the page
   (()=>{
   const ROWS=[['FRIEND','AUTHORITY'],['SERIOUS','PLAYFUL'],['RELIABLE','RISK-TAKING'],['CONTEMPORARY','CLASSIC']];

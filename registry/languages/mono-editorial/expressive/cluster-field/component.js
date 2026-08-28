@@ -38,7 +38,6 @@ export function mount(root) {
 
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
-  // ════ 6 · cluster field ════
   (()=>{
   const SAT=[[622,78,'PLUGINS',22],[706,214,'THEMES',16],[540,268,'DOCS',13],[92,72,'FORKS',12],[774,58,'MIRRORS',9]];
   obsReveal('clusters',s=>{

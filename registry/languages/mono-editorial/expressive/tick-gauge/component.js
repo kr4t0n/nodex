@@ -37,7 +37,6 @@ export function mount(root) {
 
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
-  // ════ C7 · tick gauge ════
   // ballot tick  210° 1 tick = 1%  73
   //  25/50/75/100  +  +
   (()=>{

@@ -34,7 +34,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy · 4: rainfall dual area ════
   (()=>{
   const days=Array.from({length:30},(_,i)=>i+1);
   const flow=[42,45,44,48,52,55,53,58,64,62,66,71,69,75,82,79,84,80,86,92,88,95,91,97,104,101,108,105,112,118];

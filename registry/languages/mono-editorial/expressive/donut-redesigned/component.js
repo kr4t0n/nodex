@@ -25,7 +25,6 @@ export function mount(root) {
 
   const LAD=['#1C1C1A','#4A4944','#8F8E88','#B0AFA9','#D8D7D1'];
 
-  // ════ mono-redesign · donut → waffle of dots ════
   (()=>{
   const NS='http://www.w3.org/2000/svg';
   const mkEl=(svg,t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);svg.appendChild(n);return n};

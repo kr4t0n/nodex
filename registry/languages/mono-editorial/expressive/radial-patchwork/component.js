@@ -45,7 +45,6 @@ export function mount(root) {
     return `M${xa} ${ya} A${r1} ${r1} 0 ${big} 1 ${xb} ${yb} L${xc} ${yc} A${r0} ${r0} 0 ${big} 0 ${xd} ${yd} Z`;
   };
 
-  // ════ 4 · radial patchwork ════
   (()=>{
   const CX=200,CY=168,N=46;
   obsReveal('patchwork',s=>{

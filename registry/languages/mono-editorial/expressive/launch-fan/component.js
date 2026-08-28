@@ -38,7 +38,6 @@ export function mount(root) {
 
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
-  // ════ 1 · launch fan ════
   // spokes sorted by launch week → the big dots cascade along a diagonal arc
   (()=>{
   const FEAT=['Editor','Boards','Docs','Chat','Flows','Vault','Pages','Sync','Grid','Views','Hub','Forms'];

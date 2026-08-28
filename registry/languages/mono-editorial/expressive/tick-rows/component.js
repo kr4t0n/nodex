@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ C1 · tick rows ════
   //  = 1 tick = 1
   // tick / 5
   (()=>{

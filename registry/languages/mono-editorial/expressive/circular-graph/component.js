@@ -34,7 +34,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy · 2: circular graph ════
   (()=>{
   const teams=[
     ['Product',52],['Design',38],['Frontend',46],['Backend',44],

@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ 8 · type colonnade ════
   (()=>{
   const PRE=['core','ui','api','data','auth','sync','mail','flag','edge','doc','bot'];
   const SUF=['-kit','-svc','-web','-cli','-db','-gw','-sdk','-jobs'];

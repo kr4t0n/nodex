@@ -20,14 +20,8 @@ export function mount(root) {
     node.addEventListener('click', go);
   };
 
-  // ── shared Mono tokens ──
-  const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
-
   const L=['#1C1C1A','#4A4944','#6A6963','#8F8E88','#B0AFA9','#C6C5BF'];
 
-  const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000;
-
-  // ── New chart-family helpers (scoped to the added templates) ──
   (()=>{
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
   const NS='http://www.w3.org/2000/svg';
@@ -36,7 +30,6 @@ export function mount(root) {
   const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-// ════ G22 · aggregate sankey ════
   // B3 Threads ——
   //  .5  convergence
   (()=>{

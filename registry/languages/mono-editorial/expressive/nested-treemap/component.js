@@ -6,7 +6,6 @@ export function mount(root) {
   // ── shared Mono tokens lupi-gallery  ──
   const INK='#1C1C1A',PAPER='#F0EFEB',MUTED='#8F8E88',GRID='#DEDDD6';
 
-  // ════ C9 · nested treemap ════
   // Mono
   (()=>{
   const TOTAL=1280,FILL='#55554F';

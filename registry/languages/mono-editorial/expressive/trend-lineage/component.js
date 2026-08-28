@@ -31,7 +31,6 @@ export function mount(root) {
 
   const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
 
-  // ════ 6 · trend lineage ════
   (()=>{
   // [name, events [year, type f|o], aliveToday]
   const TR=[

@@ -38,7 +38,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000;
 
-  // ════ mono-fancy3 · 4: jitter strip ════
   (()=>{
   const cats=['P0 CRITICAL','P1 HIGH','P2 NORMAL','P3 LOW'];
   const mkPts=(ci,n,median,spread,outliers)=>{

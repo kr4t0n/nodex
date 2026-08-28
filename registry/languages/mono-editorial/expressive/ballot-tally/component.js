@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ 15 · ballot tally ════
   // multi-select survey (each option independent, 0–100): every option is a row of
   // 100 hairline ticks — a hundred people standing in line, the ones who picked it inked.
   (()=>{

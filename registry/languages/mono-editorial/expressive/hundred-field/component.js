@@ -38,7 +38,6 @@ export function mount(root) {
 
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
-  // ════ 14 · hundred field ════
   // small data, unit-decomposed: four shares of 100% become 100 people.
   // phyllotaxis discs (golden angle) so; share is countable, not just readable.
   (()=>{

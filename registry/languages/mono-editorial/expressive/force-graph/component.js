@@ -34,7 +34,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ force graph: the network shakes itself into place ════
   // (replaced the axis-break bar — bars must never lie about length; house rule)
   (()=>{
   const hubs=[['Core API',52,0]];

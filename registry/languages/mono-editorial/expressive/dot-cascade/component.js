@@ -31,7 +31,6 @@ export function mount(root) {
 
   const tip=(n,s)=>{const t=document.createElementNS(NS,'title');t.textContent=s;n.appendChild(t)};
 
-  // ════ 4 · dot cascade ════
   (()=>{
   const CAUSE=['DNS','CDN','QUOTA','DISK','CERT','CACHE','QUEUE','LOCK','OOM','NET','3P API','CONFIG','DB','DEPLOY','CODE','HUMAN'];
   const COUNT=[1,1,2,3,3,4,5,6,7,9,11,13,15,18,22,27];

@@ -36,7 +36,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy2 · 4: stagger wave ════
   (()=>{
   const n=50;
   const vals=Array.from({length:n},(_,i)=>

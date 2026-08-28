@@ -29,7 +29,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>((i*73856093)^(k*19349663))%1000/1000;
 
-  // ════ mono-fancy4 · 2: dynamic data stream ════
   (()=>{
   const WIN=50;
   obsReveal('stream',el=>{

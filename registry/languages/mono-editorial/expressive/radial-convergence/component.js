@@ -38,7 +38,6 @@ export function mount(root) {
 
   const pol=(cx,cy,r,deg)=>[cx+r*Math.cos(deg*D2R),cy+r*Math.sin(deg*D2R)];
 
-  // ════ 5 · radial convergence ════
   (()=>{
   const N=48,CX=200,CY=162,R=116;
   const THEME=[['PERF',15,-75],['INTEGRATIONS',10,-3],['PRICING',9,69],['MOBILE',8,141],['UX',6,213]];

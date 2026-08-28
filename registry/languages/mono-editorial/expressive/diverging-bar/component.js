@@ -34,7 +34,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy2 · 2: diverging bar ════
   (()=>{
   const D=[
     ['Enterprise',86],['Team',54],['Pro',31],['Starter',12],

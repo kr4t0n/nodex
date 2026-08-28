@@ -36,7 +36,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy · 1: pictorial bar forest ════
   (()=>{
   const TREE='path://M20,0 L38,28 L29,28 L40,46 L26,46 L26,58 L14,58 L14,46 L0,46 L11,28 L2,28 Z';
   const years=['2022','2023','2024','2025','2026'];

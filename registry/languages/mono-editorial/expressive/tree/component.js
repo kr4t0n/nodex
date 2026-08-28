@@ -36,7 +36,6 @@ export function mount(root) {
 
   const tipLight={backgroundColor:INK,borderWidth:0,textStyle:{color:PAPER,fontFamily:'Inter',fontSize:12},padding:[10,14]};
 
-  // ════ mono-fancy · 3: LR tree ════
   (()=>{
   const b=(name,kids,shade)=>({name,itemStyle:{color:shade},lineStyle:{color:shade},
     children:kids.map(k=>({name:k,itemStyle:{color:shade},lineStyle:{color:shade}}))});

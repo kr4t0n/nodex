@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ 2 · barcode lollipop ════
   (()=>{
   const N=90;
   const val=d=>95+55*Math.sin(d/9.5)+30*Math.sin(d/3.7)+rnd(d+1,5)*40;

@@ -33,7 +33,6 @@ export function mount(root) {
 
   const rnd=(i,k)=>Math.abs(((i*73856093)^(k*19349663))%1000)/1000;
 
-  // ════ 3 · arc bubble matrix ════
   (()=>{
   const PROD=['Editor','Boards','Docs','Flows','Chat','Vault','Pages','Sync'];
   const CITY=['SF','NYC','LON','BER','TOK','SYD','SIN','PAR','AMS','TOR','SEO','SAO'];
