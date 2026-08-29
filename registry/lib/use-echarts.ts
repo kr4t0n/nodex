@@ -65,6 +65,10 @@ export function renderToSVG(
   });
   chart.setOption(option);
   const svg = chart.renderToSVGString();
+  // Not tidiness: an undisposed SSR instance keeps a handle open and the Node
+  // process never exits. A build that renders previews would hang after the
+  // last chart, with nothing printed to say why. Same shape as the jsdom
+  // timers that hang the smoke test.
   chart.dispose();
   return svg;
 }
