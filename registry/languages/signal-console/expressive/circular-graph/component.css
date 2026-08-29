@@ -1,0 +1,105 @@
+/* Eight services, who calls whom — signal-console
+
+   Colour, radius, spacing and the type stack come through --nx-* variables.
+   Type sizes and motion timings are literals taken from tokens.json, because
+   the generated tokens.css exposes the paint layer and not those two. Keep them
+   in step with `type` and `motion` in tokens.json by hand. */
+
+.nx-circular-graph .card {
+  background: var(--nx-surface);
+  border-radius: var(--nx-radius-card);
+  padding: var(--nx-space-cardPadding);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+}
+
+/* Label left, current value right, one line. Baselines aligned rather than
+   centres, so the two sit on the same rule despite the size difference. */
+.nx-circular-graph .head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nx-circular-graph .head .label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--nx-muted);
+}
+
+/* Tabular, so a figure changing in place does not shift the label beside it.
+   That is most of why this language is monospace. */
+.nx-circular-graph .head .value {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.nx-circular-graph svg {
+  width: 100%;
+  display: block;
+  margin-top: 4px;
+}
+
+.nx-circular-graph svg text {
+  font-family: var(--nx-font-mono);
+}
+
+/* A status line, not a caption: three segments spread to the card's edges, so
+   the window and the age read as columns rather than as prose. */
+.nx-circular-graph .foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 7px;
+  border-top: 1px solid var(--nx-grid);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--nx-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Marks arrive fast, with no stagger long enough to notice: a console that
+   animates in slowly is lying about how fresh its data is. */
+.nx-circular-graph .arrive {
+  animation: nx-cg-arrive 0.35s cubic-bezier(.2, 0, 0, 1) both;
+}
+
+.nx-circular-graph .chord {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: nx-cg-draw 0.35s cubic-bezier(.2, 0, 0, 1) both;
+}
+
+/* Only the failing node pulses. Motion means "this is current", so a second
+   looping thing would spend the one signal the language has. */
+.nx-circular-graph .live {
+  animation: nx-cg-pulse 1.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes nx-cg-arrive { from { opacity: 0 } }
+@keyframes nx-cg-draw { to { stroke-dashoffset: 0 } }
+@keyframes nx-cg-pulse {
+  0%, 100% { opacity: 1; transform: scale(1) }
+  50% { opacity: .4; transform: scale(1.4) }
+}
+
+/* Stops the loop and resolves to the final state rather than merely slowing it.
+   A looping language has more to answer for here, not less. */
+@media (prefers-reduced-motion: reduce) {
+  .nx-circular-graph .arrive,
+  .nx-circular-graph .live { animation: none }
+  .nx-circular-graph .chord {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}

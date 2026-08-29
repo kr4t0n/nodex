@@ -1,0 +1,11 @@
+{
+  "slug": "circular-graph",
+  "title": "Eight services, who calls whom",
+  "description": "chord width = calls per second between a pair · node size = that service's total · hue only where something is degraded",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "svg",
+  "aspectRatio": "420/268",
+  "tags": ["service-mesh", "live-ops"],
+  "dependencies": []
+}

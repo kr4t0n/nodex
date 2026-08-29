@@ -25,14 +25,13 @@ import process from 'node:process';
 import { JSDOM } from 'jsdom';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const LANGUAGE = process.env.NODEX_LANGUAGE ?? 'mono-editorial';
-const EXPRESSIVE = path.join(
-  ROOT,
-  'registry',
-  'languages',
-  LANGUAGE,
-  'expressive',
-);
+// Every language with components, unless one is named. It defaulted to
+// mono-editorial, so signal-console's first chart would have shipped without
+// the smoke test ever mounting it — the gap only appears when a second
+// language grows an expressive component, which is exactly when it matters.
+const ONLY = process.env.NODEX_LANGUAGE;
+const LANGUAGES = path.join(ROOT, 'registry', 'languages');
+const expressiveDir = (language) => path.join(LANGUAGES, language, 'expressive');
 
 function makeEchartsStub(record) {
   const instance = {
@@ -66,8 +65,8 @@ function makeEchartsStub(record) {
   };
 }
 
-async function run(slug) {
-  const dir = path.join(EXPRESSIVE, slug);
+async function run(slug, language) {
+  const dir = path.join(expressiveDir(language), slug);
   const meta = JSON.parse(await readFile(path.join(dir, 'meta.json'), 'utf8'));
   const fragment = await readFile(path.join(dir, 'component.html'), 'utf8');
 
@@ -168,7 +167,7 @@ async function run(slug) {
   // timers; without this the event loop never drains and the run hangs.
   window.close();
 
-  return { slug, runtime: meta.runtime, errors, skipped, external: meta.externalData };
+  return { slug: `${language}/${slug}`, runtime: meta.runtime, errors, skipped, external: meta.externalData };
 }
 
 // A chart that finishes drawing asynchronously can reject after mount returns.
@@ -178,14 +177,29 @@ process.on('unhandledRejection', (reason) => {
   lateErrors.push(reason instanceof Error ? reason.message : String(reason));
 });
 
-const slugs = (await readdir(EXPRESSIVE, { withFileTypes: true }))
-  .filter((e) => e.isDirectory())
-  .map((e) => e.name)
-  .sort();
+const languages = (
+  ONLY
+    ? [ONLY]
+    : (await readdir(LANGUAGES, { withFileTypes: true }))
+        .filter((e) => e.isDirectory())
+        .map((e) => e.name)
+        .sort()
+);
 
 const results = [];
-for (const slug of slugs) {
-  results.push(await run(slug));
+for (const language of languages) {
+  let slugs;
+  try {
+    slugs = (await readdir(expressiveDir(language), { withFileTypes: true }))
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .sort();
+  } catch {
+    continue; // A language may have tokens and primitives before its first chart.
+  }
+  for (const slug of slugs) {
+    results.push(await run(slug, language));
+  }
 }
 
 const failed = results.filter((r) => r.errors.length > 0);

@@ -937,6 +937,39 @@ forbids it, because monospace is already evenly spaced. Neither is a mistake:
 they are the clearest evidence that motion and tracking belong to a language
 rather than to taste in general.
 
+### Authoring a chart is not the same as importing one
+
+`signal-console/circular-graph` is the first chart written *from* a language
+rather than sliced out of a found page, and it exists to show what that shape
+is. Three differences from the imported 64, all of which fell out of authoring
+rather than being argued for:
+
+- **Data is a parameter.** `mount(root, data = { nodes: NODES, flows: FLOWS })`
+  with the samples exported. Swapping real traffic in is a call, not a rewrite.
+  The imported charts bury their data mid-function because the page they came
+  from had no reason to expose it.
+- **The mount name matches the slug**, because nothing forced otherwise. Only 3
+  of the imported 64 do.
+- **The card anatomy is the language's, not mono-editorial's.** `div.head` with
+  the current value, then the chart, then a three-segment `div.foot`. Writing it
+  made the point concrete: the same chart type in the other language opens with
+  a sentence and reading instructions, which is right for studying and wrong for
+  scanning.
+
+Two things it found that argument had not:
+
+- **The smoke test only ever ran one language**, defaulting to mono-editorial,
+  so this component would have shipped without ever being mounted. It now walks
+  every language, and `NODEX_LANGUAGE` still narrows it.
+- **`meta.data` derivation only read internal `const`**, so the chart reported
+  its colour ladder as its data contract and missed `NODES` and `FLOWS`
+  entirely. An exported array is now preferred where a component has one, with
+  the internal scan kept as the fallback the imported corpus needs.
+
+The imported charts are not being retrofitted to match. They are a corpus of
+drawing techniques, and reshaping them toward a form they were never cut for is
+what produced the dead blocks and the duplicated preludes in the first place.
+
 **It omits `density` on purpose.** mono-editorial declares both values, which
 proves nothing about whether the axis is optional. A language that is only ever
 glance-read and names no distinction is what makes it a real option rather than

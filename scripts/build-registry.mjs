@@ -401,12 +401,29 @@ function mountNames(fragment) {
  * left for a human to add to meta.json where it is worth saying.
  */
 function dataShapes(js) {
-  const series = [];
-  for (const m of js.matchAll(/^\s*const ([A-Z][A-Z0-9_]*)\s*=\s*(\[[\s\S]*?\]);/gm)) {
-    const described = describeLiteral(m[2]);
-    if (described) series.push({ name: m[1], ...described });
-  }
-  return series;
+  const read = (re) => {
+    const found = [];
+    for (const m of js.matchAll(re)) {
+      const described = describeLiteral(m[2]);
+      if (described) found.push({ name: m[1], ...described });
+    }
+    return found;
+  };
+
+  /**
+   * An exported array is the component's declared data contract; an internal
+   * one is an implementation detail. Prefer the exports where a component has
+   * them, or a chart that exports NODES and FLOWS reports its colour ladder
+   * instead — which is what happened the first time signal-console's
+   * circular-graph was built.
+   *
+   * The fallback exists for the imported corpus, which predates the convention
+   * and keeps its sample data as internal constants.
+   */
+  const exported = read(/^\s*export\s+const\s+([A-Z][A-Z0-9_]*)\s*=\s*(\[[\s\S]*?\]);/gm);
+  if (exported.length > 0) return exported;
+
+  return read(/^\s*const ([A-Z][A-Z0-9_]*)\s*=\s*(\[[\s\S]*?\]);/gm);
 }
 
 function describeLiteral(src) {
