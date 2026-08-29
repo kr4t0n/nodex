@@ -1,12 +1,16 @@
 /**
  * Eight services, who calls whom — signal-console
  *
- * React port, written to test whether a React-only registry is a cleaner
- * artifact than the framework-free fragment. The stylesheet is unchanged and
- * still scoped under `.nx-circular-graph`: the design layer stays portable, and
- * only the implementation binds to a framework.
+ * ECharts supplies the circular layout, label placement and adjacency
+ * highlighting; the design language supplies every value it draws with. The
+ * option builder is pure and exported, so the build can server-render it to a
+ * static preview and the conformance lint can read the marks it produces
+ * without a browser.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
+import type { EChartsOption } from 'echarts';
+
+import { useECharts } from '../../../../lib/use-echarts.ts';
 
 export type NodeState = 'ok' | 'warn' | 'crit';
 
@@ -26,9 +30,9 @@ export const NODES: readonly ServiceNode[] = [
 ];
 
 /**
- * Aggregated by pair on purpose. This language never draws one mark per record
- * past roughly fifty — a mesh emits millions of calls a minute, and the chart's
- * job is the shape of the traffic, not its transcript.
+ * Aggregated by pair. This language never draws one mark per record past
+ * roughly fifty — a mesh emits millions of calls a minute, and the chart's job
+ * is the shape of the traffic, not its transcript.
  */
 export const FLOWS: readonly Flow[] = [
   [0, 1, 8.1], [0, 2, 6.4], [0, 3, 5.2], [0, 5, 4.0],
@@ -39,26 +43,126 @@ export const FLOWS: readonly Flow[] = [
   [6, 7, 0.6],
 ];
 
-// The accent ladder, quietest to loudest, paired with four discrete weights.
-// Magnitude uses this and nothing else; the neutral ladder carries structure
-// and the status pair carries state, so a thick green chord can only ever mean
-// "a lot". Four thicknesses can be counted across a ring where twenty cannot.
+/**
+ * The accent ladder, quietest to loudest, paired with four discrete weights.
+ *
+ * Magnitude uses this ladder and nothing else — the neutrals carry structure
+ * and the status pair carries state — so a thick green chord can only ever mean
+ * "a lot". Four thicknesses can be counted across a ring where twenty cannot,
+ * which is why this is a scale rather than a continuous interpolation.
+ */
 const ACCENT = ['#12352B', '#1D6B52', '#2FA37C', '#4DD4A8'] as const;
 const WEIGHT = [2, 2.6, 3.2, 4] as const;
-const NEUTRAL = { rule: '#1E242E', label: '#8A94A3', ink: '#D7DEE8' } as const;
+const NEUTRAL = { label: '#8A94A3', ink: '#D7DEE8' } as const;
 const STATE: Record<NodeState, string> = {
-  ok: '#4DD4A8',
+  ok: '#D7DEE8',
   warn: '#E3B341',
   crit: '#F0616D',
 };
 
-const CX = 210;
-const CY = 126;
-const R = 88;
+const MONO =
+  "'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace";
 
-export interface CircularGraphProps {
-  nodes?: readonly ServiceNode[];
-  flows?: readonly Flow[];
+export interface CircularGraphData {
+  nodes: readonly ServiceNode[];
+  flows: readonly Flow[];
+}
+
+/**
+ * Pure. No DOM, no React. Everything the design language decides lives here,
+ * which is what lets the lint check the real marks instead of parsing source.
+ */
+export function buildOption({ nodes, flows }: CircularGraphData): EChartsOption {
+  const maxFlow = Math.max(...flows.map((f) => f[2]));
+  const maxRps = Math.max(...nodes.map((n) => n[1]));
+
+  return {
+    // Marks arrive fast, with no stagger long enough to notice: a console that
+    // animates in slowly is lying about how fresh its data is.
+    animationDuration: 350,
+    animationEasing: 'cubicOut',
+    textStyle: { fontFamily: MONO },
+    series: [
+      {
+        type: 'graph',
+        layout: 'circular',
+        circular: { rotateLabel: false },
+        // Fills the card. Whitespace in this language reads as missing data.
+        top: 26,
+        bottom: 26,
+        left: 70,
+        right: 70,
+        data: nodes.map(([name, rps, state], i) => {
+          // ECharts lays a circular graph out from three o'clock, clockwise, in
+          // data order. Recomputing the angle here is what lets each label sit
+          // outside the ring on its own side; the default puts every one to the
+          // right, which collides with the ring on the left half.
+          const a = (i / nodes.length) * Math.PI * 2;
+          return {
+            name,
+            value: rps,
+            symbolSize: 6 + (rps / maxRps) * 7,
+            itemStyle: { color: STATE[state] },
+            label: {
+              position: Math.cos(a) < -0.15 ? 'left' : 'right',
+              color: state === 'ok' ? NEUTRAL.label : STATE[state],
+              fontWeight: state === 'ok' ? 600 : 700,
+            },
+          };
+        }),
+        links: flows.map(([from, to, rps]) => {
+          const step = Math.min(
+            ACCENT.length - 1,
+            Math.floor((rps / maxFlow) * ACCENT.length),
+          );
+          return {
+            source: nodes[from]![0],
+            target: nodes[to]![0],
+            value: rps,
+            // One step indexes both ladders, so weight and colour never
+            // disagree about how much traffic a link carries.
+            lineStyle: {
+              color: ACCENT[step],
+              width: WEIGHT[step],
+              opacity: 0.45 + (rps / maxFlow) * 0.45,
+              // Bowed by how *little* it carries, so heavy links read short and
+              // direct and light ones fall away toward the centre.
+              curveness: 0.1 + (1 - rps / maxFlow) * 0.35,
+            },
+          };
+        }),
+        label: {
+          show: true,
+          distance: 8,
+          fontSize: 9,
+          fontWeight: 600,
+          // Zero or positive tracking, never negative: monospace is already
+          // evenly spaced and tightening it reads as a rendering fault.
+          letterSpacing: 0.8,
+          formatter: (p: { name: string }) => p.name.toUpperCase(),
+        },
+        emphasis: {
+          focus: 'adjacency',
+          lineStyle: { opacity: 0.95 },
+          label: { color: NEUTRAL.ink },
+        },
+        tooltip: {
+          formatter: (p: { dataType?: string; name?: string; value?: number }) =>
+            p.dataType === 'edge'
+              ? `${p.name} · ${Number(p.value).toFixed(1)}k rps`
+              : `${p.name} · ${Number(p.value).toFixed(1)}k rps`,
+        },
+      },
+    ],
+    tooltip: {
+      backgroundColor: '#12161D',
+      borderColor: '#1E242E',
+      textStyle: { color: '#D7DEE8', fontFamily: MONO, fontSize: 11 },
+    },
+  };
+}
+
+export interface CircularGraphProps extends Partial<CircularGraphData> {
   /** Head label, left of the current value. */
   label?: string;
   source?: string;
@@ -72,124 +176,28 @@ export function CircularGraph({
   source = 'MESH TELEMETRY',
   window: windowLabel = '60S WINDOW',
 }: CircularGraphProps) {
-  const maxFlow = Math.max(...flows.map((f) => f[2]));
-  const maxRps = Math.max(...nodes.map((n) => n[1]));
+  const option = useMemo(() => buildOption({ nodes, flows }), [nodes, flows]);
+  const ref = useECharts<HTMLDivElement>(option);
   const total = nodes.reduce((sum, n) => sum + n[1], 0);
-
-  // Twelve o'clock, running clockwise, so the busiest service — first in the
-  // data — sits where the eye lands first.
-  const at = (i: number) => {
-    const a = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
-    return { x: CX + Math.cos(a) * R, y: CY + Math.sin(a) * R, a };
-  };
 
   return (
     <div className="nx-circular-graph">
       <div className="card">
-        {/* The head carries the current value, because the first question asked
-            of a live chart is "what is it now". */}
+        {/* The head carries the current value, because the first question
+            asked of a live chart is "what is it now". */}
         <div className="head">
           <span className="label">{label}</span>
           <span className="value">{total.toFixed(1)}k</span>
         </div>
 
-        <svg viewBox="0 0 420 268" preserveAspectRatio="xMinYMid meet">
-          <circle
-            cx={CX} cy={CY} r={R}
-            fill="none" stroke={NEUTRAL.rule} strokeWidth={1}
-            className="arrive"
-          />
-
-          {/* Chords first, so nodes and labels sit above the traffic. */}
-          {flows.map(([from, to, rps]) => {
-            const a = at(from);
-            const b = at(to);
-            const t = rps / maxFlow;
-            // Bowed toward the centre by how *little* it carries, so heavy
-            // links read as short and direct and light ones fall away.
-            const bow = 0.18 + (1 - t) * 0.5;
-            const mx = CX + ((a.x + b.x) / 2 - CX) * bow;
-            const my = CY + ((a.y + b.y) / 2 - CY) * bow;
-            const step = Math.min(ACCENT.length - 1, Math.floor(t * ACCENT.length));
-            return (
-              <path
-                key={`${from}-${to}`}
-                d={`M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`}
-                fill="none"
-                // One step indexes both ladders, so weight and value never disagree.
-                stroke={ACCENT[step]}
-                strokeWidth={WEIGHT[step]}
-                strokeLinecap="round"
-                opacity={0.4 + t * 0.5}
-                pathLength={1}
-                className="chord"
-              >
-                <title>{`${nodes[from]![0]} → ${nodes[to]![0]} · ${rps.toFixed(1)}k rps`}</title>
-              </path>
-            );
-          })}
-
-          {nodes.map(([name, rps, state], i) => {
-            const { x, y, a } = at(i);
-            const r = 3 + (rps / maxRps) * 3.5;
-            const lx = CX + Math.cos(a) * (R + 16);
-            const ly = CY + Math.sin(a) * (R + 16);
-            const anchor =
-              Math.cos(a) < -0.2 ? 'end' : Math.cos(a) > 0.2 ? 'start' : 'middle';
-            return (
-              <g key={name}>
-                {/* Only a failing node loops. A live dot that has stopped
-                    pulsing is indistinguishable from a dead one. */}
-                <circle
-                  cx={x.toFixed(1)} cy={y.toFixed(1)} r={r.toFixed(1)}
-                  fill={state === 'ok' ? NEUTRAL.ink : STATE[state]}
-                  className={state === 'crit' ? 'live' : 'arrive'}
-                >
-                  <title>{`${name} · ${rps.toFixed(1)}k rps · ${state}`}</title>
-                </circle>
-                <text
-                  x={lx.toFixed(1)} y={(ly + 3).toFixed(1)}
-                  fontSize={9} fontWeight={600} letterSpacing="0.08em"
-                  fill={state === 'ok' ? NEUTRAL.label : STATE[state]}
-                  textAnchor={anchor}
-                  className="arrive"
-                >
-                  {name.toUpperCase()}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
+        <div className="chart" ref={ref} />
 
         <div className="foot">
           <span>{source}</span>
           <span>{windowLabel}</span>
-          <Age />
+          <span>UPDATED 0S AGO</span>
         </div>
       </div>
     </div>
   );
-}
-
-/**
- * UPDATED is honest or it is worse than absent: a status line that always says
- * "0s ago" teaches the reader to stop believing it.
- *
- * Its own component so the ticking state re-renders one span rather than the
- * whole chart every second. The interval is cleaned up on unmount, which the
- * framework-free version had to hand back for the embedder to call.
- */
-function Age() {
-  const started = useRef(Date.now());
-  const [seconds, setSeconds] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(
-      () => setSeconds(Math.round((Date.now() - started.current) / 1000)),
-      1000,
-    );
-    return () => clearInterval(timer);
-  }, []);
-
-  return <span>{`UPDATED ${seconds}S AGO`}</span>;
 }

@@ -39,14 +39,13 @@
   font-feature-settings: 'tnum' 1;
 }
 
-.nx-circular-graph svg {
+.nx-circular-graph .chart {
+  /* ECharts measures its container, so the height has to come from CSS rather
+     than from a viewBox. A ratio keeps the ring circular at any card width. */
   width: 100%;
-  display: block;
+  aspect-ratio: 420 / 268;
+  min-height: 200px;
   margin-top: 4px;
-}
-
-.nx-circular-graph svg text {
-  font-family: var(--nx-font-mono);
 }
 
 /* A status line, not a caption: three segments spread to the card's edges, so
