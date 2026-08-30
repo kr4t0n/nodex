@@ -1,0 +1,94 @@
+/* Sixty seconds of request latency, three percentiles — signal-console
+
+   Colour, radius, spacing and the type stack come through --nx-* variables.
+   Type sizes are literals from tokens.json, because the generated tokens.css
+   exposes the paint layer and not the type scale. Keep them in step with
+   `type` in tokens.json by hand.
+
+   ECharts draws the plot, so this file styles only the card around it. That is
+   the split worth keeping: the chart's marks are the language's, and the card
+   is the language's, but nothing here reaches inside the plot. */
+
+.nx-latency-percentiles .card {
+  background: var(--nx-surface);
+  border-radius: var(--nx-radius-card);
+  padding: var(--nx-space-cardPadding);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+}
+
+/* Label left, current value right, one line. Baselines aligned rather than
+   centres, so the two sit on the same rule despite the size difference. */
+.nx-latency-percentiles .head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nx-latency-percentiles .head .label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--nx-muted);
+}
+
+/* Tabular, so a figure changing in place does not shift the label beside it.
+   That is most of why this language is monospace. */
+.nx-latency-percentiles .head .value {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Hue only where something is wrong. If nothing is breaching, nothing here is
+   red — a console where the status colour is always on has no way left to say
+   "look here". */
+.nx-latency-percentiles .head .value.breach {
+  color: var(--nx-crit);
+}
+
+.nx-latency-percentiles .head .unit {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--nx-faint);
+}
+
+.nx-latency-percentiles .chart {
+  /* ECharts measures its container, so the height comes from CSS rather than
+     from a viewBox. A ratio keeps the plot proportionate at any card width. */
+  width: 100%;
+  aspect-ratio: 420 / 210;
+  min-height: 170px;
+  margin-top: 6px;
+}
+
+/* A status line, not a caption: three segments spread to the card's edges, so
+   the window and the age read as columns rather than as prose. */
+.nx-latency-percentiles .foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 7px;
+  border-top: 1px solid var(--nx-grid);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--nx-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ECharts animates the marks in itself, at the duration the option sets, so
+   there is nothing here to disable. This block exists because the language
+   requires every animated component to carry one, and because a future edit
+   that adds a CSS animation should find the guard already in place rather than
+   have to remember it. */
+@media (prefers-reduced-motion: reduce) {
+  .nx-latency-percentiles .chart {
+    transition: none;
+  }
+}
