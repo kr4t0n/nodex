@@ -63,12 +63,16 @@ export function renderToSVG(
     width: size.width,
     height: size.height,
   });
-  chart.setOption(option);
-  const svg = chart.renderToSVGString();
-  // Not tidiness: an undisposed SSR instance keeps a handle open and the Node
-  // process never exits. A build that renders previews would hang after the
-  // last chart, with nothing printed to say why. Same shape as the jsdom
-  // timers that hang the smoke test.
-  chart.dispose();
-  return svg;
+  // `finally`, not a trailing call: disposing matters most when the render
+  // throws. An undisposed SSR instance keeps a handle open and the Node process
+  // never exits, so a chart that fails to draw hangs the build *instead of*
+  // reporting the error — which is how a `visualMap` crash cost an hour before
+  // anyone saw the stack trace. Same shape as the jsdom timers that hang the
+  // smoke test.
+  try {
+    chart.setOption(option);
+    return chart.renderToSVGString();
+  } finally {
+    chart.dispose();
+  }
 }
