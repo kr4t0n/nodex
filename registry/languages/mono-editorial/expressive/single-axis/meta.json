@@ -11,6 +11,7 @@
     "desk"
   ],
   "dependencies": [
-    "echarts@6"
-  ]
+    "echarts"
+  ],
+  "aspectRatio": "580/320"
 }

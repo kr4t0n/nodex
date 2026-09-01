@@ -156,7 +156,10 @@ function ternaryBranches(expr: string): [string, string] | undefined {
 
 /** Every six-digit hex literal, uppercased. */
 export function hexLiterals(source: string): string[] {
-  return [...source.matchAll(/#[0-9A-Fa-f]{6}\b/g)].map((m) =>
+  // Three-digit hex counts. It is as valid as six and just as wrong outside the
+  // ramp, and only six was matched until a rendered chart was linted and `#000`
+  // went straight past.
+  return [...source.matchAll(/#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})\b/g)].map((m) =>
     m[0].toUpperCase(),
   );
 }

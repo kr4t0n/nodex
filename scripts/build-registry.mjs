@@ -218,6 +218,38 @@ function reactExports(mod) {
     .map(([name]) => name);
 }
 
+/**
+ * Rendered SVG with everything that paints nothing removed.
+ *
+ * ECharts clips its draw-in animation with a `<clipPath>`, and fills that path
+ * `#000` — a colour in no language's ramp, on a shape no reader ever sees.
+ * Linting it raw would either fail every chart on the runtime or force the
+ * palette rule to ignore a whole class of colour. Dropping the defs first keeps
+ * the rule strict about the marks that are actually painted.
+ */
+function paintedMarks(svg) {
+  const withoutDefs = svg
+    .replace(/<clipPath[\s\S]*?<\/clipPath>/g, '')
+    .replace(/<defs[\s\S]*?<\/defs>/g, '');
+
+  // Then drop paint the element itself has turned off. ECharts gives every
+  // hit-target and text bounding box a colour from its default palette and
+  // then sets the opacity or the width to zero — visible to a regex, invisible
+  // to a reader. Judging those would fail a conforming chart on a colour
+  // nothing renders, so each attribute is removed only where that element has
+  // proven it paints nothing.
+  return withoutDefs.replace(/<[a-z]+\s[^>]*>/gi, (tag) => {
+    let out = tag;
+    if (/\bfill-opacity="0(?:\.0+)?"/.test(out)) {
+      out = out.replace(/\bfill="[^"]*"/, '');
+    }
+    if (/\bstroke-(?:width|opacity)="0(?:\.0+)?"/.test(out)) {
+      out = out.replace(/\bstroke="[^"]*"/, '');
+    }
+    return out;
+  });
+}
+
 /** The chart's real marks, rendered without a browser. */
 async function renderChartSVG(mod, meta, where) {
   if (typeof mod.previewOption !== 'function') {
@@ -910,7 +942,7 @@ async function main() {
           // The rendered SVG *is* the source of truth for the marks — no
           // parsing, no ternaries to miss, no "cannot be checked statically".
           css,
-          js: svg,
+          js: paintedMarks(svg),
           where,
         });
 

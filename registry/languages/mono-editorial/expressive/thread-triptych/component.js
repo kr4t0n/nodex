@@ -49,7 +49,7 @@ export function mount(root) {
       'stroke-width':Math.max(.6,r.v*.14),class:'thread',
       opacity:.06+Math.min(.2,r.v*.012),'stroke-linecap':'round'});
     // invisible fat twin: the hover/click target
-    r.hit=el(gThreads,'path',{d:path(r),fill:'none',stroke:'#000','stroke-opacity':0,
+    r.hit=el(gThreads,'path',{d:path(r),fill:'none',stroke:INK,'stroke-opacity':0,
       'stroke-width':9,class:'hit'});
     r.hit.dataset.route=ri;
   });
@@ -62,7 +62,7 @@ export function mount(root) {
     txt(g,{x:anchor==='end'?x-9:x+9,y:y+2.6,'font-size':size,'font-weight':600,
       fill,'text-anchor':anchor},label);
     // generous invisible hit zone
-    el(g,'rect',{x:anchor==='end'?x-92:x-6,y:y-6.5,width:98,height:13,fill:'#000','fill-opacity':0,class:'hit'});
+    el(g,'rect',{x:anchor==='end'?x-92:x-6,y:y-6.5,width:98,height:13,fill:INK,'fill-opacity':0,class:'hit'});
     return g;
   };
   SRC.forEach((s,i)=>mkNode(X1,sy(i),s,'end','',{kind:'s',idx:i},7.5,'#6A6963'));
@@ -72,7 +72,7 @@ export function mount(root) {
     g.dataset.kind='d';g.dataset.idx=i;
     el(g,'circle',{cx:X3,cy:dy(i),r:3.4,fill:INK});
     txt(g,{x:X3+12,y:dy(i)+3,'font-size':8.5,'font-weight':700,fill:'#6A6963','letter-spacing':'.08em'},d);
-    el(g,'rect',{x:X3-8,y:dy(i)-10,width:120,height:20,fill:'#000','fill-opacity':0,class:'hit'});
+    el(g,'rect',{x:X3-8,y:dy(i)-10,width:120,height:20,fill:INK,'fill-opacity':0,class:'hit'});
   });
 
   // ── highlight machinery ──
