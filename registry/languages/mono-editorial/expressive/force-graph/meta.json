@@ -1,7 +1,7 @@
 {
   "slug": "force-graph",
   "title": "Integrations, pulled into orbit",
-  "description": "force layout · node = monthly syncs · drag a node, the web fights back",
+  "description": "force layout \u00b7 node = monthly syncs \u00b7 drag a node, the web fights back",
   "component": "network",
   "tier": "expressive",
   "runtime": "echarts",
@@ -12,6 +12,7 @@
     "hub"
   ],
   "dependencies": [
-    "echarts@6"
-  ]
+    "echarts"
+  ],
+  "aspectRatio": "560/360"
 }
