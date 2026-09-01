@@ -1,7 +1,7 @@
 {
   "slug": "scatter-morph",
   "title": "One dataset, three views",
-  "description": "watch the same 12 products fly between views · every 3s",
+  "description": "the same 12 products as price vs rating, as ranked revenue, and as revenue share · tone is held constant so a product can be tracked across all three",
   "component": "scatter",
   "tier": "expressive",
   "runtime": "echarts",
@@ -12,5 +12,5 @@
   "dependencies": [
     "echarts"
   ],
-  "aspectRatio": "580/320"
+  "aspectRatio": "560/300"
 }
