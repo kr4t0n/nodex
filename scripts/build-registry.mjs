@@ -261,10 +261,32 @@ async function renderChartSVG(mod, meta, where) {
   }
   const [w, h] = (meta.aspectRatio ?? '420/260').split('/').map(Number);
   try {
-    return renderToSVG(mod.previewOption(), {
-      width: PREVIEW_CHART_WIDTH,
-      height: Math.round((PREVIEW_CHART_WIDTH * h) / w),
-    });
+    return renderToSVG(
+      {
+        ...mod.previewOption(),
+        /**
+         * Rendered still, never mid-animation.
+         *
+         * Left on, ECharts emits each mark's entry as a CSS keyframe animating
+         * `transform: scale(...)` — and a CSS transform replaces the SVG
+         * `transform` attribute rather than composing with it. That attribute
+         * is what carries the mark's *position*, so the end state of every
+         * animation puts every symbol at the origin. A scatter plot renders as
+         * one dark pile in the corner and an empty grid.
+         *
+         * It cost two charts before it was spotted, and it only shows on
+         * symbol-based series: a bar or a line animates by clipping, which
+         * leaves its geometry alone. Turning animation off also drops the
+         * keyframes and classes from the file, which is right for a document
+         * whose whole point is to run nothing.
+         */
+        animation: false,
+      },
+      {
+        width: PREVIEW_CHART_WIDTH,
+        height: Math.round((PREVIEW_CHART_WIDTH * h) / w),
+      },
+    );
   } catch (cause) {
     fail(where, `previewOption() failed to render: ${cause.message}`);
   }
