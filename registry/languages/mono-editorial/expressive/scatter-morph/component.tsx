@@ -227,13 +227,18 @@ export function buildOption(
 
   return {
     ...base,
-    grid: { left: 44, right: 20, top: 34, bottom: 34 },
+    grid: { left: 56, right: 20, top: 34, bottom: 40 },
     xAxis: {
       ...AXIS,
       type: 'value',
       min: 5,
       max: 26,
       name: 'PRICE $',
+      // Along the axis it measures, not floating past the end of it. The
+      // default `end` parks the name in the corner, which is where the view's
+      // caption already sits.
+      nameLocation: 'middle',
+      nameGap: 24,
       nameTextStyle: { color: FAINT, fontSize: 8.5 },
     },
     yAxis: {
@@ -242,6 +247,9 @@ export function buildOption(
       min: 6,
       max: 9.6,
       name: 'CSAT',
+      nameLocation: 'middle',
+      nameRotate: 90,
+      nameGap: 32,
       nameTextStyle: { color: FAINT, fontSize: 8.5 },
     },
     series: [
