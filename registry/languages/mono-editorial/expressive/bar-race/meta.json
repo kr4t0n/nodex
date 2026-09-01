@@ -1,7 +1,7 @@
 {
   "slug": "bar-race",
   "title": "Eight products race for revenue",
-  "description": "MRR by product, $K · 2019 → 2026 · leader wears black · click to replay",
+  "description": "eight products racing on revenue, 2019 to 2026 · tone follows rank so the leader is always ink · plays through once on view, click to replay",
   "component": "bar",
   "tier": "expressive",
   "runtime": "echarts",
@@ -10,6 +10,7 @@
     "billing"
   ],
   "dependencies": [
-    "echarts@6"
-  ]
+    "echarts"
+  ],
+  "aspectRatio": "580/320"
 }
