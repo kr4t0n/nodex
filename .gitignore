@@ -9,6 +9,7 @@ build/
 
 # generated registry artifacts — rebuilt by scripts/build-registry.mjs
 registry/**/index.html
+registry/**/component.preview.js
 registry/languages/*/tokens.css
 public/r/
 

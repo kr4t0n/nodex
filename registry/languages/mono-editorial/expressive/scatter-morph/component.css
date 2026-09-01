@@ -13,12 +13,32 @@
   font-family: var(--nx-font-sans);
 }
 
+/* The whole plot is the control, so the button carries no chrome of its own —
+   it exists to make advancing the view focusable and announceable rather than
+   to look like a button. */
+.nx-scatter-morph .morph {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nx-scatter-morph .morph:focus-visible {
+  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline-offset: 4px;
+}
+
 .nx-scatter-morph .chart {
   /* ECharts measures its container, so the height comes from CSS rather than
      from a viewBox. */
   width: 100%;
-  aspect-ratio: 560 / 300;
-  min-height: 240px;
+  aspect-ratio: 580 / 320;
+  min-height: 256px;
 }
 
 /* ECharts animates its own marks, at the duration the option sets, so there is
@@ -26,7 +46,27 @@
    animated component to carry one, and so an edit that adds a CSS animation
    finds the guard already in place rather than having to remember it. */
 @media (prefers-reduced-motion: reduce) {
-  .nx-scatter-morph .chart {
+  /* The whole plot is the control, so the button carries no chrome of its own —
+   it exists to make advancing the view focusable and announceable rather than
+   to look like a button. */
+.nx-scatter-morph .morph {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nx-scatter-morph .morph:focus-visible {
+  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline-offset: 4px;
+}
+
+.nx-scatter-morph .chart {
     transition: none;
   }
 }

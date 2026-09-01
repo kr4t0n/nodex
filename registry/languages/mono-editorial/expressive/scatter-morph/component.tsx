@@ -6,21 +6,21 @@
  * divides. Each product keeps its tone across all three panels, so a product
  * can be followed from one to the next by eye.
  *
- * **Three panels, not a morph.** The imported version cycled between the
- * encodings every three seconds, which this language forbids outright — "never
- * animate on a loop". Advancing on click was the first fix and was worse: the
- * gallery renders these as static documents, so the other two views became
- * unreachable and a chart called "three views" showed one.
+ * **The morph is the component, and it advances on click.** The imported
+ * version cycled every three seconds, which this language forbids outright —
+ * "never animate on a loop". A click is the same demonstration under the
+ * reader's control, and matches the click-to-replay the rest of the corpus
+ * already uses.
  *
- * Small multiples are the better answer for this language anyway. A morph asks
- * you to remember the previous view; three panels let you compare them, which
- * is what a close-read language is for. Holding the tone constant across the
- * panels does the work `universalTransition` was doing, without motion.
+ * `universalTransition` is what makes it worth doing: a product does not
+ * disappear and reappear between encodings, it travels, so the same twelve
+ * things are visibly the same twelve things. Tone is held constant across the
+ * views for the same reason.
  *
  * `buildOption` is pure and exported, so the build server-renders it to a
  * static preview and the conformance lint reads the marks it really produces.
  */
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import type {
   CallbackDataParams,
@@ -39,21 +39,31 @@ import type {
  */
 function useECharts<T extends HTMLElement>(option: EChartsOption) {
   const ref = useRef<T>(null);
+  const chart = useRef<echarts.ECharts>(null);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
 
-    const chart = echarts.init(node, null, { renderer: 'svg' });
-    chart.setOption(option);
-
-    const observer = new ResizeObserver(() => chart.resize());
+    const instance = echarts.init(node, null, { renderer: 'svg' });
+    chart.current = instance;
+    const observer = new ResizeObserver(() => instance.resize());
     observer.observe(node);
 
     return () => {
       observer.disconnect();
-      chart.dispose();
+      instance.dispose();
+      chart.current = null;
     };
+  }, []);
+
+  // Setting the option is separate from creating the chart, so changing the
+  // view morphs the marks that are already there. Rebuilding the instance would
+  // destroy them and universalTransition would have nothing to carry across.
+  useEffect(() => {
+    chart.current?.setOption(option, {
+      replaceMerge: ['xAxis', 'yAxis', 'grid', 'title', 'series'],
+    });
   }, [option]);
 
   return ref;
@@ -101,15 +111,23 @@ const AXIS = {
   axisLabel: { color: MUTED, fontFamily: SANS, fontSize: 8.5 },
 } as const;
 
-const PANEL = {
-  textStyle: { fontSize: 9, fontWeight: 700, fontFamily: SANS, color: LABEL },
-  top: 8,
+/** The three questions, in the order clicking walks them. */
+export const VIEWS = ['scatter', 'bar', 'donut'] as const;
+export type View = (typeof VIEWS)[number];
+
+const CAPTION = {
+  scatter: 'PRICE VS RATING',
+  bar: 'REVENUE, RANKED',
+  donut: 'REVENUE SHARE',
 } as const;
 
 /** Pure. No DOM, no React — the design language, checkable by running it. */
-export function buildOption(products: readonly Product[]): EChartsOption {
-  // Revenue order. Tone is assigned here, once, and every panel reads from it,
-  // which is what lets a product be tracked across the three.
+export function buildOption(
+  products: readonly Product[],
+  view: View = 'scatter',
+): EChartsOption {
+  // Revenue order. Tone is assigned here, once, and every view reads from it,
+  // so a product keeps its weight as it travels between encodings.
   const ranked = [...products].sort((a, b) => b[3] - a[3]);
   const toneOf = new Map(
     ranked.map(([name], i) => [
@@ -118,114 +136,140 @@ export function buildOption(products: readonly Product[]): EChartsOption {
     ]),
   );
 
-  return {
+  const base: EChartsOption = {
     color: LADDER,
     animationDuration: 900,
     animationEasing: 'quarticOut',
+    animationDurationUpdate: 1100,
+    animationEasingUpdate: 'cubicInOut',
     textStyle: { fontFamily: SANS },
-
     tooltip: {
       backgroundColor: INK,
       borderWidth: 0,
       padding: [10, 14],
       textStyle: { color: PAPER, fontFamily: SANS, fontSize: 12 },
     },
-
     title: [
-      { ...PANEL, text: 'PRICE VS RATING', left: '4%' },
-      { ...PANEL, text: 'REVENUE, RANKED', left: '38%' },
-      { ...PANEL, text: 'REVENUE SHARE', left: '72%' },
-    ],
-
-    grid: [
-      { left: '4%', right: '70%', top: 34, bottom: 30 },
-      { left: '38%', right: '36%', top: 34, bottom: 52 },
-    ],
-
-    xAxis: [
       {
-        ...AXIS,
-        gridIndex: 0,
-        type: 'value',
-        min: 5,
-        max: 26,
-        name: 'PRICE $',
-        nameTextStyle: { color: FAINT, fontSize: 8 },
+        text: CAPTION[view],
+        left: 0,
+        top: 0,
+        textStyle: { fontSize: 9, fontWeight: 700, fontFamily: SANS, color: LABEL },
       },
-      {
+    ],
+  };
+
+  if (view === 'bar') {
+    return {
+      ...base,
+      grid: { left: 44, right: 16, top: 34, bottom: 52 },
+      xAxis: {
         ...AXIS,
-        gridIndex: 1,
         type: 'category',
         data: ranked.map(([name]) => name),
-        axisLabel: { ...AXIS.axisLabel, rotate: 52, fontSize: 7.5 },
+        axisLabel: { ...AXIS.axisLabel, rotate: 38, fontSize: 8.5 },
       },
-    ],
-    yAxis: [
-      {
-        ...AXIS,
-        gridIndex: 0,
-        type: 'value',
-        min: 6,
-        max: 9.6,
-        name: 'CSAT',
-        nameTextStyle: { color: FAINT, fontSize: 8 },
-      },
-      { ...AXIS, gridIndex: 1, type: 'value', max: 520 },
-    ],
+      yAxis: { ...AXIS, type: 'value', max: 520 },
+      series: [
+        {
+          id: 'p',
+          type: 'bar',
+          // The mark itself travels between encodings, so twelve products stay
+          // visibly twelve products rather than vanishing and returning.
+          universalTransition: true,
+          barCategoryGap: '32%',
+          data: ranked.map(([name, , , revenue]) => ({
+            name,
+            value: revenue,
+            groupId: name,
+            itemStyle: { color: toneOf.get(name) ?? INK, borderRadius: [6, 6, 0, 0] },
+          })),
+          tooltip: {
+            formatter: (p: CallbackDataParams) => `${p.name} — $${p.value as number}K`,
+          },
+        },
+      ],
+    };
+  }
 
+  if (view === 'donut') {
+    return {
+      ...base,
+      grid: { left: 0, right: 0, top: 30, bottom: 0 },
+      xAxis: { show: false, type: 'value' },
+      yAxis: { show: false, type: 'value' },
+      series: [
+        {
+          id: 'p',
+          type: 'pie',
+          universalTransition: true,
+          radius: ['26%', '68%'],
+          center: ['50%', '54%'],
+          // A gap painted in the page colour, not an ink border: this language
+          // has no outline on a filled mark.
+          itemStyle: { borderColor: PAPER, borderWidth: 2, borderRadius: 6 },
+          label: { color: LABEL, fontFamily: SANS, fontSize: 9, formatter: '{b}' },
+          labelLine: { lineStyle: { color: FAINT } },
+          data: ranked.map(([name, , , revenue]) => ({
+            name,
+            value: revenue,
+            groupId: name,
+            itemStyle: { color: toneOf.get(name) ?? INK },
+          })),
+          tooltip: {
+            formatter: (p: CallbackDataParams) =>
+              `${p.name} — $${p.value as number}K · ${p.percent}%`,
+          },
+        },
+      ],
+    };
+  }
+
+  return {
+    ...base,
+    grid: { left: 44, right: 20, top: 34, bottom: 34 },
+    xAxis: {
+      ...AXIS,
+      type: 'value',
+      min: 5,
+      max: 26,
+      name: 'PRICE $',
+      nameTextStyle: { color: FAINT, fontSize: 8.5 },
+    },
+    yAxis: {
+      ...AXIS,
+      type: 'value',
+      min: 6,
+      max: 9.6,
+      name: 'CSAT',
+      nameTextStyle: { color: FAINT, fontSize: 8.5 },
+    },
     series: [
       {
-        name: 'price vs rating',
+        id: 'p',
         type: 'scatter',
-        xAxisIndex: 0,
-        yAxisIndex: 0,
-        // Area, not radius, so revenue reads honestly here too.
-        symbolSize: (d: number[]) => Math.sqrt(d[3] ?? 0) * 0.9,
+        universalTransition: true,
+        // Area, not radius, so revenue reads honestly.
+        symbolSize: (d: number[]) => Math.sqrt(d[3] ?? 0) * 1.2,
         data: products.map(([name, price, csat, revenue]) => ({
           name,
           value: [price, csat, name, revenue],
+          groupId: name,
           itemStyle: { color: toneOf.get(name) ?? INK },
         })),
+        label: {
+          show: true,
+          position: 'top',
+          color: MUTED,
+          fontFamily: SANS,
+          fontSize: 8.5,
+          formatter: (p: CallbackDataParams) => p.name,
+        },
         tooltip: {
           formatter: (p: CallbackDataParams) => {
             const [price, csat] = p.value as [number, number];
             return `${p.name} — $${price} · CSAT ${csat}`;
           },
-        },
-      },
-      {
-        name: 'revenue',
-        type: 'bar',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        barCategoryGap: '34%',
-        data: ranked.map(([name, , , revenue]) => ({
-          name,
-          value: revenue,
-          itemStyle: { color: toneOf.get(name) ?? INK, borderRadius: [4, 4, 0, 0] },
-        })),
-        tooltip: {
-          formatter: (p: CallbackDataParams) => `${p.name} — $${p.value as number}K`,
-        },
-      },
-      {
-        name: 'share',
-        type: 'pie',
-        radius: ['13%', '30%'],
-        center: ['84%', '54%'],
-        // A gap painted in the page colour, not an ink border: this language
-        // has no outline on a filled mark.
-        itemStyle: { borderColor: PAPER, borderWidth: 2, borderRadius: 4 },
-        label: { color: LABEL, fontFamily: SANS, fontSize: 7.5, formatter: '{b}' },
-        labelLine: { lineStyle: { color: FAINT }, length: 5, length2: 5 },
-        data: ranked.map(([name, , , revenue]) => ({
-          name,
-          value: revenue,
-          itemStyle: { color: toneOf.get(name) ?? INK },
-        })),
-        tooltip: {
-          formatter: (p: CallbackDataParams) =>
-            `${p.name} — $${p.value as number}K · ${p.percent}%`,
         },
       },
     ],
@@ -245,15 +289,30 @@ export function ScatterMorph({
 }: {
   products?: readonly Product[];
 }) {
-  const option = useMemo(() => buildOption(products), [products]);
+  const [step, setStep] = useState(0);
+  const view = VIEWS[step % VIEWS.length] ?? 'scatter';
+  const option = useMemo(() => buildOption(products, view), [products, view]);
   const ref = useECharts<HTMLDivElement>(option);
+
+  const next = VIEWS[(step + 1) % VIEWS.length] ?? 'scatter';
 
   // A card is the drawing and nothing else. What names this chart is printed by
   // whatever lists it, read from the manifest.
   return (
     <div className="nx-scatter-morph">
       <div className="card">
-        <div className="chart" ref={ref} />
+        {/* A button rather than a click handler on the chart. Advancing the
+            view is a real action, so it belongs on something focusable that
+            announces what it does — a div with onClick is reachable by neither
+            keyboard nor screen reader. */}
+        <button
+          type="button"
+          className="morph"
+          onClick={() => setStep((s) => s + 1)}
+          aria-label={`Showing ${CAPTION[view].toLowerCase()}. Show ${next} instead.`}
+        >
+          <div className="chart" ref={ref} />
+        </button>
       </div>
     </div>
   );

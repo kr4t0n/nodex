@@ -77,6 +77,28 @@ function fontLinks(tokens) {
 const ECHARTS_CDN =
   'https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js';
 
+/** The compiled component a React preview loads. Generated; never authored. */
+const PREVIEW_MODULE = 'component.preview.js';
+
+/**
+ * Where a preview finds React and ECharts.
+ *
+ * A preview is a static file that runs in a browser, which is what the vanilla
+ * previews have always been — they import `component.js` and execute it. A
+ * React component needs its runtime resolved the same way, and an import map
+ * does it without introducing a bundler.
+ *
+ * Pinned, because an unpinned range would let a preview's behaviour change
+ * without anything in this repository changing.
+ */
+const PREVIEW_IMPORTS = {
+  react: 'https://esm.sh/react@19.2.8',
+  'react/jsx-runtime': 'https://esm.sh/react@19.2.8/jsx-runtime',
+  'react-dom': 'https://esm.sh/react-dom@19.2.8',
+  'react-dom/client': 'https://esm.sh/react-dom@19.2.8/client',
+  echarts: 'https://esm.sh/echarts@6',
+};
+
 const problems = [];
 const notes = [];
 
@@ -186,10 +208,15 @@ async function loadComponent(dir, where) {
     },
   });
 
+  // The browser copy, beside the preview that imports it. Bare specifiers are
+  // left alone: an import map in the preview points them at a CDN, which is
+  // how the preview runs the real component without a bundler.
+  await writeFile(path.join(dir, PREVIEW_MODULE), outputText);
+
   const out = path.join(BUILD_DIR, `${path.basename(dir)}.mjs`);
   await mkdir(BUILD_DIR, { recursive: true });
-  // Relative imports resolve from the source directory, not from the scratch
-  // one, so they are rewritten to absolute file URLs on the way out.
+  // The Node copy differs in one way: relative imports resolve from the source
+  // directory, not from the scratch one, so they become absolute file URLs.
   await writeFile(
     out,
     outputText.replace(
@@ -322,7 +349,7 @@ function renderChartMarkup(mod, svg, where) {
 }
 
 /** A preview for a React component: markup only, no script, no runtime. */
-function renderReactPreview({ language, tokens, meta, body }) {
+function renderReactPreview({ language, tokens, meta, body, exportName }) {
   const [w, h] = (meta.aspectRatio ?? '420/260').split('/').map(Number);
   const chartWidth = PREVIEW_CHART_WIDTH;
   const chartHeight = Math.round((PREVIEW_CHART_WIDTH * h) / w);
@@ -365,15 +392,43 @@ ${fontLinks(tokens)}
 
 </style>
 </head>
+<script type="importmap">
+{"imports": ${JSON.stringify(PREVIEW_IMPORTS)}}
+</script>
+</head>
 <body>
 <div class="nx-preview">
 ${body}
 </div>
 <script type="module">
+  /* Mount the real component over the server-rendered paint.
+     The SVG above is the chart drawn without a browser: it is what a reader
+     sees before this runs, and what they keep if the module fails to load.
+     Then React takes over and the preview becomes the component itself —
+     tooltips on hover, its own animation, and whatever it does on click.
+
+     This is parity with the vanilla previews, which have always imported
+     component.js and executed it. A static preview shows a chart; it cannot
+     show what a chart *does*, and a gallery that cannot demonstrate its
+     components is not doing its job. */
+  const root = document.querySelector('.nx-preview');
+  try {
+    const [{ createElement }, { createRoot }, mod] = await Promise.all([
+      import('react'),
+      import('react-dom/client'),
+      import('./${PREVIEW_MODULE}'),
+    ]);
+    createRoot(root).render(createElement(mod.${exportName}));
+  } catch (cause) {
+    /* Leave the server-rendered SVG in place. A preview that silently shows a
+       still chart is a far better outcome than an empty frame. */
+    console.warn('nodex: preview stayed static —', cause);
+  }
+</script>
+<script type="module">
   /* Report content height to an embedding gallery. The card's height depends on
      its head and foot, so a chart's ratio alone is an approximation and
-     guessing it clips the footer. This is the only script a React preview
-     carries, and it draws nothing. */
+     guessing it clips the footer. */
   const wrap = document.querySelector('.nx-preview');
   const post = () => {
     const pad = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
@@ -975,6 +1030,7 @@ async function main() {
             tokens,
             meta,
             body: renderChartMarkup(mod, svg, where),
+            exportName: reactExports(mod)[0],
           }),
         });
 
