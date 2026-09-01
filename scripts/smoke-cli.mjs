@@ -111,16 +111,22 @@ try {
     'mono-editorial/choropleth-states',
     'button',
   ]);
-  check('add reports echarts dependency', added.includes('echarts@6'));
+  check('add reports echarts dependency', added.includes('echarts'));
+  // A React item's way in is its export, which no consumer can derive from the
+  // slug. This replaces the old assertion about a runtime data fetch: the
+  // choropleths vendored their geography, so nothing in the registry fetches
+  // at runtime any more and there is no warning left to assert.
   check(
-    'add warns about the runtime data fetch',
-    added.includes('third party') && added.includes('USA.json'),
+    'add reports the import contract',
+    added.includes('ChoroplethStates') && added.includes('component.css'),
   );
 
   const base = path.join(project, config.paths.components);
   for (const [name, files] of [
     ['barcode-lollipop', ['component.html', 'component.css', 'component.js']],
-    ['choropleth-states', ['component.html', 'component.css', 'component.js']],
+    // Ships geo.ts too: a component whose own import does not resolve is
+    // broken on arrival.
+    ['choropleth-states', ['component.tsx', 'component.css', 'geo.ts']],
     ['button', ['component.tsx', 'component.css']],
   ]) {
     for (const file of files) {

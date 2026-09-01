@@ -1,6 +1,32 @@
-/* Six hundred collaborations, one ring — mono-editorial */
+/* Six hundred collaborations, one ring — mono-editorial
 
-.nx-circular-graph-dense .card {background:var(--nx-bg);border-radius:24px;padding:34px 34px 24px;
-    width:min(1100px,100%)}
+   Colour, radius and the type stack come through --nx-* variables. ECharts
+   draws the plot, so this file styles only the card around it: nothing here
+   reaches inside the chart, whose marks are set in the option where the
+   conformance lint can read them. */
 
-.nx-circular-graph-dense [data-nx-mount="ch"] {height:78vh;min-height:620px;cursor:pointer}
+.nx-circular-graph-dense .card {
+  background: var(--nx-bg);
+  border-radius: var(--nx-radius-card);
+  padding: var(--nx-space-cardPadding);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
+}
+
+.nx-circular-graph-dense .chart {
+  /* ECharts measures its container, so the height comes from CSS rather than
+     from a viewBox. */
+  width: 100%;
+  aspect-ratio: 560 / 400;
+  min-height: 320px;
+}
+
+/* ECharts animates its own marks, at the duration the option sets, so there is
+   nothing here to disable. The block exists because the language requires every
+   animated component to carry one, and so an edit that adds a CSS animation
+   finds the guard already in place rather than having to remember it. */
+@media (prefers-reduced-motion: reduce) {
+  .nx-circular-graph-dense .chart {
+    transition: none;
+  }
+}

@@ -17,7 +17,7 @@
  *   node scripts/build-registry.mjs --check   validate only, no writes (CI)
  */
 
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
@@ -1039,7 +1039,16 @@ async function main() {
             languageMeta: language.meta,
             meta,
             componentDir: dir,
-            files: ['component.tsx', 'component.css'],
+            // Plus any module the component imports from beside it, such as
+            // vendored geography. Without this `nodex add` ships a component
+            // whose own import does not resolve.
+            files: [
+              'component.tsx',
+              'component.css',
+              ...(await readdir(dir))
+                .filter((f) => f.endsWith('.ts') && f !== PREVIEW_MODULE)
+                .sort(),
+            ],
             exports: reactExports(mod),
             data: dataShapes(tsx),
           }),

@@ -11,9 +11,7 @@
     "ops"
   ],
   "dependencies": [
-    "echarts@6"
+    "echarts"
   ],
-  "externalData": [
-    "https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/world.json"
-  ]
+  "aspectRatio": "640/380"
 }

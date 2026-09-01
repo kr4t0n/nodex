@@ -11,9 +11,7 @@
     "geo"
   ],
   "dependencies": [
-    "echarts@6"
+    "echarts"
   ],
-  "externalData": [
-    "https://cdn.jsdelivr.net/gh/apache/echarts-examples@gh-pages/public/data/asset/geo/USA.json"
-  ]
+  "aspectRatio": "580/380"
 }

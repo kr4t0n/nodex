@@ -13,6 +13,7 @@
     "mesh"
   ],
   "dependencies": [
-    "echarts@6"
-  ]
+    "echarts"
+  ],
+  "aspectRatio": "560/420"
 }
