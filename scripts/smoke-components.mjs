@@ -18,6 +18,7 @@
  * Usage: node scripts/smoke-components.mjs
  */
 
+import { existsSync } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -65,9 +66,46 @@ function makeEchartsStub(record) {
   };
 }
 
+/**
+ * A React chart draws at build time, not at mount time.
+ *
+ * `useEffect` does not run under server rendering, so there is no mount to
+ * simulate — the build renders the option to SVG and writes it into the
+ * preview. Reading that back asserts the same property this test exists for,
+ * against the artifact a reader actually receives, rather than standing up a
+ * second rendering path that could pass while the shipped one is blank.
+ */
+async function runRendered(slug, language, meta) {
+  const dir = path.join(expressiveDir(language), slug);
+  const errors = [];
+  let preview = '';
+  try {
+    preview = await readFile(path.join(dir, 'index.html'), 'utf8');
+  } catch {
+    errors.push('no generated preview — run build:registry');
+  }
+  // Any of these alone can appear in an empty plot's axes, so the bar is marks
+  // with fill, which only a drawn series produces.
+  const marks = (preview.match(/<(path|rect|circle|polyline)\b[^>]*fill="#/g) ?? [])
+    .length;
+  if (!errors.length && marks === 0) {
+    errors.push('rendered preview contains no filled marks');
+  }
+  return {
+    slug: `${language}/${slug}`,
+    runtime: meta.runtime,
+    errors,
+    skipped: false,
+    external: meta.externalData,
+  };
+}
+
 async function run(slug, language) {
   const dir = path.join(expressiveDir(language), slug);
   const meta = JSON.parse(await readFile(path.join(dir, 'meta.json'), 'utf8'));
+  if (existsSync(path.join(dir, 'component.tsx'))) {
+    return runRendered(slug, language, meta);
+  }
   const fragment = await readFile(path.join(dir, 'component.html'), 'utf8');
 
   const dom = new JSDOM(

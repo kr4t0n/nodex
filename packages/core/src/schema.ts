@@ -92,6 +92,17 @@ export const nodexMetaSchema = z.object({
    */
   mounts: z.array(z.string()).optional(),
   /**
+   * The React components a `.tsx` item exports, in the order it declares them.
+   *
+   * This is the same contract `mounts` records, spelled for the other authoring
+   * style: a vanilla item hands a consumer three files that connect through a
+   * `data-nx-mount` name, and a React one hands them a module that connects
+   * through an export name. Neither is derivable from the slug —
+   * `endpoint-latency` exports `EndpointLatency` — so both are recorded rather
+   * than guessed, and a consumer never has to open the file to find the way in.
+   */
+  exports: z.array(z.string()).optional(),
+  /**
    * The shape of each sample dataset the component draws, derived from the
    * source at build time. `rows` is the sample's own arity, which is a hint at
    * a workable range rather than a hard bound.

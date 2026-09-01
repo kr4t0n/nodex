@@ -56,7 +56,26 @@ Filters for `search`: `--design`, `--type`, `--tag`, `--tier`, `--density`.
 output alone on stdout with no headings. Prefer it to scraping the aligned
 columns, which are for people and are not a stable format.
 
-`add --json` also states the contract between the three files you were handed:
+`add --json` also states the contract between the files you were handed, which
+differs by how the component was authored.
+
+A primitive, or a chart authored in React, is a module and a stylesheet, and
+`exports` names what to import:
+
+```json
+{
+  "added": [{
+    "ref": "signal-console/endpoint-latency",
+    "dir": "src/components/nodex/endpoint-latency",
+    "files": ["...component.tsx", "...component.css"],
+    "exports": ["EndpointLatency"],
+    "aspectRatio": "420/260"
+  }]
+}
+```
+
+One of the imported charts is three files, and `mounts` names the elements
+`mount(root)` fills:
 
 ```json
 {

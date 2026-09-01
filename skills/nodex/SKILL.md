@@ -71,7 +71,17 @@ nodex add button --design mono-editorial       # primitives are shared, so name 
 nodex add mono-editorial/ridgeline --to src/charts   # one-off override
 ```
 
-This copies three files into the configured directory:
+What lands depends on the item, and `add` prints the way in either way. Run
+`nodex show <ref>` first if you want to know before adding.
+
+**A primitive, or a chart authored in React** — `component.tsx` and
+`component.css`:
+
+- `component.tsx` a React module, importing nothing but `react` and whatever
+  `add` told you to install
+- `component.css` scoped under a per-component root class
+
+**One of the imported charts** — `component.html`, `.css` and `.js`:
 
 - `component.html` a fragment, already scoped. Not a full document.
 - `component.css` scoped under a per-component root class
@@ -80,10 +90,38 @@ This copies three files into the configured directory:
 If the component needs an external library or fetches data at runtime, `add`
 prints it. Install what it asks for.
 
-## Using what you added
+## Using a React component
 
-The fragment is plain HTML and the script is a mount function, so it works in any
-framework.
+Import it, and import its stylesheet. A missing stylesheet does not throw — the
+component renders unstyled — so do not skip the second line.
+
+```tsx
+import { EndpointLatency } from './endpoint-latency/component.tsx';
+import './endpoint-latency/component.css';
+
+<EndpointLatency endpoints={myRoutes} objectiveMs={250} />;
+```
+
+A chart takes its data as a prop with the sample as the default, and exports
+the sample's type. `nodex show <ref>` reports the shape, so you can check your
+data fits before writing any code.
+
+**A primitive is a specimen sheet, not a component to render.** `nodex add
+button` gives you `ButtonSpecimens`, which draws every variant at once. It is
+there to show which classes produce which result. Copy the element you need and
+apply the classes to your own component:
+
+```tsx
+<button className="nx-btn nx-btn--solid" type="button">Add component</button>
+```
+
+Where you need real keyboard and ARIA behaviour, apply the classes to a headless
+Radix or Ark component rather than to a bare element.
+
+## Using one of the imported charts
+
+The fragment is plain HTML and the script is a mount function, so it works in
+any framework.
 
 ```html
 <link rel="stylesheet" href="./component.css" />
@@ -94,7 +132,7 @@ framework.
 </script>
 ```
 
-In React, the port is mechanical:
+In React, wrap it:
 
 ```tsx
 import { useEffect, useRef } from 'react';
@@ -106,8 +144,8 @@ export function Chart() {
   useEffect(() => {
     if (ref.current) mount(ref.current);
   }, []);
-  // Paste the contents of component.html here as JSX, or set it via
-  // dangerouslySetInnerHTML before mount runs.
+  // Paste the contents of component.html here as JSX, remembering that JSX
+  // wants className and htmlFor. `nodex show` lists the mount names it fills.
   return <div ref={ref} />;
 }
 ```

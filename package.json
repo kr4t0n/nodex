@@ -20,7 +20,7 @@
     "check:registry": "node scripts/build-registry.mjs --check",
     "check:shell": "node scripts/check-shell-primitives.mjs",
     "smoke": "node scripts/smoke-components.mjs",
-    "typecheck": "tsc --build && npm run typecheck --workspace @nodex/web",
+    "typecheck": "tsc --build && tsc --noEmit -p registry/tsconfig.json && npm run typecheck --workspace @nodex/web",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "dev": "npm run dev --workspace @nodex/web",
@@ -31,11 +31,14 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/node": "26.2.0",
+    "@types/react": "19.2.8",
     "echarts": "^6.1.0",
     "eslint": "10.9.0",
     "globals": "17.11.0",
     "jiti": "2.7.0",
     "jsdom": "30.0.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "typescript": "5.9.3",
     "typescript-eslint": "8.67.0"
   },

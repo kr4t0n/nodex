@@ -121,7 +121,7 @@ try {
   for (const [name, files] of [
     ['barcode-lollipop', ['component.html', 'component.css', 'component.js']],
     ['choropleth-states', ['component.html', 'component.css', 'component.js']],
-    ['button', ['component.html', 'component.css']],
+    ['button', ['component.tsx', 'component.css']],
   ]) {
     for (const file of files) {
       check(`${name}/${file} landed`, await exists(path.join(base, name, file)));

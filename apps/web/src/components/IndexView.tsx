@@ -1,8 +1,8 @@
 'use client';
 
 import { ArrowRight } from '@phosphor-icons/react';
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import Link, { type LinkProps } from 'next/link';
 
 import { Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
@@ -12,6 +12,7 @@ import {
   previewUrl,
   primitivePreviewUrl,
   type Catalog,
+  type Item,
   type Language,
 } from '@/lib/registry.ts';
 
@@ -63,7 +64,11 @@ export function IndexView({
 
         <div className="flex flex-col gap-10">
           {catalog.languages.map((language) => (
-            <LanguageTile key={language.slug} language={language} />
+            <LanguageTile
+              key={language.slug}
+              language={language}
+              items={catalog.items}
+            />
           ))}
         </div>
       </PageShell>
@@ -87,6 +92,62 @@ export function IndexView({
 const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
 
 /**
+ * One labelled tile: title, description, then the component.
+ *
+ * Three subgrid rows rather than a plain stack, because these descriptions are
+ * a sentence long and wrap to different heights across a row — without shared
+ * rows, one two-line description drops its own preview below its neighbours'
+ * and the composite reads as misaligned rather than as varied.
+ *
+ * `min-w-0` on every level down to the Preview: a grid item's default minimum
+ * is its content size, and a preview renders an iframe at a fixed wide logical
+ * width, so without it the column is forced open and the inflated width is then
+ * measured back as the one the scale is computed from.
+ */
+function TileCell<T>({
+  href,
+  title,
+  description,
+  children,
+}: {
+  // Next types its routes, so the prop borrows Link's own href type rather than
+  // widening to string, which would drop the check at every call site. It is
+  // generic because that type is parameterised by the route being linked to.
+  href: LinkProps<T>['href'];
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    // Both levels restate rowGap. A subgrid adopts its parent's gap along the
+    // axis it inherits, and the tile grid sets 20px to separate whole cells —
+    // left alone, that 20px would also open up between a title, its description
+    // and its chart, so each cell would read as three loose parts.
+    <article
+      className="grid min-w-0 grid-rows-subgrid row-span-3"
+      style={{ rowGap: 6 }}
+    >
+      <Link
+        href={href}
+        className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+        style={{ color: 'inherit', rowGap: 6 }}
+      >
+        <h3 className="m-0 self-start text-[12.5px] leading-[1.4] font-bold tracking-[-0.01em]">
+          {title}
+        </h3>
+        <p
+          className="m-0 self-start text-[10.5px] leading-[1.6]"
+          style={{ color: 'var(--nx-muted)' }}
+        >
+          {description ?? ''}
+        </p>
+        <div className="mt-2 min-w-0 self-start">{children}</div>
+      </Link>
+    </article>
+  );
+}
+
+/**
  * One box height for every tile on this page, charts and primitives alike.
  *
  * Charts scale to fit, so any value works for them. Primitives do not: they
@@ -97,12 +158,43 @@ const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
  */
 const TILE_HEIGHT = 260;
 
-function LanguageTile({ language }: { language: Language }) {
+function LanguageTile({
+  language,
+  items,
+}: {
+  language: Language;
+  items: Item[];
+}) {
   const featured = language.featured.slice(0, 4);
 
   // A language under construction has tokens and primitives before it has a
   // single chart. Rendering nothing there makes a real language look broken.
   const showing = featured.length > 0 ? 'expressive' : 'primitives';
+
+  /**
+   * Label a tile from the manifest rather than from the component.
+   *
+   * The tiles used to show whatever the fragment labelled itself with, which
+   * held only while one language existed: mono-editorial's card anatomy opens
+   * with a title and a sentence, so its tiles read as labelled by accident.
+   * Signal Console's opens with the current value instead — deliberately, and
+   * its DESIGN.md says never to reorder it — so its tile arrived with no title
+   * at all beside four that had one.
+   *
+   * The manifest carries a title and a description for every component in every
+   * language, so reading them here is the only spelling that does not assume an
+   * anatomy. It is also what the language page already does for its grid cells.
+   */
+  const describe = (name: string, tier: 'expressive' | 'primitive') => {
+    const item = items.find(
+      (i) =>
+        i.name === name &&
+        (tier === 'primitive'
+          ? i.meta.tier === 'primitive'
+          : i.meta.language === language.slug),
+    );
+    return { title: item?.title ?? name, description: item?.description };
+  };
 
   return (
     /**
@@ -146,10 +238,12 @@ function LanguageTile({ language }: { language: Language }) {
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="nx-badge nx-badge--dashed">
-              {language.counts.expressive} components
+              {language.counts.expressive}{' '}
+              {language.counts.expressive === 1 ? 'component' : 'components'}
             </span>
             <span className="nx-badge nx-badge--dashed">
-              {language.counts.primitives} primitives
+              {language.counts.primitives}{' '}
+              {language.counts.primitives === 1 ? 'primitive' : 'primitives'}
             </span>
             {language.visibility === 'restricted' ? (
               <span className="nx-badge nx-badge--solid">Restricted</span>
@@ -164,40 +258,51 @@ function LanguageTile({ language }: { language: Language }) {
       </div>
 
       {/* The composite IS the description. A name and a paragraph cannot convey
-          taste, and these are real running components rather than screenshots. */}
+          taste, and these are real running components rather than screenshots.
+
+          Subgrid, so a title or description that wraps to an extra line moves
+          its own text and not its neighbours' previews out of line. */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {showing === 'expressive'
-          ? featured.map((name) => (
-              <Link
-                key={name}
-                href={`/l/${language.slug}/${name}`}
-                className="min-w-0 no-underline"
-                aria-label={`${name} in ${language.name}`}
-              >
-                <Preview
-                  src={previewUrl(language.slug, name)}
-                  title={`${name} in ${language.name}`}
-                  boxHeight={TILE_HEIGHT}
-                />
-              </Link>
-            ))
-          : SAMPLE_PRIMITIVES.map((name) => (
-              <Link
-                key={name}
-                href={`/l/${language.slug}/${name}`}
-                className="min-w-0 no-underline"
-                aria-label={`${name} in ${language.name}`}
-              >
-                {/* Fluid, so the component is shown at the size it really is,
-                    but inside the same box as every other tile. */}
-                <Preview
-                  src={primitivePreviewUrl(name, language.slug)}
-                  title={`${name} in ${language.name}`}
-                  boxHeight={TILE_HEIGHT}
-                  fluid
-                />
-              </Link>
-            ))}
+          ? featured.map((name) => {
+              const { title, description } = describe(name, 'expressive');
+              return (
+                <TileCell
+                  key={name}
+                  href={`/l/${language.slug}/${name}`}
+                  title={title}
+                  description={description}
+                >
+                  {/* Bare: the heading above states the title, so a fragment
+                      that carries its own would print it twice. */}
+                  <Preview
+                    src={previewUrl(language.slug, name, { bare: true })}
+                    title={title}
+                    boxHeight={TILE_HEIGHT}
+                  />
+                </TileCell>
+              );
+            })
+          : SAMPLE_PRIMITIVES.map((name) => {
+              const { title, description } = describe(name, 'primitive');
+              return (
+                <TileCell
+                  key={name}
+                  href={`/l/${language.slug}/${name}`}
+                  title={title}
+                  description={description}
+                >
+                  {/* Fluid, so the component is shown at the size it really is,
+                      but inside the same box as every other tile. */}
+                  <Preview
+                    src={primitivePreviewUrl(name, language.slug)}
+                    title={title}
+                    boxHeight={TILE_HEIGHT}
+                    fluid
+                  />
+                </TileCell>
+              );
+            })}
       </div>
 
       {showing === 'primitives' ? (

@@ -20,6 +20,10 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import ts from 'typescript';
 
 import { loadSource, registrySchema } from '@nodex/core';
 // The same checks `nodex lint` runs, from the same file. They used to be two
@@ -27,10 +31,25 @@ import { loadSource, registrySchema } from '@nodex/core';
 // shipped a 2px mark under a 1.4px ceiling: the regex here could not read a
 // ternary, and nothing downstream could check at all.
 import { lint as lintSource, rulesFromTokens } from '../packages/cli/src/lint.ts';
+import { renderToSVG } from './echarts-ssr.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const REGISTRY_DIR = path.join(ROOT, 'registry');
 const OUT_DIR = path.join(ROOT, 'public', 'r');
+// Compiled .tsx lands here, never beside the source: a build artifact must not
+// be mistakable for something a consumer receives. Gitignored.
+const BUILD_DIR = path.join(ROOT, 'tmp', 'build');
+/**
+ * The width a server-rendered chart is drawn at, and displayed at.
+ *
+ * The two must be equal. An ECharts SVG carries a viewBox, so stretching it
+ * scales the type with it — a 9px axis label displayed at 1.8x becomes a 16px
+ * one, which is the language's smallest size rendered as one of its largest.
+ * Type is identity rather than craft, so the preview draws at display size and
+ * never scales. It sits inside the gallery's 660px logical frame with room for
+ * the page and card padding.
+ */
+const PREVIEW_CHART_WIDTH = 540;
 const CHECK_ONLY = process.argv.includes('--check');
 
 const HOMEPAGE = 'https://nodex.dev';
@@ -138,6 +157,200 @@ ${body}
  * the fragment: `body { padding }` is page padding, not component padding, and a
  * global `*` reset would trash a consumer's layout.
  */
+async function readFileOrUndefined(file) {
+  try {
+    return await readFile(file, 'utf8');
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Load a `.tsx` component.
+ *
+ * Node strips types from `.ts` natively but cannot transform JSX, so a React
+ * component has to be compiled before it can be imported. TypeScript is already
+ * a devDependency and does it, which keeps a bundler out of the build.
+ *
+ * The output goes to a gitignored scratch directory rather than beside the
+ * source, so a compiled artifact is never mistaken for something a consumer
+ * receives.
+ */
+async function loadComponent(dir, where) {
+  const source = await readFile(path.join(dir, 'component.tsx'), 'utf8');
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: {
+      jsx: ts.JsxEmit.ReactJSX,
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ES2022,
+    },
+  });
+
+  const out = path.join(BUILD_DIR, `${path.basename(dir)}.mjs`);
+  await mkdir(BUILD_DIR, { recursive: true });
+  // Relative imports resolve from the source directory, not from the scratch
+  // one, so they are rewritten to absolute file URLs on the way out.
+  await writeFile(
+    out,
+    outputText.replace(
+      /from\s+'(\.[^']*)'/g,
+      (_m, spec) => `from '${pathToFileURL(path.resolve(dir, spec)).href}'`,
+    ),
+  );
+
+  try {
+    return await import(pathToFileURL(out).href);
+  } catch (cause) {
+    fail(where, `component.tsx could not be imported: ${cause.message}`);
+  }
+}
+
+/**
+ * The React components a module exports.
+ *
+ * Read from the loaded module rather than parsed out of the source, so it
+ * cannot disagree with what a consumer's bundler will actually find. The
+ * capital-letter test is JSX's own rule for what counts as a component.
+ */
+function reactExports(mod) {
+  return Object.entries(mod)
+    .filter(([name, v]) => typeof v === 'function' && /^[A-Z]/.test(name))
+    .map(([name]) => name);
+}
+
+/** The chart's real marks, rendered without a browser. */
+async function renderChartSVG(mod, meta, where) {
+  if (typeof mod.previewOption !== 'function') {
+    fail(
+      where,
+      'a .tsx chart must export previewOption(): the build and the lint need ' +
+        'its marks, and useEffect does not run under server rendering',
+    );
+  }
+  const [w, h] = (meta.aspectRatio ?? '420/260').split('/').map(Number);
+  try {
+    return renderToSVG(mod.previewOption(), {
+      width: PREVIEW_CHART_WIDTH,
+      height: Math.round((PREVIEW_CHART_WIDTH * h) / w),
+    });
+  } catch (cause) {
+    fail(where, `previewOption() failed to render: ${cause.message}`);
+  }
+}
+
+/**
+ * The component's own markup, with the server-rendered chart spliced in.
+ *
+ * `useEffect` never runs under server rendering, so the component alone emits
+ * an empty chart container. Rendering the option separately and putting it in
+ * that container is what makes the preview a static file with no runtime —
+ * which is the property that lets previews sit on a CDN.
+ */
+function renderComponentMarkup(mod, where) {
+  const Component = Object.values(mod).find(
+    (v) => typeof v === 'function' && /^[A-Z]/.test(v.name ?? ''),
+  );
+  if (!Component) fail(where, 'component.tsx exports no React component');
+  return renderToStaticMarkup(createElement(Component));
+}
+
+/** The same markup, with a chart's server-rendered SVG in its container. */
+function renderChartMarkup(mod, svg, where) {
+  const markup = renderComponentMarkup(mod, where);
+  const container = /<div class="chart"><\/div>/;
+  if (!container.test(markup)) {
+    fail(
+      where,
+      'expected an empty <div class="chart"> for the server-rendered chart',
+    );
+  }
+  return markup.replace(container, `<div class="chart">${svg}</div>`);
+}
+
+/** A preview for a React component: markup only, no script, no runtime. */
+function renderReactPreview({ language, tokens, meta, body }) {
+  const [w, h] = (meta.aspectRatio ?? '420/260').split('/').map(Number);
+  const chartWidth = PREVIEW_CHART_WIDTH;
+  const chartHeight = Math.round((PREVIEW_CHART_WIDTH * h) / w);
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${meta.title} — ${language.name}</title>
+${fontLinks(tokens)}
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="./component.css">
+<style>
+  /* Page chrome — belongs to the preview, never to the distributed component. */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--nx-bg);
+    color: var(--nx-ink);
+    font-family: var(--nx-font-sans);
+    padding: var(--nx-space-pagePadding, 40px);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Shrink-wrapped to the chart. The chart cannot be stretched to the card, so
+     the card is sized to the chart instead — otherwise a wide viewport leaves a
+     540px plot marooned in a 1400px card with the foot spread across it. */
+  .nx-preview { width: fit-content; margin: 0 auto; }
+  /* Drawn at display size, so nothing scales. The component's own stylesheet
+     sizes this box fluidly, which is right when ECharts is live and measuring
+     its container; a static SVG has already chosen its type sizes, so here the
+     box is pinned to the size the SVG was rendered at. */
+  .nx-preview .chart {
+    width: ${chartWidth}px;
+    height: ${chartHeight}px;
+    max-width: 100%;
+    aspect-ratio: auto;
+    min-height: 0;
+  }
+  .nx-preview .chart svg { display: block; }
+
+  /* Embedded mode, the same contract the vanilla previews carry.
+     An embedder that prints the title and subtitle from the manifest above the
+     frame would otherwise label a chart twice. It is a no-op for a language
+     whose card anatomy opens with a value rather than a heading — signal-console
+     does — but the parameter has to mean the same thing on every preview, or an
+     embedder cannot rely on asking for it. */
+  [data-nx-bare] .nx-preview h2,
+  [data-nx-bare] .nx-preview .sub { display: none; }
+</style>
+<script>
+  /* Applied before first paint. Doing this after the document renders makes the
+     header appear and then vanish, which reads as a layout glitch in a grid. */
+  if (new URLSearchParams(location.search).get('bare') === '1') {
+    document.documentElement.setAttribute('data-nx-bare', '');
+  }
+</script>
+</head>
+<body>
+<div class="nx-preview">
+${body}
+</div>
+<script type="module">
+  /* Report content height to an embedding gallery. The card's height depends on
+     its head and foot, so a chart's ratio alone is an approximation and
+     guessing it clips the footer. This is the only script a React preview
+     carries, and it draws nothing. */
+  const wrap = document.querySelector('.nx-preview');
+  const post = () => {
+    const pad = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+    parent.postMessage(
+      { type: 'nx-preview-size', height: Math.ceil(wrap.getBoundingClientRect().height + pad * 2) },
+      '*',
+    );
+  };
+  post();
+  new ResizeObserver(post).observe(wrap);
+</script>
+</body>
+</html>
+`;
+}
+
 function renderPreview({ language, tokens, meta, fragment, needsEcharts }) {
   const echarts = needsEcharts
     ? `\n<script src="${ECHARTS_CDN}"></script>`
@@ -313,9 +526,9 @@ ${meta.markup.trim()}
  * Their preview takes the token layer from a `?lang=` parameter, so a single
  * generated file serves every language rather than one per pairing.
  */
-function primitiveItem({ meta, dir }) {
+function primitiveItem({ meta, dir, exports }) {
   const rel = path.relative(REGISTRY_DIR, dir).split(path.sep).join('/');
-  const files = ['component.html', 'component.css'].map((name) => ({
+  const files = ['component.tsx', 'component.css'].map((name) => ({
     path: `registry/${rel}/${name}`,
     type: 'registry:file',
     target: `nodex/primitives/${meta.slug}/${name}`,
@@ -332,6 +545,7 @@ function primitiveItem({ meta, dir }) {
       tier: meta.tier,
       component: meta.component,
       runtime: meta.runtime,
+      ...(exports?.length ? { exports } : {}),
       tags: meta.tags,
     },
   };
@@ -420,10 +634,24 @@ function dataShapes(js) {
    * The fallback exists for the imported corpus, which predates the convention
    * and keeps its sample data as internal constants.
    */
-  const exported = read(/^\s*export\s+const\s+([A-Z][A-Z0-9_]*)\s*=\s*(\[[\s\S]*?\]);/gm);
+  // The optional `: readonly Endpoint[]` is what a typed component writes
+  // between the name and the value. Without it a .tsx chart reports no data
+  // contract at all, which is the opposite of what annotating it should buy.
+  const type = String.raw`(?::[^=]+)?`;
+  const exported = read(
+    new RegExp(
+      String.raw`^\s*export\s+const\s+([A-Z][A-Z0-9_]*)\s*${type}=\s*(\[[\s\S]*?\]);`,
+      'gm',
+    ),
+  );
   if (exported.length > 0) return exported;
 
-  return read(/^\s*const ([A-Z][A-Z0-9_]*)\s*=\s*(\[[\s\S]*?\]);/gm);
+  return read(
+    new RegExp(
+      String.raw`^\s*const ([A-Z][A-Z0-9_]*)\s*${type}=\s*(\[[\s\S]*?\]);`,
+      'gm',
+    ),
+  );
 }
 
 function describeLiteral(src) {
@@ -449,7 +677,18 @@ function describeLiteral(src) {
   return { rows: value.length, of: kinds.length === 1 ? kinds[0] : kinds.join(' | ') };
 }
 
-function itemFor({ languageMeta, meta, componentDir, mounts, data }) {
+function itemFor({
+  languageMeta,
+  meta,
+  componentDir,
+  mounts,
+  exports,
+  data,
+  // What a consumer receives. A vanilla component ships the triple; a React one
+  // ships a module and a stylesheet, and has no markup file because its markup
+  // is in the module.
+  files = ['component.html', 'component.css', 'component.js'],
+}) {
   const rel = path
     .relative(REGISTRY_DIR, componentDir)
     .split(path.sep)
@@ -463,23 +702,11 @@ function itemFor({ languageMeta, meta, componentDir, mounts, data }) {
     title: meta.title,
     ...(meta.description ? { description: meta.description } : {}),
     ...(meta.dependencies.length ? { dependencies: meta.dependencies } : {}),
-    files: [
-      {
-        path: `registry/${rel}/component.html`,
-        type: fileType,
-        target: `${target}/component.html`,
-      },
-      {
-        path: `registry/${rel}/component.css`,
-        type: fileType,
-        target: `${target}/component.css`,
-      },
-      {
-        path: `registry/${rel}/component.js`,
-        type: fileType,
-        target: `${target}/component.js`,
-      },
-    ],
+    files: files.map((name) => ({
+      path: `registry/${rel}/${name}`,
+      type: fileType,
+      target: `${target}/${name}`,
+    })),
     meta: {
       language: languageMeta.slug,
       tier: meta.tier,
@@ -488,6 +715,7 @@ function itemFor({ languageMeta, meta, componentDir, mounts, data }) {
       ...(meta.density ? { density: meta.density } : {}),
       ...(meta.aspectRatio ? { aspectRatio: meta.aspectRatio } : {}),
       ...(mounts?.length ? { mounts } : {}),
+      ...(exports?.length ? { exports } : {}),
       ...(data?.length ? { data } : {}),
       // Must reach the manifest, or the CLI cannot warn about it and declaring
       // it in the component's meta.json accomplishes nothing.
@@ -615,15 +843,19 @@ async function main() {
       );
     }
 
-    const markup = await readFile(
-      path.join(primitive.dir, 'component.html'),
-      'utf8',
-    );
+    // A primitive is pure markup with no effects, so server rendering produces
+    // the whole specimen sheet. That is what lets the preview stay a static
+    // file while the shipped artifact is a React module.
+    const mod = await loadComponent(primitive.dir, where);
+    const markup = await renderComponentMarkup(mod, where);
 
     // A primitive must be self-contained: it is copied on its own, so markup
     // referencing a class defined in a sibling primitive's stylesheet hands the
     // consumer something with no styles for it. Duplicating a shared wrapper is
     // the correct fix, not importing across primitives.
+    //
+    // Read from the rendered output rather than from the source, so a class
+    // assembled in an expression is still seen.
     const usedClasses = new Set();
     for (const attr of markup.matchAll(/class="([^"]+)"/g)) {
       for (const name of attr[1].split(/\s+/).filter(Boolean)) {
@@ -654,7 +886,7 @@ async function main() {
     });
 
     primitiveSheets.push([primitive.meta.slug, css]);
-    items.push(primitiveItem(primitive));
+    items.push(primitiveItem({ ...primitive, exports: reactExports(mod) }));
   }
 
   lintDuplicatedRules(primitiveSheets);
@@ -695,6 +927,48 @@ async function main() {
       }
 
       const css = await readFile(path.join(dir, 'component.css'), 'utf8');
+      const tsx = await readFileOrUndefined(path.join(dir, 'component.tsx'));
+
+      if (tsx !== undefined) {
+        // A React component. Its marks live in the option rather than in the
+        // markup, so both the preview and the lint come from rendering it.
+        const mod = await loadComponent(dir, where);
+        const svg = await renderChartSVG(mod, meta, where);
+
+        lintComponent({
+          languageMeta: language.meta,
+          tokens,
+          meta,
+          // The rendered SVG *is* the source of truth for the marks — no
+          // parsing, no ternaries to miss, no "cannot be checked statically".
+          css,
+          js: svg,
+          where,
+        });
+
+        generated.push({
+          file: path.join(dir, 'index.html'),
+          content: renderReactPreview({
+            language: language.meta,
+            tokens,
+            meta,
+            body: renderChartMarkup(mod, svg, where),
+          }),
+        });
+
+        items.push(
+          itemFor({
+            languageMeta: language.meta,
+            meta,
+            componentDir: dir,
+            files: ['component.tsx', 'component.css'],
+            exports: reactExports(mod),
+            data: dataShapes(tsx),
+          }),
+        );
+        continue;
+      }
+
       const js = await readFile(path.join(dir, 'component.js'), 'utf8');
       const fragment = await readFile(
         path.join(dir, 'component.html'),

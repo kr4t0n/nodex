@@ -73,7 +73,40 @@ them as a live composite, because a name and a paragraph cannot convey taste.
 
 ## Adding a component
 
-Create `registry/languages/<slug>/expressive/<component-slug>/` with four files.
+Create `registry/languages/<slug>/expressive/<component-slug>/`.
+
+There are two authoring styles, and **a new chart should use the React one**.
+The framework-free triple below is how the imported corpus is written; it is
+documented because sixty-four components use it and you will read them.
+
+### React: `component.tsx` + `component.css` + `meta.json`
+
+The reference is `signal-console/endpoint-latency`. Four rules, all of which the
+build enforces:
+
+- **Export a pure `buildOption(data)`** returning the ECharts option, taking no
+  DOM. This is what the build renders and the lint reads.
+- **Export `previewOption()`**, zero arguments, returning `buildOption` applied
+  to the sample. `useEffect` does not run under server rendering, so this is the
+  only way the build can reach a chart's marks without knowing its default
+  props. The build fails without it.
+- **Take data as props with the sample as the default**, and export the sample.
+  `EndpointLatency({ endpoints = ENDPOINTS })`. Swapping real data in should be
+  a prop, not a rewrite.
+- **Inline `useECharts`** rather than importing it, and set
+  `renderer: 'svg'`. Copy the hook from `endpoint-latency`. A component is
+  lifted out one file at a time, so an import of a shared hook hands a consumer
+  a path that does not resolve; and a canvas chart leaves nothing in the DOM,
+  so it cannot be linted at all.
+
+Render the component's chart into `<div className="chart" ref={ref} />` — an
+empty element with exactly that class, which is where the build splices the
+server-rendered SVG. Size it in CSS, because ECharts measures its container.
+
+Check your work with `npm run build:registry`, which renders the chart and will
+tell you if it draws nothing, breaks the ramp, or exceeds the stroke ceiling.
+
+### Framework-free: `component.html` + `component.css` + `component.js` + `meta.json`
 
 ### `component.html`
 
@@ -153,16 +186,42 @@ screenshots must reproduce exactly.
 ## Adding a primitive
 
 Primitives live at `registry/primitives/<name>/` and are shared by **every**
-language. Two files, `component.html` and `component.css`, plus `meta.json` with
+language. Two files, `component.tsx` and `component.css`, plus `meta.json` with
 `"tier": "primitive"` and `"runtime": "css"`.
 
-Keep them **presentational**: visual states in CSS, no JavaScript API. Design
-what a select looks like and document applying it to a headless Radix or Ark
-component. Nodex ships the design layer, not the behaviour layer.
+`component.tsx` exports one component named `<Name>Specimens` — `ButtonSpecimens`,
+`EmptyStateSpecimens` — rendering **every variant at once**. The plural name is
+deliberate: it is a specimen sheet, and a consumer importing `Button` and
+rendering it expecting one button would get five.
+
+Keep them **presentational**. Plain elements and classes, no props API, no
+abstraction. Design what a select looks like and document applying the classes
+to a headless Radix or Ark component; nodex ships the design layer, not the
+behaviour layer. A `<Button variant="solid" />` would take that away, because a
+consumer already on Radix would have to unwrap it to reach the classes.
+
+Four things the JSX has to get right, each of which broke something real when
+the existing 24 were ported:
+
+- **`className` and `htmlFor`**, not `class` and `for`. This is the whole reason
+  primitives are TSX: those two are type errors in JSX, so HTML meant a
+  hand-translation every time one was added.
+- **A CSS custom property keeps its literal name and needs a cast** —
+  `style={{ '--nx-slider-steps': '12' } as CSSProperties}`. Camel-casing it
+  produces a property that does not exist and silently applies nothing.
+- **Numeric props go in braces**: `rows={3}`, `tabIndex={0}`.
+- **JSX deletes a space that spans a line break.** `Read the\n<a>field ratio</a>`
+  renders as "Read thefield ratio". Write `{' '}` at the end of the line.
 
 A primitive may not contain a single colour literal. The build rejects it,
 because a primitive that hardcodes a colour cannot be themed, which defeats the
 only reason it is shared.
+
+The build server-renders the specimen sheet to generate its preview, so a
+primitive must render with **no effects**: whatever a `useEffect` or a `ref`
+would set is absent from the preview. Where a state exists only as a DOM
+property, carry it in an attribute too and match both in CSS — see `checkbox`
+and its `data-indeterminate`.
 
 ## Verifying
 

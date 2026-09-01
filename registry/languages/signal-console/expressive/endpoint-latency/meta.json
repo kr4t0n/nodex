@@ -1,0 +1,11 @@
+{
+  "slug": "endpoint-latency",
+  "title": "Ten endpoints, ranked by tail latency",
+  "description": "bar length = p99 in ms · red where the route breaches the objective · ranked slowest first, aggregated from a five-minute window",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "echarts",
+  "aspectRatio": "420/260",
+  "tags": ["latency", "live-ops"],
+  "dependencies": ["echarts"]
+}

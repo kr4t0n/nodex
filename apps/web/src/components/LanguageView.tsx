@@ -343,7 +343,8 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
       )}
 
       <p className="mt-10 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-        {filtered.length} of {items.length} charts. Each preview draws when it
+        {filtered.length} of {items.length}{' '}
+        {items.length === 1 ? 'chart' : 'charts'}. Each preview draws when it
         scrolls into view; click a chart to replay it.
       </p>
     </section>

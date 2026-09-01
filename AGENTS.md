@@ -58,12 +58,47 @@ tags. The enum lives in `packages/core/src/taxonomy.ts`.
 
 ## Components ship as fragments
 
-The authored artifact is `component.html` / `.css` / `.js` — a fragment. The
-standalone `index.html` is **generated** from it at build time and exists only
-for previews. One source of truth; a consumer never receives a document with a
-doctype and a `body` rule.
+The authored artifact is a **fragment**, never a document. The standalone
+`index.html` is generated from it at build time and exists only for previews.
+One source of truth; a consumer never receives a doctype and a `body` rule.
 
-This forces two things the source did not do:
+Two spellings of that fragment, and the split is by when the artifact was
+written rather than by what it is:
+
+- **`component.tsx` + `component.css`** — every primitive, and every chart
+  authored since. A React module: its markup is in the module, so there is no
+  markup file.
+- **`component.html` + `.css` + `.js`** — the 64 imported charts, which were
+  sliced out of a found page and are a corpus of drawing techniques rather than
+  something to reshape.
+
+The primitives moved because the artifact a consumer wanted was never valid in
+the place they were taking it. Every one is copied into a React project, and
+`class` and `for` are type errors in JSX — so every primitive had to be
+hand-translated on arrival, and a translation done twenty-four times is
+twenty-four chances to get it wrong.
+
+They stayed **presentational** through the move, which is the important half.
+A primitive exports a specimen sheet — `ButtonSpecimens` draws all five
+variants — and not a `<Button variant="solid" />`. The artifact is still the
+stylesheet, and the module is still just a record of which classes produce which
+result, so applying those classes to a headless Radix or Ark component is
+unchanged. Wrapping them in a props API would have taken that away: a consumer
+on Radix would have to unwrap a component to reach the thing they came for.
+
+The port was verified rather than eyeballed. Each file was rendered back to
+static markup and compared to the HTML it replaced, and 23 of 24 were identical.
+That check earned its keep — it caught the indent pass writing six spaces into
+the `pre` and `textarea` blocks, a CSS custom property being camel-cased into
+`-NxSliderSteps` and silently applying nothing, and JSX eating the space in
+`Read the <a>field ratio</a>` so the words ran together.
+
+The one file that is deliberately not identical is `checkbox`, which used to
+carry a `<script>` and a document-level id to set `indeterminate`. That is a
+ref now, which reaches the element without naming it. See the gotcha below for
+why the stylesheet also matches an attribute.
+
+The fragment rule forces two things the source did not do:
 
 - **CSS is partitioned.** Page chrome (`body`, `.grid2`, `.pagehead`,
   `.card.wide`) is dropped; component rules are scoped by ancestor under
@@ -72,7 +107,8 @@ This forces two things the source did not do:
 - **JS is root-scoped.** Every mount point is `data-nx-mount="name"`, never an
   `id`, and `mount(root)` queries within its own subtree. This fixes the real ID
   collisions in the source (`#ch` appeared in three components, `#stream` in two)
-  rather than relying on an iframe to hide them.
+  rather than relying on an iframe to hide them. A React component gets this for
+  free, having no document-level names at all.
 
 ## Self-contained, deliberately duplicated
 
@@ -124,13 +160,13 @@ disambiguation that happens to borrow the vocabulary — not an encoding.
 
 ## Two runtimes, never three
 
-Raw SVG (42 components, zero dependencies) and ECharts 6 (22). Chart.js served
+Raw SVG (42 components, zero dependencies) and ECharts 6 (23). Chart.js served
 exactly 2 and was ported out.
 
 The reason is maintenance ratio, not library quality: each runtime needs its own
 token binding in `DESIGN.md` and its own lints, because a `0.8px` hairline is
 `stroke-width` in SVG and `lineStyle.width` in ECharts. A permanent third binding
-for 2 of 64 components is a bad trade. The ports live in `PORTED_BLOCKS` in the
+for 2 of 65 components is a bad trade. The ports live in `PORTED_BLOCKS` in the
 extractor so re-running stays idempotent.
 
 ## Conformance lints
@@ -202,7 +238,9 @@ reaches past the list.
 The rest are in `scripts/build-registry.mjs`. These replace what a shared module
 would have enforced:
 
-- a primitive's markup only uses classes its own stylesheet defines
+- a primitive's markup only uses classes its own stylesheet defines, read from
+  its **rendered** output rather than its source, so a class assembled in an
+  expression is still seen
 - anything that animates ships a `prefers-reduced-motion` guard
 - stroke widths stay within `tokens.stroke.lineMax` unless the component declares
   `strokeAsArea`
@@ -445,9 +483,35 @@ The app prints the same two strings from the manifest above each frame, so
 rendering both labelled all 64 charts twice.
 
 The generated preview therefore takes a `bare=1` parameter that hides the
-fragment's title and subtitle only. The app asks for it wherever it supplies its
-own heading, which is the grid cells and the detail page. The index's featured
-composites are not bare: nothing labels them, so there is nothing to duplicate.
+fragment's title and subtitle only. **The app asks for it everywhere it embeds a
+chart**, and supplies its own heading from the manifest in each of those places:
+the grid cells, the detail page, and the index's featured composites.
+
+The index used to be the exception, on the reasoning that nothing labelled those
+tiles so there was nothing to duplicate. That held only while one language
+existed. It was really relying on the *fragment* to label itself, which
+mono-editorial's card anatomy happens to do by opening with a title and a
+sentence — so its tiles read as labelled by accident. Signal Console opens with
+the current value instead, deliberately and by its own `DESIGN.md`, so its tile
+arrived on the index with no title beside four that had one.
+
+The manifest carries a title and a description for **every** component in every
+language, so reading them there is the only spelling that does not assume a card
+anatomy. The fix therefore belonged in the app: adding an `h2` to the chart would
+have made nodex break the language it exists to enforce.
+
+Two consequences of that:
+
+- **Every preview must honour `bare=1`, including one that has nothing to
+  hide.** The React preview did not, which was invisible while the only React
+  chart was in a language whose anatomy has no heading. An embedder cannot rely
+  on asking for something that silently means nothing in half the registry.
+- **A labelled tile needs its rows shared.** These descriptions are a sentence
+  and wrap to different heights, so the cells are a three-row subgrid — without
+  it, one two-line description drops its own preview below its neighbours' and
+  the composite reads as broken rather than as varied. Both levels have to
+  restate `rowGap`, because a subgrid otherwise inherits the gap that separates
+  whole cells and opens the same distance between a title and its own chart.
 
 **The app no longer links to the whole version anywhere.** A "Open preview in a
 tab" link on the detail page used to be that escape hatch and was removed as
@@ -879,6 +943,15 @@ reading it will not expect them either.
   also not announced by assistive technology at all, so where the text carries
   real information, use these visuals on a headless tooltip. The charts avoid the
   whole problem by using SVG `<title>`, which the browser announces natively.
+- **A DOM-only property does not survive server rendering.** `indeterminate` on
+  a checkbox has no markup attribute behind it, so a ref sets it and a ref never
+  runs in a statically rendered preview — the primitive's own preview quietly
+  lost the state it exists to demonstrate. The component now carries both the
+  ref and a `data-indeterminate` attribute, and the stylesheet matches
+  `:indeterminate` alongside it. The ref stays the real mechanism, because it is
+  what a browser reports to assistive technology; the attribute is only what
+  lets rendered markup carry the state. Anything else in this shape — a
+  property with no attribute — needs the same pair.
 - **A primitive may not borrow a class from a sibling primitive.** They are
   copied individually, so `nodex add select` referencing `.nx-field__label` from
   the input primitive hands the consumer markup with no styles for it. Duplicate
@@ -939,32 +1012,95 @@ rather than to taste in general.
 
 ### Authoring a chart is not the same as importing one
 
-`signal-console/circular-graph` is the first chart written *from* a language
-rather than sliced out of a found page, and it exists to show what that shape
-is. Three differences from the imported 64, all of which fell out of authoring
-rather than being argued for:
+`signal-console/endpoint-latency` is the first chart written *from* a language
+rather than sliced out of a found page, and it is the reference for anything
+authored next. Four differences from the imported 64, all of which fell out of
+authoring rather than being argued for:
 
-- **Data is a parameter.** `mount(root, data = { nodes: NODES, flows: FLOWS })`
-  with the samples exported. Swapping real traffic in is a call, not a rewrite.
-  The imported charts bury their data mid-function because the page they came
-  from had no reason to expose it.
-- **The mount name matches the slug**, because nothing forced otherwise. Only 3
-  of the imported 64 do.
+- **It is a React component**, `component.tsx` plus `component.css` and no
+  markup file, because its markup is in the module. See below for why the two
+  authoring styles coexist rather than one replacing the other.
+- **Data is a parameter.** `EndpointLatency({ endpoints = ENDPOINTS })` with the
+  sample exported. Swapping real traffic in is a prop, not a rewrite. The
+  imported charts bury their data mid-function because the page they came from
+  had no reason to expose it.
+- **The option is pure and separate from the component.** `buildOption(data)`
+  takes no DOM and returns the ECharts option, which is what lets the build
+  render it and the lint read its real marks.
 - **The card anatomy is the language's, not mono-editorial's.** `div.head` with
   the current value, then the chart, then a three-segment `div.foot`. Writing it
   made the point concrete: the same chart type in the other language opens with
   a sentence and reading instructions, which is right for studying and wrong for
   scanning.
 
-Two things it found that argument had not:
+Two things an earlier attempt found that argument had not:
 
 - **The smoke test only ever ran one language**, defaulting to mono-editorial,
-  so this component would have shipped without ever being mounted. It now walks
+  so this component would have shipped without ever being drawn. It now walks
   every language, and `NODEX_LANGUAGE` still narrows it.
 - **`meta.data` derivation only read internal `const`**, so the chart reported
-  its colour ladder as its data contract and missed `NODES` and `FLOWS`
-  entirely. An exported array is now preferred where a component has one, with
-  the internal scan kept as the fallback the imported corpus needs.
+  its colour ladder as its data contract and missed the real sample entirely. An
+  exported array is now preferred where a component has one, with the internal
+  scan kept as the fallback the imported corpus needs. It also had to learn to
+  step over a type annotation, or annotating a sample would delete its own
+  contract from the manifest.
+
+### A chart may be authored in TSX, and then it renders at build time
+
+The 64 imported charts are markup, CSS and a `mount(root)`. A chart authored now
+is a React component, and both ship from the same registry.
+
+That is not a migration half-done. The two styles differ in *when the marks
+exist*, and the build follows:
+
+- A vanilla component draws when `mount` runs, so its preview is a document that
+  loads `component.js` and a browser executes it.
+- A React component draws inside `useEffect`, which never runs under server
+  rendering. So the build calls its exported `previewOption()`, renders that to
+  an SVG string with no DOM, and splices it into the statically rendered markup.
+  The preview it writes is a finished document that runs nothing.
+
+Three consequences worth knowing:
+
+- **The lint reads rendered output, not source.** For a vanilla component it
+  parses `stroke-width` out of the JS, with the known blind spots that cost five
+  components a 2px stroke. For a React one it reads the SVG the chart really
+  produced, where a ternary has already collapsed to a number. This is the
+  better half of the arrangement and the reason `renderer: 'svg'` is mandatory:
+  a canvas chart leaves nothing to inspect and is unlintable by construction.
+- **`previewOption()` is the contract.** Zero arguments, returns the option for
+  the sample data. Without it the build cannot reach a chart's marks without
+  knowing its default props, so it is required rather than detected.
+- **A preview draws at display size and is never scaled.** An ECharts SVG
+  carries a viewBox, so stretching it scales the type — a 9px axis label shown
+  at 1.8x becomes 16px, which is the language's smallest size rendered as one of
+  its largest. The build renders at `PREVIEW_CHART_WIDTH` and pins the container
+  to the same number, and the preview's card shrink-wraps that rather than the
+  chart stretching to the card.
+
+`meta.exports` records which component to import, for exactly the reason
+`meta.mounts` records a mount name: neither is derivable from the slug, and a
+consumer should not have to open the file to find the way in.
+
+**A TSX component still inlines its helpers.** `useECharts` is twenty lines
+repeated per chart rather than an import, because a component is lifted out of
+this registry one file at a time and a shared import hands a consumer a path
+that does not resolve in their project. Verified rather than assumed: a copy
+produced by `nodex add` compiles on its own against `react` and `echarts` and
+nothing else. The SSR half of that pair lives in `scripts/echarts-ssr.mjs`,
+because nothing a consumer receives calls it.
+
+### ECharts renders under SSR, with one exception found the hard way
+
+A piecewise `visualMap` on a **line** series throws during server rendering:
+ECharts builds a gradient along the path and finds no colour stops without a
+live coordinate system. On a **bar** series the same option renders cleanly, and
+`endpoint-latency` uses it to recolour every route breaching its objective.
+
+The distinction is worth keeping because the workaround for the line case is
+ugly — splitting one series into two, each null where the other draws — and
+reaching for it on a bar chart would be cargo cult. Thresholding belongs on bars
+anyway.
 
 The imported charts are not being retrofitted to match. They are a corpus of
 drawing techniques, and reshaping them toward a form they were never cut for is

@@ -255,8 +255,14 @@ registry/
       component.js     exports mount(root)
       meta.json        type, density, runtime, aspect ratio, tags
       index.html       GENERATED standalone preview
+                       (a chart authored now is component.tsx + .css instead,
+                       with no markup file — its markup is in the module)
   primitives/<name>/   24 shared primitives. ONE implementation,
                        shared by every language, token variables only
+      component.tsx    a specimen sheet of every variant, as JSX
+      component.css    the actual artifact — what you are copying
+      meta.json        title, description, tags
+      index.html       GENERATED preview, themed by a ?lang= parameter
 packages/core/       the registry contract: schemas, taxonomy, loader
 packages/cli/        the nodex CLI
 apps/web/            Next.js + React + TS + Tailwind browse app
@@ -271,9 +277,12 @@ skills/nodex/        the skill shipped to consumers
 scripts/
   build-registry.mjs        validate + generate + emit
   sync-registry-public.mjs  copy the registry into apps/web/public
+  echarts-ssr.mjs           render a chart to SVG with no DOM, for previews
+                            and for the lint. Build-only, never shipped
   check-shell-primitives.mjs  the app loads every primitive it uses
   migrate.mjs               apply SQL migrations
-  smoke-components.mjs      mount every component and assert it draws
+  smoke-components.mjs      assert every component draws — by mounting it, or
+                            for a React chart by reading its rendered preview
   smoke-cli.mjs             init and add against a temporary project
 tmp/                 gitignored scratch space
 ```

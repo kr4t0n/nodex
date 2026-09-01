@@ -69,13 +69,21 @@
 }
 
 /* Indeterminate is a real state on the element, so style it rather than
-   inventing a third visual. */
-.nx-checkbox:indeterminate {
+   inventing a third visual.
+
+   `data-indeterminate` is matched alongside the pseudo-class because the
+   property has no markup attribute behind it, so it cannot survive server
+   rendering: a statically rendered checkbox loses the state entirely, which is
+   what happened to this primitive's own preview. Setting the property remains
+   the real mechanism, and the attribute is what lets rendered markup carry it. */
+.nx-checkbox:indeterminate,
+.nx-checkbox[data-indeterminate='true'] {
   background: var(--nx-ink);
   border-color: var(--nx-ink);
 }
 
-.nx-checkbox:indeterminate::before {
+.nx-checkbox:indeterminate::before,
+.nx-checkbox[data-indeterminate='true']::before {
   width: 7px;
   height: 0;
   margin-top: 0;

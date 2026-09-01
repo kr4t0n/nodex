@@ -89,7 +89,8 @@ const COMMAND_HELP: Record<string, string> = {
   --design <slug>   language for bare refs
   --json            report files, mounts, exports and aspectRatio
 
-  Components arrive as component.html, .css and .js. mount(root) fills the
+  A primitive and a newly authored chart arrive as component.tsx and .css.
+  The imported charts arrive as component.html, .css and .js, where mount(root) fills the
   data-nx-mount elements in the markup, and those names are printed.`,
 
   show: `${bold('nodex show')} <ref> [--json]
@@ -302,6 +303,7 @@ function cmdSearch(
         ...(item.meta.density ? { density: item.meta.density } : {}),
         ...(item.meta.aspectRatio ? { aspectRatio: item.meta.aspectRatio } : {}),
         ...(item.meta.mounts?.length ? { mounts: item.meta.mounts } : {}),
+        ...(item.meta.exports?.length ? { exports: item.meta.exports } : {}),
         ...(item.meta.externalData?.length
           ? { externalData: item.meta.externalData }
           : {}),
@@ -477,7 +479,9 @@ async function cmdLint(
       }
     };
     const css = await read('component.css');
-    const js = await read('component.js');
+    // A React component holds its marks and its markup in one module, so it
+    // stands in for both. No check reads the markup on its own.
+    const js = (await read('component.js')) ?? (await read('component.tsx'));
     const html = await read('component.html');
 
     // A consumer has no meta.json, so the exemption is a marker file. Naming it
@@ -565,6 +569,7 @@ function cmdShow(
       ...(meta.density ? { density: meta.density } : {}),
       ...(meta.aspectRatio ? { aspectRatio: meta.aspectRatio } : {}),
       ...(meta.mounts?.length ? { mounts: meta.mounts } : {}),
+      ...(meta.exports?.length ? { exports: meta.exports } : {}),
       ...(meta.data?.length ? { data: meta.data } : {}),
       ...(item.dependencies?.length ? { dependencies: item.dependencies } : {}),
       ...(meta.externalData?.length ? { externalData: meta.externalData } : {}),
@@ -599,13 +604,26 @@ function cmdShow(
       if (d.fields?.length) out(`      ${dim(d.fields.join(' · '))}`);
     }
   } else if (meta.tier === 'expressive') {
+    // Name the module this item actually ships. A React component has no
+    // component.js, and sending a reader to a file they were never given is
+    // worse than saying nothing.
+    const source =
+      item.files?.find((f) => /component\.(tsx|js)$/.test(f.path))?.path.split('/').pop() ??
+      'the component source';
     out();
     out(`  ${bold('Sample data')}`);
     out(`    ${dim('Generated in the component rather than written as a literal,')}`);
-    out(`    ${dim('so there is no shape to report. Read component.js.')}`);
+    out(`    ${dim(`so there is no shape to report. Read ${source}.`)}`);
   }
 
-  if (meta.mounts?.length) {
+  if (meta.exports?.length) {
+    out();
+    out(`  ${bold('Importing')}`);
+    out(
+      `    ${dim(`import { ${meta.exports[0]} } from './component.tsx'`)}`,
+    );
+    out(`    ${dim("plus")} import './component.css'${dim(', which carries the card.')}`);
+  } else if (meta.mounts?.length) {
     out();
     out(`  ${bold('Mounting')}`);
     out(`    ${dim('import { mount } from "./component.js"; mount(rootEl)')}`);
@@ -694,7 +712,10 @@ async function cmdAdd(
       runtime: item.meta.runtime,
       ...(item.meta.aspectRatio ? { aspectRatio: item.meta.aspectRatio } : {}),
       ...(item.meta.mounts?.length ? { mounts: item.meta.mounts } : {}),
-      exports: js ? exportedNames(js) : [],
+      // A React item has no component.js to scan, and the manifest already
+      // records what it exports. Prefer that, and keep the scan for the vanilla
+      // items whose manifest entries predate the field.
+      exports: item.meta.exports ?? (js ? exportedNames(js) : []),
       ...(item.meta.externalData?.length
         ? { externalData: item.meta.externalData }
         : {}),
@@ -733,6 +754,23 @@ async function cmdAdd(
   // rather than derived from the slug — arc-matrix mounts "arcmatrix", and only
   // 3 of 64 match. Printing the names is what stops the reader having to grep
   // the source to find the contract between the files they were just handed.
+  // The React spelling of the same contract. `endpoint-latency` exports
+  // `EndpointLatency`, which no consumer can derive from the slug, and the
+  // stylesheet is a separate import that is silently easy to forget — the
+  // component renders unstyled rather than failing, which is the worst way for
+  // a missing import to present.
+  const imported = report.filter(
+    (r) => r.exports.length > 0 && r.files.some((f) => f.endsWith('.tsx')),
+  );
+  if (imported.length > 0) {
+    out();
+    out(`  ${bold('Importing')}`);
+    for (const r of imported) {
+      out(`      ${dim(`import { ${r.exports[0]} } from './${r.name}/component.tsx'`)}`);
+      out(`      ${dim(`import './${r.name}/component.css'`)}`);
+    }
+  }
+
   const mounted = report.filter((r) => r.mounts?.length);
   if (mounted.length > 0) {
     out();
@@ -870,7 +908,7 @@ that still looks wrong.
   out();
   out(`  ${bold('Next')}`);
   out('    1. Fill in tokens.json, then DESIGN.md.');
-  out('    2. Add components under expressive/<slug>/ as component.html/.css/.js.');
+  out('    2. Add components under expressive/<slug>/ as component.tsx/.css.');
   out('    3. npm run build:registry');
   out();
   out(`  ${dim('Languages are discovered by directory, so there is nothing to register.')}`);
