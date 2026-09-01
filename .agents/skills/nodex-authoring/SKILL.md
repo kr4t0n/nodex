@@ -123,10 +123,17 @@ Wrap everything in a single root element carrying the scope class:
 Mount points use `data-nx-mount="name"`, never `id`. Two copies of a component on
 one page must not collide, and nothing may depend on a document-level ID.
 
+**Do not put a title or a description in the fragment.** A chart is the drawing;
+its title and type come from `meta.json` and are printed by whatever lists it.
+Naming a component inside itself duplicates the manifest and is how the two
+drift apart. Annotation is different and still belongs: a `div.note` explaining
+what one mark represents sits in the composition, because it points at the marks
+rather than naming the component.
+
 ### `component.css`
 
 Every selector scoped under the root class by ancestor, for example
-`.nx-my-chart h2`. Reference token variables only.
+`.nx-my-chart .note`. Reference token variables only.
 
 Three things that must not appear: a global reset such as
 `*{margin:0;padding:0}`, page chrome such as `body { padding }`, and any colour
@@ -161,7 +168,7 @@ screenshots must reproduce exactly.
 {
   "slug": "my-chart",
   "title": "A sentence about what the chart says",
-  "description": "What one mark represents, as reading instructions",
+  "description": "What one mark represents, as reading instructions. Agent-facing: nodex show and nodex search read it, and the app does not print it",
   "component": "bar",
   "tier": "expressive",
   "runtime": "svg",

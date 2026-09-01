@@ -475,50 +475,52 @@ Charts are authored for a full page and must be scaled down; a button is already
 button-sized, and shrinking it to a quarter both makes it illegible and
 misrepresents it.
 
-### An embedded preview is bare; a standalone one is whole
+### A chart is the drawing; everything that names it comes from the manifest
 
-Every expressive fragment carries its own `h2` and `.sub`, because the card
-anatomy `DESIGN.md` fixes includes them and that is what a consumer receives.
-The app prints the same two strings from the manifest above each frame, so
-rendering both labelled all 64 charts twice.
+Every expressive fragment used to carry its own `h2` and `.sub`, because the
+card anatomy `DESIGN.md` fixed included them. The app printed the same two
+strings from the manifest above each frame, so both together labelled all 64
+charts twice, and the registry grew a `bare=1` parameter whose only job was to
+hide the fragment's copy again wherever an embedder supplied its own.
 
-The generated preview therefore takes a `bare=1` parameter that hides the
-fragment's title and subtitle only. **The app asks for it everywhere it embeds a
-chart**, and supplies its own heading from the manifest in each of those places:
-the grid cells, the detail page, and the index's featured composites.
+**All of that is gone.** The `h2` and the `.sub` were stripped from all 64
+charts, the parameter with them, and every surface now prints **title, then
+component type, then the chart** — read from the manifest in all three places:
+the index tiles, the grid cells, and the detail page.
 
-The index used to be the exception, on the reasoning that nothing labelled those
-tiles so there was nothing to duplicate. That held only while one language
-existed. It was really relying on the *fragment* to label itself, which
-mono-editorial's card anatomy happens to do by opening with a title and a
-sentence — so its tiles read as labelled by accident. Signal Console opens with
-the current value instead, deliberately and by its own `DESIGN.md`, so its tile
-arrived on the index with no title beside four that had one.
+Two arguments, and the second is the one that settles it:
 
-The manifest carries a title and a description for **every** component in every
-language, so reading them there is the only spelling that does not assume a card
-anatomy. The fix therefore belonged in the app: adding an `h2` to the chart would
-have made nodex break the language it exists to enforce.
+- Naming a component inside itself duplicates what the manifest already holds,
+  so it can only drift. The same reasoning removed `div.src` earlier, where 53
+  of 64 ended up crediting a language that never existed.
+- **The suppression mechanism did not survive a second language.** `bare=1` was
+  defined as "hide the fragment's title and subtitle", which reads as a sensible
+  contract until a language arrives whose cards open with a live value instead
+  of a heading. Then the same parameter means "hide two elements" in one
+  language and "do nothing" in another, and an embedder cannot tell which
+  without knowing the anatomy. The index found this the hard way: it was the one
+  surface not asking for `bare=1`, relying on each fragment to label itself, so
+  Signal Console's tile arrived with no title beside Mono Editorial's four that
+  had one.
 
-Two consequences of that:
+What the manifest holds and what the app shows are deliberately not the same
+set. `description` is still recorded for every component — it is what `nodex
+show` and `nodex search` read, and for the imported charts it is the reading key
+that used to be the `.sub`, so the text was preserved rather than deleted. The
+app just does not print it, because a grid of 64 cells each carrying a
+three-line sentence buries the previews it exists to show.
 
-- **Every preview must honour `bare=1`, including one that has nothing to
-  hide.** The React preview did not, which was invisible while the only React
-  chart was in a language whose anatomy has no heading. An embedder cannot rely
-  on asking for something that silently means nothing in half the registry.
-- **A labelled tile needs its rows shared.** These descriptions are a sentence
-  and wrap to different heights, so the cells are a three-row subgrid — without
-  it, one two-line description drops its own preview below its neighbours' and
-  the composite reads as broken rather than as varied. Both levels have to
-  restate `rowGap`, because a subgrid otherwise inherits the gap that separates
-  whole cells and opens the same distance between a title and its own chart.
+One consequence worth keeping: **a labelled cell needs its grid rows shared.**
+A title that wraps to two lines would otherwise drop its own preview below its
+neighbours', so the cells are a three-row subgrid. Both the cell and the link
+inside it have to restate `rowGap`, because a subgrid otherwise inherits the gap
+that separates whole cells and opens that same distance between a title and its
+own chart.
 
-**The app no longer links to the whole version anywhere.** A "Open preview in a
-tab" link on the detail page used to be that escape hatch and was removed as
-clutter. The document is unchanged and still served at the same URL without the
-parameter, so opening a preview directly still shows the component exactly as a
-consumer receives it. Nothing generates the bare version separately; `bare=1`
-only hides two elements at view time.
+**Annotation is a different thing and stays in the component.** A `div.note` and
+a `div.legend` explain the marks and sit in the composition; `barcode-lollipop`
+is the one chart that has them. A title names the component and belongs to
+whatever is listing it. The rule is where the text points, not how long it is.
 
 The fix belongs in the preview rather than in the fragments. A chart that lost
 its title would be a worse component for the consumer, and the app's grid needs
@@ -536,8 +538,9 @@ would miss, and the rule still holds for the annotation that remains.
 ### The `div.src` credit line was removed from every chart
 
 Each chart used to end with `CHART TYPE · LANGUAGE · DATA SOURCE`, uppercase, as
-the fourth part of the card anatomy. All 64 were stripped and `DESIGN.md` now
-fixes a three-part anatomy.
+the fourth part of the card anatomy. All 64 were stripped. This was the first of
+two removals for the same reason — the heading above it went later, and
+`DESIGN.md` now fixes a card that is the drawing and nothing else.
 
 It restated what the manifest already holds, so it could only ever drift out of
 date, and it had: 53 of 64 named a section of the source document the extractor
@@ -554,7 +557,8 @@ Two consequences to keep in mind. The `type.caption` token now has no consumer
 among the shipped charts and is deliberately kept, because it is the language's
 vocabulary for an annotation smaller than a legend. And a caption naming the
 *data* is a different thing that still belongs when a chart needs sourcing; it
-is written as a `div.note`, which is annotation and is never hidden by `bare=1`.
+is written as a `div.note`, which explains the marks rather than naming the
+component and therefore stays in the card.
 
 ### Previews must not depend on an observer firing
 

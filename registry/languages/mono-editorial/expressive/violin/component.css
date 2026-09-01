@@ -4,12 +4,6 @@
 
 .nx-violin .card.dark {background:var(--nx-dark);color:#F0EFEB}
 
-.nx-violin .card.dark .sub {color:#8F8E88}
-
-.nx-violin h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
-
-.nx-violin .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
 .nx-violin .ch {height:320px}
 
 .nx-violin .wrap {position:relative;height:320px}

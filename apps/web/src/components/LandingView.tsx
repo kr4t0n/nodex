@@ -343,7 +343,7 @@ function ComponentBelt({
                 >
                   {language ? (
                     <Preview
-                      src={previewUrl(language, name, { bare: true })}
+                      src={previewUrl(language, name)}
                       title={name}
                       boxHeight={RUN_CARD_HEIGHT}
                     />

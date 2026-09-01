@@ -160,9 +160,10 @@ same component on one page do not collide.
 - **Do not fight the language.** If a chart looks too quiet or too thin, that is
   the language, not a bug. Changing stroke weights and colours to taste produces
   something that no longer belongs to it.
-- **Keep the card anatomy.** Where `DESIGN.md` fixes an order for title,
-  subtitle, chart, and caption, keep it. The subtitle is not decoration; it tells
-  the reader what one mark represents.
+- **Keep the card anatomy.** Each language fixes what a card is made of and in
+  what order, and `DESIGN.md` states it. A chart you receive is the drawing;
+  its title is not in the file, because whatever lists it supplies that from the
+  manifest. Add your own heading outside the component, not inside it.
 - **Preserve deterministic sample data.** Components use a seeded hash rather
   than `Math.random()` so previews and screenshots reproduce. Do not swap it.
 - **Honour `prefers-reduced-motion`.** Every animated component ships a guard.

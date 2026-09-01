@@ -309,22 +309,7 @@ ${fontLinks(tokens)}
   }
   .nx-preview .chart svg { display: block; }
 
-  /* Embedded mode, the same contract the vanilla previews carry.
-     An embedder that prints the title and subtitle from the manifest above the
-     frame would otherwise label a chart twice. It is a no-op for a language
-     whose card anatomy opens with a value rather than a heading — signal-console
-     does — but the parameter has to mean the same thing on every preview, or an
-     embedder cannot rely on asking for it. */
-  [data-nx-bare] .nx-preview h2,
-  [data-nx-bare] .nx-preview .sub { display: none; }
 </style>
-<script>
-  /* Applied before first paint. Doing this after the document renders makes the
-     header appear and then vanish, which reads as a layout glitch in a grid. */
-  if (new URLSearchParams(location.search).get('bare') === '1') {
-    document.documentElement.setAttribute('data-nx-bare', '');
-  }
-</script>
 </head>
 <body>
 <div class="nx-preview">
@@ -377,24 +362,7 @@ ${fontLinks(tokens)}
   }
   .nx-preview { max-width: 1400px; margin: 0 auto; }
 
-  /* Embedded mode.
-     A fragment carries its own title and subtitle, because the card anatomy
-     DESIGN.md fixes includes them and that is what a consumer receives. An
-     embedder that prints those same two strings from the manifest above the
-     frame therefore labels every chart twice. A bare=1 query parameter drops
-     the fragment's copy so the embedder can own the label; opened directly, the
-     preview still shows the component whole. */
-  [data-nx-bare] .nx-preview h2,
-  [data-nx-bare] .nx-preview .sub { display: none; }
 </style>
-<script>
-  /* Applied before first paint. Doing this from the module below would let the
-     header render and then vanish, which reads as a layout glitch in a grid of
-     sixty-four frames. */
-  if (new URLSearchParams(location.search).get('bare') === '1') {
-    document.documentElement.setAttribute('data-nx-bare', '');
-  }
-</script>
 </head>
 <body>
 <div class="nx-preview">

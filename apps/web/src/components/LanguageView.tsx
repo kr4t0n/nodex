@@ -311,9 +311,9 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
               className="grid min-w-0 grid-rows-subgrid row-span-3"
               style={{ rowGap: 6 }}
             >
-              {/* Title above the preview, mirroring the card anatomy DESIGN.md
-                  fixes for the components themselves: title, then sub, then the
-                  chart. */}
+              {/* Title, then type, then the chart. The chart itself is only
+                  the drawing, so everything that names it is printed here from
+                  the manifest. */}
               <Link href={`/l/${language}/${item.name}`}
                 className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
                 style={{ color: 'inherit', rowGap: 6 }}
@@ -327,11 +327,9 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                 >
                   {item.meta.component}
                 </p>
-                {/* Bare: the heading above already states the title, and the
-                    fragment's own copy is illegible at thumbnail scale anyway. */}
                 <Preview
                   className="mt-3 self-start"
-                  src={previewUrl(language, item.name, { bare: true })}
+                  src={previewUrl(language, item.name)}
                   title={item.title}
                   aspectRatio={item.meta.aspectRatio}
                   boxHeight={THUMB_HEIGHT}

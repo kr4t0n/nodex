@@ -94,10 +94,9 @@ const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
 /**
  * One labelled tile: title, description, then the component.
  *
- * Three subgrid rows rather than a plain stack, because these descriptions are
- * a sentence long and wrap to different heights across a row — without shared
- * rows, one two-line description drops its own preview below its neighbours'
- * and the composite reads as misaligned rather than as varied.
+ * Three subgrid rows rather than a plain stack, because a title that wraps to
+ * two lines would otherwise drop its own preview below its neighbours' and the
+ * composite would read as misaligned rather than as varied.
  *
  * `min-w-0` on every level down to the Preview: a grid item's default minimum
  * is its content size, and a preview renders an iframe at a fixed wide logical
@@ -107,7 +106,7 @@ const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
 function TileCell<T>({
   href,
   title,
-  description,
+  kind,
   children,
 }: {
   // Next types its routes, so the prop borrows Link's own href type rather than
@@ -115,7 +114,7 @@ function TileCell<T>({
   // generic because that type is parameterised by the route being linked to.
   href: LinkProps<T>['href'];
   title: string;
-  description?: string;
+  kind: string;
   children: ReactNode;
 }) {
   return (
@@ -136,10 +135,10 @@ function TileCell<T>({
           {title}
         </h3>
         <p
-          className="m-0 self-start text-[10.5px] leading-[1.6]"
-          style={{ color: 'var(--nx-muted)' }}
+          className="m-0 self-start text-[10.5px] tracking-[0.06em] uppercase"
+          style={{ color: 'var(--nx-faint)' }}
         >
-          {description ?? ''}
+          {kind}
         </p>
         <div className="mt-2 min-w-0 self-start">{children}</div>
       </Link>
@@ -181,7 +180,7 @@ function LanguageTile({
    * its DESIGN.md says never to reorder it — so its tile arrived with no title
    * at all beside four that had one.
    *
-   * The manifest carries a title and a description for every component in every
+   * The manifest carries a title and a type for every component in every
    * language, so reading them here is the only spelling that does not assume an
    * anatomy. It is also what the language page already does for its grid cells.
    */
@@ -193,7 +192,7 @@ function LanguageTile({
           ? i.meta.tier === 'primitive'
           : i.meta.language === language.slug),
     );
-    return { title: item?.title ?? name, description: item?.description };
+    return { title: item?.title ?? name, kind: item?.meta.component ?? '' };
   };
 
   return (
@@ -265,18 +264,16 @@ function LanguageTile({
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {showing === 'expressive'
           ? featured.map((name) => {
-              const { title, description } = describe(name, 'expressive');
+              const { title, kind } = describe(name, 'expressive');
               return (
                 <TileCell
                   key={name}
                   href={`/l/${language.slug}/${name}`}
                   title={title}
-                  description={description}
+                  kind={kind}
                 >
-                  {/* Bare: the heading above states the title, so a fragment
-                      that carries its own would print it twice. */}
                   <Preview
-                    src={previewUrl(language.slug, name, { bare: true })}
+                    src={previewUrl(language.slug, name)}
                     title={title}
                     boxHeight={TILE_HEIGHT}
                   />
@@ -284,13 +281,13 @@ function LanguageTile({
               );
             })
           : SAMPLE_PRIMITIVES.map((name) => {
-              const { title, description } = describe(name, 'primitive');
+              const { title, kind } = describe(name, 'primitive');
               return (
                 <TileCell
                   key={name}
                   href={`/l/${language.slug}/${name}`}
                   title={title}
-                  description={description}
+                  kind={kind}
                 >
                   {/* Fluid, so the component is shown at the size it really is,
                       but inside the same box as every other tile. */}

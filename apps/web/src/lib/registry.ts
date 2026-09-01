@@ -94,20 +94,14 @@ export function findItem(
 }
 
 /**
- * URL of a component's generated standalone preview document.
+ * The generated preview document for a chart.
  *
- * `bare` hides the fragment's own title and subtitle. Every chart carries them,
- * and this app already prints the same two strings from the manifest above the
- * frame, so an embedded preview must ask for bare or the chart is labelled
- * twice. Anything that opens the preview on its own leaves it off.
+ * A chart is only the drawing: the title and the component type are printed by
+ * whatever embeds it, read from the manifest. There is nothing inside the
+ * document to suppress, which is why this takes no options.
  */
-export function previewUrl(
-  language: string,
-  name: string,
-  options: { bare?: boolean } = {},
-): string {
-  const url = `${BASE}/registry/languages/${language}/expressive/${name}/index.html`;
-  return options.bare ? `${url}?bare=1` : url;
+export function previewUrl(language: string, name: string): string {
+  return `${BASE}/registry/languages/${language}/expressive/${name}/index.html`;
 }
 
 export function designUrl(language: string): string {

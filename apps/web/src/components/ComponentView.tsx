@@ -60,13 +60,9 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
   // size rather than scaled: a button shrunk to a quarter misrepresents it.
   const isPrimitive = item.meta.tier === 'primitive';
 
-  // Bare, because the heading beside it already carries the title and the
-  // description, and printing both labels the component twice. The non-bare
-  // document still exists at the same URL without `?bare=1`, and is still what
-  // opening a preview directly gives you; this page just does not link to it.
   const embedSrc = isPrimitive
     ? primitivePreviewUrl(item.name, slug)
-    : previewUrl(slug, item.name, { bare: true });
+    : previewUrl(slug, item.name);
 
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
@@ -90,14 +86,17 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
             <h1 className="m-0 text-[26px] leading-[1.15] font-extrabold tracking-[-0.025em] sm:text-[32px]">
               {item.title}
             </h1>
-            {item.description ? (
-              <p
-                className="mt-3 max-w-[60ch] text-[12.5px] leading-[1.7]"
-                style={{ color: 'var(--nx-muted)' }}
-              >
-                {item.description}
-              </p>
-            ) : null}
+            {/* The type, not the description. Every surface that names a
+                component names it the same way — title, then type — so the
+                grid, the index and this page read as one thing. The
+                description is still in the manifest, where `nodex show` and
+                `nodex search` use it. */}
+            <p
+              className="mt-3 text-[10.5px] tracking-[0.06em] uppercase"
+              style={{ color: 'var(--nx-faint)' }}
+            >
+              {item.meta.component}
+            </p>
 
             <div className="mt-9">
               <Preview

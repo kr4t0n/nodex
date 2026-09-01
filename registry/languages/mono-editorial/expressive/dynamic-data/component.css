@@ -4,12 +4,6 @@
 
 .nx-dynamic-data .card.dark {background:var(--nx-dark);color:#F0EFEB}
 
-.nx-dynamic-data .card.dark .sub {color:#8F8E88}
-
-.nx-dynamic-data h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
-
-.nx-dynamic-data .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
 .nx-dynamic-data .ch {height:320px}
 
 .nx-dynamic-data .wrap {position:relative;height:320px}

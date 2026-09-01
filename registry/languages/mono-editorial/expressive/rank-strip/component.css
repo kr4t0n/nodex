@@ -4,12 +4,6 @@
 
 .nx-rank-strip .card.dark {background:var(--nx-dark);color:#F0EFEB}
 
-.nx-rank-strip .card.dark .sub {color:#8F8E88}
-
-.nx-rank-strip h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
-
-.nx-rank-strip .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
 .nx-rank-strip .ch {height:320px}
 
 .nx-rank-strip .wrap {position:relative;height:320px}

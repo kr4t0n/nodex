@@ -4,12 +4,6 @@
 
 .nx-single-axis .card.dark {background:var(--nx-dark);color:#F0EFEB}
 
-.nx-single-axis .card.dark .sub {color:#8F8E88}
-
-.nx-single-axis h2 {font-weight:700;font-size:16.5px;letter-spacing:-.02em;margin-bottom:3px}
-
-.nx-single-axis .sub {font-size:11.5px;color:var(--nx-muted);margin-bottom:14px}
-
 .nx-single-axis .ch {height:320px}
 
 .nx-single-axis .wrap {position:relative;height:320px}

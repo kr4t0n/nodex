@@ -81,41 +81,48 @@ the reverse.
 
 ## Component behaviors
 
-Every chart card follows the same three-part anatomy, in this order, always:
+**A chart is the drawing and nothing else.** The card holds the marks; whatever
+names the chart is printed by whatever embeds it.
 
 ```
-h2.title      what the chart says, as a sentence
-div.sub       the reading instructions — units, span, what one mark means
 [the chart]
 ```
 
-The drawing is **left-aligned to the title, never centred**. Every SVG carries
+This is the second thing removed from the anatomy, for the same reason as the
+first. Every card used to open with an `h2` and a `div.sub`, and end with a
+`div.src` reading `CHART TYPE · LANGUAGE · DATA SOURCE`. Both restated what the
+manifest already holds, so both could only ever drift out of date, and the
+footer had: 53 of 64 named a design language that never existed.
+
+Naming a chart in two places also forced a suppression mechanism. The registry
+carried a `bare=1` parameter whose whole job was to hide the heading again
+wherever an embedder printed its own — which worked until a second language
+arrived whose cards open with a live value instead of a heading, and then the
+same parameter meant two different things depending on which language you asked.
+Removing the heading removed the parameter with it.
+
+The title and the type live in the manifest, which is where a consumer, the CLI
+and the app all read them from. `nodex show <ref>` prints them.
+
+The drawing is **left-aligned, never centred**. Every SVG carries
 `preserveAspectRatio="xMinYMid meet"` and no `margin: 0 auto`. A chart with a
 `max-height` reaches its cap before it runs out of width, so in any container
 wider than its aspect ratio needs there is slack — and the default `xMidYMid`
-spends that slack centring the drawing away from the title and subtitle sitting
-at the card's left edge. Left-aligned, a wall of these cards shares one starting
-edge and reads as a set. Centred, each one floats at its own offset.
+spends that slack centring the drawing inside its own box. Left-aligned, a wall
+of these cards shares one starting edge and reads as a set. Centred, each one
+floats at its own offset.
 
 This aligns the SVG's own box. A chart that centres its composition *inside* its
 viewBox — a donut, a network — still sits wherever it was drawn, because that is
 a property of the drawing rather than of the box. Fix those by moving the marks
 in the viewBox, not by re-centring the box.
 
-The subtitle is not decoration. It tells the reader what one mark represents,
-which is the only way a one-mark-per-record chart is legible. Write it as
-instructions, not as a description.
-
-There is deliberately **no footer credit line.** An earlier anatomy ended each
-card with a `div.src` reading `CHART TYPE · LANGUAGE · DATA SOURCE`, and it was
-removed for two reasons. It states facts the manifest already records, so it
-went stale the moment a component was renamed or moved — 53 of 64 ended up
-naming a design language that had never existed. And it is the only left-aligned
-element under a chart that centres itself, so it read as misalignment on every
-card wide enough to letterbox.
-
-A caption naming the *data* rather than the component is a different thing and
-still belongs, when a chart genuinely needs sourcing. Write it as a `div.note`.
+**Annotation is not a heading, and still belongs.** What one mark represents is
+the only way a one-mark-per-record chart is legible, and where that has to sit
+beside the marks rather than above the card, write it as a `div.note` with a
+`div.legend`. `barcode-lollipop` is the one chart that does. The distinction is
+that a note explains the *marks* and sits in the composition; a title names the
+*component* and belongs to whatever is listing it.
 
 Interactive marks carry an SVG `<title>` child so hovering yields a native
 tooltip with no JavaScript. Prefer that over a custom tooltip layer.
