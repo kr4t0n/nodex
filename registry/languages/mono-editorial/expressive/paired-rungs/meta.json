@@ -4,12 +4,14 @@
   "description": "two ladders per plan · solid rungs = 2026 · faint rungs = 2025 · one rung = $1k",
   "component": "grouped-bar",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "billing",
     "yoy"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

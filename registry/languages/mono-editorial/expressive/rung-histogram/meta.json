@@ -4,13 +4,15 @@
   "description": "one rung = one ticket in a hundred · bins of two hours · the ladder shows the pile",
   "component": "histogram",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "support",
     "desk"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "echarts"
+  ],
   "strokeAsArea": true
 }
