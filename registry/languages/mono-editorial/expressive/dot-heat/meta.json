@@ -4,12 +4,14 @@
   "description": "7 days × 12 hours · dot area = tickets · biggest cell labeled · silence stays visible",
   "component": "heatmap",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "support",
     "desk"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
