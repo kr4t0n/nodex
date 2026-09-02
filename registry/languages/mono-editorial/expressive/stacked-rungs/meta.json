@@ -4,12 +4,14 @@
   "description": "one rung = $1k · three products stack up the ladder, darkest carries the most",
   "component": "stacked-bar",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "revenue",
     "mix"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

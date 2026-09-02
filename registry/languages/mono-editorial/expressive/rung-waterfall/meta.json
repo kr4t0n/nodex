@@ -4,9 +4,11 @@
   "description": "one rung = $1k · solid rungs add, hollow rungs take away · the ladder walks down",
   "component": "waterfall",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
