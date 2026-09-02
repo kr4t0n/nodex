@@ -4,11 +4,13 @@
   "description": "one dot = one day · hollow = weekend · the barcode floor keeps the calendar honest",
   "component": "line",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "growth"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
