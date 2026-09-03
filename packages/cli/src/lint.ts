@@ -78,15 +78,33 @@ export function strokeUses(source: string): StrokeUse[] {
    * unexamined, and five of them drawing lines up to 2.6px under a 1.4px
    * ceiling.
    *
-   * The SVG form is matched only as a quoted attribute: a `stroke-width:3px`
-   * inside a `style` string is a paint-order halo behind text, which is
-   * legibility rather than a data mark.
+   * Three spellings, because a stroke is written three ways in this registry.
+   * `'stroke-width':` is how the hand-rolled SVG components set it,
+   * `lineStyle: { width }` is how an ECharts option does, and
+   * `stroke-width="..."` is how it comes out of a *rendered* chart — which is
+   * what a React component is linted against. Only the first two were matched,
+   * so the ceiling was inert for every ported chart: they are checked as
+   * rendered SVG, and rendered SVG writes attributes.
+   *
+   * A `stroke-width:3px` inside a `style` string is still not matched: that is
+   * a paint-order halo behind text, which is legibility rather than a data
+   * mark. Rendered text carries the same halo as an attribute, so the caller
+   * strips text elements before linting.
    *
    * `itemStyle.borderWidth` is deliberately absent. Almost every use of it here
    * is a knockout gap — a border painted in the page colour to separate
    * adjacent segments — which reads as absence rather than as a line, so
    * checking it would report mostly false positives.
    */
+  // A rendered attribute is a plain literal ending at its own quote, so it is
+  // read directly rather than through the expression scanner below — that
+  // scanner looks for a JS expression's terminator and would run past the
+  // quote and swallow the rest of the document.
+  for (const m of source.matchAll(/\bstroke-width="([0-9.]+)"/g)) {
+    const raw = m[1] ?? '';
+    uses.push({ raw, widths: [Number(raw)], unverifiable: false });
+  }
+
   const re = /(?:['"]stroke-width['"]|lineStyle\s*:\s*\{[^{}]*?\bwidth)\s*:\s*/g;
 
   for (let m = re.exec(source); m; m = re.exec(source)) {

@@ -254,7 +254,7 @@ function reactExports(mod) {
  * palette rule to ignore a whole class of colour. Dropping the defs first keeps
  * the rule strict about the marks that are actually painted.
  */
-function paintedMarks(svg) {
+function paintedMarks(svg, pageColour) {
   const withoutDefs = svg
     .replace(/<clipPath[\s\S]*?<\/clipPath>/g, '')
     .replace(/<defs[\s\S]*?<\/defs>/g, '');
@@ -265,7 +265,12 @@ function paintedMarks(svg) {
   // to a reader. Judging those would fail a conforming chart on a colour
   // nothing renders, so each attribute is removed only where that element has
   // proven it paints nothing.
-  return withoutDefs.replace(/<[a-z]+\s[^>]*>/gi, (tag) => {
+  // Text is type, not a mark. Its stroke is a paint-order halo that keeps a
+  // figure legible over a busy field, and measuring that against the hairline
+  // ceiling would report every knocked-out label as an over-wide line.
+  const withoutText = withoutDefs.replace(/<text[\s\S]*?<\/text>/g, '');
+
+  return withoutText.replace(/<[a-z]+\s[^>]*>/gi, (tag) => {
     let out = tag;
     if (/\bfill-opacity="0(?:\.0+)?"/.test(out)) {
       out = out.replace(/\bfill="[^"]*"/, '');
@@ -273,8 +278,31 @@ function paintedMarks(svg) {
     if (/\bstroke-(?:width|opacity)="0(?:\.0+)?"/.test(out)) {
       out = out.replace(/\bstroke="[^"]*"/, '');
     }
+    // A stroke in the page colour is a knockout gap, not a line: it separates
+    // two adjacent segments by painting the ground between them, and reads as
+    // absence. Measuring it against the hairline ceiling would fail a donut for
+    // the gaps that make its wedges countable. This is the same exemption
+    // `itemStyle.borderWidth` already had, stated in terms of what the stroke
+    // *is* rather than of how it happened to be spelled.
+    if (pageColour && isColour(out, pageColour)) {
+      out = out.replace(/\bstroke-width="[^"]*"/, '');
+    }
     return out;
   });
+}
+
+/** Whether an element's stroke is the given colour, in either notation. */
+function isColour(tag, colour) {
+  const stroke = /\bstroke="([^"]+)"/.exec(tag)?.[1];
+  if (!stroke) return false;
+  if (stroke.toUpperCase() === colour.toUpperCase()) return true;
+  const rgb = /^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(stroke);
+  if (!rgb) return false;
+  const hex = `#${rgb
+    .slice(1, 4)
+    .map((c) => Number(c).toString(16).padStart(2, '0'))
+    .join('')}`;
+  return hex.toUpperCase() === colour.toUpperCase();
 }
 
 /** The chart's real marks, rendered without a browser. */
@@ -1019,7 +1047,7 @@ async function main() {
           // The rendered SVG *is* the source of truth for the marks — no
           // parsing, no ternaries to miss, no "cannot be checked statically".
           css,
-          js: paintedMarks(svg),
+          js: paintedMarks(svg, tokens.color?.bg),
           where,
         });
 

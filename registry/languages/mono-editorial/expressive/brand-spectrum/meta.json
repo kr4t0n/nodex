@@ -4,13 +4,15 @@
   "description": "panel of 120 customers placed us between opposing traits · big dot = us · small dots = competitors",
   "component": "dot-plot",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "460/300",
+  "aspectRatio": "560/340",
   "tags": [
     "brand",
     "survey"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "echarts"
+  ],
   "strokeAsArea": true
 }
