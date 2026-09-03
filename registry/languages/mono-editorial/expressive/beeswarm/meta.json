@@ -4,12 +4,14 @@
   "description": "one dot = one closed deal · the swarm piles up where deals cluster · hollow = enterprise · dashed = median",
   "component": "beeswarm",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "sales",
     "ops"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
