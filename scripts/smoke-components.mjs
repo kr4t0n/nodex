@@ -86,8 +86,14 @@ async function runRendered(slug, language, meta) {
   }
   // Any of these alone can appear in an empty plot's axes, so the bar is marks
   // with fill, which only a drawn series produces.
-  const marks = (preview.match(/<(path|rect|circle|polyline)\b[^>]*fill="#/g) ?? [])
-    .length;
+  //
+  // Both notations count. Anything ECharts *computes* — a visualMap band, a
+  // heatmap cell, a filled country — comes out as rgb(), so matching only hex
+  // reported a fully drawn heatmap as empty. The palette lint had the same
+  // blind spot and was widened for the same reason.
+  const marks = (
+    preview.match(/<(path|rect|circle|polyline)\b[^>]*fill="(?:#|rgb\()/g) ?? []
+  ).length;
   if (!errors.length && marks === 0) {
     errors.push('rendered preview contains no filled marks');
   }
