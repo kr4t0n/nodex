@@ -4,12 +4,14 @@
   "description": "8 × 8 co-usage · shade = share of accounts using both · dashed square = strongest pair",
   "component": "heatmap",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/400",
   "tags": [
     "product",
     "analytics"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

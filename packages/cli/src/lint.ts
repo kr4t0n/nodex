@@ -159,9 +159,22 @@ export function hexLiterals(source: string): string[] {
   // Three-digit hex counts. It is as valid as six and just as wrong outside the
   // ramp, and only six was matched until a rendered chart was linted and `#000`
   // went straight past.
-  return [...source.matchAll(/#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})\b/g)].map((m) =>
+  const hex = [...source.matchAll(/#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})\b/g)].map((m) =>
     m[0].toUpperCase(),
   );
+
+  // `rgb(28, 28, 26)` is the same colour as `#1C1C1A`, and a rendered chart is
+  // full of it: anything ECharts derives — a visualMap band, a heatmap cell, a
+  // map's fill — comes out in rgb notation. Matching only hex meant every
+  // colour a chart *computed* went unchecked, which is most of the colours on
+  // a choropleth.
+  const rgb = [...source.matchAll(/rgb\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)\s*\)/g)].map((m) =>
+    `#${[m[1], m[2], m[3]]
+      .map((c) => Number(c).toString(16).padStart(2, '0'))
+      .join('')}`.toUpperCase(),
+  );
+
+  return [...hex, ...rgb];
 }
 
 export function lint(
