@@ -4,13 +4,15 @@
   "description": "box = the middle half of tickets · paper tick = median · hollow dot = an outlier nobody enjoyed",
   "component": "boxplot",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "support",
     "desk"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "echarts"
+  ],
   "strokeAsArea": true
 }
