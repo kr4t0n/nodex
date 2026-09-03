@@ -4,12 +4,14 @@
   "description": "each plane = one squad · 6 × 6 weeks of activity · dot area = tasks closed",
   "component": "dot-matrix",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/372",
+  "aspectRatio": "560/400",
   "tags": [
     "sprint",
     "board"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

@@ -4,12 +4,14 @@
   "description": "incidents by root cause · 2019 → 2026 · one dot = 2 incidents · sorted ascending",
   "component": "dot-plot",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "incident",
     "log"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
