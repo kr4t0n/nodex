@@ -4,12 +4,14 @@
   "description": "52 weeks × 7 days · dot area = deploys that day · tiny dot = a quiet day · dashed ring = the busiest day of 2025",
   "component": "calendar-heatmap",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "840/232",
+  "aspectRatio": "720/260",
   "tags": [
     "deploy",
     "log"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

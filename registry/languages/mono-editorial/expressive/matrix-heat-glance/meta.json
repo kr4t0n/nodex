@@ -4,13 +4,15 @@
   "description": "5 versions × 6 features · shade = % of accounts using it · every cell carries its number",
   "component": "heatmap",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "product",
     "analytics"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "echarts"
+  ],
   "strokeAsArea": true
 }
