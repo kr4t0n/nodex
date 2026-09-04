@@ -4,12 +4,14 @@
   "description": "80 core contributors orbit the main repo · satellite islands keep their own gravity · dotted paths = cross-contribution",
   "component": "network",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "840/320",
+  "aspectRatio": "720/320",
   "tags": [
     "contributor",
     "graph"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

@@ -4,12 +4,14 @@
   "description": "ribbon width = accounts · channels on the left, the plans they land in on the right",
   "component": "sankey",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "720/320",
   "tags": [
     "attribution"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "echarts"
+  ],
   "strokeAsArea": true
 }
