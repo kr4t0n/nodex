@@ -344,6 +344,11 @@ async function renderChartSVG(mod, meta, where) {
     );
   } catch (cause) {
     fail(where, `previewOption() failed to render: ${cause.message}`);
+    // `fail` collects rather than throws, so the caller would otherwise carry
+    // an undefined SVG into the lint and crash there with a TypeError that
+    // names neither the chart nor the real fault. An empty document keeps the
+    // build going to the point where every problem is reported together.
+    return '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
   }
 }
 
