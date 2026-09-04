@@ -4,13 +4,15 @@
   "description": "hours to first reply · silhouette = where tickets pile up · paper tick = median",
   "component": "violin",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "support",
     "desk"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "echarts"
+  ],
   "strokeAsArea": true
 }

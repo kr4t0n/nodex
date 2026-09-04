@@ -4,12 +4,14 @@
   "description": "one dot = one person in a hundred · four attitude clusters, sized by share · 2026 survey",
   "component": "unit-chart",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "attitude",
     "survey"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
