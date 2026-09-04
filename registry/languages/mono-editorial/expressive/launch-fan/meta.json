@@ -4,12 +4,14 @@
   "description": "one spoke per feature · big dot = launch week, sized by MAU today · small dots = every week since",
   "component": "radial-plot",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "product",
     "analytics"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
