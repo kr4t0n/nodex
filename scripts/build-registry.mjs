@@ -287,8 +287,36 @@ function paintedMarks(svg, pageColour) {
     if (pageColour && isColour(out, pageColour)) {
       out = out.replace(/\bstroke-width="[^"]*"/, '');
     }
-    return out;
+    return scaleStroke(out);
   });
+}
+
+/**
+ * Restate a stroke width in the coordinates a reader sees it in.
+ *
+ * ECharts draws a scatter symbol in a unit space and scales it with a
+ * transform, so a 1.4px ring on an 11px dot is written `stroke-width="0.254"`
+ * beside `matrix(5.5,0,0,5.5,…)`. The lint reads the attribute, so before this
+ * it measured the unit-space number and saw a 5.5x-thinner line than the one on
+ * the card — a hole that widens with the symbol, and it silently passes any
+ * border on a large enough mark.
+ *
+ * Found by rendering `trend-lineage`, whose hollow "reworked" dots sit exactly
+ * on the 1.4px ceiling and were being reported as 0.25px.
+ */
+function scaleStroke(tag) {
+  const width = /\bstroke-width="([0-9.]+)"/.exec(tag);
+  const matrix = /\btransform="matrix\(([-0-9.e]+),([-0-9.e]+),([-0-9.e]+),([-0-9.e]+)/.exec(tag);
+  if (!width || !matrix) return tag;
+
+  // A stroke is scaled by the square root of the transform's area factor, which
+  // is what SVG itself uses for a non-uniform scale.
+  const [, a, b, c, d] = matrix.map(Number);
+  const factor = Math.sqrt(Math.abs(a * d - b * c));
+  if (!Number.isFinite(factor) || factor === 0) return tag;
+
+  const effective = Number((Number(width[1]) * factor).toFixed(4));
+  return tag.replace(/\bstroke-width="[0-9.]+"/, `stroke-width="${effective}"`);
 }
 
 /** Whether an element's stroke is the given colour, in either notation. */

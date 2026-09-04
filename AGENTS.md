@@ -216,6 +216,23 @@ checking it would report mostly false positives. The one genuine ink border it
 would have caught, in `nested-treemap`, was fixed by hand. That is a known hole:
 an ink-coloured border above `lineMax` will not be caught.
 
+That hole is now much smaller for TSX components, because the lint reads their
+rendered SVG rather than their source — but reading rendered output introduced a
+different one, and it had to be closed. **A stroke width in rendered SVG is in
+the element's own coordinates, not the reader's.** ECharts draws a scatter
+symbol in a unit space and scales it, so a 1.4px ring on an 11px dot is written
+`stroke-width="0.254"` beside `matrix(5.5,0,0,5.5,…)`. The reader measured the
+unit-space number, which understates every symbol border by the symbol's size —
+so the hole widened with the mark, and a 3px border on that dot passed as
+0.545px. `paintedMarks` now multiplies by the square root of the transform's
+area factor before linting, and a deliberately over-wide border does fail.
+
+Found by rendering `trend-lineage`, whose hollow "reworked" dots sit exactly on
+the ceiling and were reported at a fifth of it. Worth restating as a general
+rule for anything else read out of rendered output: **an attribute is measured
+in whatever space its element was drawn in**, and a transform on that element
+means the number is not the one on the card.
+
 `strokeAsArea` is for a stroke whose **width carries data**, and the four
 network and chord components declare it because their link width encodes edge
 weight — thinning those would destroy information. It is not a way to silence
