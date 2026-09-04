@@ -4,12 +4,14 @@
   "description": "one tick = one percent of target · inked = earned · the dial reads left to right",
   "component": "gauge",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/360",
   "tags": [
     "quarterly",
     "target"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

@@ -4,11 +4,13 @@
   "description": "Q2 2026 · every dot = 1% of new accounts",
   "component": "donut",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "380/300",
+  "aspectRatio": "620/300",
   "tags": [
     "attribution"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

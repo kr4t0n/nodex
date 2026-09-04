@@ -4,11 +4,13 @@
   "description": "one tick = one percent · four sources shade the dial · read it like a clock",
   "component": "donut",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/380",
   "tags": [
     "acquisition"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
