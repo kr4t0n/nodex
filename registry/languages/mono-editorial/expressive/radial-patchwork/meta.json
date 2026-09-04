@@ -4,12 +4,14 @@
   "description": "each wedge = one deploy · angle = time of day · reach = files touched · ink builds where deploys pile up",
   "component": "polar-area",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "420/380",
   "tags": [
     "deploy",
     "log"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

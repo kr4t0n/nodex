@@ -4,12 +4,14 @@
   "description": "every rim node = a feature request · lines bundle into the theme that claimed it",
   "component": "network",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "420/380",
   "tags": [
     "feedback",
     "board"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
