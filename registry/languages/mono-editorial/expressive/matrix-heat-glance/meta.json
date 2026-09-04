@@ -1,7 +1,7 @@
 {
   "slug": "matrix-heat-glance",
   "title": "Adoption runs hot on the new versions",
-  "description": "5 versions × 6 features · shade = % of accounts using it · every cell carries its number",
+  "description": "5 versions \u00d7 6 features \u00b7 shade = % of accounts using it \u00b7 every cell carries its number",
   "component": "heatmap",
   "tier": "expressive",
   "runtime": "echarts",
@@ -13,6 +13,5 @@
   ],
   "dependencies": [
     "echarts"
-  ],
-  "strokeAsArea": true
+  ]
 }

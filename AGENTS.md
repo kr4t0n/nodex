@@ -62,15 +62,24 @@ The authored artifact is a **fragment**, never a document. The standalone
 `index.html` is generated from it at build time and exists only for previews.
 One source of truth; a consumer never receives a doctype and a `body` rule.
 
-Two spellings of that fragment, and the split is by when the artifact was
-written rather than by what it is:
+There is one spelling of that fragment: **`component.tsx` + `component.css`**.
+A React module, so its markup is in the module and there is no markup file.
 
-- **`component.tsx` + `component.css`** — every primitive, and every chart
-  authored since. A React module: its markup is in the module, so there is no
-  markup file.
-- **`component.html` + `.css` + `.js`** — the 64 imported charts, which were
-  sliced out of a found page and are a corpus of drawing techniques rather than
-  something to reshape.
+It used to be two. The 64 imported charts were `component.html` + `.css` +
+`.js` with a `mount(root)`, and this file argued at length that they should
+stay that way — they were a corpus of drawing techniques, and reshaping them
+toward a form they were never cut for was what had produced the dead blocks and
+duplicated preludes described below. All 64 have since been rewritten as React
+components on ECharts, and that argument turned out to be wrong in one specific
+way worth recording: it defended the *artifacts* when what was worth keeping
+was the *readings*. Each rewrite kept what its chart says — the sag in
+`arc-matrix`'s rows, the ink that accumulates in `radial-patchwork`, the
+wobbling rims in `bubble-almanac` — and none of it depended on the original
+drawing code.
+
+What the collapse bought is that the conformance lints now read every chart's
+rendered output rather than parsing its source, which is what closed the holes
+described under the lints below.
 
 The primitives moved because the artifact a consumer wanted was never valid in
 the place they were taking it. Every one is copied into a React project, and
@@ -158,16 +167,23 @@ Do not reintroduce it as a UI control.
 `circular-graph-dense` carry density-sounding suffixes, but those are collision
 disambiguation that happens to borrow the vocabulary — not an encoding.
 
-## Two runtimes, never three
+## One runtime for charts, one for primitives
 
-Raw SVG (42 components, zero dependencies) and ECharts 6 (23). Chart.js served
-exactly 2 and was ported out.
+ECharts 6 draws all 65 expressive components; the 24 primitives are `css` and
+draw themselves. Chart.js served 2 and was ported out; hand-rolled SVG served
+42 and was ported out after it.
 
-The reason is maintenance ratio, not library quality: each runtime needs its own
-token binding in `DESIGN.md` and its own lints, because a `0.8px` hairline is
-`stroke-width` in SVG and `lineStyle.width` in ECharts. A permanent third binding
-for 2 of 65 components is a bad trade. The ports live in `PORTED_BLOCKS` in the
-extractor so re-running stays idempotent.
+The reason was always maintenance ratio rather than library quality. Each
+runtime needs its own token binding in `DESIGN.md` and its own lints, because a
+`0.8px` hairline is `stroke-width` in SVG and `lineStyle.width` in ECharts —
+and the SVG binding is what carried the expensive bugs. It was the branch that
+could not see `isHero?2:.65`, and the branch that had to guess at
+`.6+rnd(i+3,j+11)*.9`. Both classes of failure are gone with it: a rendered
+chart states its widths as literals.
+
+**This is not licence to add a runtime back.** The argument that removed two of
+them applies unchanged to a third, and it is now stronger, because a second
+binding would also mean a second answer to how the lint reads a mark.
 
 ## Conformance lints
 
@@ -216,9 +232,9 @@ checking it would report mostly false positives. The one genuine ink border it
 would have caught, in `nested-treemap`, was fixed by hand. That is a known hole:
 an ink-coloured border above `lineMax` will not be caught.
 
-That hole is now much smaller for TSX components, because the lint reads their
-rendered SVG rather than their source — but reading rendered output introduced a
-different one, and it had to be closed. **A stroke width in rendered SVG is in
+That hole is now much smaller everywhere, because every chart is TSX and the
+lint reads rendered SVG rather than source — but reading rendered output
+introduced a different one, and it had to be closed. **A stroke width in rendered SVG is in
 the element's own coordinates, not the reader's.** ECharts draws a scatter
 symbol in a unit space and scales it, so a 1.4px ring on an 11px dot is written
 `stroke-width="0.254"` beside `matrix(5.5,0,0,5.5,…)`. The reader measured the
@@ -233,10 +249,22 @@ rule for anything else read out of rendered output: **an attribute is measured
 in whatever space its element was drawn in**, and a transform on that element
 means the number is not the one on the card.
 
-`strokeAsArea` is for a stroke whose **width carries data**, and the four
-network and chord components declare it because their link width encodes edge
-weight — thinning those would destroy information. It is not a way to silence
-the lint, and a component that merely draws a thick line does not qualify.
+`strokeAsArea` is for a stroke whose **width carries data**. Five components
+declare it — `circular-graph`, `circular-graph-dense`, `force-graph`,
+`force-graph-dense`, `thread-triptych` — because link width encodes edge weight
+or route volume, and thinning those would destroy information rather than
+restyle it. It is not a way to silence the lint, and a component that merely
+draws a thick line does not qualify.
+
+It was fourteen until the port finished. The other nine were declared during the
+original extraction and were **stale**: rewriting those charts on ECharts moved
+their thick marks from strokes to fills — a sankey link and a violin body are
+areas there — so the declaration no longer suppressed anything, and each one was
+a lint permanently disarmed on that component. The nine were found by stripping
+every declaration and rebuilding to see who actually still failed, which is the
+check to re-run after any change to how a chart draws. **A `strokeAsArea` that
+is not currently doing work should be deleted**, because nothing else will
+notice when it starts hiding something real.
 
 ### The registry-only lints
 
@@ -800,20 +828,16 @@ nobody promised to keep stable. `--help` after a command describes that command;
 it used to print the global page, so `add`'s only flag, `--to`, was documented
 nowhere anyone would look.
 
-**`meta.mounts` is the important one.** A component ships three files, and
-nothing in them says how they connect: `mount(root)` fills elements marked
-`data-nx-mount="<name>"`, and the name is chosen in the JS rather than derived
-from the slug. Only 3 of 64 match — `arc-matrix` mounts `arcmatrix`. A consumer
-reported grepping the JS for `obsReveal('...')` to find it, which is a fair
-thing to do and a bad thing to have to do.
+**`meta.exports` is the important one.** A component ships two files and
+nothing in them says how to get in: the export name is chosen in the module
+rather than derived from the slug. `add` prints it and `add --json` reports it
+alongside `files` and `aspectRatio`.
 
-The build extracts the names from the markup, so it cannot drift from what
-`mount` actually looks for; authoring it in `meta.json` would let it. `add`
-prints them and `add --json` reports them alongside `files`, `exports` and
-`aspectRatio`, which is the viewBox.
-
-Primitives have no mounts and correctly report none: they are markup and CSS
-with no script to wire up.
+`meta.mounts` was the same field for the vanilla era, recording which
+`data-nx-mount="<name>"` a `mount(root)` filled — a name that matched its slug
+in only 3 of 64 charts, so a consumer reported grepping the JS for
+`obsReveal('...')` to find it. Nothing ships a mount now, and the manifest
+records none. The schema keeps the field so an older manifest still parses.
 
 ### The extractor split by chart family, not by chart
 
@@ -920,12 +944,13 @@ reading it will not expect them either.
   replace it with `Math.random()`.
 - **Charts draw on scroll into view and replay on click.** A chart that looks
   blank in a preview may simply not have been scrolled to. Click it.
-- **The two choropleths fetch GeoJSON from third-party hosts at runtime** —
-  including a `world.json` from `echarts@4.9.0` while the components run ECharts
-  6. Declared in `meta.externalData` and surfaced by the build, but they break
-  offline and cannot be smoke-tested. Vendoring the geo data is open work.
-- **39 of 64 components had no `prefers-reduced-motion` guard in the source.**
-  The extractor synthesises one. `basics` and `glance` never shipped one.
+- **The choropleths' geo data is vendored, and must stay that way.** Both used
+  to fetch GeoJSON from third-party hosts at runtime — including a `world.json`
+  from `echarts@4.9.0` while the components run ECharts 6 — so they broke
+  offline and could not be smoke-tested. Each now imports a sibling `geo.ts`
+  with the coordinates rounded down to a sane precision, and the build ships any
+  sibling `.ts` alongside the component so `nodex add` delivers it. `meta.externalData`
+  still exists in the schema and nothing declares it.
 - **The palette is 37 greys, not a designed scale.** Several pairs differ by one
   or two values (`#D8D7D1` / `#D8D6CE`). Consolidating is open work; the ramp in
   `tokens.json` records what exists.
@@ -985,15 +1010,14 @@ reading it will not expect them either.
   build now compares every selector defined by more than one primitive and fails
   on a mismatch. If a difference is genuinely wanted, rename the class rather
   than letting the copies diverge.
-- **A component's CSS must not select a mount by `#id`.** The extractor rewrote
-  every mount point from `id="ch"` to `data-nx-mount="ch"` in the markup but
-  left the stylesheets selecting `#ch`, so the rule silently stopped matching.
-  Three charts — `circular-graph-dense`, `force-graph-dense`, and
-  `thread-triptych` — set their height that way, so their containers collapsed
-  to `0` and they rendered nothing at all. Two were on a dark ground, which is
-  why it read as a stray black bar rather than as a missing chart, and it
-  survived the smoke test because jsdom reports a canvas as present regardless
-  of layout. Select `[data-nx-mount="name"]` instead.
+- **A silently-collapsed container renders nothing and reports nothing.** When
+  charts were vanilla, three of them sized themselves through a CSS rule that
+  had stopped matching, so their containers collapsed to `0`. Two were on a dark
+  ground, which is why it read as a stray black bar rather than as a missing
+  chart, and it survived the smoke test because jsdom reports a canvas as
+  present regardless of layout. Mounts are gone, but the shape of the failure is
+  not: assert on **what a chart drew**, never on whether its container exists.
+  The smoke test now counts painted marks in the rendered SVG for this reason.
 - **`packages/core` uses `.ts` import specifiers.** Node strips types natively;
   `.js` specifiers would not resolve against `.ts` files.
 - **The extractor is gone, but recoverable.** `tmp/extract-charts.mjs` turned
@@ -1068,25 +1092,24 @@ Two things an earlier attempt found that argument had not:
 
 ### A chart may be authored in TSX, and then it renders at build time
 
-The 64 imported charts are markup, CSS and a `mount(root)`. A chart authored now
-is a React component, and both ship from the same registry.
+Every chart is a React component. The registry briefly held both spellings, and
+the build still explains why the surviving one needs the machinery it does.
 
-That is not a migration half-done. The two styles differ in *when the marks
-exist*, and the build follows:
+A React component draws inside `useEffect`, which never runs under server
+rendering — where a vanilla component drew when `mount` ran, so its preview
+could simply be a document that loaded `component.js` and let a browser execute
+it. The build has no such option here:
 
-- A vanilla component draws when `mount` runs, so its preview is a document that
-  loads `component.js` and a browser executes it.
-- A React component draws inside `useEffect`, which never runs under server
-  rendering. So the build calls its exported `previewOption()`, renders that to
-  an SVG string with no DOM, and splices it into the statically rendered markup.
-  The preview it writes is a finished document that runs nothing.
+So it calls the component's exported `previewOption()`, renders that to an SVG
+string with no DOM, and splices it into the statically rendered markup. The
+preview it writes is a finished document that runs nothing.
 
 Three consequences worth knowing:
 
-- **The lint reads rendered output, not source.** For a vanilla component it
-  parses `stroke-width` out of the JS, with the known blind spots that cost five
-  components a 2px stroke. For a React one it reads the SVG the chart really
-  produced, where a ternary has already collapsed to a number. This is the
+- **The lint reads rendered output, not source.** It used to parse
+  `stroke-width` out of the JS, with the known blind spots that cost five
+  components a 2px stroke. It now reads the SVG the chart really produced,
+  where a ternary has already collapsed to a number. This is the
   better half of the arrangement and the reason `renderer: 'svg'` is mandatory:
   a canvas chart leaves nothing to inspect and is unlintable by construction.
 - **`previewOption()` is the contract.** Zero arguments, returns the option for
@@ -1123,9 +1146,18 @@ ugly — splitting one series into two, each null where the other draws — and
 reaching for it on a bar chart would be cargo cult. Thresholding belongs on bars
 anyway.
 
-The imported charts are not being retrofitted to match. They are a corpus of
-drawing techniques, and reshaping them toward a form they were never cut for is
-what produced the dead blocks and the duplicated preludes in the first place.
+The imported charts **were** retrofitted to match, and all 64 are now React
+components on ECharts. This paragraph used to say they would not be. What
+changed the answer was not the effort estimate but a second language: once
+`signal-console` existed, keeping half the registry in a spelling no new chart
+would ever be written in meant maintaining two preview paths, two lint paths and
+two answers to "how do I use this" — permanently, for a corpus nobody was adding
+to.
+
+The old objection still holds for the thing it was actually about. Reshaping
+those files *as files* is what produced the dead blocks and duplicated preludes
+described above. Each rewrite started from what its chart says rather than from
+its drawing code, which is why none of the readings were lost.
 
 **It omits `density` on purpose.** mono-editorial declares both values, which
 proves nothing about whether the axis is optional. A language that is only ever
@@ -1140,13 +1172,16 @@ font now comes from `font.webfont` in each language's tokens.
 
 ## Technical debt
 
-- Vendor the choropleth geo data; remove the runtime fetches.
 - Consolidate the 37-step grey ramp.
-- `component.js` hardcodes hex literals rather than reading custom properties,
-  so a chart's marks do not follow a re-themed token layer. Acceptable while one
-  language exists; revisit when a second arrives.
-- The extractor leaves a few orphaned trailing comments where a `//` comment
-  followed a statement on the same line.
+- **A chart's marks still do not follow a re-themed token layer.** Every
+  `component.tsx` names its colours as hex constants rather than reading the
+  `--nx-*` custom properties, so swapping a language's `tokens.css` restyles the
+  whole app and none of the charts inside it. The port did not fix this and was
+  not the moment to: a chart reading custom properties has to resolve them at
+  runtime, which the build's server render cannot do, so the fix needs a way to
+  hand the palette to `buildOption` — and that is a change to the contract every
+  chart implements. The lint enforcing ramp membership is what keeps the
+  hardcoding honest in the meantime.
 - `languages.json` has no file addresses, so `init`, `tokens`, and `design`
   hardcode `registry/languages/<slug>/...` while `add` reads addresses from the
   manifest. Harmless today because every language is public and every path

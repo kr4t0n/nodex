@@ -1,7 +1,7 @@
 {
   "slug": "rank-strip",
   "title": "Flows climbs to the top",
-  "description": "one row per product, one cell per quarter · darker = higher rank · a bar race you can print",
+  "description": "one row per product, one cell per quarter \u00b7 darker = higher rank \u00b7 a bar race you can print",
   "component": "bump",
   "tier": "expressive",
   "runtime": "echarts",
@@ -12,6 +12,5 @@
   ],
   "dependencies": [
     "echarts"
-  ],
-  "strokeAsArea": true
+  ]
 }

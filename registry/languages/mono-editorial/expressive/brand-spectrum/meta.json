@@ -1,7 +1,7 @@
 {
   "slug": "brand-spectrum",
   "title": "Where the brand sits",
-  "description": "panel of 120 customers placed us between opposing traits · big dot = us · small dots = competitors",
+  "description": "panel of 120 customers placed us between opposing traits \u00b7 big dot = us \u00b7 small dots = competitors",
   "component": "dot-plot",
   "tier": "expressive",
   "runtime": "echarts",
@@ -13,6 +13,5 @@
   ],
   "dependencies": [
     "echarts"
-  ],
-  "strokeAsArea": true
+  ]
 }

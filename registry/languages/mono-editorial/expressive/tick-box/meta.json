@@ -1,7 +1,7 @@
 {
   "slug": "tick-box",
   "title": "Reply times, boxed by plan",
-  "description": "box = the middle half of tickets · paper tick = median · hollow dot = an outlier nobody enjoyed",
+  "description": "box = the middle half of tickets \u00b7 paper tick = median \u00b7 hollow dot = an outlier nobody enjoyed",
   "component": "boxplot",
   "tier": "expressive",
   "runtime": "echarts",
@@ -13,6 +13,5 @@
   ],
   "dependencies": [
     "echarts"
-  ],
-  "strokeAsArea": true
+  ]
 }

@@ -1,7 +1,7 @@
 {
   "slug": "stream-ribbon",
   "title": "Three products trade the same river",
-  "description": "48 weeks of usage share · band width = weekly active accounts · the river swells where the total grows",
+  "description": "48 weeks of usage share \u00b7 band width = weekly active accounts \u00b7 the river swells where the total grows",
   "component": "streamgraph",
   "tier": "expressive",
   "runtime": "echarts",
@@ -13,6 +13,5 @@
   ],
   "dependencies": [
     "echarts"
-  ],
-  "strokeAsArea": true
+  ]
 }

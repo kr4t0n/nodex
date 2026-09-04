@@ -4,13 +4,15 @@
   "description": "source → processor → destination · one thread per data path · hover to trace a route · hover any label to pull its whole bundle · click to pin, click empty space to release",
   "component": "sankey",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
   "aspectRatio": "1140/640",
   "tags": [
     "data",
     "map"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "echarts"
+  ],
   "strokeAsArea": true
 }

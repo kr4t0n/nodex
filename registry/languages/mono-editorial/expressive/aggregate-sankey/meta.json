@@ -1,7 +1,7 @@
 {
   "slug": "aggregate-sankey",
   "title": "Channels pour into plans",
-  "description": "ribbon width = accounts · channels on the left, the plans they land in on the right",
+  "description": "ribbon width = accounts \u00b7 channels on the left, the plans they land in on the right",
   "component": "sankey",
   "tier": "expressive",
   "runtime": "echarts",
@@ -12,6 +12,5 @@
   ],
   "dependencies": [
     "echarts"
-  ],
-  "strokeAsArea": true
+  ]
 }

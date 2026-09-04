@@ -1,7 +1,7 @@
 {
   "slug": "violin",
   "title": "How fast each plan gets an answer",
-  "description": "hours to first reply · silhouette = where tickets pile up · paper tick = median",
+  "description": "hours to first reply \u00b7 silhouette = where tickets pile up \u00b7 paper tick = median",
   "component": "violin",
   "tier": "expressive",
   "runtime": "echarts",
@@ -13,6 +13,5 @@
   ],
   "dependencies": [
     "echarts"
-  ],
-  "strokeAsArea": true
+  ]
 }
