@@ -4,12 +4,14 @@
   "description": "one hairline = one product across price · satisfaction · retention · growth · ink = the one that wins everywhere",
   "component": "parallel-coordinates",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "product",
     "panel"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

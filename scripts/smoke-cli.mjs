@@ -161,7 +161,10 @@ try {
   check('--to overrides the configured directory', perProject.includes('src/charts'));
   check(
     '--to actually wrote there',
-    await exists(path.join(project, 'src/charts/ridgeline/component.js')),
+    // The stylesheet, because every component ships one whichever way it is
+    // authored. Naming component.js here tied the test to one chart's
+    // authoring style, and it broke the day that chart was ported.
+    await exists(path.join(project, 'src/charts/ridgeline/component.css')),
   );
 } finally {
   await rm(project, { recursive: true, force: true });
