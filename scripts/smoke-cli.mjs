@@ -123,7 +123,7 @@ try {
 
   const base = path.join(project, config.paths.components);
   for (const [name, files] of [
-    ['barcode-lollipop', ['component.html', 'component.css', 'component.js']],
+    ['barcode-lollipop', ['component.tsx', 'component.css']],
     // Ships geo.ts too: a component whose own import does not resolve is
     // broken on arrival.
     ['choropleth-states', ['component.tsx', 'component.css', 'geo.ts']],
@@ -134,17 +134,30 @@ try {
     }
   }
 
-  const fragment = await readFile(
-    path.join(base, 'barcode-lollipop', 'component.html'),
-    'utf8',
+  // The fragment contract, checked against whichever chart still ships one
+  // rather than against a chart named here. Naming one tied this to a single
+  // authoring style and broke twice as charts were ported; when the last
+  // fragment goes, these skip themselves instead of failing.
+  const registry = JSON.parse(
+    await readFile(path.join(ROOT, 'public', 'r', 'registry.json'), 'utf8'),
   );
-  check('fragment is not a full document', !fragment.includes('<!doctype'));
-  check('fragment carries the scope class', fragment.includes('nx-barcode-lollipop'));
-  check('mount points are data attributes', fragment.includes('data-nx-mount'));
-  check('no id attributes remain', !/ id="/.test(fragment));
+  const withFragment = registry.items.find((item) =>
+    (item.files ?? []).some((f) => f.path.endsWith('component.html')),
+  );
 
-  const js = await readFile(path.join(base, 'barcode-lollipop', 'component.js'), 'utf8');
-  check('script exports a root-scoped mount', js.includes('export function mount(root)'));
+  if (withFragment) {
+    const slug = withFragment.name;
+    await nodex(project, ['add', `${withFragment.meta.language}/${slug}`]);
+
+    const fragment = await readFile(path.join(base, slug, 'component.html'), 'utf8');
+    check('fragment is not a full document', !fragment.includes('<!doctype'));
+    check('fragment carries the scope class', fragment.includes(`nx-${slug}`));
+    check('mount points are data attributes', fragment.includes('data-nx-mount'));
+    check('no id attributes remain', !/ id="/.test(fragment));
+
+    const js = await readFile(path.join(base, slug, 'component.js'), 'utf8');
+    check('script exports a root-scoped mount', js.includes('export function mount(root)'));
+  }
 
   // A bare primitive name with no --design must explain itself rather than guess.
   let guided = false;

@@ -4,12 +4,14 @@
   "description": "one tick = one respondent in a hundred · inked = picked it · they could pick several",
   "component": "unit-chart",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "workplace",
     "survey"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }

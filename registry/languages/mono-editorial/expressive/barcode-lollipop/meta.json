@@ -4,12 +4,14 @@
   "description": "peak concurrent users, daily · Apr – Jun 2026",
   "component": "lollipop",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "echarts",
   "density": "close-read",
-  "aspectRatio": "800/300",
+  "aspectRatio": "620/300",
   "tags": [
     "live",
     "ops"
   ],
-  "dependencies": []
+  "dependencies": [
+    "echarts"
+  ]
 }
