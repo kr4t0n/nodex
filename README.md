@@ -1,309 +1,308 @@
 # nodex
 
-A component registry organised by **design language** rather than by component
-type.
+A design-language-first registry of editable React components. Pick a language,
+receive its tokens and written design rules, and copy components into your app.
+Expressive charts belong to a language because their geometry carries its
+identity. Primitives share one implementation and change appearance through tokens.
 
-Most component libraries give you one `Button` and let you theme it. That works
-because a design language only changes a button's paint. It breaks completely for
-charts: you cannot turn a chart that draws one hairline per calendar day into a
-thick-bar brutalist chart by swapping a CSS variable, because the language
-changed the geometry, not the colour.
+This reconstruction contains **24 reusable primitives and three Recharts proofs
+of concept**: `mono-editorial/hairline-line`, `mono-editorial/arc-matrix`, and
+`signal-console/endpoint-latency`. The previous expressive catalogue has been
+removed from this branch; it remains in Git history. This is a new source
+contract, with no legacy HTML/mount-function compatibility path.
 
-So nodex is organised the other way round. You pick a design language, and you
-get its tokens, its written rules, and the components that belong to it — then
-your coding agent has everything it needs to build in that language rather than
-guessing.
+## Develop the registry and gallery
 
-The first language is **mono-editorial**: 64 charts drawn in sub-pixel hairlines
-on warm paper.
-
-## Status
-
-The registry, the 24 primitives, the CLI, and the web app all work. The accounts
-backend does not exist yet, and authentication is stubbed because every language
-is currently public — the app runs on Next.js so that backend has somewhere to
-land. See `AGENTS.md` for the architecture.
-
-## Using it in a project
+Prerequisites: Node **22.22+** (CI and Docker use Node 24), npm 10+, and Chromium
+installed through Playwright. No database or credentials are needed to build.
 
 ```bash
-nodex list                                  # what languages exist
-nodex init mono-editorial                   # set the project up
-nodex search heatmap --design mono-editorial
-nodex add mono-editorial/barcode-lollipop
+npm ci
+npx playwright install --with-deps chromium
+npm run build:registry
+npm run dev
 ```
 
-Signing in is only needed for restricted languages, of which there are none yet:
+The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
+`npm start`. Rebuild the registry after editing its source; the gallery reads
+built artifacts. `dev` and the web build copy those artifacts into the app's
+public directory automatically.
+
+## Use components in a React app
+
+The current component platform is **React 19, React DOM, TypeScript and
+Tailwind CSS 4**. Primitives use React 19's ref-as-prop API. Nodex keeps the host
+application's platform packages under the application's control.
+
+To try this branch before publishing, build the registry, then run the source
+CLI from an existing consumer app using absolute checkout paths:
 
 ```bash
-nodex login     # prints a code, waits for approval in a browser
-nodex whoami
-nodex logout
+node /path/to/nodex/packages/cli/src/index.ts init mono-editorial --registry /path/to/nodex/public
+node /path/to/nodex/packages/cli/src/index.ts add hairline-line arc-matrix button
 ```
 
-Credentials go to `~/.nodex/auth.json`, mode `0600`, keyed by registry. Set
-`NODEX_TOKEN` instead in CI, where nobody can approve anything.
+The installed CLI provides the same commands as `nodex init` and `nodex add`.
+Its default registry is the hosted deployment, which may have a different
+version. Use `--registry` explicitly to exercise this reconstruction.
 
-`init` writes `nodex.json`, drops the language's `tokens.css` and `DESIGN.md`
-into the project, and appends a section to the project's `AGENTS.md` so a coding
-agent knows the rules exist. `add` then needs no flags.
+Release this CLI together with a registry built from the new contract. Older
+hosted manifests do not provide the required entry, file-target and language-asset
+fields; the CLI intentionally reports that mismatch instead of guessing paths.
 
-The CLI talks to <https://nodex.kubitnodes.com> unless told otherwise, so it
-works with no configuration. Resolution runs `--registry <dir|url>`, then
-`nodex.json`, then `NODEX_REGISTRY`, then that default — every step something
-someone wrote down, nothing inferred from where the command was run. A project
-initialised against a remote registry has the root written into its
-`nodex.json` and keeps using it.
+`init` writes `nodex.json`, `src/styles/nodex-tokens.css`, `docs/DESIGN.md`, and
+a managed section of `AGENTS.md`. Read the design document. Import the token
+stylesheet once after Tailwind in your application stylesheet:
 
-**To read this checkout rather than the deployment, say so:** `--registry .`,
-or `NODEX_REGISTRY=.`. Running inside the repo is not enough and deliberately
-so — see `AGENTS.md`.
+```css
+@import "tailwindcss";
+@import "./nodex-tokens.css";
+```
 
-Inside this repo, invoke it as `node packages/cli/src/index.ts <command>` — the
-source runs directly, so there is nothing to build first.
+Ensure Tailwind scans the configured component destination. Its default
+`src/components/nodex` location is inside the application's source tree. If
+using a custom location outside automatic detection, add a Tailwind `@source`
+entry for that location.
 
-### Publishing the CLI
+```tsx
+import { HairlineLine } from './components/nodex/hairline-line/component';
+import { Button } from './components/nodex/button/component';
 
-`@kubitnodes/nodex` publishes to npm from `.github/workflows/npm-publish.yml`, on a
-`v*` tag or a manual run, and needs one repository secret:
+const observations = [
+  { label: 'Monday', value: 24 },
+  { label: 'Tuesday', value: 38 },
+  { label: 'Wednesday', value: 29 },
+];
 
-| Secret | What it is |
+export function Report() {
+  return (
+    <section>
+      <h2>Daily observations</h2>
+      <HairlineLine data={observations} aria-label="Daily observations" />
+      <Button onClick={() => window.print()}>Print report</Button>
+    </section>
+  );
+}
+```
+
+Each chart requires real data. Fixtures remain in registry examples. Gallery
+titles belong to the caller; the original drawing annotations and console status
+header/footer remain part of their charts. Charts have no data dropdown or table.
+Primitive modules import their own required CSS.
+`nodex show` documents the explicit props for charts and primitives; descriptions
+identify which export owns a prop when an item contains several components.
+
+The reconstruction preserves the previous specimens' data, copy, proportions
+and language values. Changes are limited to React/Recharts composition, token
+bindings and source-delivery architecture; new UI belongs in a separate change.
+
+A typical installation contains:
+
+```text
+src/components/nodex/
+  hairline-line/component.tsx
+  arc-matrix/component.tsx
+  button/component.tsx
+  button/component.css
+  _shared/use-chart-motion.ts
+  _shared/use-reduced-motion.ts
+```
+
+Only declared, reachable runtime files are copied. There is no Nodex runtime
+package, example dataset, preview bundle or ECharts adapter in the consumer.
+`add` installs pinned chart dependencies using npm, pnpm, Yarn or Bun and
+matches `react-is` to the consumer's React version. `--no-install` reports the
+packages for manual installation. Identical files are reused; differing files
+or package versions require `--force`. Review that flag before replacing code
+that the consumer has edited.
+
+```bash
+nodex list
+nodex search --design mono-editorial --type line
+nodex show mono-editorial/hairline-line --json
+nodex add signal-console/endpoint-latency
+nodex lint src/components/nodex/endpoint-latency --design signal-console
+```
+
+The latency chart requires `data` (each observation supplies `route` and `p99Ms`)
+and `objectiveMs`. It uses signal-console's
+tokens. When mixing languages, apply each language's token values to its own
+ancestor scope; installing a chart does not switch the application's theme.
+`init` selects one default language.
+
+## Tokens and rendering
+
+Language `tokens.json` is canonical. The build emits CSS custom properties;
+chart paint, text, strokes and motion refer to those properties. A scoped
+`--nx-ink` override affects descendant chart marks directly. Motion helpers
+resolve the numeric values that the chart library needs and honor reduced motion.
+No parallel JavaScript palette or theme provider is required.
+
+All 24 primitives consume language tokens for typography, spacing, radii and
+interaction timing as well as paint, fonts and strokes. Card and Dialog titles
+use `type.cardTitle`; Card padding uses `space.cardPadding`. These existing roles
+now determine their defaults, including Signal Console's smaller titles and
+tighter Card padding. Controls use shared roles such as `type.control`,
+`type.action`, `space.controlPadding` and `space.fieldGap`. Newly introduced roles
+preserve the previous primitive values. `motion.control` governs control feedback
+independently of chart `motion.draw`; both honor reduced motion. Override the
+generated variables on any ancestor to theme that subtree without remounting it.
+Structural values such as circular marks and native-control geometry stay local.
+
+The token stylesheet also embeds the declared fonts and their Open Font License
+text. Inter and JetBrains Mono come from pinned Fontsource packages; copying the
+stylesheet includes the font bytes without Google Fonts requests. Current faces
+use Latin subsets, with the declared platform stacks providing other glyphs.
+
+These are React components for the **web**, using DOM/SVG. “React native” in the
+architecture discussion means declarative React composition, not the React
+Native mobile framework.
+
+The pinned Recharts version does not emit chart marks through React server
+rendering. The registry build renders the actual examples in Chromium, checks
+their resolved paint and stroke widths, and stores complete static previews.
+Local JavaScript bundles then mount the same examples for interaction. This is
+not React hydration. Downstream applications receive ordinary client charts;
+the gallery's pre-rendered snapshot is not a server-rendering guarantee for
+consumer apps.
+
+## Source and build layout
+
+```text
+registry/
+  _shared/                         copied support modules, declared per item
+  primitives/<slug>/
+    component.tsx                  reusable API, types and private helpers
+    component.css                  preserved native-control visual treatment
+    example.tsx                    gallery composition and fixtures
+    meta.json                      explicit public contract
+  languages/<slug>/
+    meta.json                      identity, visibility, featured charts, density
+    tokens.json                    canonical values
+    DESIGN.md                      geometry, semantics and interaction rules
+    expressive/<slug>/
+      component.tsx
+      example.tsx
+      meta.json
+packages/core/src/                 schema, taxonomy and source loader
+packages/cli/src/                  static registry access, delivery, install, auth
+apps/web/src/                      Next gallery and account routes
+apps/web/migrations/               SQL account migrations
+scripts/build-registry.ts          validation, bundling, browser preview rendering
+scripts/lib/                       delivery, tokens and browser build utilities
+skills/nodex/                      consumer skill
+.agents/skills/nodex-authoring/     repository authoring skill
+public/r/                          GENERATED manifests and per-item JSON
+public/registry/                   GENERATED delivered sources, tokens, previews
+apps/web/public/                   GENERATED copy for Next static serving
+```
+
+Generated files never live beside authored components. Serve both `public/r/`
+and `public/registry/` at the same registry root. Public registry downloads use
+static paths and can be hosted on a CDN without the Next server.
+
+## Verification
+
+```bash
+npm run build:registry
+npm test
+npm run smoke
+npm run smoke:cli
+npm run check:shell
+npm run lint
+npm run typecheck
+npm run build --workspace @nodex/web
+```
+
+| Command | Coverage |
 | --- | --- |
-| `NPM_TOKEN` | an npm automation token with publish rights on the `@nodex` scope |
+| `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
+| `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
+| `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
+| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in both languages, native keyboard/form behavior and reduced motion |
+| `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
+| `check:shell` | Gallery primitive classes have their curated stylesheets |
+| `lint` / `typecheck` | Application, registry, CLI and build source |
 
-The workflow lints, typechecks, smoke-tests the CLI, builds, then installs the
-packed tarball into a scratch project and runs the binary before publishing —
-compiling is not the same as being runnable, and `files` narrows what ships. A
-version already on npm is left alone with a notice rather than failing, so
-re-running a tag is safe; bump `version` in `packages/cli/package.json` to
-release.
+The consumer smoke installs packages in a disposable directory and therefore
+needs npm network access. Build previews bundle dependencies locally; rendered
+examples need no CDN chart scripts or external data fetches. Chromium belongs to
+the build and test environment, not the production server image.
 
-The repo runs TypeScript directly, but the published package is compiled
-JavaScript, since someone installing it may be on a Node without type
-stripping. `npm run build:cli` produces it via `packages/cli/tsconfig.publish.json`.
-The one `@nodex/core` import is `import type` and erases completely, so the
-package has **no dependencies** and `@nodex/core` is not published.
+## Accounts and configuration
 
-## Running the site
+GitHub OAuth, hashed sessions and CLI device authorization are implemented.
+Every current language is public. Accounts sequence access to the gallery;
+public registry files remain independent of sessions. Paid-language enforcement
+and entitlements are not implemented.
 
-```bash
-npm install
-npm run build:registry   # generates tokens.css, previews, and the manifest
-npm run dev              # http://localhost:4180
-```
-
-`build:registry` has to run at least once first: the app reads the built manifest
-from `public/r/` and iframes the generated previews, neither of which is
-committed. `dev` and `build` then copy both into `apps/web/public/` so Next can
-serve them, which is why that directory is generated and gitignored.
-
-For a production build:
-
-```bash
-npm run build   # build:registry, then next build
-npm start       # http://localhost:4180
-```
-
-Set `NEXT_PUBLIC_REGISTRY_URL` to serve the registry from a CDN instead of from
-the app's own `public/`. It is static, so nothing else has to change.
-
-## Accounts and sign-in
-
-Optional. The registry, the CLI, and every public page work without any of this.
-Only `/languages` and `/login` need it.
+For optional local accounts:
 
 ```bash
 cp .env.example .env
-npm run db:up        # Postgres in Docker, on host port 5433
+npm run db:up
 npm run db:migrate
 ```
 
-Then register a GitHub OAuth app at
-[github.com/settings/developers](https://github.com/settings/developers):
+Register a GitHub OAuth app with homepage `http://localhost:4180` and callback
+`http://localhost:4180/api/auth/github/callback`. Fill the credentials in the
+root `.env` and restart the site. `npm run db:down` stops local Postgres.
 
-- Homepage URL: `http://localhost:4180`
-- Authorization callback URL: `http://localhost:4180/api/auth/github/callback`
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Runtime account database connection |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration |
+| `NEXT_PUBLIC_SITE_URL` | Runtime public origin used by server-side OAuth |
+| `NEXT_PUBLIC_REGISTRY_URL` | Registry CDN root, baked into the browser bundle at build time |
+| `NODEX_REGISTRY` | CLI registry override; flag and project config take precedence |
+| `NODEX_TOKEN` | CLI session token for unattended use |
+| `NODEX_CONFIG_DIR` | Optional CLI credential-directory override |
 
-Put the client ID and secret in `.env` and restart the dev server. `.env` is
-gitignored; if the secret is ever exposed, rotate it in GitHub rather than
-deleting the message.
+`.env` is gitignored. Next explicitly loads the root file. CLI credentials live
+separately in `~/.nodex/auth.json` with mode `0600`; project config never holds
+a token. `nodex login`, `whoami` and `logout` manage CLI sessions. Public file
+requests carry no bearer token; authenticated registry requests are confined to
+same-origin `api/` paths.
 
-Without a GitHub app the login page says so and the rest of the site is
-unaffected. `npm run db:down` stops the database.
-
-## Running it as a container
-
-The `Dockerfile` at the root builds the web app. The context is the repository
-root, not `apps/web`, because the image builds the registry before the app.
+## Deploy and publish
 
 ```bash
 docker build -t nodex .
-docker run -p 4180:4180 \
-  -e DATABASE_URL=postgres://user:pass@host:5432/nodex \
-  -e NEXT_PUBLIC_SITE_URL=https://your.host \
-  -e GITHUB_CLIENT_ID=... -e GITHUB_CLIENT_SECRET=... \
-  nodex
+docker run -p 4180:4180 --env-file .env nodex
 ```
 
-Everything above is runtime configuration, so one image serves any hostname.
-The app starts and serves public pages even with none of it set; only accounts
-need it. Migrations travel in the image, so a deployment can apply its own
-schema with `node scripts/migrate.mjs`.
-
-One value is different. `NEXT_PUBLIC_REGISTRY_URL` is a **build argument**, not
-runtime config, because Next inlines `NEXT_PUBLIC_*` into the browser bundle and
-the code reading it runs in the browser:
+Use the repository root as the Docker context. The dependency stage caches Chromium
+and its OS libraries; the build generates registry previews and Next. Runtime carries Next's standalone
+output and migrations. Run `node scripts/migrate.mjs` in the container to apply
+its schema. For CDN hosting:
 
 ```bash
 docker build --build-arg NEXT_PUBLIC_REGISTRY_URL=https://cdn.example.com -t nodex .
 ```
 
-`.github/workflows/docker.yml` publishes to Docker Hub on every push to `main`
-and on `v*` tags. It needs `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` as
-repository secrets, and optionally `DOCKERHUB_REPOSITORY` and
-`NEXT_PUBLIC_REGISTRY_URL` as repository variables. The image is `linux/amd64`
-only; see the workflow comments for what an arm64 build would need.
+The existing Docker workflow publishes on `main` and version tags, using
+`DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. Optional variables are
+`DOCKERHUB_REPOSITORY` and `NEXT_PUBLIC_REGISTRY_URL`. The image targets amd64.
 
-## Deploying with Helm
+The Helm chart in `helm/nodex` deploys the app with an optional external database
+and a migration Job. Its release workflow requires a chart-version bump:
 
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm install nodex nodex/nodex --set siteUrl=https://nodex.example.com
 ```
 
-The chart lives in `helm/nodex` and deploys the app alone: no database is
-bundled and none is required. Accounts turn on by setting `database.url` and
-the GitHub credentials, and schema migrations then run as a pre-upgrade Job
-from the same image.
+`npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
+`@kubitnodes/nodex`, has no runtime dependencies on the monorepo. The npm workflow
+publishes on version tags or manual runs, requires `NPM_TOKEN` with rights to
+that package, and verifies the packed artifact before publishing.
 
-`.github/workflows/helm-publish.yml` packages the chart to the `gh-pages`
-branch whenever `helm/**` changes on `main`. Releasing is bumping `version:` in
-`helm/nodex/Chart.yaml`: a version already published is never repackaged, so a
-run without a bump is a no-op. Serving it needs GitHub Pages pointed at
-`gh-pages`, which is a one-time setting.
+## Extend the catalogue
 
-## Prerequisites
-
-- Node.js 20 or newer (developed on 25)
-- npm 10 or newer
-- Docker, only for the accounts database
-
-## Setup
-
-```bash
-npm install
-```
-
-## Commands
-
-| Command | What it does |
-| --- | --- |
-| `npm run build:registry` | Validate, generate previews and `tokens.css`, emit the manifest |
-| `npm run check:registry` | Validate only, no writes. Handy before committing |
-| `npm run check:shell` | Fail if the app uses a primitive its layout does not load |
-| `npm run db:up` / `db:down` | Start or stop the accounts database |
-| `npm run db:migrate` | Apply pending SQL migrations, once each |
-| `npm run smoke` | Mount all 64 components in a real DOM and assert they draw |
-| `npm run smoke:cli` | Run init and add against a temporary project |
-| `npm run dev` | Next dev server on port 4180 |
-| `npm run build` | Build the registry, then the site |
-| `npm start` | Serve the production build on port 4180 |
-| `npm run lint` | ESLint across the workspace |
-| `npm run typecheck` | Types across the workspace and the site |
-
-`npm run build:registry` writes three kinds of output:
-
-- `registry/languages/<slug>/tokens.css` — generated from `tokens.json`
-- `registry/languages/<slug>/expressive/<slug>/index.html` — a standalone
-  preview document, generated by wrapping the component fragment in page chrome
-- `public/r/` — the public manifest and one JSON file per component
-
-All three are build artifacts and are gitignored.
-
-## Looking at the components
-
-`npm run dev` and browse:
-
-- `/` the landing page, built from live registry components. Static
-- `/login` the sign-in gate
-- `/languages` the language index, each language a live composite of its own components
-- `/l/[slug]` the language: tokens, primitives, filterable chart grid, and the rendered `DESIGN.md`
-- `/l/[slug]/[name]` one component, full size, with its `nodex add` command
-
-The `/l/*` routes are prerendered from the manifest. `/languages` and `/login`
-read the session, so they render on demand.
-
-Sign-in is a sequencing gate, not authentication: there is no identity provider
-yet, and every language is public. See `AGENTS.md` before building on it.
-
-Charts draw when scrolled into view and replay on click. Individual previews are
-directly openable too, for example
-`/registry/languages/mono-editorial/expressive/barcode-lollipop/index.html`.
-
-## Project structure
-
-```
-registry/
-  languages/<slug>/
-    meta.json        name, visibility, declared density values, featured list
-    tokens.json      the values — the source of truth
-    tokens.css       GENERATED from tokens.json
-    DESIGN.md        the written language: what tokens cannot encode
-    expressive/<slug>/
-      component.html   fragment — this is what gets distributed
-      component.css    scoped to .nx-<slug>
-      component.js     exports mount(root)
-      meta.json        type, density, runtime, aspect ratio, tags
-      index.html       GENERATED standalone preview
-                       (a chart authored now is component.tsx + .css instead,
-                       with no markup file — its markup is in the module)
-  primitives/<name>/   24 shared primitives. ONE implementation,
-                       shared by every language, token variables only
-      component.tsx    a specimen sheet of every variant, as JSX
-      component.css    the actual artifact — what you are copying
-      meta.json        title, description, tags
-      index.html       GENERATED preview, themed by a ?lang= parameter
-packages/core/       the registry contract: schemas, taxonomy, loader
-packages/cli/        the nodex CLI
-apps/web/            Next.js + React + TS + Tailwind browse app
-  src/app/             routes; layout links the primitives the shell is built from
-  src/app/api/         OAuth start and callback
-  src/components/      the views, plus Preview and the chrome
-  src/lib/             registry client, hooks, session, database, GitHub
-  migrations/          numbered SQL, applied once each by scripts/migrate.mjs
-  public/              GENERATED copy of the registry, for Next to serve
-skills/nodex/        the skill shipped to consumers
-.agents/skills/nodex-authoring/   how to add languages and components here
-scripts/
-  build-registry.mjs        validate + generate + emit
-  sync-registry-public.mjs  copy the registry into apps/web/public
-  echarts-ssr.mjs           render a chart to SVG with no DOM, for previews
-                            and for the lint. Build-only, never shipped
-  check-shell-primitives.mjs  the app loads every primitive it uses
-  migrate.mjs               apply SQL migrations
-  smoke-components.mjs      assert every component draws — by mounting it, or
-                            for a React chart by reading its rendered preview
-  smoke-cli.mjs             init and add against a temporary project
-tmp/                 gitignored scratch space
-```
-
-The 64 charts were extracted once from a single-file sample by a throwaway script
-that has since been removed. The registry is the source of truth now; see
-`AGENTS.md` if you need to recover the extractor from history.
-
-## Configuration
-
-None yet. No environment variables, no database, no server — the registry is
-static files and the build is a pure function over them. That changes in Phase 5,
-when accounts arrive.
-
-## Adding a design language
-
-```bash
-node packages/cli/src/index.ts new-language <slug>
-```
-
-Scaffolds the standard folder shape, so a language never starts as a copy of an
-existing one. Languages are discovered by directory; nothing needs registering.
-
-The full procedure lives in `.agents/skills/nodex-authoring/SKILL.md`.
+Read [AGENTS.md](AGENTS.md) for architecture and
+[the authoring skill](.agents/skills/nodex-authoring/SKILL.md) for the exact
+procedure. `node packages/cli/src/index.ts new-language <slug>` scaffolds a new
+language with all shared primitive roles, seeded from the checkout's canonical
+Mono Editorial values while retaining neutral paint and system fonts. Customize
+those roles in the new language's `tokens.json`. Components are discovered from source metadata; routes and delivery
+addresses come from the generated manifests.

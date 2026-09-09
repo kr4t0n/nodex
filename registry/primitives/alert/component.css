@@ -1,3 +1,4 @@
+@layer components {
 /* alert - shared primitive, themed by the active language's tokens.
 
    A note that interrupts the reading, for a caveat, a limit, or a consequence.
@@ -11,20 +12,20 @@
 .nx-alert {
   display: flex;
   flex-direction: column;
-  gap: 0.35em;
-  padding: 12px 0 12px 14px;
-  border-left: calc(var(--nx-hairline) * 2) solid var(--nx-grid);
+  gap: var(--nx-space-alertGap);
+  padding: var(--nx-space-alertPadding);
+  border-left: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-grid);
   font-family: var(--nx-font-sans);
-  font-size: 11.5px;
-  line-height: 1.7;
+  font-size: var(--nx-type-body-size);
+  line-height: var(--nx-type-body-lineHeight);
   color: var(--nx-ink);
 }
 
 .nx-alert__title {
   margin: 0;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
 }
@@ -53,7 +54,7 @@
    loud as a language without colour can be, and it is loud enough because
    nothing else on the page looks like it. */
 .nx-alert--critical {
-  border-left-width: calc(var(--nx-hairline) * 5);
+  border-left-width: calc(var(--nx-stroke-hairline) * 5);
   border-left-color: var(--nx-ink);
 }
 
@@ -62,7 +63,7 @@
 }
 
 .nx-alert--critical .nx-alert__body {
-  font-weight: 600;
+  font-weight: var(--nx-font-weight-semibold);
 }
 
 /* Inverted, for an alert on an inverted card. */
@@ -73,4 +74,5 @@
 
 .nx-alert--invert .nx-alert__title {
   color: var(--nx-muted);
+}
 }

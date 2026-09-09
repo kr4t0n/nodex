@@ -91,8 +91,8 @@ export const PRIMITIVE_TYPES = [
 
 export type PrimitiveType = (typeof PRIMITIVE_TYPES)[number];
 
-/** How a component is meant to be read — never how it is drawn. */
-export const RUNTIMES = ['svg', 'echarts', 'css'] as const;
+/** React is the delivery runtime. A chart's library is declared separately. */
+export const RUNTIMES = ['react'] as const;
 
 export type Runtime = (typeof RUNTIMES)[number];
 

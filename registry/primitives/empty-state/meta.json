@@ -4,7 +4,57 @@
   "description": "A dashed boundary marking something provisional, with a hint that says how to fill it",
   "component": "empty-state",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["feedback", "structure"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "feedback",
+    "structure"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "EmptyState"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "title",
+      "type": "ReactNode",
+      "description": "Main empty-state message.",
+      "required": true
+    },
+    {
+      "name": "hint",
+      "type": "ReactNode",
+      "description": "Optional explanation of how to populate the empty area.",
+      "required": false
+    },
+    {
+      "name": "action",
+      "type": "ReactNode",
+      "description": "Optional caller-supplied action below the content.",
+      "required": false
+    },
+    {
+      "name": "quiet",
+      "type": "boolean",
+      "description": "Reduce the container treatment; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "centered",
+      "type": "boolean",
+      "description": "Center the content with the spacious treatment; defaults to false.",
+      "required": false
+    }
+  ]
 }

@@ -4,7 +4,39 @@
   "description": "One class that styles authored long-form text: headings, lists, quotes, tables, and code",
   "component": "prose",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["text", "documentation"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "text",
+    "documentation"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Prose"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 440
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "narrow",
+      "type": "boolean",
+      "description": "Use the compact reading treatment; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Content whose descendant headings, paragraphs, lists, links, tables and code receive prose styling.",
+      "required": false
+    }
+  ]
 }

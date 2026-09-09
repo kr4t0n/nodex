@@ -4,7 +4,52 @@
   "description": "Native radio marked with a filled dot, echoing how the charts mark a chosen point",
   "component": "radio",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["form", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "form",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Radio",
+    "RadioGroup"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Radio: visible label wrapping the native input.",
+      "required": true
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Radio: native group name. Share it within a group and keep it distinct from other groups on the page.",
+      "required": true
+    },
+    {
+      "name": "wrapperClassName",
+      "type": "string",
+      "description": "Radio: classes on the outer label. className and ref target the input.",
+      "required": false
+    },
+    {
+      "name": "orientation",
+      "type": "'horizontal' | 'vertical'",
+      "description": "RadioGroup only: layout and aria-orientation; defaults to vertical. Supply the group accessible name through native ARIA props.",
+      "required": false
+    }
+  ]
 }

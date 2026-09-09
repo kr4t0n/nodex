@@ -1,49 +1,39 @@
-/**
- * Table — every variant, as a specimen sheet.
- *
- * Hairline rules between rows, tabular numerals, emphasis by weight rather than fill
- *
- * This is not a component API. A primitive's artifact is its stylesheet, and
- * this file records which classes produce which variant so you can copy the one
- * you need. Apply the classes to your own element, or to a headless Radix or
- * Ark component when you need real keyboard and ARIA behaviour — that is what
- * keeps the presentational rule intact for controls this file cannot implement.
- */
-export function TableSpecimens() {
-  return (
-    <>
-      <table className="nx-table">
-        <caption>Revenue by plan, Q2</caption>{' '}
-        <thead>
-          <tr>
-            <th scope="col">Plan</th>{' '}
-            <th scope="col">Accounts</th>{' '}
-            <th scope="col" className="nx-num">MRR</th>
-          </tr>
-        </thead>{' '}
-        <tbody>
-          <tr>
-            <td>Starter</td>{' '}
-            <td className="nx-cell--quiet">1,284</td>{' '}
-            <td className="nx-num">182.4</td>
-          </tr>{' '}
-          <tr>
-            <td>Pro</td>{' '}
-            <td className="nx-cell--quiet">612</td>{' '}
-            <td className="nx-num">486.1</td>
-          </tr>{' '}
-          <tr>
-            <td>Team</td>{' '}
-            <td className="nx-cell--quiet">207</td>{' '}
-            <td className="nx-num">391.7</td>
-          </tr>{' '}
-          <tr className="nx-row--strong">
-            <td>Total</td>{' '}
-            <td className="nx-cell--quiet">2,103</td>{' '}
-            <td className="nx-num">1,060.2</td>
-          </tr>
-        </tbody>
-      </table>
-    </>
-  );
+import type { ComponentPropsWithRef } from 'react';
+import './component.css';
+
+export type TableProps = ComponentPropsWithRef<'table'> & { interactive?: boolean };
+
+/** interactive styles rows; put real links or buttons in cells for keyboard interaction. */
+export function Table({ interactive = false, className = '', ...props }: TableProps) {
+  return <table {...props} className={`nx-table${interactive ? ' nx-table--interactive' : ''} ${className}`.trim()} />;
+}
+
+export function TableCaption(props: ComponentPropsWithRef<'caption'>) {
+  return <caption {...props} />;
+}
+
+export function TableHeader(props: ComponentPropsWithRef<'thead'>) {
+  return <thead {...props} />;
+}
+
+export function TableBody(props: ComponentPropsWithRef<'tbody'>) {
+  return <tbody {...props} />;
+}
+
+export type TableRowProps = ComponentPropsWithRef<'tr'> & { strong?: boolean };
+
+export function TableRow({ strong = false, className = '', ...props }: TableRowProps) {
+  return <tr {...props} className={`${strong ? 'nx-row--strong' : ''} ${className}`.trim() || undefined} />;
+}
+
+export type TableHeadProps = ComponentPropsWithRef<'th'> & { numeric?: boolean };
+
+export function TableHead({ numeric = false, scope = 'col', className = '', ...props }: TableHeadProps) {
+  return <th {...props} scope={scope} className={`${numeric ? 'nx-num' : ''} ${className}`.trim() || undefined} />;
+}
+
+export type TableCellProps = ComponentPropsWithRef<'td'> & { numeric?: boolean; quiet?: boolean };
+
+export function TableCell({ numeric = false, quiet = false, className = '', ...props }: TableCellProps) {
+  return <td {...props} className={[numeric && 'nx-num', quiet && 'nx-cell--quiet', className].filter(Boolean).join(' ') || undefined} />;
 }

@@ -1,35 +1,76 @@
+'use client';
+
+import { useEffect, useId, useRef } from 'react';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
+import './component.css';
+
+export type DialogProps = Omit<ComponentPropsWithRef<'dialog'>, 'title'> & {
+  title: ReactNode;
+  description?: ReactNode;
+  actions?: ReactNode;
+  onOpenChange?: (open: boolean) => void;
+  modal?: boolean;
+  inline?: boolean;
+  wide?: boolean;
+};
+
 /**
- * Dialog — every variant, as a specimen sheet.
- *
- * Native dialog with a mixed-ink backdrop, since a language with no elevation model cannot lift a panel with a shadow
- *
- * This is not a component API. A primitive's artifact is its stylesheet, and
- * this file records which classes produce which variant so you can copy the one
- * you need. Apply the classes to your own element, or to a headless Radix or
- * Ark component when you need real keyboard and ARIA behaviour — that is what
- * keeps the presentational rule intact for controls this file cannot implement.
+ * Control open with onOpenChange, or omit open and use the native dialog ref.
+ * Modal dialogs use the browser's top layer, focus management, and Escape handling.
+ * inline is for a visible, nonmodal specimen in documentation.
  */
-export function DialogSpecimens() {
+export function Dialog({ title, description, actions, open, onOpenChange, modal = true, inline = false, wide = false, className = '', children, ref, onClose, onCancel, ...props }: DialogProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || inline || open === undefined) return;
+    if (open && !dialog.open) {
+      if (modal) dialog.showModal();
+      else dialog.show();
+    } else if (!open && dialog.open) {
+      dialog.close();
+    }
+  }, [open, modal, inline]);
+
   return (
-    <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', width: '100%', maxWidth: '440px' }}>
-        {/* Rendered open and in flow so the styling is visible here. In use, omit `open` and `nx-dialog--inline`, then call el.showModal() to get the top layer, the focus trap, and the backdrop. */}{' '}
-        <dialog className="nx-dialog nx-dialog--inline" open>
-          <div className="nx-dialog__body">
-            <h2 className="nx-dialog__title">Replace this component?</h2>{' '}
-            <p className="nx-dialog__sub">
-              You have edited this file since adding it. Fetching it again overwrites{' '}
-              your changes, and nodex keeps no copy of them.
-            </p>
-          </div>{' '}
-          <div className="nx-dialog__actions">
-            <button className="nx-dialog__action" type="button">Keep mine</button>{' '}
-            <button className="nx-dialog__action nx-dialog__action--confirm" type="button">
-              Overwrite
-            </button>
-          </div>
-        </dialog>
+    <dialog
+      {...props}
+      ref={(element) => {
+        dialogRef.current = element;
+        if (typeof ref === 'function') return ref(element);
+        if (ref) ref.current = element;
+      }}
+      open={inline ? open : undefined}
+      className={`nx-dialog${inline ? ' nx-dialog--inline' : ''}${wide ? ' nx-dialog--wide' : ''} ${className}`.trim()}
+      aria-labelledby={props['aria-labelledby'] ?? titleId}
+      aria-describedby={props['aria-describedby'] ?? ((description !== undefined && description !== null) ? descriptionId : undefined)}
+      onClose={(event) => {
+        onClose?.(event);
+        if (open !== false) onOpenChange?.(false);
+      }}
+      onCancel={(event) => {
+        onCancel?.(event);
+        if (!event.defaultPrevented && open !== undefined && onOpenChange) {
+          event.preventDefault();
+          onOpenChange(false);
+        }
+      }}
+    >
+      <div className="nx-dialog__body">
+        <h2 className="nx-dialog__title" id={titleId}>{title}</h2>
+        {(description !== undefined && description !== null) && <p className="nx-dialog__sub" id={descriptionId}>{description}</p>}
+        {children}
       </div>
-    </>
+      {(actions !== undefined && actions !== null) && <div className="nx-dialog__actions">{actions}</div>}
+    </dialog>
   );
+}
+
+export type DialogActionProps = ComponentPropsWithRef<'button'> & { confirm?: boolean };
+
+export function DialogAction({ confirm = false, type = 'button', className = '', ...props }: DialogActionProps) {
+  return <button {...props} type={type} className={`nx-dialog__action${confirm ? ' nx-dialog__action--confirm' : ''} ${className}`.trim()} />;
 }

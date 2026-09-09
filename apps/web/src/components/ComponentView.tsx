@@ -17,7 +17,6 @@ import {
   findItem,
   loadCatalog,
   previewUrl,
-  primitivePreviewUrl,
   type Catalog,
 } from '@/lib/registry.ts';
 
@@ -55,14 +54,11 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
     );
   }
 
-  // Primitives are stored once and browsed under every language, so their
-  // preview takes the viewed language as a parameter. They also render at true
-  // size rather than scaled: a button shrunk to a quarter misrepresents it.
+  // Shared primitives use the viewed language and render at their natural size.
+  // Charts preserve the specimen's composition and scale to the available width.
   const isPrimitive = item.meta.tier === 'primitive';
 
-  const embedSrc = isPrimitive
-    ? primitivePreviewUrl(item.name, slug)
-    : previewUrl(slug, item.name);
+  const embedSrc = previewUrl(item, slug);
 
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
@@ -102,6 +98,8 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
               <Preview
                 src={embedSrc}
                 title={item.title}
+                width={item.meta.preview.width}
+                height={item.meta.preview.height}
                 aspectRatio={item.meta.aspectRatio}
                 fluid={isPrimitive}
               />
@@ -118,14 +116,14 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                     className="py-2.5 text-[9px] font-bold tracking-[0.08em] uppercase"
                     style={{
                       color: 'var(--nx-muted)',
-                      borderTop: 'var(--nx-hairline) solid var(--nx-grid)',
+                      borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)',
                     }}
                   >
                     {label}
                   </dt>
                   <dd
                     className="m-0 py-2.5 text-[11.5px]"
-                    style={{ borderTop: 'var(--nx-hairline) solid var(--nx-grid)' }}
+                    style={{ borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)' }}
                   >
                     {value}
                   </dd>

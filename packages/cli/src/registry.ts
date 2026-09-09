@@ -1,31 +1,19 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
 import type { Density, NodexMeta } from '@nodex/core/schema';
 
 import { tokenFor } from './config.ts';
-
-/**
- * A registry is addressed by its ROOT, not by its manifest.
- *
- * Everything hangs off that root at a fixed shape:
- *   <root>/r/registry.json      the manifest
- *   <root>/r/languages.json     language metadata
- *   <root>/<item.files[].path>  component sources
- *
- * The root can be a local directory or an https base, and nothing else in the
- * CLI cares which. That is deliberate: it means the registry can move to a CDN
- * later without touching a single command.
- */
+import { containedPath, registryPath } from './safety.ts';
 
 export interface Item {
   name: string;
   title: string;
   description?: string;
-  dependencies?: string[];
-  files?: Array<{ path: string; target?: string }>;
-  meta: NodexMeta & { externalData?: string[] };
+  dependencies: string[];
+  files: Array<{ path: string; target: string }>;
+  meta: NodexMeta;
 }
 
 export interface Language {
@@ -36,165 +24,190 @@ export interface Language {
   density?: Density[];
   featured: string[];
   counts?: { expressive: number; primitives: number };
+  files: { tokens: string; tokensJson: string; design: string };
 }
 
 export interface Registry {
+  /** Canonical served root: a URL, or a built public directory. */
   root: string;
   isRemote: boolean;
   items: Item[];
   languages: Language[];
-  /** Read any file addressed relative to the registry root. */
   read(relative: string): Promise<string>;
 }
 
-/**
- * Where the CLI looks when nothing else says otherwise.
- *
- * It is a plain registry root, so it is reached by exactly the path any other
- * root is: `r/registry.json` for the manifest, `<item.files[].path>` for
- * sources. No command knows it is the default, and moving it to a CDN later is
- * a change to this string alone.
- *
- * It is the last resort, and there is no longer anything between it and the
- * environment. The CLI used to walk up from the cwd looking for a built
- * manifest and prefer that, which meant running any command inside a nodex
- * checkout silently addressed the working tree instead of the deployment —
- * `login` reported there was nothing to sign in to, and a stray `nodex.json`
- * anywhere above the checkout flipped it back again. Both are confusing in a
- * way that is hard to attribute. A local root is still reachable, but only by
- * asking for it: `--registry .` or `NODEX_REGISTRY`.
- */
 export const DEFAULT_REGISTRY = 'https://nodex.kubitnodes.com';
 
-function isUrl(value: string): boolean {
-  return /^https?:\/\//.test(value);
+function record(value: unknown, label: string): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`Invalid registry: ${label} must be an object.`);
+  }
+  return value as Record<string, unknown>;
 }
 
-/**
- * Precedence: `--registry`, then `nodex.json`, then `NODEX_REGISTRY`, then the
- * hosted default.
- *
- * Every step is something someone wrote down. Nothing is inferred from where
- * the command happened to be run, which is what makes the resolved root
- * predictable from the arguments and the project alone.
- *
- * `nodex.json` outranks the environment so a project pinned to one registry
- * cannot be silently served by another. `init` records the root it used
- * whenever it is remote, which is what makes that pin exist at all.
- */
-export async function resolveRegistry(explicit?: string): Promise<Registry> {
-  const candidate =
-    explicit ?? process.env.NODEX_REGISTRY ?? DEFAULT_REGISTRY;
+function string(value: unknown, label: string): asserts value is string {
+  if (typeof value !== 'string' || !value.length) {
+    throw new Error(`Invalid registry: ${label} must be a non-empty string.`);
+  }
+}
 
-  const remote = isUrl(candidate);
-  const root = remote ? candidate.replace(/\/+$/, '') : path.resolve(candidate);
+function strings(value: unknown, label: string): asserts value is string[] {
+  if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string')) {
+    throw new Error(`Invalid registry: ${label} must be a string array.`);
+  }
+}
 
-  /**
-   * Served layout is canonical: `r/*` for the manifest, `registry/*` for
-   * sources. A checkout does not match it exactly, because the manifest is
-   * written into `public/` so a static host exposes it at `/r` while sources
-   * stay at the repo root. One prefix rule reconciles the two, and keeping it
-   * here means no command has to care which kind of registry it is talking to.
-   */
-  const localPath = (clean: string): string =>
-    clean.startsWith('r/')
-      ? path.join(root, 'public', clean)
-      : path.join(root, clean);
-
-  /**
-   * Read a file addressed relative to the registry root.
-   *
-   * The token is attached ONLY to paths under `api/`, never to the static ones.
-   * Public content is served straight off a CDN, and a bearer token sent there
-   * is handed to a third party for nothing: those paths need no authorization at
-   * all. The manifest decides which is which by where it points a file, so this
-   * needs no per-language policy.
-   */
-  const read = async (relative: string): Promise<string> => {
-    const clean = relative.replace(/^\/+/, '');
-    if (remote) {
-      const guarded = clean.startsWith('api/');
-      const token = guarded ? await tokenFor(root) : undefined;
-
-      const res = await fetch(`${root}/${clean}`, {
-        headers: token ? { authorization: `Bearer ${token}` } : undefined,
-      });
-
-      if (res.status === 401 || res.status === 403) {
-        throw new Error(
-          `${root}/${clean} requires access you do not have.\n` +
-            (token
-              ? '  Your sign in may have expired. Try `nodex login` again.'
-              : '  Run `nodex login` first.'),
-        );
-      }
-      if (!res.ok) {
-        throw new Error(`${root}/${clean} returned ${res.status}`);
-      }
-      return res.text();
+/** Validate the public wire contract without adding a runtime schema dependency. */
+function readItems(value: unknown): Item[] {
+  const manifest = record(value, 'manifest');
+  if (!Array.isArray(manifest.items)) throw new Error('Invalid registry: items are required.');
+  const refs = new Set<string>();
+  for (const value of manifest.items) {
+    const item = record(value, 'item');
+    string(item.name, 'item.name');
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.name)) throw new Error('Invalid component slug.');
+    string(item.title, 'item.title');
+    strings(item.dependencies, 'item.dependencies');
+    const meta = record(item.meta, 'item.meta');
+    for (const key of ['language', 'component', 'entry']) string(meta[key], `meta.${key}`);
+    if (meta.runtime !== 'react' || !['primitive', 'expressive'].includes(String(meta.tier))) {
+      throw new Error('Invalid registry: components must declare the React contract.');
     }
-    return readFile(localPath(clean), 'utf8');
-  };
-
-  let manifest: { items?: Item[] };
-  try {
-    manifest = JSON.parse(await read('r/registry.json')) as { items?: Item[] };
-  } catch (cause) {
-    throw new Error(
-      `Could not read the manifest for ${root}.\n` +
-        (remote
-          ? '  Check you are online, and that the URL is a registry root\n' +
-            '  rather than the manifest itself.'
-          : '  Run `npm run build:registry` in the nodex checkout first.'),
-      { cause },
-    );
+    strings(meta.tags, 'meta.tags');
+    strings(meta.exports, 'meta.exports');
+    if (meta.externalData === undefined) meta.externalData = [];
+    strings(meta.externalData, 'meta.externalData');
+    if (!meta.exports.length || meta.exports.some((name) => !/^[A-Za-z_$][\w$]*$/.test(name))) {
+      throw new Error('Invalid registry: explicit component exports are required.');
+    }
+    registryPath(meta.entry as string, 'component entry');
+    const preview = record(meta.preview, 'meta.preview');
+    string(preview.path, 'meta.preview.path');
+    registryPath(preview.path, 'preview path');
+    if (![preview.width, preview.height].every((v) => typeof v === 'number' && Number.isFinite(v) && v > 0)) {
+      throw new Error('Invalid registry: preview dimensions must be positive numbers.');
+    }
+    if (meta.props !== undefined) {
+      if (!Array.isArray(meta.props)) throw new Error('Invalid registry: props must be an array.');
+      for (const value of meta.props) {
+        const prop = record(value, 'prop');
+        string(prop.name, 'prop.name');
+        string(prop.type, 'prop.type');
+        if (prop.description !== undefined && typeof prop.description !== 'string') {
+          throw new Error('Invalid registry: prop.description must be text.');
+        }
+        if (prop.required !== undefined && typeof prop.required !== 'boolean') {
+          throw new Error('Invalid registry: prop.required must be boolean.');
+        }
+      }
+    }
+    if (!Array.isArray(item.files) || !item.files.length) throw new Error('Invalid registry: item files are required.');
+    const targets = new Set<string>();
+    for (const value of item.files) {
+      const file = record(value, 'file');
+      string(file.path, 'file.path');
+      string(file.target, 'file.target');
+      registryPath(file.path, 'source path');
+      registryPath(file.target, 'target path');
+      if (targets.has(file.target)) throw new Error(`Duplicate target ${file.target}.`);
+      targets.add(file.target);
+    }
+    if (!targets.has(meta.entry as string)) throw new Error('Invalid registry: entry must name a delivered target.');
+    const ref = `${meta.language}/${item.name}`;
+    if (refs.has(ref)) throw new Error(`Duplicate registry component ${ref}.`);
+    refs.add(ref);
   }
-
-  let languages: Language[];
-  try {
-    languages = JSON.parse(await read('r/languages.json')) as Language[];
-  } catch {
-    // Older registries may predate languages.json. Degrade to what the manifest
-    // itself implies rather than failing outright.
-    const slugs = [
-      ...new Set(
-        (manifest.items ?? [])
-          .map((item) => item.meta.language)
-          .filter((slug) => slug !== 'shared'),
-      ),
-    ];
-    languages = slugs.map((slug) => ({
-      slug,
-      name: slug,
-      description: '',
-      visibility: 'public' as const,
-      featured: [],
-    }));
-  }
-
-  return {
-    root,
-    isRemote: remote,
-    items: manifest.items ?? [],
-    languages,
-    read,
-  };
+  return manifest.items as Item[];
 }
 
-export function findLanguage(
-  registry: Registry,
-  slug: string,
-): Language | undefined {
-  return registry.languages.find((l) => l.slug === slug);
+function readLanguages(value: unknown): Language[] {
+  if (!Array.isArray(value)) throw new Error('Invalid registry: languages.json must be an array.');
+  const slugs = new Set<string>();
+  for (const candidate of value) {
+    const language = record(candidate, 'language');
+    string(language.slug, 'language.slug');
+    string(language.name, 'language.name');
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(language.slug) || slugs.has(language.slug)) {
+      throw new Error('Invalid or duplicate language slug.');
+    }
+    slugs.add(language.slug);
+    if (typeof language.description !== 'string' || !['public', 'restricted'].includes(String(language.visibility))) {
+      throw new Error('Invalid language description or visibility.');
+    }
+    strings(language.featured, 'language.featured');
+    const files = record(language.files, 'language.files');
+    for (const key of ['tokens', 'tokensJson', 'design']) {
+      string(files[key], `language.files.${key}`);
+      registryPath(files[key] as string, `language ${key} path`);
+    }
+  }
+  return value as Language[];
 }
 
-/**
- * Resolve a component reference.
- *
- * Accepts `mono-editorial/barcode-lollipop` (language-qualified) or a bare
- * `button` plus `--design`, which is how shared primitives are addressed since
- * they belong to no single language.
- */
+async function exists(file: string): Promise<boolean> {
+  try {
+    return (await stat(file)).isFile();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
+/** The caller resolves flag > project; environment > hosted default follow here. */
+export async function resolveRegistry(explicit?: string): Promise<Registry> {
+  const candidate = explicit ?? process.env.NODEX_REGISTRY ?? DEFAULT_REGISTRY;
+  const remote = /^https?:\/\//.test(candidate);
+  let root: string;
+  if (remote) {
+    const url = new URL(candidate);
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    if ((url.protocol !== 'https:' && !loopback) || url.username || url.password || url.search || url.hash) {
+      throw new Error('A registry must use HTTPS (HTTP is allowed for localhost), without credentials, query or fragment.');
+    }
+    root = url.toString().replace(/\/+$/, '');
+  } else {
+    const local = path.resolve(candidate);
+    const built = await exists(path.join(local, 'r/registry.json')) ? local : path.join(local, 'public');
+    try {
+      root = await realpath(built);
+    } catch (cause) {
+      throw new Error(`Could not read the built registry under ${local}. Run npm run build:registry first.`, { cause });
+    }
+  }
+
+  const read = async (relative: string): Promise<string> => {
+    const clean = registryPath(relative);
+    if (!remote) {
+      const file = await realpath(containedPath(root, clean));
+      containedPath(root, path.relative(root, file));
+      return readFile(file, 'utf8');
+    }
+    const target = new URL(`${root}/${clean}`);
+    if (target.origin !== new URL(root).origin) throw new Error('Registry files must remain on their registry origin.');
+    const token = clean.startsWith('api/') ? await tokenFor(root) : undefined;
+    const response = await fetch(target, {
+      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+      // A guarded file cannot redirect a bearer token to another route or host.
+      redirect: 'error',
+    });
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(`${target} requires access. ${token ? 'Try nodex login again.' : 'Run nodex login first.'}`);
+    }
+    if (!response.ok) throw new Error(`${target} returned ${response.status}.`);
+    return response.text();
+  };
+
+  const [manifest, languageList] = await Promise.all([
+    read('r/registry.json'),
+    read('r/languages.json'),
+  ]);
+  return { root, isRemote: remote, items: readItems(JSON.parse(manifest)), languages: readLanguages(JSON.parse(languageList)), read };
+}
+
+export function findLanguage(registry: Registry, slug: string): Language | undefined {
+  return registry.languages.find((language) => language.slug === slug);
+}
+
 export function findItem(
   registry: Registry,
   ref: string,
@@ -203,34 +216,10 @@ export function findItem(
   const slash = ref.indexOf('/');
   const language = slash === -1 ? design : ref.slice(0, slash);
   const name = slash === -1 ? ref : ref.slice(slash + 1);
-
-  if (!language) {
-    return {
-      error:
-        `"${ref}" does not say which design language it belongs to.\n` +
-        `  Use nodex add <language>/${name}, or pass --design <language>.`,
-    };
-  }
-
-  const exact = registry.items.find(
-    (item) => item.name === name && item.meta.language === language,
-  );
-  if (exact) return { item: exact, language };
-
-  // Primitives carry language "shared" but are requested per language.
-  const shared = registry.items.find(
-    (item) => item.name === name && item.meta.language === 'shared',
-  );
-  if (shared) return { item: shared, language };
-
-  const near = registry.items
-    .filter((item) => item.name.includes(name) || name.includes(item.name))
-    .slice(0, 4)
-    .map((item) => `${item.meta.language}/${item.name}`);
-
-  return {
-    error:
-      `No component named "${name}" in "${language}".` +
-      (near.length ? `\n  Close matches: ${near.join(', ')}` : ''),
-  };
+  if (!language) return { error: `"${ref}" needs a design language. Use <language>/${name} or --design <language>.` };
+  if (!findLanguage(registry, language)) return { error: `No design language named "${language}".` };
+  const item = registry.items.find((item) => item.name === name && item.meta.language === language)
+    ?? registry.items.find((item) => item.name === name && item.meta.language === 'shared');
+  if (item) return { item, language };
+  return { error: `No component named "${name}" in "${language}". Use nodex search to see available components.` };
 }

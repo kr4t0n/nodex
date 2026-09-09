@@ -4,7 +4,46 @@
   "description": "A checkbox with role=switch, for settings that take effect immediately rather than on submit",
   "component": "switch",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["form", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "form",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Switch",
+    "SwitchGroup"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Switch: visible label wrapping the native checkbox with role=\"switch\".",
+      "required": true
+    },
+    {
+      "name": "spread",
+      "type": "boolean",
+      "description": "Switch: place the label before the control and spread the row; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "wrapperClassName",
+      "type": "string",
+      "description": "Switch: classes on the outer label. className, ref and checked/onChange target the input; SwitchGroup accepts native div props.",
+      "required": false
+    }
+  ]
 }

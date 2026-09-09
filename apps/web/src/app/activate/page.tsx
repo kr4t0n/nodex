@@ -35,7 +35,7 @@ export default async function Page({
           <Link
             href="/languages"
             className="text-[13px] font-extrabold tracking-[0.1em] uppercase no-underline"
-            style={{ color: 'var(--nx-ink, #1C1C1A)' }}
+            style={{ color: 'var(--nx-ink)' }}
           >
             nodex
           </Link>
@@ -49,7 +49,7 @@ export default async function Page({
               </h1>
               <p
                 className="mt-5 mb-0 text-[13.5px] leading-[1.75]"
-                style={{ color: 'var(--nx-muted, #8F8E88)' }}
+                style={{ color: 'var(--nx-muted)' }}
               >
                 Signed in as {user.login}. Enter the code shown in your terminal.
               </p>
@@ -101,7 +101,7 @@ export default async function Page({
 
               <p
                 className="mt-8 mb-0 text-[11.5px] leading-[1.7]"
-                style={{ color: 'var(--nx-muted, #8F8E88)' }}
+                style={{ color: 'var(--nx-muted)' }}
               >
                 Only authorise a code you started yourself. It grants the
                 terminal that requested it the same access as this browser.
@@ -123,7 +123,7 @@ function Outcome({ done }: { done: string }) {
       </h1>
       <p
         className="mt-5 mb-0 text-[13.5px] leading-[1.75]"
-        style={{ color: 'var(--nx-muted, #8F8E88)' }}
+        style={{ color: 'var(--nx-muted)' }}
       >
         {approved
           ? 'You can close this tab. The terminal will pick it up within a few seconds.'

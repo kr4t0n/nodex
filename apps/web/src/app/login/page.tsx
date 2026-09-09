@@ -45,7 +45,7 @@ export default async function Page({
           <Link
             href="/"
             className="text-[13px] font-extrabold tracking-[0.1em] uppercase no-underline"
-            style={{ color: 'var(--nx-ink, #1C1C1A)' }}
+            style={{ color: 'var(--nx-ink)' }}
           >
             nodex
           </Link>
@@ -71,7 +71,7 @@ export default async function Page({
           ) : (
             <p
               className="mt-9 mb-0 max-w-[46ch] text-[12px] leading-[1.7]"
-              style={{ color: 'var(--nx-muted, #8F8E88)' }}
+              style={{ color: 'var(--nx-muted)' }}
             >
               This server has no GitHub app or database configured, so there is
               nothing to sign in to. See the setup steps in the README.

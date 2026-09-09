@@ -4,7 +4,51 @@
   "description": "Severity carried by rule weight rather than by hue, for a language with no accent colour",
   "component": "alert",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["feedback", "text"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "feedback",
+    "text"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Alert"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "title",
+      "type": "ReactNode",
+      "description": "Optional heading above the alert body.",
+      "required": false
+    },
+    {
+      "name": "severity",
+      "type": "'note' | 'important' | 'critical'",
+      "description": "Rule and text emphasis; defaults to note. Does not assign an alert role.",
+      "required": false
+    },
+    {
+      "name": "inverted",
+      "type": "boolean",
+      "description": "Use the inverted surface treatment; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Content inside the alert body. Add role=\"alert\" explicitly when an incoming message should interrupt the reader.",
+      "required": false
+    }
+  ]
 }

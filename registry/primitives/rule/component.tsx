@@ -1,31 +1,22 @@
-/**
- * Rule — every variant, as a specimen sheet.
- *
- * Hairline separator in strong, faint, dashed, vertical, and inset treatments
- *
- * This is not a component API. A primitive's artifact is its stylesheet, and
- * this file records which classes produce which variant so you can copy the one
- * you need. Apply the classes to your own element, or to a headless Radix or
- * Ark component when you need real keyboard and ARIA behaviour — that is what
- * keeps the presentational rule intact for controls this file cannot implement.
- */
-export function RuleSpecimens() {
-  return (
-    <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', width: '100%', maxWidth: '420px' }}>
-        <hr className="nx-rule" />{' '}
-        <hr className="nx-rule nx-rule--strong" />{' '}
-        <hr className="nx-rule nx-rule--faint" />{' '}
-        <hr className="nx-rule nx-rule--dashed" />{' '}
+import type { ComponentPropsWithRef } from 'react';
+import './component.css';
 
-        <div style={{ display: 'flex', alignItems: 'center', height: '26px' }}>
-          <span>Close read</span>{' '}
-          <hr className="nx-rule nx-rule--vertical" />{' '}
-          <span>Glance</span>{' '}
-          <hr className="nx-rule nx-rule--vertical" />{' '}
-          <span>All types</span>
-        </div>
-      </div>
-    </>
+export type RuleProps = ComponentPropsWithRef<'hr'> & {
+  tone?: 'default' | 'strong' | 'faint';
+  dashed?: boolean;
+  orientation?: 'horizontal' | 'vertical';
+  inset?: boolean;
+};
+
+export function Rule({ tone = 'default', dashed = false, orientation = 'horizontal', inset = false, className = '', ...props }: RuleProps) {
+  return (
+    <hr
+      {...props}
+      aria-orientation={orientation}
+      className={[
+        'nx-rule', tone !== 'default' && `nx-rule--${tone}`, dashed && 'nx-rule--dashed',
+        orientation === 'vertical' && 'nx-rule--vertical', inset && 'nx-rule--inset', className,
+      ].filter(Boolean).join(' ')}
+    />
   );
 }

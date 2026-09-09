@@ -4,7 +4,39 @@
   "description": "Hairline underline offset clear of descenders, with quiet, strong, and external treatments",
   "component": "link",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["text", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "text",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Link"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "variant",
+      "type": "'default' | 'quiet' | 'strong'",
+      "description": "Link emphasis; defaults to default.",
+      "required": false
+    },
+    {
+      "name": "external",
+      "type": "boolean",
+      "description": "Add the external-link visual mark; defaults to false. Native href, target and rel remain the caller choice.",
+      "required": false
+    }
+  ]
 }

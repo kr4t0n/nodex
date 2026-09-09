@@ -4,7 +4,63 @@
   "description": "Hairline rules between rows, tabular numerals, emphasis by weight rather than fill",
   "component": "table",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["data", "container"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "data",
+    "container"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Table",
+    "TableCaption",
+    "TableHeader",
+    "TableBody",
+    "TableRow",
+    "TableHead",
+    "TableCell"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "interactive",
+      "type": "boolean",
+      "description": "Table: enable row hover/focus styling; defaults to false. Put actual links or buttons in cells for interaction.",
+      "required": false
+    },
+    {
+      "name": "strong",
+      "type": "boolean",
+      "description": "TableRow only: emphasize a total or other important row; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "numeric",
+      "type": "boolean",
+      "description": "TableHead and TableCell only: align numeric columns; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "quiet",
+      "type": "boolean",
+      "description": "TableCell only: apply the quieter text tone; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "scope",
+      "type": "string",
+      "description": "TableHead only: native header association; defaults to col. Other table anatomy exports forward their native element props.",
+      "required": false
+    }
+  ]
 }

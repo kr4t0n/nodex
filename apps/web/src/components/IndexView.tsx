@@ -10,7 +10,6 @@ import { useLanguageTokens, useScopedLanguageTokens } from '@/lib/hooks.ts';
 import {
   loadCatalog,
   previewUrl,
-  primitivePreviewUrl,
   type Catalog,
   type Item,
   type Language,
@@ -21,8 +20,8 @@ import {
  * by looking. So a language is presented as a live composite of its own
  * components rather than a name and a paragraph.
  *
- * Deliberately thin while one language exists: there is nothing to compare yet.
- * It grows into a comparison surface when a second arrives.
+ * Scoped token layers let several languages appear together without changing
+ * the identity of neighboring tiles.
  */
 export function IndexView({
   user,
@@ -83,11 +82,8 @@ export function IndexView({
  * image can show: how colour is used (status), the type face (link), shape and
  * radius (slider), and mark weight (progress).
  *
- * Chosen for compatible natural height as well as for coverage. Primitives
- * render fluid, at true size, so the row is only as tidy as the components in
- * it: `stat` and `alert` are more characterful but measure 274px and 361px
- * against `badge`'s 63px, and a composite with a sixfold height spread reads as
- * broken rather than as varied. These four sit within 151px to 185px.
+ * These examples have compatible compositions for an unscaled tile. Their
+ * authored dimensions reserve space until each document reports its height.
  */
 const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
 
@@ -164,36 +160,17 @@ function LanguageTile({
   language: Language;
   items: Item[];
 }) {
-  const featured = language.featured.slice(0, 4);
+  const featured = language.featured.slice(0, 4).map((name) => items.find(
+    (item) => item.name === name && item.meta.language === language.slug,
+  )).filter((item): item is Item => item !== undefined);
 
   // A language under construction has tokens and primitives before it has a
   // single chart. Rendering nothing there makes a real language look broken.
   const showing = featured.length > 0 ? 'expressive' : 'primitives';
 
-  /**
-   * Label a tile from the manifest rather than from the component.
-   *
-   * The tiles used to show whatever the fragment labelled itself with, which
-   * held only while one language existed: mono-editorial's card anatomy opens
-   * with a title and a sentence, so its tiles read as labelled by accident.
-   * Signal Console's opens with the current value instead — deliberately, and
-   * its DESIGN.md says never to reorder it — so its tile arrived with no title
-   * at all beside four that had one.
-   *
-   * The manifest carries a title and a type for every component in every
-   * language, so reading them here is the only spelling that does not assume an
-   * anatomy. It is also what the language page already does for its grid cells.
-   */
-  const describe = (name: string, tier: 'expressive' | 'primitive') => {
-    const item = items.find(
-      (i) =>
-        i.name === name &&
-        (tier === 'primitive'
-          ? i.meta.tier === 'primitive'
-          : i.meta.language === language.slug),
-    );
-    return { title: item?.title ?? name, kind: item?.meta.component ?? '' };
-  };
+  const visibleItems = showing === 'expressive' ? featured : SAMPLE_PRIMITIVES.map(
+    (name) => items.find((item) => item.name === name && item.meta.tier === 'primitive'),
+  ).filter((item): item is Item => item !== undefined);
 
   return (
     /**
@@ -262,44 +239,23 @@ function LanguageTile({
           Subgrid, so a title or description that wraps to an extra line moves
           its own text and not its neighbours' previews out of line. */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {showing === 'expressive'
-          ? featured.map((name) => {
-              const { title, kind } = describe(name, 'expressive');
-              return (
-                <TileCell
-                  key={name}
-                  href={`/l/${language.slug}/${name}`}
-                  title={title}
-                  kind={kind}
-                >
-                  <Preview
-                    src={previewUrl(language.slug, name)}
-                    title={title}
-                    boxHeight={TILE_HEIGHT}
-                  />
-                </TileCell>
-              );
-            })
-          : SAMPLE_PRIMITIVES.map((name) => {
-              const { title, kind } = describe(name, 'primitive');
-              return (
-                <TileCell
-                  key={name}
-                  href={`/l/${language.slug}/${name}`}
-                  title={title}
-                  kind={kind}
-                >
-                  {/* Fluid, so the component is shown at the size it really is,
-                      but inside the same box as every other tile. */}
-                  <Preview
-                    src={primitivePreviewUrl(name, language.slug)}
-                    title={title}
-                    boxHeight={TILE_HEIGHT}
-                    fluid
-                  />
-                </TileCell>
-              );
-            })}
+        {visibleItems.map((item) => (
+          <TileCell
+            key={item.name}
+            href={`/l/${language.slug}/${item.name}`}
+            title={item.title}
+            kind={item.meta.component}
+          >
+            <Preview
+              src={previewUrl(item, language.slug)}
+              title={item.title}
+              width={item.meta.preview.width}
+              height={item.meta.preview.height}
+              boxHeight={TILE_HEIGHT}
+              fluid={item.meta.tier === 'primitive'}
+            />
+          </TileCell>
+        ))}
       </div>
 
       {showing === 'primitives' ? (

@@ -1,6 +1,7 @@
+@layer components {
 /* select - shared primitive, themed by the active language's tokens.
 
-   Presentational only. A native <select> is used deliberately: it is accessible,
+   A native <select> is used deliberately: it is accessible,
    keyboard-navigable, and correct on touch for free. Reach for a headless
    listbox (Radix, Ark) only when you genuinely need custom option rendering,
    then apply .nx-select to its trigger.
@@ -18,14 +19,14 @@
 .nx-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--nx-space-fieldGap);
   font-family: var(--nx-font-sans);
 }
 
 .nx-field__label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
 }
@@ -33,14 +34,15 @@
 .nx-select {
   appearance: none;
   width: 100%;
-  padding: 0.6em 2.2em 0.6em 0.95em;
-  border: var(--nx-hairline) solid var(--nx-grid);
+  padding: var(--nx-space-controlPadding);
+  padding-right: var(--nx-space-selectIndicatorPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-pill);
   background-color: var(--nx-bg);
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: var(--nx-type-control-size);
+  line-height: var(--nx-type-control-lineHeight);
   cursor: pointer;
   /* Two 1px bars rotated into a chevron. Sized to the hairline scale so it
      matches the weight of everything else in the language. */
@@ -54,7 +56,7 @@
     4px 4px,
     4px 4px;
   background-repeat: no-repeat;
-  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color var(--nx-motion-control-duration) var(--nx-motion-control-easing);
 }
 
 .nx-select:hover {
@@ -67,7 +69,7 @@
 }
 
 .nx-select:focus-visible {
-  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
   outline-offset: 2px;
 }
 
@@ -79,6 +81,7 @@
 /* Auto-width variant, for filter bars where a full-width control would be odd. */
 .nx-select--auto {
   width: auto;
+  align-self: flex-start;
 }
 
 /* The dropdown list.
@@ -108,8 +111,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.7em;
-    padding-right: 0.95em;
+    gap: var(--nx-space-selectGap);
+    padding: var(--nx-space-controlPadding);
     background-image: none;
   }
 
@@ -118,10 +121,10 @@
     content: '';
     width: 5px;
     height: 5px;
-    border-right: var(--nx-hairline) solid currentColor;
-    border-bottom: var(--nx-hairline) solid currentColor;
+    border-right: var(--nx-stroke-hairline) solid currentColor;
+    border-bottom: var(--nx-stroke-hairline) solid currentColor;
     transform: translateY(-1px) rotate(45deg);
-    transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
   }
 
   /* Motivated motion: the chevron points where the list now is. */
@@ -131,10 +134,10 @@
 
   .nx-select::picker(select) {
     background: var(--nx-bg);
-    border: var(--nx-hairline) solid var(--nx-grid);
+    border: var(--nx-stroke-hairline) solid var(--nx-grid);
     border-radius: var(--nx-radius-card);
-    padding: 6px;
-    margin-top: 6px;
+    padding: var(--nx-space-pickerPadding);
+    margin-top: var(--nx-space-pickerOffset);
     /* No shadow: this language has no elevation model. The hairline separates. */
     box-shadow: none;
   }
@@ -142,11 +145,11 @@
   .nx-select option {
     display: flex;
     align-items: center;
-    padding: 7px 12px;
+    padding: var(--nx-space-optionPadding);
     border-radius: var(--nx-radius-pill);
     background: transparent;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--nx-type-control-size);
+    line-height: var(--nx-type-control-lineHeight);
     cursor: pointer;
   }
 
@@ -158,7 +161,7 @@
 
   /* Selection reads by weight, consistent with how the table marks a total. */
   .nx-select option:checked {
-    font-weight: 700;
+    font-weight: var(--nx-type-label-weight);
   }
 
   /* The default checkmark is a glyph from the OS. Replace it with a mark that
@@ -182,4 +185,5 @@
   .nx-select::picker-icon {
     transition: none;
   }
+}
 }

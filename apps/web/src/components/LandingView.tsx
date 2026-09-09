@@ -13,8 +13,10 @@ import { usePrefersReducedMotion } from '@/lib/hooks.ts';
 import {
   expressiveFor,
   loadCatalog,
+  OWN_LANGUAGE,
   previewUrl,
   type Catalog,
+  type Item,
 } from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -57,23 +59,23 @@ export function LandingView() {
   const tagline = useRef<HTMLParagraphElement>(null);
   const barBg = useRef<HTMLDivElement>(null);
 
-  const language = catalog?.languages[0];
+  const language = catalog?.languages.find((entry) => entry.slug === OWN_LANGUAGE);
 
   useEffect(() => {
     void loadCatalog().then(setCatalog);
   }, []);
 
-  // Spread across the collection rather than the first few alphabetically, so
-  // the belt shows how much the language's range actually varies.
-  const runNames = useMemo(() => {
+  // Spread a large catalog across the run; repeat a small catalog so each
+  // eight-slot pass still covers a wide viewport before the loop seam arrives.
+  const runItems = useMemo(() => {
     if (!catalog || !language) return [];
     const all = expressiveFor(catalog, language.slug);
-    if (all.length <= RUN_LENGTH) return all.map((item) => item.name);
-    const step = Math.floor(all.length / RUN_LENGTH);
+    if (all.length === 0) return [];
+    const step = Math.max(1, Math.floor(all.length / RUN_LENGTH));
     return Array.from(
       { length: RUN_LENGTH },
-      (_, i) => all[i * step]?.name,
-    ).filter((name): name is string => Boolean(name));
+      (_, i) => all[(i * step) % all.length],
+    ).filter((item): item is Item => item !== undefined);
   }, [catalog, language]);
 
   /**
@@ -193,7 +195,7 @@ export function LandingView() {
           className="absolute inset-0 backdrop-blur-[6px]"
           style={{
             background:
-              'color-mix(in oklab, var(--nx-bg, #F0EFEB) 88%, transparent)',
+              'color-mix(in oklab, var(--nx-bg) 88%, transparent)',
           }}
         />
 
@@ -229,7 +231,7 @@ export function LandingView() {
             <p
               ref={tagline}
               className="m-0 max-w-[34ch] text-[14px] leading-[1.7]"
-              style={{ color: 'var(--nx-muted, #8F8E88)' }}
+              style={{ color: 'var(--nx-muted)' }}
             >
               Components that belong to a design language.
             </p>
@@ -248,11 +250,11 @@ export function LandingView() {
           is the scroll distance the fold happens across. */}
       <section ref={hero} className="min-h-[100dvh]" />
 
-      <ComponentBelt language={language?.slug} names={runNames} />
+      <ComponentBelt items={runItems} />
 
       <footer
         className="mx-auto max-w-[1400px] px-6 pb-14 lg:px-10"
-        style={{ color: 'var(--nx-muted, #8F8E88)' }}
+        style={{ color: 'var(--nx-muted)' }}
       >
         <hr className="nx-rule nx-rule--faint" />
         <p className="mt-6 mb-0 text-[11.5px]">
@@ -277,11 +279,9 @@ export function LandingView() {
  * ordinary horizontal scroller.
  */
 function ComponentBelt({
-  language,
-  names,
+  items,
 }: {
-  language?: string;
-  names: string[];
+  items: Item[];
 }) {
   const reduced = usePrefersReducedMotion();
   const wrap = useRef<HTMLDivElement>(null);
@@ -289,15 +289,15 @@ function ComponentBelt({
 
   useGSAP(
     () => {
-      if (reduced || !track.current || names.length === 0) return;
+      if (reduced || !track.current || items.length === 0) return;
       gsap.to(track.current, {
         xPercent: -50,
         ease: 'none',
-        duration: names.length * RUN_SECONDS_PER_CARD,
+        duration: items.length * RUN_SECONDS_PER_CARD,
         repeat: -1,
       });
     },
-    { scope: wrap, dependencies: [reduced, names.length], revertOnUpdate: true },
+    { scope: wrap, dependencies: [reduced, items.length], revertOnUpdate: true },
   );
 
   /**
@@ -335,21 +335,19 @@ function ComponentBelt({
               // listen to.
               aria-hidden={pass === 1}
             >
-              {names.map((name) => (
+              {items.map((item, index) => (
                 <figure
-                  key={name}
+                  key={`${pass}-${index}-${item.name}`}
                   className="m-0 shrink-0"
                   style={{ width: RUN_CARD_WIDTH }}
                 >
-                  {language ? (
-                    <Preview
-                      src={previewUrl(language, name)}
-                      title={name}
-                      boxHeight={RUN_CARD_HEIGHT}
-                    />
-                  ) : (
-                    <div style={{ height: RUN_CARD_HEIGHT }} />
-                  )}
+                  <Preview
+                    src={previewUrl(item)}
+                    title={item.title}
+                    width={item.meta.preview.width}
+                    height={item.meta.preview.height}
+                    boxHeight={RUN_CARD_HEIGHT}
+                  />
                 </figure>
               ))}
             </div>

@@ -7,11 +7,9 @@ dist/
 build/
 *.tsbuildinfo
 
-# generated registry artifacts — rebuilt by scripts/build-registry.mjs
-registry/**/index.html
-registry/**/component.preview.js
-registry/languages/*/tokens.css
+# generated registry artifacts — authored registry/ contains source only
 public/r/
+public/registry/
 
 # scratch space. The one-shot extractor lived here and was deleted once its
 # output was verified; recover it from git history if a chart's provenance is
@@ -32,6 +30,6 @@ tmp/
 apps/web/.next/
 apps/web/next-env.d.ts
 
-# registry copied into the web app by scripts/sync-registry-public.mjs so Next
+# registry copied into the web app by scripts/sync-registry-public.ts so Next
 # can serve it from public/ — always regenerated, never a source of truth
 apps/web/public/

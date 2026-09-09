@@ -74,7 +74,7 @@ export function TopBar<T extends string>({
                   height={20}
                   className="rounded-full"
                   style={{
-                    border: 'var(--nx-hairline) solid var(--nx-grid)',
+                    border: 'var(--nx-stroke-hairline) solid var(--nx-grid)',
                   }}
                 />
               ) : null}

@@ -4,7 +4,57 @@
   "description": "Single-value range on a hairline track with a filled or hollow thumb, plus optional ticks",
   "component": "slider",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["form", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "form",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Slider"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Visible label linked to the native range input.",
+      "required": true
+    },
+    {
+      "name": "valueLabel",
+      "type": "ReactNode",
+      "description": "Optional displayed value text; does not set or change the native input value.",
+      "required": false
+    },
+    {
+      "name": "hollow",
+      "type": "boolean",
+      "description": "Use the hollow thumb treatment; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "ticks",
+      "type": "number",
+      "description": "Optional positive finite tick subdivision count, rounded down. Omitted or invalid values hide the tick decoration.",
+      "required": false
+    },
+    {
+      "name": "wrapperClassName",
+      "type": "string",
+      "description": "Classes on the label/range wrapper. className, ref, value, min, max, step and onChange target the native range input.",
+      "required": false
+    }
+  ]
 }

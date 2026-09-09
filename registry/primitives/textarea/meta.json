@@ -4,7 +4,69 @@
   "description": "Multi-line field with vertical-only resize, a monospace variant, and content sizing where supported",
   "component": "textarea",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["form", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "form",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Textarea"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Visible label linked to the native textarea. An instance ID is generated unless id is supplied.",
+      "required": false
+    },
+    {
+      "name": "help",
+      "type": "ReactNode",
+      "description": "Helper content included in the textarea accessible description.",
+      "required": false
+    },
+    {
+      "name": "error",
+      "type": "ReactNode",
+      "description": "Error content included in the accessible description and invalid state; false, null and undefined omit it.",
+      "required": false
+    },
+    {
+      "name": "count",
+      "type": "ReactNode",
+      "description": "Caller-supplied count display beside the helper. The component does not calculate a character count.",
+      "required": false
+    },
+    {
+      "name": "monospace",
+      "type": "boolean",
+      "description": "Use the code font treatment; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "autoSize",
+      "type": "boolean",
+      "description": "Use native content-based field sizing where supported; defaults to false. Native fallback resizing remains available.",
+      "required": false
+    },
+    {
+      "name": "wrapperClassName",
+      "type": "string",
+      "description": "Classes on the field wrapper. className, ref and native textarea props target the textarea itself.",
+      "required": false
+    }
+  ]
 }

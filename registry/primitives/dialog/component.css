@@ -1,3 +1,4 @@
+@layer components {
 /* dialog - shared primitive, themed by the active language's tokens.
 
    Built on native <dialog>, which brings the focus trap, the top layer, Escape
@@ -14,7 +15,7 @@
   margin: auto;
   padding: 0;
   width: min(440px, calc(100vw - 48px));
-  border: var(--nx-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-card);
   background: var(--nx-bg);
   color: var(--nx-ink);
@@ -28,23 +29,24 @@
 }
 
 .nx-dialog__body {
-  padding: 22px 24px 20px;
+  padding: var(--nx-space-dialogBodyPadding);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--nx-space-dialogGap);
 }
 
 .nx-dialog__title {
   margin: 0;
-  font-size: 16.5px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--nx-type-cardTitle-size);
+  font-weight: var(--nx-type-cardTitle-weight);
+  letter-spacing: var(--nx-type-cardTitle-tracking);
 }
 
 .nx-dialog__sub {
   margin: 0;
-  font-size: 11.5px;
-  line-height: 1.7;
+  font-size: var(--nx-type-subtitle-size);
+  font-weight: var(--nx-type-subtitle-weight);
+  line-height: var(--nx-type-body-lineHeight);
   color: var(--nx-muted);
   max-width: 52ch;
 }
@@ -53,9 +55,9 @@
 .nx-dialog__actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 24px;
-  border-top: var(--nx-hairline) solid var(--nx-grid);
+  gap: var(--nx-space-dialogGap);
+  padding: var(--nx-space-dialogActionsPadding);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
 }
 
 /* Actions.
@@ -65,15 +67,15 @@
    not a usable copy. If you have already added the button primitive, use
    .nx-btn here instead and delete these three rules. */
 .nx-dialog__action {
-  padding: 0.5em 1em;
-  border: var(--nx-hairline) solid var(--nx-grid);
+  padding: var(--nx-space-compactActionPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-pill);
   background: transparent;
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1;
+  font-size: var(--nx-type-action-size);
+  font-weight: var(--nx-type-action-weight);
+  line-height: var(--nx-type-action-lineHeight);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -92,7 +94,7 @@
 }
 
 .nx-dialog__action:focus-visible {
-  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
   outline-offset: 3px;
 }
 
@@ -112,11 +114,11 @@
    not move things that are not data. */
 @media (prefers-reduced-motion: no-preference) {
   .nx-dialog[open] {
-    animation: nx-dialog-in 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    animation: nx-dialog-in var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
   }
 
   .nx-dialog[open]::backdrop {
-    animation: nx-dialog-in 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    animation: nx-dialog-in var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
   }
 }
 
@@ -124,4 +126,5 @@
   from {
     opacity: 0;
   }
+}
 }

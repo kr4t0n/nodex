@@ -15,7 +15,6 @@ import {
   facetValues,
   loadCatalog,
   previewUrl,
-  primitivePreviewUrl,
   primitivesFor,
   tokensJsonUrl,
   type Catalog,
@@ -37,14 +36,13 @@ const THUMB_HEIGHT = 250;
 export function LanguageView({ slug }: { slug: string }) {
   const [catalog, setCatalog] = useState<Catalog>();
   const themed = useLanguageTokens(slug);
-  const design = useText(designUrl(slug));
-  const tokensRaw = useText(tokensJsonUrl(slug));
+  const language = catalog?.languages.find((entry) => entry.slug === slug);
+  const design = useText(language ? designUrl(language) : undefined);
+  const tokensRaw = useText(language ? tokensJsonUrl(language) : undefined);
 
   useEffect(() => {
     void loadCatalog().then(setCatalog);
   }, []);
-
-  const language = catalog?.languages.find((l) => l.slug === slug);
 
   if (!catalog || !themed) return <Loading label="Loading registry" />;
   if (!language) {
@@ -126,7 +124,7 @@ function TokenPanel({ tokens }: { tokens: Tokens }) {
               className="h-7 w-7 rounded-[3px]"
               style={{
                 background: hex,
-                border: 'var(--nx-hairline) solid color-mix(in oklab, var(--nx-grid) 70%, transparent)',
+                border: 'var(--nx-stroke-hairline) solid color-mix(in oklab, var(--nx-grid) 70%, transparent)',
               }}
             />
           ))}
@@ -329,8 +327,10 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                 </p>
                 <Preview
                   className="mt-3 self-start"
-                  src={previewUrl(language, item.name)}
+                  src={previewUrl(item, language)}
                   title={item.title}
+                  width={item.meta.preview.width}
+                  height={item.meta.preview.height}
                   aspectRatio={item.meta.aspectRatio}
                   boxHeight={THUMB_HEIGHT}
                 />
@@ -343,13 +343,13 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
       <p className="mt-10 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
         {filtered.length} of {items.length}{' '}
         {items.length === 1 ? 'chart' : 'charts'}. Each preview draws when it
-        scrolls into view; click a chart to replay it.
+        scrolls into view.
       </p>
     </section>
   );
 }
 
-/** Primitives render inline, so they re-theme with the rest of the shell. */
+/** Shared primitives preview at their natural size under the viewed language. */
 function PrimitiveStrip({ items, language }: { items: Item[]; language: string }) {
   return (
     <section className="pt-4">
@@ -384,8 +384,10 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
               {/* Fluid: a primitive is shown at the size it actually is. */}
               <Preview
                 className="mt-3 self-start"
-                src={primitivePreviewUrl(item.name, language)}
+                src={previewUrl(item, language)}
                 title={item.title}
+                width={item.meta.preview.width}
+                height={item.meta.preview.height}
                 fluid
               />
             </Link>

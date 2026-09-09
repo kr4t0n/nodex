@@ -4,7 +4,51 @@
   "description": "Hairline separator in strong, faint, dashed, vertical, and inset treatments",
   "component": "rule",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["structure", "separator"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "structure",
+    "separator"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Rule"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 260
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "tone",
+      "type": "'default' | 'strong' | 'faint'",
+      "description": "Separator emphasis; defaults to default.",
+      "required": false
+    },
+    {
+      "name": "dashed",
+      "type": "boolean",
+      "description": "Use a dashed rule; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "orientation",
+      "type": "'horizontal' | 'vertical'",
+      "description": "Separator direction and aria-orientation; defaults to horizontal.",
+      "required": false
+    },
+    {
+      "name": "inset",
+      "type": "boolean",
+      "description": "Inset the rule from the start edge; defaults to false.",
+      "required": false
+    }
+  ]
 }

@@ -28,38 +28,30 @@ of marks, never from color.
 | `--nx-muted` | `#8F8E88` | subtitles, axis labels, secondary marks |
 | `--nx-faint` | `#C6C5BF` | captions, the quietest rules |
 | `--nx-grid` | `#DEDDD6` | gridlines, hairline separators |
+| `--nx-markMuted` | `#6A6963` | middle-value matrix cells and product labels |
+| `--nx-markQuiet` | `#B0AFA9` | low-value matrix cells |
+| `--nx-plotGrid` | `#E3E2DB` | bowed matrix guides |
+| `--nx-plotFaint` | `#D8D6CE` | measured zeroes in the matrix |
+| `--nx-plotFloor` | `#CFCEC7` | the line chart's barcode floor |
 
-Cards may invert to ink ground with paper text. On inverted cards, captions drop
-to `#55554F` so they recede the same amount they do on paper.
+The chart roles name paints already used by the retained specimens. Their tone
+relationships are preserved when moving paint into tokens.
 
-**No chart in the collection currently inverts.** Seven did — `circular-graph`,
-`circular-graph-dense`, `dot-cascade`, `force-graph`, `force-graph-dense`,
-`petal-rose`, and `thread-triptych` — and were moved onto paper so a page of
-them reads as one language rather than two. The affordance and its CSS stay,
-because inversion is a legitimate choice for a single card that has to stand
-apart; it is just not something to reach for while building a set.
-
-Note that only four carried the `card dark` modifier. The other three set a dark
-background on `.card` itself, so grepping for the modifier finds the wrong
-answer; check the resolved background instead.
+Cards may invert to ink ground with paper text. On inverted cards,
+`--nx-onDarkMuted` is `#8F8E88` and `--nx-onDarkFaint` is `#55554F`. The current
+chart specimens stay on paper. Inversion remains a choice for a card that needs
+to stand apart, not something to reach for while building a set.
 
 Inverting is not a background swap. Mark colour encodes rank, so the ramp has to
 be reversed with it: on ink the brightest mark carries the most, on paper the
 darkest does. A card whose ground flipped but whose marks did not will read with
 its emphasis exactly backwards.
 
-Chart marks are drawn in JavaScript with literal hex from the warm-grey ramp in
-`tokens.json`. That is deliberate: SVG attributes are set imperatively, so there
-is no `var()` to reference. The conformance lint therefore checks that literals
-are **members of the ramp**, not that they use custom properties.
-
-Run it yourself with `nodex lint`. It checks this project's components against
-this language and reports what fails, so a claim of conformance can be verified
-rather than asserted.
-
-Known debt: 37 distinct greys appear across the collection. The ramp in
-`tokens.json` records the load-bearing steps; consolidating the rest is a
-cleanup task, not a redesign.
+Chart paint references semantic CSS variables directly. `tokens.json` is the
+authority; the build generates its stylesheet. Do not copy literal colors into
+the component or maintain a second JavaScript palette. Direct references also
+let a consumer override tokens on a containing element without a root alias
+retaining the old value.
 
 ## Typographic architecture
 
@@ -68,118 +60,113 @@ Inter throughout, 400 to 800. Nothing else.
 The scale is small and tight. Card titles are `16.5px/700` at `-0.02em`, which
 is barely larger than body text — the hierarchy comes from weight and from the
 uppercase tracking of the captions, not from size jumps. Captions run `9.5px`
-uppercase at `0.08em`, small enough to read as a printed credit line.
-
-No chart currently uses that caption size: it belonged to the `div.src` footer,
-which was removed. The token stays because it is the language's vocabulary for
-an annotation smaller than a legend, and a consumer captioning their own data
-needs a size to reach for. Do not read its absence from the shipped charts as a
-reason to delete it.
+uppercase at `0.08em`, small enough to read as a printed credit line. The axis
+token remains `8px`; individual annotations retain their existing proportions.
 
 Negative tracking on headings, positive tracking on anything uppercase. Never
-the reverse.
+the reverse. The generated token stylesheet bundles the configured Inter face
+for previews and copied components.
+
+Shared primitives consume these roles directly: Card and Dialog titles follow
+`cardTitle`, Card padding follows `space.cardPadding`, and captions follow
+`caption`. Control, action, prose and stat roles preserve the existing primitive
+scale. Their spacing and interaction timing are tokenized too; control feedback
+uses `motion.control`, independently of chart `motion.draw`. Scoped overrides
+apply to the rendered primitives without changing their native behavior.
 
 ## Component behaviors
 
 **A chart is the drawing and nothing else.** The card holds the marks; whatever
-names the chart is printed by whatever embeds it.
+names the chart is printed by whatever embeds it. The title and type live in the
+manifest, where the consumer, CLI and gallery all read them. A component does
+not repeat that heading or add a source footer to a Mono Editorial drawing.
 
-```
-[the chart]
-```
+The drawing is **left-aligned, never centred**. When a drawing reaches its size
+limit, unused space belongs after it. A wall of cards shares one starting edge
+and reads as a set; each drawing should not float at its own offset. Preserve
+the composition inside the chart as well as the alignment of its outer box.
 
-This is the second thing removed from the anatomy, for the same reason as the
-first. Every card used to open with an `h2` and a `div.sub`, and end with a
-`div.src` reading `CHART TYPE · LANGUAGE · DATA SOURCE`. Both restated what the
-manifest already holds, so both could only ever drift out of date, and the
-footer had: 53 of 64 named a design language that never existed.
+**Annotation is not a heading, and still belongs.** A note explains the marks
+and sits in the composition; a title names the component and belongs to whatever
+is listing it. Keep each specimen's existing annotation rather than adding
+explanatory sections around it.
 
-Naming a chart in two places also forced a suppression mechanism. The registry
-carried a `bare=1` parameter whose whole job was to hide the heading again
-wherever an embedder printed its own — which worked until a second language
-arrived whose cards open with a live value instead of a heading, and then the
-same parameter meant two different things depending on which language you asked.
-Removing the heading removed the parameter with it.
+Hairline line places one dot per supplied day above a barcode floor. The stems
+keep the spacing between days visible, hollow dots indicate weekends, and the
+two highest observations carry sparse, rounded labels. Its annotation remains
+`ONE DOT = ONE DAY · HOLLOW = WEEKEND`.
 
-The title and the type live in the manifest, which is where a consumer, the CLI
-and the app all read them from. `nodex show <ref>` prints them.
+Arc matrix places product rows on shallow bowed guides, with city labels angled
+along the top. Cell area encodes accounts; tone reinforces the same count with
+fixed thresholds at 12 and 25. A measured zero is a pinprick, not a missing
+observation. The largest cells carry their values without labelling the whole
+matrix. Preserve the existing 27-unit column spacing, 29-unit row spacing and
+16-unit bow when mapping that composition through the chart's scales.
 
-The drawing is **left-aligned, never centred**. Every SVG carries
-`preserveAspectRatio="xMinYMid meet"` and no `margin: 0 auto`. A chart with a
-`max-height` reaches its cap before it runs out of width, so in any container
-wider than its aspect ratio needs there is slack — and the default `xMidYMid`
-spends that slack centring the drawing inside its own box. Left-aligned, a wall
-of these cards shares one starting edge and reads as a set. Centred, each one
-floats at its own offset.
-
-This aligns the SVG's own box. A chart that centres its composition *inside* its
-viewBox — a donut, a network — still sits wherever it was drawn, because that is
-a property of the drawing rather than of the box. Fix those by moving the marks
-in the viewBox, not by re-centring the box.
-
-**Annotation is not a heading, and still belongs.** What one mark represents is
-the only way a one-mark-per-record chart is legible, and where that has to sit
-beside the marks rather than above the card, write it as a `div.note` with a
-`div.legend`. `barcode-lollipop` is the one chart that does. The distinction is
-that a note explains the *marks* and sits in the composition; a title names the
-*component* and belongs to whatever is listing it.
-
-Interactive marks carry an SVG `<title>` child so hovering yields a native
-tooltip with no JavaScript. Prefer that over a custom tooltip layer.
+Recharts supplies the scales, series and tooltip navigation. Matrix guides and
+custom cells live inside that composition. Hover exposes the observation, and
+the library's accessibility layer supports keyboard inspection. These are
+interactive library tooltips, not native SVG title popups. Chart data comes from
+the caller; absent or invalid data must not produce invented observations.
 
 ## Layout principles
 
 Two-column grid, `22px` gap, `40px` page padding, `24px` card radius. A card may
-span both columns when its chart needs width — a 90-day barcode does, a donut
+span both columns when its chart needs width — a long barcode does, a donut
 does not.
 
 Wide cards may split into a `250px` text column beside the chart. Use that when
 the chart genuinely needs prose to be read correctly, and put real reasoning
-there rather than filler.
+there rather than filler. The retained specimens keep their authored aspect
+ratios; a consumer can constrain width or height through the component API.
 
 ## Motion philosophy
 
-One rule: **marks draw themselves when they scroll into view, and clicking
-replays.** Nothing animates on a loop, nothing animates on hover except the
-native tooltip.
+Marks arrive quietly, then hold still. Nothing animates on a loop or decoratively
+on hover. The gallery defers previews until they approach the viewport. The
+retained React charts do not replay on click.
 
-Implemented as an IntersectionObserver at `0.3` threshold that disconnects after
-firing once, plus a click handler that clears and redraws. Three keyframes are
-available — `draw` for stroke-dashoffset reveals, `pop` for marks scaling in,
-`fade` for labels — and stagger delays are computed per index so a field of
-marks arrives as a wave rather than all at once.
+Entry and data transitions use the language's motion tokens. The shared motion
+helper reads scoped timing for Recharts; there is no separate JavaScript theme.
+Reduced motion disables transitions, including when the preference changes
+after mounting. Initial server and client markup remains stable, with animation
+disabled until the preference and timing are known. Consumers may also disable
+animation explicitly. CSS animations must retain a reduced-motion guard.
 
-Every animated component must ship a `prefers-reduced-motion: reduce` block that
-disables the animations and resets `stroke-dashoffset` to `0`. This is not
-optional, and `nodex lint` checks for it.
+## React delivery and validation
 
-## Runtime token bindings
+Each chart is a typed React component. Its data and prop types and private
+layout calculations normally live together; deterministic sample records live
+in a separate example. Delivered components require application data and never
+default to the example's fixtures.
 
-The same rule is spelled differently per runtime. A `0.8px` hairline is:
+Metadata declares the entry, exports, copied files and pinned dependencies. The
+CLI copies the component and its reachable local helpers; consumers own that
+source. Recharts is the default chart library, including simple charts. Custom
+marks compose with its scales and series rather than introducing another chart
+renderer or an adapter that hides its React API.
 
-- **Raw SVG** — `stroke-width="0.8"`
-- **ECharts** — `lineStyle: { width: 0.8 }`, or `itemStyle.borderWidth`
-
-Only these two runtimes exist in this language. Do not introduce a third.
+The build leaves authored source untouched. It renders the real example in a
+browser, captures the static preview and bundles that same example for
+interaction. This does not give consumer charts server-rendered SVG. Validation
+checks both source token references and resolved browser paint, strokes and
+scoped overrides.
 
 ## Anti-patterns
 
 - **Never** exceed `1.4px` on a stroke that reads as a *line* — axes, rules,
   connectors, series lines, stems, leaders. Hairlines are the language; a 2px
-  line reads as a different product.
-  The exception, and it is a real one: where the stroke **is** the area rather
-  than an outline, its width encodes magnitude and may be as thick as the data
-  demands. Sankey flows, streamgraph ribbons, violin bodies, box plots, and
-  histogram bands all legitimately draw at 2px and above. The test is whether
-  thinning the stroke would lose information. If it would only make the chart
-  more delicate, thin it.
+  line reads as a different product. The exception is where the stroke **is**
+  the area rather than an outline: its width encodes magnitude. The test is
+  whether thinning the stroke would lose information. If it would only make
+  the chart more delicate, thin it. Declare the exception in metadata.
 - **Never** introduce a hue. No blue, no accent, no semantic red or green.
-- **Never** aggregate in `close-read` mode. One mark per record, always — if
-  there are 90 days, draw 90 marks.
+- **Never** aggregate in `close-read` mode. One mark per record, always.
 - **Never** fill a large area where a hairline will carry the same information.
 - **Never** use a drop shadow, a gradient, or a border-radius above `24px`.
-- **Never** reorder or drop the card anatomy. A chart without a `.sub` is not
-  readable in this language.
-- **Never** animate on a loop or on hover.
-- **Never** use `Math.random()` for sample data. Use a deterministic hash so
+- **Never** add a repeated heading or unrelated controls around a drawing.
+- **Never** animate on a loop or decoratively on hover.
+- **Never** use `Math.random()` for sample data. Keep examples deterministic so
   previews and screenshots reproduce exactly.
+- **Never** duplicate token values in chart code or generate application data
+  inside a delivered component.

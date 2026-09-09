@@ -1,4 +1,4 @@
-import type { Density, NodexMeta } from '@nodex/core/schema';
+import type { NodexMeta, PublishedLanguage, RegistryItem } from '@nodex/core/schema';
 
 /**
  * The app reads the built manifest at runtime rather than importing the
@@ -7,24 +7,11 @@ import type { Density, NodexMeta } from '@nodex/core/schema';
  * means the registry could later move to a CDN without touching the app.
  */
 
-export interface Item {
-  name: string;
-  title: string;
-  description?: string;
-  dependencies?: string[];
-  files?: Array<{ path: string; target?: string }>;
-  meta: NodexMeta;
-}
+export type Item = RegistryItem;
+export type Language = PublishedLanguage;
 
-export interface Language {
-  slug: string;
-  name: string;
-  description: string;
-  visibility: 'public' | 'restricted';
-  density?: Density[];
-  featured: string[];
-  counts: { expressive: number; primitives: number };
-}
+/** The landing, account pages, and initial document share this language. */
+export const OWN_LANGUAGE = 'mono-editorial';
 
 export interface Catalog {
   languages: Language[];
@@ -41,6 +28,11 @@ export interface Catalog {
  */
 const BASE = (process.env.NEXT_PUBLIC_REGISTRY_URL ?? '').replace(/\/+$/, '');
 
+/** Manifest addresses are relative to the same static registry root. */
+export function registryFileUrl(path: string): string {
+  return `${BASE}/${path}`;
+}
+
 let cache: Promise<Catalog> | undefined;
 
 async function json<T>(url: string): Promise<T> {
@@ -52,8 +44,8 @@ async function json<T>(url: string): Promise<T> {
 export function loadCatalog(): Promise<Catalog> {
   cache ??= (async () => {
     const [registry, languages] = await Promise.all([
-      json<{ items: Item[] }>(`${BASE}/r/registry.json`),
-      json<Language[]>(`${BASE}/r/languages.json`),
+      json<{ items: Item[] }>(registryFileUrl('r/registry.json')),
+      json<Language[]>(registryFileUrl('r/languages.json')),
     ]);
     return { languages, items: registry.items };
   })();
@@ -93,35 +85,24 @@ export function findItem(
   );
 }
 
-/**
- * The generated preview document for a chart.
- *
- * A chart is only the drawing: the title and the component type are printed by
- * whatever embeds it, read from the manifest. There is nothing inside the
- * document to suppress, which is why this takes no options.
- */
-export function previewUrl(language: string, name: string): string {
-  return `${BASE}/registry/languages/${language}/expressive/${name}/index.html`;
+/** The whole React example, with a language selection for a shared primitive. */
+export function previewUrl(item: Item, language?: string): string {
+  const url = registryFileUrl(item.meta.preview.path);
+  return item.meta.tier === 'primitive' && language
+    ? `${url}?lang=${encodeURIComponent(language)}`
+    : url;
 }
 
-export function designUrl(language: string): string {
-  return `${BASE}/registry/languages/${language}/DESIGN.md`;
+export function designUrl(language: Language): string {
+  return registryFileUrl(language.files.design);
 }
 
-export function tokensUrl(language: string): string {
-  return `${BASE}/registry/languages/${language}/tokens.css`;
+export function tokensUrl(language: Language): string {
+  return registryFileUrl(language.files.tokens);
 }
 
-export function tokensJsonUrl(language: string): string {
-  return `${BASE}/registry/languages/${language}/tokens.json`;
-}
-
-/**
- * A primitive's preview takes its token layer from the query parameter, so one
- * generated file serves every design language.
- */
-export function primitivePreviewUrl(name: string, language: string): string {
-  return `${BASE}/registry/primitives/${name}/index.html?lang=${encodeURIComponent(language)}`;
+export function tokensJsonUrl(language: Language): string {
+  return registryFileUrl(language.files.tokensJson);
 }
 
 export function addCommand(language: string, item: Item): string {

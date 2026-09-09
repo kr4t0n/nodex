@@ -3,7 +3,7 @@ name: npm
 # Publishes packages/cli to npm as @kubitnodes/nodex.
 #
 # Needs one repository secret:
-#   NPM_TOKEN   an npm automation token with publish rights on the @nodex scope
+#   NPM_TOKEN   an npm automation token with publish rights on @kubitnodes/nodex
 #
 # Triggered by a v* tag, and manually. Not by pushes to main: the version lives
 # in package.json, so publishing on every push would either republish the same
@@ -60,7 +60,7 @@ jobs:
       - if: steps.guard.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           registry-url: https://registry.npmjs.org
 
@@ -89,6 +89,7 @@ jobs:
         run: |
           npm run lint
           npm run typecheck
+          npx playwright install --with-deps chromium
           npm run build:registry
           npm run smoke:cli
 
@@ -107,7 +108,7 @@ jobs:
           # <scope>-<name>-<version>.tgz, so hardcoding that spelling breaks
           # silently the next time the package is renamed.
           npm install "$RUNNER_TEMP"/*.tgz
-          ./node_modules/.bin/nodex list
+          ./node_modules/.bin/nodex list --registry "$GITHUB_WORKSPACE/public"
 
       - if: steps.guard.outputs.configured == 'true' && steps.version.outputs.published == 'false'
         run: npm publish --workspace @kubitnodes/nodex

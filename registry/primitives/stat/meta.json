@@ -4,7 +4,70 @@
   "description": "A measured figure with its label and direction of change, carried by a drawn mark rather than by colour",
   "component": "stat",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["data", "text"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "data",
+    "text"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Stat",
+    "StatGroup"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Stat: label naming the displayed measure.",
+      "required": true
+    },
+    {
+      "name": "value",
+      "type": "ReactNode",
+      "description": "Stat: value content supplied by the caller; no numeric formatting is inferred.",
+      "required": true
+    },
+    {
+      "name": "unit",
+      "type": "ReactNode",
+      "description": "Stat: optional unit beside the value.",
+      "required": false
+    },
+    {
+      "name": "note",
+      "type": "ReactNode",
+      "description": "Stat: optional supporting text below the value.",
+      "required": false
+    },
+    {
+      "name": "size",
+      "type": "'sm' | 'md' | 'lg'",
+      "description": "Stat: value size treatment; defaults to md.",
+      "required": false
+    },
+    {
+      "name": "delta",
+      "type": "{ direction: 'up' | 'down' | 'flat'; label: ReactNode; strong?: boolean }",
+      "description": "Stat: caller-supplied change direction and text, with optional emphasis.",
+      "required": false
+    },
+    {
+      "name": "variant",
+      "type": "'default' | 'ruled' | 'stack'",
+      "description": "StatGroup only: group layout and separators; defaults to default.",
+      "required": false
+    }
+  ]
 }

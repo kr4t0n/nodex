@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { tokensUrl } from './registry.ts';
+import { loadCatalog, tokensUrl } from './registry.ts';
 
 /**
  * Swap the active language's token layer.
@@ -20,8 +20,8 @@ import { tokensUrl } from './registry.ts';
  * is right on a page showing one language and impossible on the index, where
  * several sit on screen together and the last one loaded would win.
  *
- * The generated `tokens.css` is one `:root` block and nothing else, so
- * re-pointing that selector at an attribute produces the same values bound to
+ * The generated `tokens.css` has one `:root` token block and embedded font faces.
+ * Re-pointing that selector at an attribute produces the same values bound to
  * an element instead of the document. Deliberately a rename of the build's own
  * output rather than a second artifact or a client-side reimplementation of its
  * flattening: there is no third place for the two to drift apart.
@@ -41,10 +41,12 @@ export function useScopedLanguageTokens(slugs: string[]): boolean {
     let live = true;
     const ID = 'nx-scoped-language-tokens';
 
-    void Promise.all(
+    void loadCatalog().then((catalog) => Promise.all(
       key.split(',').map(async (slug) => {
         try {
-          const res = await fetch(tokensUrl(slug));
+          const language = catalog.languages.find((entry) => entry.slug === slug);
+          if (!language) return '';
+          const res = await fetch(tokensUrl(language));
           if (!res.ok) return '';
           const css = await res.text();
           // Skip rather than inject. A template that stopped emitting `:root`
@@ -56,7 +58,7 @@ export function useScopedLanguageTokens(slugs: string[]): boolean {
           return '';
         }
       }),
-    ).then((sheets) => {
+    )).then((sheets) => {
       if (!live) return;
       let style = document.getElementById(ID);
       if (!style) {
@@ -81,32 +83,45 @@ export function useScopedLanguageTokens(slugs: string[]): boolean {
 }
 
 export function useLanguageTokens(slug: string | undefined): boolean {
-  const [ready, setReady] = useState(false);
+  const [readySlug, setReadySlug] = useState<string>();
 
   useEffect(() => {
     if (!slug) return;
-    const ID = 'nx-language-tokens';
-    let link = document.getElementById(ID) as HTMLLinkElement | null;
-    if (!link) {
-      link = document.createElement('link');
-      link.id = ID;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-    const href = tokensUrl(slug);
-    if (link.getAttribute('href') === href) {
-      setReady(true);
-      return;
-    }
-    setReady(false);
-    const onLoad = () => setReady(true);
-    link.addEventListener('load', onLoad, { once: true });
-    link.setAttribute('href', href);
-    document.documentElement.dataset.nxLanguage = slug;
-    return () => link?.removeEventListener('load', onLoad);
+    let live = true;
+    let link: HTMLLinkElement | null = null;
+    const onLoad = () => { if (live) setReadySlug(slug); };
+
+    void loadCatalog().then((catalog) => {
+      if (!live) return;
+      const language = catalog.languages.find((entry) => entry.slug === slug);
+      // Let the view report an unknown language instead of waiting on a token
+      // URL that does not exist in the manifest.
+      if (!language) { setReadySlug(slug); return; }
+      const id = 'nx-language-tokens';
+      link = document.getElementById(id) as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+      }
+      const href = tokensUrl(language);
+      document.documentElement.dataset.nxLanguage = slug;
+      if (link.getAttribute('href') === href && link.sheet) {
+        setReadySlug(slug);
+        return;
+      }
+      link.addEventListener('load', onLoad, { once: true });
+      link.setAttribute('href', href);
+    });
+
+    return () => {
+      live = false;
+      link?.removeEventListener('load', onLoad);
+    };
   }, [slug]);
 
-  return ready;
+  return slug !== undefined && readySlug === slug;
 }
 
 /** Fetch text once per URL, with loading and error states surfaced. */
@@ -144,8 +159,8 @@ export function useText(url: string | undefined): {
 /**
  * Mount only once the element is near the viewport.
  *
- * Seventy live iframes at once would be untenable, and each preview loads its
- * own fonts and possibly ECharts.
+ * Each iframe loads a React example and its assets. Defer those documents until
+ * they can contribute to the visible page.
  *
  * The timeout is not belt-and-braces, it is load-bearing. IntersectionObserver
  * callbacks do not fire in a tab that is never painted, which includes

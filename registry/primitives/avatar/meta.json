@@ -4,7 +4,70 @@
   "description": "Image or initials in circle and square shapes, with tones drawn from the grey ramp and a stacked group",
   "component": "avatar",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["identity", "media"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "identity",
+    "media"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Avatar",
+    "AvatarGroup"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Avatar: accessible image name and source for fallback initials.",
+      "required": true
+    },
+    {
+      "name": "src",
+      "type": "string",
+      "description": "Avatar: image URL. A failed image falls back to the supplied fallback or initials.",
+      "required": false
+    },
+    {
+      "name": "fallback",
+      "type": "ReactNode",
+      "description": "Avatar: custom fallback content; otherwise uses initials from the first two name words.",
+      "required": false
+    },
+    {
+      "name": "size",
+      "type": "'sm' | 'md' | 'lg'",
+      "description": "Avatar: size treatment; defaults to md.",
+      "required": false
+    },
+    {
+      "name": "shape",
+      "type": "'circle' | 'square'",
+      "description": "Avatar: outline geometry; defaults to circle.",
+      "required": false
+    },
+    {
+      "name": "tone",
+      "type": "1 | 2 | 3 | 4",
+      "description": "Avatar: neutral language tone; defaults to 1.",
+      "required": false
+    },
+    {
+      "name": "variant",
+      "type": "'filled' | 'outline' | 'count'",
+      "description": "Avatar: fill or count treatment; defaults to filled. AvatarGroup accepts native div props.",
+      "required": false
+    }
+  ]
 }

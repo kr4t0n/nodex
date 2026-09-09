@@ -1,3 +1,4 @@
+@layer components {
 /* input - shared primitive, themed by the active language's tokens.
 
    Label sits above, helper or error below. Placeholder is never the label:
@@ -7,29 +8,29 @@
 .nx-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--nx-space-fieldGap);
   font-family: var(--nx-font-sans);
 }
 
 .nx-field__label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
 }
 
 .nx-input {
   width: 100%;
-  padding: 0.6em 0.95em;
-  border: var(--nx-hairline) solid var(--nx-grid);
+  padding: var(--nx-space-controlPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-pill);
   background: var(--nx-bg);
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
-  font-size: 12px;
-  line-height: 1.4;
-  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: var(--nx-type-control-size);
+  line-height: var(--nx-type-control-lineHeight);
+  transition: border-color var(--nx-motion-control-duration) var(--nx-motion-control-easing);
 }
 
 /* Placeholder must clear WCAG AA against the field background, so it uses the
@@ -50,7 +51,7 @@
 }
 
 .nx-input:focus-visible {
-  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
   outline-offset: 2px;
 }
 
@@ -60,16 +61,16 @@
 }
 
 .nx-field__help {
-  font-size: 10.5px;
-  line-height: 1.5;
+  font-size: var(--nx-type-help-size);
+  line-height: var(--nx-type-help-lineHeight);
   color: var(--nx-muted);
 }
 
 .nx-field__error {
-  font-size: 10.5px;
-  line-height: 1.5;
+  font-size: var(--nx-type-help-size);
+  line-height: var(--nx-type-help-lineHeight);
   color: var(--nx-ink);
-  font-weight: 600;
+  font-weight: var(--nx-font-weight-semibold);
 }
 
 .nx-field[data-invalid='true'] .nx-input {
@@ -81,4 +82,5 @@
   .nx-input {
     transition: none;
   }
+}
 }

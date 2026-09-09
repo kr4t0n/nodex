@@ -1,3 +1,4 @@
+@layer components {
 /* prose - shared primitive, themed by the active language's tokens.
 
    Long-form text: rendered markdown, documentation, an article body. One class
@@ -9,8 +10,8 @@
 
 .nx-prose {
   font-family: var(--nx-font-sans);
-  font-size: 12.5px;
-  line-height: 1.75;
+  font-size: var(--nx-type-prose-size);
+  line-height: var(--nx-type-prose-lineHeight);
   color: var(--nx-ink);
   /* A measure, not a width. Long lines are the most common failure in
      documentation and the easiest to prevent. */
@@ -20,7 +21,7 @@
 /* Flow spacing rather than margins on every element: the gap belongs between
    siblings, so the first and last child never push against their container. */
 .nx-prose > * + * {
-  margin-top: 0.9em;
+  margin-top: var(--nx-space-proseFlowGap);
 }
 
 /* Headings below set their own larger top margin to open a section. On the
@@ -37,36 +38,36 @@
 .nx-prose h3,
 .nx-prose h4 {
   margin-bottom: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--nx-type-prose-headingTracking);
 }
 
 .nx-prose h1 {
-  font-size: 19px;
-  font-weight: 800;
+  font-size: var(--nx-type-prose-titleSize);
+  font-weight: var(--nx-type-prose-titleWeight);
 }
 
 /* Section headings are set as small caps rather than large type. Hierarchy by
    tracking and colour, not by scale, which is how this language handles it
    everywhere else. */
 .nx-prose h2 {
-  margin-top: 2em;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  margin-top: var(--nx-space-proseSectionGap);
+  font-size: var(--nx-type-prose-sectionSize);
+  font-weight: var(--nx-font-weight-bold);
+  letter-spacing: var(--nx-type-prose-sectionTracking);
   text-transform: uppercase;
   color: var(--nx-muted);
 }
 
 .nx-prose h3 {
-  margin-top: 1.6em;
-  font-size: 12.5px;
-  font-weight: 700;
+  margin-top: var(--nx-space-proseSubheadingGap);
+  font-size: var(--nx-type-prose-subheadingSize);
+  font-weight: var(--nx-font-weight-bold);
 }
 
 .nx-prose h4 {
-  margin-top: 1.4em;
-  font-size: 12px;
-  font-weight: 600;
+  margin-top: var(--nx-space-proseMinorHeadingGap);
+  font-size: var(--nx-type-prose-minorHeadingSize);
+  font-weight: var(--nx-font-weight-semibold);
   color: var(--nx-muted);
 }
 
@@ -78,10 +79,10 @@
 .nx-prose ul,
 .nx-prose ol {
   margin-block: 0;
-  padding-left: 1.1em;
+  padding-left: var(--nx-space-proseIndent);
   display: flex;
   flex-direction: column;
-  gap: 0.35em;
+  gap: var(--nx-space-proseListGap);
 }
 
 .nx-prose li::marker {
@@ -89,7 +90,7 @@
 }
 
 .nx-prose strong {
-  font-weight: 700;
+  font-weight: var(--nx-font-weight-bold);
 }
 
 .nx-prose em {
@@ -99,9 +100,9 @@
 .nx-prose a {
   color: var(--nx-ink);
   text-decoration-line: underline;
-  text-decoration-thickness: var(--nx-hairline);
+  text-decoration-thickness: var(--nx-stroke-hairline);
   text-decoration-color: var(--nx-faint);
-  text-underline-offset: 0.22em;
+  text-underline-offset: var(--nx-space-linkUnderlineOffset);
 }
 
 .nx-prose a:hover {
@@ -110,22 +111,22 @@
 
 .nx-prose code {
   font-family: var(--nx-font-mono);
-  font-size: 0.88em;
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
+  font-size: var(--nx-type-code-inlineSize);
+  padding: var(--nx-space-inlineCodePadding);
+  border-radius: var(--nx-radius-code);
   background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
   overflow-wrap: anywhere;
 }
 
 .nx-prose pre {
   margin: 0;
-  padding: 14px 16px;
-  border: var(--nx-hairline) solid var(--nx-grid);
+  padding: var(--nx-space-codeBlockPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-card);
   overflow-x: auto;
   font-family: var(--nx-font-mono);
-  font-size: 11px;
-  line-height: 1.7;
+  font-size: var(--nx-type-code-blockSize);
+  line-height: var(--nx-type-code-blockLineHeight);
 }
 
 .nx-prose pre code {
@@ -140,29 +141,29 @@
    these two elements sit further from their neighbours than anything else. */
 .nx-prose blockquote {
   margin: 0;
-  padding-left: 1.1em;
-  border-left: var(--nx-hairline) solid var(--nx-grid);
+  padding-left: var(--nx-space-proseIndent);
+  border-left: var(--nx-stroke-hairline) solid var(--nx-grid);
   color: var(--nx-muted);
 }
 
 .nx-prose hr {
   border: 0;
-  border-top: var(--nx-hairline) solid var(--nx-grid);
-  margin-block: 1.8em;
+  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+  margin-block: var(--nx-space-proseRuleGap);
 }
 
 .nx-prose table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11.5px;
+  font-size: var(--nx-type-body-size);
 }
 
 .nx-prose th {
   text-align: left;
-  padding: 6px 12px 6px 0;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  padding: var(--nx-space-proseTablePadding);
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
   white-space: nowrap;
@@ -171,8 +172,8 @@
 /* Rule below each row only, never above and below: doubling the line at every
    boundary is the laziest possible table. */
 .nx-prose td {
-  padding: 6px 12px 6px 0;
-  border-top: var(--nx-hairline) solid var(--nx-grid);
+  padding: var(--nx-space-proseTablePadding);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
   vertical-align: top;
 }
 
@@ -184,8 +185,9 @@
 
 /* Narrow, for a sidebar or an annotation column beside a chart. */
 .nx-prose--narrow {
-  font-size: 11px;
-  line-height: 1.7;
+  font-size: var(--nx-type-prose-narrowSize);
+  line-height: var(--nx-type-prose-narrowLineHeight);
   max-width: 46ch;
   color: var(--nx-muted);
+}
 }

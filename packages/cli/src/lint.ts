@@ -1,289 +1,152 @@
-/**
- * Conformance checks for a component against a design language.
- *
- * This lives in the CLI and is imported by `scripts/build-registry.mjs`, so the
- * registry and a consumer's project are held to the same rules by the same
- * code. They used to be separate — the registry had checks and a consumer had
- * none — and `DESIGN.md` described enforcement that only existed on one side of
- * the line.
- *
- * Deliberately free of imports so the published CLI keeps zero dependencies.
- * Pure functions over strings: no file reads, no network, no process exit.
- */
-
+/** Pure checks shared by the registry build and the dependency-free CLI. */
 export interface LanguageRules {
-  /** Legal colours: `ramp.steps` plus the semantic `color` values. */
   palette: string[];
-  /** `stroke.lineMax` in px. */
   lineMax: number;
+  tokenNames: string[];
+  background?: string;
 }
 
-export type Severity = 'error' | 'warning';
-
 export interface Finding {
-  rule: 'palette' | 'stroke' | 'motion' | 'determinism';
-  severity: Severity;
+  rule: 'palette' | 'tokens' | 'stroke' | 'motion' | 'determinism';
+  severity: 'error' | 'warning';
   message: string;
 }
 
 export interface Source {
-  /** Component markup, if any. */
-  html?: string;
+  tsx?: string;
   css?: string;
-  js?: string;
+}
+
+export interface RenderedMark {
+  fill: string;
+  stroke: string;
+  /** Screen-space width after the renderer's transforms. */
+  strokeWidth: number;
+  tag?: string;
 }
 
 export interface LintOptions {
-  /**
-   * The stroke IS the area and its width encodes magnitude, so thinning it
-   * would destroy information. Ribbons, bands, and violins.
-   */
   strokeAsArea?: boolean;
 }
 
-/** A stroke-width assignment and the widths it can be shown to produce. */
-interface StrokeUse {
-  raw: string;
-  widths: number[];
-  /** True when the expression is beyond static reasoning. */
-  unverifiable: boolean;
-}
-
-const NUMBER = /^-?(?:\d+\.?\d*|\.\d+)(?:px)?$/;
-
-function asNumber(text: string): number | undefined {
-  const t = text.trim();
-  if (!NUMBER.test(t)) return undefined;
-  return Number.parseFloat(t);
-}
+const COLOR_LITERAL = /#[\da-f]{8}\b|#[\da-f]{6}\b|#[\da-f]{4}\b|#[\da-f]{3}\b|\b(?:rgb|rgba|hsl|hsla|oklch|oklab|lab|lch|hwb)\([^)]*\)/gi;
 
 /**
- * Read the value of every `stroke-width` assignment.
- *
- * The previous implementation matched `'stroke-width'\s*:\s*([0-9.]+)`, which
- * requires a digit immediately after the colon. Widths are routinely written as
- * a ternary — `isHero?2:.65` — so it matched none of those and five components
- * shipped a 2px mark under a 1.4px ceiling without the build noticing.
- *
- * Both branches of a ternary are read. Anything else is reported as
- * unverifiable rather than guessed at, because `.6+rnd(i+3,j+11)*.9` contains
- * `3` and `11` as function arguments and "largest number wins" would call that
- * an 11px stroke.
+ * This checks explicit source spellings; it does not execute React, calculate
+ * geometry, or prove that arbitrary expressions produce conforming marks.
+ * The build supplements it with browser rendering and computed-style checks.
  */
-export function strokeUses(source: string): StrokeUse[] {
-  const uses: StrokeUse[] = [];
-  /**
-   * Both runtimes, because a hairline is `stroke-width` in SVG and
-   * `lineStyle.width` in ECharts. Checking only the first left 22 components
-   * unexamined, and five of them drawing lines up to 2.6px under a 1.4px
-   * ceiling.
-   *
-   * Three spellings, because a stroke is written three ways in this registry.
-   * `'stroke-width':` is how the hand-rolled SVG components set it,
-   * `lineStyle: { width }` is how an ECharts option does, and
-   * `stroke-width="..."` is how it comes out of a *rendered* chart — which is
-   * what a React component is linted against. Only the first two were matched,
-   * so the ceiling was inert for every ported chart: they are checked as
-   * rendered SVG, and rendered SVG writes attributes.
-   *
-   * A `stroke-width:3px` inside a `style` string is still not matched: that is
-   * a paint-order halo behind text, which is legibility rather than a data
-   * mark. Rendered text carries the same halo as an attribute, so the caller
-   * strips text elements before linting.
-   *
-   * `itemStyle.borderWidth` is deliberately absent. Almost every use of it here
-   * is a knockout gap — a border painted in the page colour to separate
-   * adjacent segments — which reads as absence rather than as a line, so
-   * checking it would report mostly false positives.
-   */
-  // A rendered attribute is a plain literal ending at its own quote, so it is
-  // read directly rather than through the expression scanner below — that
-  // scanner looks for a JS expression's terminator and would run past the
-  // quote and swallow the rest of the document.
-  for (const m of source.matchAll(/\bstroke-width="([0-9.]+)"/g)) {
-    const raw = m[1] ?? '';
-    uses.push({ raw, widths: [Number(raw)], unverifiable: false });
-  }
-
-  const re = /(?:['"]stroke-width['"]|lineStyle\s*:\s*\{[^{}]*?\bwidth)\s*:\s*/g;
-
-  for (let m = re.exec(source); m; m = re.exec(source)) {
-    const start = m.index + m[0].length;
-    let depth = 0;
-    let end = start;
-    for (; end < source.length; end++) {
-      const ch = source[end];
-      if (ch === '(' || ch === '[' || ch === '{') depth++;
-      else if (ch === ')' || ch === ']' || ch === '}') {
-        if (depth === 0) break;
-        depth--;
-      } else if (ch === ',' && depth === 0) break;
-    }
-    const raw = source.slice(start, end).trim();
-    if (!raw) continue;
-
-    const literal = asNumber(raw);
-    if (literal !== undefined) {
-      uses.push({ raw, widths: [literal], unverifiable: false });
-      continue;
-    }
-
-    // A ternary at depth zero: take the two branches.
-    const branches = ternaryBranches(raw);
-    if (branches) {
-      const a = asNumber(branches[0]);
-      const b = asNumber(branches[1]);
-      if (a !== undefined && b !== undefined) {
-        uses.push({ raw, widths: [a, b], unverifiable: false });
-        continue;
-      }
-    }
-
-    uses.push({ raw, widths: [], unverifiable: true });
-  }
-  return uses;
-}
-
-/** Split `cond ? a : b` on its top-level `?` and `:`. */
-function ternaryBranches(expr: string): [string, string] | undefined {
-  let depth = 0;
-  let q = -1;
-  for (let i = 0; i < expr.length; i++) {
-    const ch = expr[i];
-    if (ch === '(' || ch === '[') depth++;
-    else if (ch === ')' || ch === ']') depth--;
-    else if (ch === '?' && depth === 0) {
-      q = i;
-      break;
-    }
-  }
-  if (q === -1) return undefined;
-
-  depth = 0;
-  for (let i = q + 1; i < expr.length; i++) {
-    const ch = expr[i];
-    if (ch === '(' || ch === '[') depth++;
-    else if (ch === ')' || ch === ']') depth--;
-    else if (ch === '?' && depth === 0) return undefined; // nested, give up
-    else if (ch === ':' && depth === 0) {
-      return [expr.slice(q + 1, i), expr.slice(i + 1)];
-    }
-  }
-  return undefined;
-}
-
-/** Every six-digit hex literal, uppercased. */
-export function hexLiterals(source: string): string[] {
-  // Three-digit hex counts. It is as valid as six and just as wrong outside the
-  // ramp, and only six was matched until a rendered chart was linted and `#000`
-  // went straight past.
-  const hex = [...source.matchAll(/#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})\b/g)].map((m) =>
-    m[0].toUpperCase(),
-  );
-
-  // `rgb(28, 28, 26)` is the same colour as `#1C1C1A`, and a rendered chart is
-  // full of it: anything ECharts derives — a visualMap band, a heatmap cell, a
-  // map's fill — comes out in rgb notation. Matching only hex meant every
-  // colour a chart *computed* went unchecked, which is most of the colours on
-  // a choropleth.
-  const rgb = [...source.matchAll(/rgb\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)\s*\)/g)].map((m) =>
-    `#${[m[1], m[2], m[3]]
-      .map((c) => Number(c).toString(16).padStart(2, '0'))
-      .join('')}`.toUpperCase(),
-  );
-
-  return [...hex, ...rgb];
-}
-
-export function lint(
-  source: Source,
-  rules: LanguageRules,
-  options: LintOptions = {},
-): Finding[] {
+export function lintSource(source: Source, rules: LanguageRules): Finding[] {
   const findings: Finding[] = [];
-  const css = source.css ?? '';
-  const js = source.js ?? '';
-  const drawn = `${js}\n${css}`;
-
-  // Anything that animates needs an escape hatch. Vestibular disorders are not
-  // a preference, and the guard costs three lines.
-  if (/animation\s*:/.test(css) && !/prefers-reduced-motion/.test(css)) {
-    findings.push({
-      rule: 'motion',
-      severity: 'error',
-      message: 'animates but ships no prefers-reduced-motion guard',
-    });
+  const tsx = (source.tsx ?? '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const css = (source.css ?? '').replace(/\/\*[\s\S]*?\*\//g, '');
+  const code = `${tsx}\n${css}`;
+  const literals = [...new Set(code.match(COLOR_LITERAL) ?? [])];
+  if (literals.length) {
+    findings.push({ rule: 'palette', severity: 'error', message: `Use language tokens instead of literal colors: ${literals.join(', ')}.` });
   }
-
-  if (!options.strokeAsArea) {
-    const uses = strokeUses(drawn);
-    const over = [
-      ...new Set(
-        uses.flatMap((u) => u.widths).filter((w) => w > rules.lineMax),
-      ),
-    ];
-    if (over.length > 0) {
-      findings.push({
-        rule: 'stroke',
-        severity: 'error',
-        message:
-          `stroke-width ${over.join(', ')} exceeds lineMax ${rules.lineMax}px. ` +
-          'If the stroke is the area rather than an outline, declare strokeAsArea',
-      });
-    }
-    for (const u of uses.filter((x) => x.unverifiable)) {
-      findings.push({
-        rule: 'stroke',
-        severity: 'warning',
-        message:
-          `stroke-width "${u.raw}" cannot be checked statically. ` +
-          'Bound it with a literal, or declare strokeAsArea if the stroke is the area',
-      });
-    }
+  const named = [
+    ...code.matchAll(/\b(?:fill|stroke|color|backgroundColor|borderColor)\s*(?:=|:)\s*\{?\s*['"]([a-z]+)['"]/gi),
+    ...css.matchAll(/\b(?:fill|stroke|color|background(?:-color)?|border-color|outline-color)\s*:\s*([a-z]+)(?=[\s;},])/gi),
+  ].map((match) => match[1]!)
+    .filter((name) => !['none', 'transparent', 'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'revert-layer'].includes(name.toLowerCase()));
+  if (named.length) {
+    findings.push({ rule: 'palette', severity: 'error', message: `Use language tokens instead of named paint colors: ${[...new Set(named)].join(', ')}.` });
   }
-
-  // Marks are drawn imperatively with literal hex, so there is no var() to
-  // check. Membership of the recorded ramp is the next best thing: it freezes
-  // today's palette and catches an addition.
-  const legal = new Set(rules.palette.map((c) => c.toUpperCase()));
-  const strays = [...new Set(hexLiterals(drawn))].filter((h) => !legal.has(h));
-  if (strays.length > 0) {
-    findings.push({
-      rule: 'palette',
-      severity: 'error',
-      message: `colour(s) outside the language's ramp: ${strays.join(', ')}`,
-    });
+  const known = new Set(rules.tokenNames);
+  // --nx-* is reserved for language tokens. Local component state uses its own prefix.
+  const uses = [...code.matchAll(/var\(\s*(--nx-[\w-]+)/g), ...code.matchAll(/(--nx-[\w-]+)\s*['"]?\s*:/g)];
+  const missing = [...new Set(uses.map((match) => match[1]!))]
+    .filter((name) => !known.has(name));
+  if (missing.length) {
+    findings.push({ rule: 'tokens', severity: 'error', message: `Unknown language token(s): ${missing.join(', ')}.` });
   }
-
-  // Sample data must reproduce, or a preview and a screenshot of it disagree
-  // and no visual diff means anything.
-  if (/Math\.random\s*\(/.test(js)) {
-    findings.push({
-      rule: 'determinism',
-      severity: 'error',
-      message: 'uses Math.random(); use a deterministic hash so previews reproduce',
-    });
+  if (/\bMath\.random\s*\(/.test(tsx)) {
+    findings.push({ rule: 'determinism', severity: 'error', message: 'Use deterministic example data; Math.random() makes previews irreproducible.' });
   }
-
+  if (/\banimation(?:-name)?\s*:\s*(?!none\b)/.test(css) && !/prefers-reduced-motion/.test(css)) {
+    findings.push({ rule: 'motion', severity: 'error', message: 'CSS animation needs a prefers-reduced-motion guard.' });
+  }
+  const enabledAnimation = [...tsx.matchAll(/\bisAnimationActive\s*=\s*\{([^}]*)\}/g)]
+    .some((match) => match[1]?.trim() !== 'false');
+  if (enabledAnimation
+      && !/use(?:ReducedMotion|PrefersReducedMotion|ChartMotion)|prefers-reduced-motion/.test(tsx)) {
+    findings.push({ rule: 'motion', severity: 'error', message: 'Chart animation needs reduced-motion handling.' });
+  }
   return findings;
 }
 
-/** Build the rule set a language's tokens.json implies. */
-export function rulesFromTokens(tokens: {
-  ramp?: { steps?: string[] };
-  color?: Record<string, unknown>;
-  stroke?: { lineMax?: string };
-}): LanguageRules {
-  const palette = [
-    ...(tokens.ramp?.steps ?? []),
-    ...Object.entries(tokens.color ?? {})
-      // `$comment` keys are documentation, not colours.
-      .filter(([k]) => !k.startsWith('$'))
-      .map(([, v]) => String(v)),
-  ].filter((c) => /^#[0-9A-Fa-f]{6}$/.test(c));
+/** Normalize browser RGB and token hex colors to a comparable opaque hex. */
+export function normalizeColor(color: string): string | undefined {
+  const value = color.trim().toLowerCase();
+  if (!value || value === 'none' || value === 'transparent') return undefined;
+  if (/^#[\da-f]{3,4}$/.test(value)) {
+    const chars = value.slice(1).split('').map((char) => char + char).join('');
+    if (chars.length === 8 && chars.slice(6) === '00') return undefined;
+    return `#${chars.slice(0, 6)}`.toUpperCase();
+  }
+  if (/^#[\da-f]{6}(?:[\da-f]{2})?$/.test(value)) {
+    if (value.length === 9 && value.slice(7) === '00') return undefined;
+    return value.slice(0, 7).toUpperCase();
+  }
+  const rgb = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+)%?)?\s*\)$/.exec(value);
+  if (rgb) {
+    if (rgb[4] !== undefined && Number(rgb[4]) === 0) return undefined;
+    return `#${rgb.slice(1, 4).map((channel) => Math.round(Number(channel)).toString(16).padStart(2, '0')).join('')}`.toUpperCase();
+  }
+  // Unknown output is reported rather than accepted as though it were a token.
+  return value;
+}
 
-  return {
-    palette,
-    lineMax: Number.parseFloat(tokens.stroke?.lineMax ?? '1.4'),
+export function lintRendered(marks: RenderedMark[], rules: LanguageRules, options: LintOptions = {}): Finding[] {
+  const findings: Finding[] = [];
+  const legal = new Set(rules.palette.map(normalizeColor));
+  const unexpected = new Set<string>();
+  const over = new Set<number>();
+  const background = rules.background ? normalizeColor(rules.background) : undefined;
+  for (const mark of marks) {
+    const stroke = normalizeColor(mark.stroke);
+    for (const color of [normalizeColor(mark.fill), stroke]) {
+      if (color && !color.startsWith('url(') && !legal.has(color)) unexpected.add(color);
+    }
+    if (!options.strokeAsArea && stroke && stroke !== background && mark.tag !== 'text' && mark.strokeWidth > rules.lineMax + 0.001) {
+      over.add(Math.round(mark.strokeWidth * 1000) / 1000);
+    }
+  }
+  if (unexpected.size) findings.push({ rule: 'palette', severity: 'error', message: `Rendered color(s) outside the language tokens: ${[...unexpected].join(', ')}.` });
+  if (over.size) findings.push({ rule: 'stroke', severity: 'error', message: `Rendered stroke-width ${[...over].join(', ')} exceeds lineMax ${rules.lineMax}px.` });
+  return findings;
+}
+
+/** Uses the same token naming convention as the generated CSS layer. */
+export function rulesFromTokens(tokens: Record<string, unknown>): LanguageRules {
+  const palette = new Set<string>();
+  const tokenNames = new Set<string>();
+  const walk = (value: unknown, prefix: string): void => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      for (const [key, entry] of Object.entries(value)) {
+        if (!key.startsWith('$')) walk(entry, prefix ? `${prefix}-${key}` : key);
+      }
+    } else if (typeof value === 'string' || typeof value === 'number') {
+      tokenNames.add(`--nx-${prefix}`);
+      if (typeof value === 'string' && /^(?:#|rgba?\(|hsla?\(|oklch\()/i.test(value)) {
+        const color = normalizeColor(value);
+        if (color) palette.add(color);
+      }
+    }
   };
+  for (const [key, value] of Object.entries(tokens)) {
+    if (key.startsWith('$') || key === 'ramp') continue;
+    walk(value, key === 'color' ? '' : key);
+  }
+  const ramp = tokens.ramp as { steps?: unknown[] } | undefined;
+  for (const color of ramp?.steps ?? []) {
+    if (typeof color === 'string') {
+      const normalized = normalizeColor(color);
+      if (normalized) palette.add(normalized);
+    }
+  }
+  const stroke = tokens.stroke as { lineMax?: string | number; hairline?: string | number } | undefined;
+  const color = tokens.color as { bg?: string } | undefined;
+  return { palette: [...palette], lineMax: Number.parseFloat(String(stroke?.lineMax ?? '1.4')), tokenNames: [...tokenNames], ...(color?.bg ? { background: color.bg } : {}) };
 }

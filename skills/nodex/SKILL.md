@@ -5,21 +5,27 @@ description: Build UI in a chosen design language using the nodex CLI. Use when 
 
 # nodex
 
-A component registry organised by **design language** rather than by component
-type. A language bundles its tokens, its written rules, and the components built
-for it.
+Nodex copies editable React components into an application, accompanied by a
+language's design tokens and written rules. The current component platform is
+React 19, React DOM, TypeScript and Tailwind CSS 4, for the web.
 
-Use this skill whenever you are about to write UI in a project that uses nodex.
+## Read the project contract
 
-## First: is this project set up?
+Find `nodex.json` at the project root. It records the selected language, registry
+root and destination paths. Do not hand-create it. If absent, run `nodex list`
+and `nodex init <language>` when the user wants to use Nodex.
 
-Look for `nodex.json` at the project root.
+Read the configured design document before writing UI. Tokens carry values;
+`DESIGN.md` explains geometry, hierarchy, annotation and anti-patterns. Follow
+both. Import the configured token stylesheet once after Tailwind, and ensure
+Tailwind scans the configured component destination.
 
-**If it exists**, read it. It tells you the active language and where things go:
+Typical configuration:
 
 ```json
 {
   "language": "mono-editorial",
+  "registry": "https://nodex.kubitnodes.com",
   "paths": {
     "components": "src/components/nodex",
     "tokens": "src/styles/nodex-tokens.css",
@@ -28,197 +34,116 @@ Look for `nodex.json` at the project root.
 }
 ```
 
-**If it does not exist**, and the user wants to use nodex, run `nodex list` to
-see the available languages and `nodex init <language>` to set the project up.
-Do not hand-create `nodex.json`.
-
-## Then: read the design document before writing anything
-
-`nodex init` writes the language's `DESIGN.md` into the project. **Read it.**
-This is the single most important step and the reason nodex exists.
-
-Tokens hold values. `DESIGN.md` holds the reasoning values cannot carry: the
-card anatomy, the motion contract, and an explicit anti-pattern list. It is
-entirely possible to produce something that uses every correct colour and still
-violates the language, and the anti-pattern section is what prevents that.
-
-If it is not in the project yet: `nodex design <language>`.
-
-## Finding components
+## Find and inspect
 
 ```bash
-nodex search                                  # everything
-nodex search heatmap                          # free text over titles, types, tags
-nodex search --design mono-editorial --type bar
-nodex search --density glance                 # how it is read, not how it is drawn
-nodex search --tier primitive                 # button, card, badge, input, select, table
+nodex list --json
+nodex search --design mono-editorial --json
+nodex search --type line --design mono-editorial
+nodex search --tier primitive
+nodex show mono-editorial/hairline-line --json
 ```
 
-`--type` matches a fixed vocabulary (`bar`, `line`, `heatmap`, `sankey`,
-`choropleth`, and so on), which is what makes the same request answerable across
-languages. A bare query is free text.
+Search the actual registry; do not assume an older catalogue's component still
+exists. Types describe marks/encoding across languages. Optional `--density`
+selects reading intent, not stroke weight or a preferred visual style.
 
-**On `--density`:** `close-read` components draw one mark per record and reward
-study, for reports and analyses. `glance` components show aggregate shapes and
-read instantly, for dashboards. Pick on how the user will read it, not on which
-looks nicer.
+`show` reports the declared exports, entry, props, dependencies and runtime
+files. Read the delivered TypeScript for detailed data types; fixtures are not
+part of the public component API.
 
-## Adding a component
+## Add and use
 
 ```bash
-nodex add mono-editorial/barcode-lollipop
-nodex add button --design mono-editorial       # primitives are shared, so name the language
-nodex add mono-editorial/ridgeline --to src/charts   # one-off override
+nodex init mono-editorial
+nodex add hairline-line button
+nodex add mono-editorial/arc-matrix --to src/charts
 ```
 
-What lands depends on the item, and `add` prints the way in either way. Run
-`nodex show <ref>` first if you want to know before adding.
+`add` copies the complete declared file set and installs pinned dependencies
+with the application's package manager. It reuses identical shared files and
+protects edited files. `--no-install` reports packages for manual installation;
+`--force` replaces differing source and conflicting dependency versions, so use
+it only when that replacement is intended. Nodex preserves platform packages.
 
-**A primitive, or a chart authored in React** — `component.tsx` and
-`component.css`:
-
-- `component.tsx` a React module, importing nothing but `react` and whatever
-  `add` told you to install
-- `component.css` scoped under a per-component root class
-
-**One of the imported charts** — `component.html`, `.css` and `.js`:
-
-- `component.html` a fragment, already scoped. Not a full document.
-- `component.css` scoped under a per-component root class
-- `component.js` exports `mount(root)`
-
-If the component needs an external library or fetches data at runtime, `add`
-prints it. Install what it asks for.
-
-## Using a React component
-
-Import it, and import its stylesheet. A missing stylesheet does not throw — the
-component renders unstyled — so do not skip the second line.
+A chart normally delivers `component.tsx`; required local support appears beside
+it under `_shared/`. Primitive modules also import their delivered CSS. Examples,
+preview scripts and synthetic default data do not ship. Import the reusable
+exports directly:
 
 ```tsx
-import { EndpointLatency } from './endpoint-latency/component.tsx';
-import './endpoint-latency/component.css';
+import { HairlineLine } from './components/nodex/hairline-line/component';
+import { Button } from './components/nodex/button/component';
 
-<EndpointLatency endpoints={myRoutes} objectiveMs={250} />;
-```
+const observations = [
+  { label: 'Monday', value: 24 },
+  { label: 'Tuesday', value: 38 },
+];
 
-A chart takes its data as a prop with the sample as the default, and exports
-the sample's type. `nodex show <ref>` reports the shape, so you can check your
-data fits before writing any code.
-
-**A primitive is a specimen sheet, not a component to render.** `nodex add
-button` gives you `ButtonSpecimens`, which draws every variant at once. It is
-there to show which classes produce which result. Copy the element you need and
-apply the classes to your own component:
-
-```tsx
-<button className="nx-btn nx-btn--solid" type="button">Add component</button>
-```
-
-Where you need real keyboard and ARIA behaviour, apply the classes to a headless
-Radix or Ark component rather than to a bare element.
-
-## Using one of the imported charts
-
-The fragment is plain HTML and the script is a mount function, so it works in
-any framework.
-
-```html
-<link rel="stylesheet" href="./component.css" />
-<div id="host"><!-- contents of component.html --></div>
-<script type="module">
-  import { mount } from './component.js';
-  mount(document.getElementById('host'));
-</script>
-```
-
-In React, wrap it:
-
-```tsx
-import { useEffect, useRef } from 'react';
-import { mount } from './component.js';
-import './component.css';
-
-export function Chart() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (ref.current) mount(ref.current);
-  }, []);
-  // Paste the contents of component.html here as JSX, remembering that JSX
-  // wants className and htmlFor. `nodex show` lists the mount names it fills.
-  return <div ref={ref} />;
+export function Report() {
+  return (
+    <section>
+      <h2>Observations</h2>
+      <HairlineLine data={observations} aria-label="Daily observations" />
+      <Button onClick={() => window.print()}>Print</Button>
+    </section>
+  );
 }
 ```
 
-`mount(root)` queries only within the element you pass it, so two copies of the
-same component on one page do not collide.
+Data is required. Replace or update that prop with the application's real data;
+never expect a hidden sample fallback. Component modules include their own types
+and private layout helpers. The application supplies gallery headings; charts
+retain their drawing annotations and console status header/footer. There is no
+chart data dropdown, imperative mount API or Nodex runtime package.
 
-## Rules that hold for every language
+Recharts charts are client-rendered. Do not assume their server HTML contains
+chart marks, even with fixed dimensions. Use the host framework's client-component
+conventions; delivered interactive entries already carry `use client`.
 
-- **Reference tokens, never literals.** Use `var(--nx-ink)`, not a hex code. The
-  token layer is what lets the language be swapped.
-- **Do not fight the language.** If a chart looks too quiet or too thin, that is
-  the language, not a bug. Changing stroke weights and colours to taste produces
-  something that no longer belongs to it.
-- **Keep the card anatomy.** Each language fixes what a card is made of and in
-  what order, and `DESIGN.md` states it. A chart you receive is the drawing;
-  its title is not in the file, because whatever lists it supplies that from the
-  manifest. Add your own heading outside the component, not inside it.
-- **Preserve deterministic sample data.** Components use a seeded hash rather
-  than `Math.random()` so previews and screenshots reproduce. Do not swap it.
-- **Honour `prefers-reduced-motion`.** Every animated component ships a guard.
-  Keep it when you edit.
+## Preserve the language and behavior
 
-## You own the code
+- Reference semantic tokens directly for paint, text, strokes and motion. Avoid
+  literal chart palettes or a second theme object. Runtime scoped token overrides
+  are supported.
+- Primitives consume typography, spacing, radii and interaction timing too.
+  Use `--nx-type-cardTitle-size` and `--nx-space-cardPadding` for Card/title roles,
+  `--nx-type-control-size` and `--nx-space-controlPadding` for form controls, and
+  `--nx-type-action-size` for buttons. Override variables on an ancestor for a
+  local theme. `--nx-motion-control-duration` controls interaction feedback;
+  chart drawing uses `--nx-motion-draw-duration` separately.
+- Each expressive chart belongs to its language. Mixing languages requires a
+  correct token layer in each ancestor scope; adding a chart does not switch the
+  default theme selected by `init`.
+- Keep reduced-motion handling and effect cleanup when editing components.
+- Preserve native labels, refs, keyboard behavior and unique IDs across instances.
+  A CSS tooltip is a visual hint; use an appropriate headless behavior layer
+  when richer accessible tooltip interaction is needed.
+- Verify empty data, updates, narrow containers, tooltips and keyboard access in
+  the application. `nodex lint` checks source spellings and token references;
+  it cannot prove rendering or accessibility.
 
-Added components are copies. Edit them freely; nodex will not update them and
-there is no version to upgrade. Adapting a reference implementation to real data
-is the expected workflow, not a workaround.
-
-## Restricted languages
-
-Some languages may require authentication. Public languages need none at all, so
-do not sign in unless a command tells you to.
-
-`nodex login` prints a URL and a short code, waits while a human approves it in a
-browser, and stores a token in `~/.nodex/auth.json`. Because it needs a person,
-it is not something to run unattended.
-
-**In CI or a container, set `NODEX_TOKEN` instead.** It overrides the stored file
-entirely and needs no interactive step. `nodex whoami` says who the current token
-belongs to, and `nodex logout` forgets it.
-
-The token is sent only to guarded paths, never to the public registry files, so
-a public `add` works signed in or out.
-
-## Command reference
-
-```
-nodex list                         design languages available
-nodex design <language>            print DESIGN.md
-nodex tokens <language> [--json]   print tokens as CSS, or JSON
-nodex search [query] [filters]     find components
-nodex init <language>              set the project up
-nodex add <ref...> [--to <dir>]    copy components in
-nodex show <ref>                   what it is, and the data it draws
-nodex lint [path...]               check components against the language
-nodex login                        sign in, by device code
-nodex logout                       forget the stored token
-nodex whoami                       who the token belongs to
+```bash
+nodex lint
+nodex lint src/components/nodex/endpoint-latency --design signal-console
 ```
 
-Global: `--registry <dir|url>` to point at a specific registry, or
-`NODEX_REGISTRY`. Neither is needed normally — the CLI defaults to the hosted
-registry, and `init` pins whichever root it used into `nodex.json`.
+The copied code belongs to the project. Nodex does not silently update it.
 
-`--help` after a command describes that command.
+## Registry and authentication
 
-**Use `--json` on `list`, `search`, `add` and `tokens`.** The default output is
-aligned columns meant for people; the JSON is the stable shape.
+Resolution order is `--registry`, the project's recorded registry,
+`NODEX_REGISTRY`, then the hosted default. Use an explicit checkout or built
+public root to try an unpublished reconstruction; working inside a checkout does
+not change the CLI's default registry automatically.
 
-`add --json` reports where each file landed, the component's `exports`, its
-`aspectRatio` (the viewBox), and its `mounts`. That last one matters: `mount(root)`
-fills elements marked `data-nx-mount="<name>"` inside the root you pass, and the
-names are chosen in the JS rather than derived from the slug, so you cannot
-guess them. Neither is needed normally — the CLI defaults to the hosted
-registry, and `init` pins whichever root it used into `nodex.json`.
+Public languages require no login. For a registry requiring credentials,
+`nodex login` displays a URL and device code for a person to approve. `whoami`
+checks the current session; `logout` forgets it. `NODEX_TOKEN` supplies a session
+for CI without interactive approval. Tokens are stored separately from project
+config in `~/.nodex/auth.json` and are never committed. Public asset requests
+carry no bearer token.
+
+Prefer JSON output when consuming CLI results programmatically. `add --json`
+reports delivered files, exports, entry, props, package requirements and install
+results. It contains no inferred mount names or default fixture contract.

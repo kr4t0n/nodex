@@ -1,38 +1,39 @@
-/**
- * Avatar — every variant, as a specimen sheet.
- *
- * Image or initials in circle and square shapes, with tones drawn from the grey ramp and a stacked group
- *
- * This is not a component API. A primitive's artifact is its stylesheet, and
- * this file records which classes produce which variant so you can copy the one
- * you need. Apply the classes to your own element, or to a headless Radix or
- * Ark component when you need real keyboard and ARIA behaviour — that is what
- * keeps the presentational rule intact for controls this file cannot implement.
- */
-export function AvatarSpecimens() {
+'use client';
+
+import { useState } from 'react';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
+import './component.css';
+
+export type AvatarProps = Omit<ComponentPropsWithRef<'span'>, 'children'> & {
+  name: string;
+  src?: string;
+  fallback?: ReactNode;
+  size?: 'sm' | 'md' | 'lg';
+  shape?: 'circle' | 'square';
+  tone?: 1 | 2 | 3 | 4;
+  variant?: 'filled' | 'outline' | 'count';
+};
+
+export function Avatar({ name, src, fallback, size = 'md', shape = 'circle', tone = 1, variant = 'filled', className = '', ...props }: AvatarProps) {
+  const [failedSource, setFailedSource] = useState<string>();
+  const initials = name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('');
   return (
-    <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span className="nx-avatar nx-avatar--sm nx-avatar--tone-1">RH</span>{' '}
-          <span className="nx-avatar nx-avatar--tone-2">MK</span>{' '}
-          <span className="nx-avatar nx-avatar--tone-3">TA</span>{' '}
-          <span className="nx-avatar nx-avatar--lg nx-avatar--tone-4">JL</span>
-        </div>{' '}
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span className="nx-avatar nx-avatar--square nx-avatar--tone-2">PL</span>{' '}
-          <span className="nx-avatar nx-avatar--outline">DS</span>
-        </div>{' '}
-
-        <div className="nx-avatar-group">
-          <span className="nx-avatar nx-avatar--tone-4">JL</span>{' '}
-          <span className="nx-avatar nx-avatar--tone-3">TA</span>{' '}
-          <span className="nx-avatar nx-avatar--tone-2">MK</span>{' '}
-          <span className="nx-avatar nx-avatar--tone-1">RH</span>{' '}
-          <span className="nx-avatar nx-avatar--count">+7</span>
-        </div>
-      </div>
-    </>
+    <span
+      {...props}
+      role="img"
+      aria-label={name}
+      className={[
+        'nx-avatar', `nx-avatar--tone-${tone}`, size !== 'md' && `nx-avatar--${size}`,
+        shape === 'square' && 'nx-avatar--square', variant !== 'filled' && `nx-avatar--${variant}`, className,
+      ].filter(Boolean).join(' ')}
+    >
+      {src && src !== failedSource
+        ? <img src={src} alt="" onError={() => setFailedSource(src)} />
+        : <span aria-hidden="true">{fallback ?? initials}</span>}
+    </span>
   );
+}
+
+export function AvatarGroup({ className = '', ...props }: ComponentPropsWithRef<'div'>) {
+  return <div role="group" {...props} className={`nx-avatar-group ${className}`.trim()} />;
 }

@@ -4,7 +4,39 @@
   "description": "Solid, outline, and quiet variants with hover, pressed, focus, and disabled states",
   "component": "button",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["action", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "action",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Button"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 160
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "variant",
+      "type": "'solid' | 'outline' | 'quiet'",
+      "description": "Action emphasis; defaults to solid.",
+      "required": false
+    },
+    {
+      "name": "type",
+      "type": "'button' | 'submit' | 'reset'",
+      "description": "Native button behavior; defaults to button. Set submit explicitly for a form action.",
+      "required": false
+    }
+  ]
 }

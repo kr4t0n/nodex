@@ -4,7 +4,51 @@
   "description": "Disclosure built on native details and summary, separated by rules rather than boxed",
   "component": "details",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["structure", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "structure",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Details"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "summary",
+      "type": "ReactNode",
+      "description": "Content of the native summary trigger.",
+      "required": true
+    },
+    {
+      "name": "meta",
+      "type": "ReactNode",
+      "description": "Optional secondary content alongside the summary.",
+      "required": false
+    },
+    {
+      "name": "open",
+      "type": "boolean",
+      "description": "Native disclosure state. The native name and onToggle props remain available.",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Content shown inside the disclosure body.",
+      "required": false
+    }
+  ]
 }

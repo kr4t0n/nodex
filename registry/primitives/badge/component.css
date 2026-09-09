@@ -1,3 +1,4 @@
+@layer components {
 /* badge - shared primitive, themed by the active language's tokens.
 
    Derived from the three badge treatments in the source collection: solid,
@@ -7,15 +8,15 @@
 .nx-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
-  padding: 3px 10px;
-  border: var(--nx-hairline) solid transparent;
+  gap: var(--nx-space-badgeGap);
+  padding: var(--nx-space-badgePadding);
+  border: var(--nx-stroke-hairline) solid transparent;
   border-radius: var(--nx-radius-pill);
   font-family: var(--nx-font-sans);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1.6;
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
+  line-height: var(--nx-type-badge-lineHeight);
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--nx-muted);
@@ -41,4 +42,5 @@
 .nx-badge--quiet {
   color: var(--nx-faint);
   padding-inline: 0;
+}
 }

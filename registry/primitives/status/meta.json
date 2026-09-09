@@ -4,7 +4,52 @@
   "description": "Inline state where the label carries the meaning, since there is no hue for failure and no loop for waiting",
   "component": "status",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["feedback", "text"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "feedback",
+    "text"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Status",
+    "StatusBlock"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Status: meaningful text label accompanying the decorative state mark.",
+      "required": true
+    },
+    {
+      "name": "state",
+      "type": "'idle' | 'working' | 'done' | 'failed'",
+      "description": "Status: state treatment; defaults to idle.",
+      "required": false
+    },
+    {
+      "name": "meta",
+      "type": "ReactNode",
+      "description": "Status: optional secondary status text.",
+      "required": false
+    },
+    {
+      "name": "inline",
+      "type": "boolean",
+      "description": "StatusBlock only: compact in-flow layout; defaults to false. StatusBlock supplies role=\"status\" unless overridden.",
+      "required": false
+    }
+  ]
 }

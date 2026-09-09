@@ -1,32 +1,30 @@
-/* button - shared primitive, themed entirely by the active language's tokens.
-   Presentational only: no JavaScript API. For real keyboard and ARIA behaviour,
-   apply these classes to a headless component (Radix, Ark) instead.
-
-   Every value here is a token reference. A literal would break theming, since
-   this one file serves every design language. */
+@layer components {
+/* button - shared primitive, themed by the active language's tokens.
+   The React API wraps a native button. These classes also remain available
+   when composing the same visual treatment with an existing headless control. */
 
 .nx-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5em;
-  padding: 0.55em 1.1em;
-  border: var(--nx-hairline) solid transparent;
+  gap: var(--nx-space-actionGap);
+  padding: var(--nx-space-actionPadding);
+  border: var(--nx-stroke-hairline) solid transparent;
   border-radius: var(--nx-radius-pill);
   font-family: var(--nx-font-sans);
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 1;
+  font-size: var(--nx-type-action-size);
+  font-weight: var(--nx-type-action-weight);
+  letter-spacing: var(--nx-type-action-tracking);
+  line-height: var(--nx-type-action-lineHeight);
   white-space: nowrap;
   cursor: pointer;
   background: transparent;
   color: var(--nx-ink);
   transition:
-    background-color 160ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 160ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 160ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 120ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
+    color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
+    border-color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
+    transform var(--nx-motion-press-duration) var(--nx-motion-press-easing);
 }
 
 /* Solid. The only high-emphasis action on a surface. */
@@ -61,7 +59,7 @@
 /* Quiet. For tertiary navigation where a border would be noise. */
 .nx-btn--quiet {
   color: var(--nx-muted);
-  padding-inline: 0.5em;
+  padding-inline: var(--nx-space-quietActionPaddingInline);
 }
 
 .nx-btn--quiet:hover {
@@ -74,7 +72,7 @@
 }
 
 .nx-btn:focus-visible {
-  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
   outline-offset: 3px;
 }
 
@@ -91,4 +89,5 @@
   .nx-btn:active {
     transform: none;
   }
+}
 }

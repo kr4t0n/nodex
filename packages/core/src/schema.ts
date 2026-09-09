@@ -2,205 +2,117 @@ import { z } from 'zod';
 
 import { COMPONENT_TYPES, PRIMITIVE_TYPES, RUNTIMES } from './taxonomy.ts';
 
-/**
- * The nodex manifest is a superset of the shadcn `registry-item` schema, so a
- * React consumer can run `npx shadcn add <url>` against any nodex item without
- * nodex shipping a second representation. Nodex-specific fields live in the
- * schema's arbitrary `meta` record, which shadcn passes through untouched.
- */
-
-export const registryItemTypeSchema = z.enum([
-  'registry:base',
-  'registry:block',
-  'registry:component',
-  'registry:file',
-  'registry:font',
-  'registry:hook',
-  'registry:item',
-  'registry:lib',
-  'registry:page',
-  'registry:style',
-  'registry:theme',
-  'registry:ui',
-]);
-
-/** shadcn requires `target` on `registry:file` and `registry:page`. */
-export const registryItemFileSchema = z.discriminatedUnion('type', [
-  z.object({
-    path: z.string(),
-    content: z.string().optional(),
-    type: z.enum(['registry:file', 'registry:page']),
-    target: z.string(),
-  }),
-  z.object({
-    path: z.string(),
-    content: z.string().optional(),
-    type: registryItemTypeSchema.exclude(['registry:file', 'registry:page']),
-    target: z.string().optional(),
-  }),
-]);
-
-export const cssVarsSchema = z.object({
-  theme: z.record(z.string(), z.string()).optional(),
-  light: z.record(z.string(), z.string()).optional(),
-  dark: z.record(z.string(), z.string()).optional(),
-});
+/** Addresses are relative to the served registry or configured destination. */
+export const relativePathSchema = z.string().min(1).refine(
+  (value) => /^[A-Za-z0-9_@./-]+$/.test(value) &&
+    value.split('/').every((part) => part !== '..' && part !== '.' && part.length > 0),
+  'Expected a relative path without traversal, URL syntax, or empty segments',
+);
 
 export const tierSchema = z.enum(['primitive', 'expressive']);
-
-/**
- * Density describes how a component is READ, not how it is drawn. Stroke weight
- * is already the design language's job; encoding it again here would duplicate
- * information the tokens already carry.
- *
- * Optional by design. The close-read / glance split is an artifact of how the
- * first collection was authored; a future language may have no such distinction
- * and simply omits the field.
- */
 export const densitySchema = z.enum(['close-read', 'glance']);
+export const aspectRatioSchema = z.string().regex(/^\d+(\.\d+)?\/\d+(\.\d+)?$/)
+  .refine((value) => value.split('/').every((part) => Number(part) > 0), 'Aspect dimensions must be positive');
+export const propSchema = z.object({
+  name: z.string().min(1),
+  type: z.string().min(1),
+  description: z.string().optional(),
+  required: z.boolean().default(false),
+});
 
-export const aspectRatioSchema = z
-  .string()
-  .regex(
-    /^\d+(\.\d+)?\/\d+(\.\d+)?$/,
-    'aspectRatio must look like "800/300" so it drops straight into CSS aspect-ratio',
-  );
-
-/** Nodex fields, carried inside shadcn's pass-through `meta` record. */
-export const nodexMetaSchema = z.object({
-  language: z.string(),
-  tier: tierSchema,
+const componentFields = {
   component: z.enum([...COMPONENT_TYPES, ...PRIMITIVE_TYPES]),
+  tier: tierSchema,
   runtime: z.enum(RUNTIMES),
+  library: z.string().optional(),
   density: densitySchema.optional(),
   aspectRatio: aspectRatioSchema.optional(),
   tags: z.array(z.string()).default([]),
-  /**
-   * Runtime data fetches, carried through to the manifest so a consumer sees
-   * them before installing. A component that silently phones a third-party host
-   * is a supply-chain surface, and the whole point of declaring it is that the
-   * declaration reaches the person adding it.
-   */
-  externalData: z.array(z.string()).optional(),
-  /**
-   * The `data-nx-mount` names `mount(root)` looks for.
-   *
-   * Derived from the markup at build time rather than authored, because the
-   * name is chosen in the JS and only 3 of 64 match their slug — `arc-matrix`
-   * mounts `arcmatrix`. Without this a consumer holding all three files still
-   * has to read the source to find the contract between them.
-   */
-  mounts: z.array(z.string()).optional(),
-  /**
-   * The React components a `.tsx` item exports, in the order it declares them.
-   *
-   * This is the same contract `mounts` records, spelled for the other authoring
-   * style: a vanilla item hands a consumer three files that connect through a
-   * `data-nx-mount` name, and a React one hands them a module that connects
-   * through an export name. Neither is derivable from the slug —
-   * `endpoint-latency` exports `EndpointLatency` — so both are recorded rather
-   * than guessed, and a consumer never has to open the file to find the way in.
-   */
-  exports: z.array(z.string()).optional(),
-  /**
-   * The shape of each sample dataset the component draws, derived from the
-   * source at build time. `rows` is the sample's own arity, which is a hint at
-   * a workable range rather than a hard bound.
-   *
-   * Derived rather than authored so it cannot drift from the data in the file.
-   * What it cannot say is what a field *means*, which is why `fields` is
-   * optional prose a human adds where it is worth saying.
-   */
-  data: z
-    .array(
-      z.object({
-        name: z.string(),
-        of: z.string(),
-        rows: z.number(),
-        fields: z.array(z.string()).optional(),
-      }),
-    )
-    .optional(),
+  entry: relativePathSchema,
+  exports: z.array(z.string().regex(/^[A-Za-z_$][\w$]*$/)).min(1),
+  props: z.array(propSchema).optional(),
+  strokeAsArea: z.boolean().default(false),
+  externalData: z.array(z.string().url()).default([]),
+};
+
+/** Authored explicitly: examples never become consumer runtime dependencies. */
+export const componentMetaSchema = z.object({
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  title: z.string().min(1),
+  description: z.string().optional(),
+  ...componentFields,
+  files: z.array(relativePathSchema).min(1),
+  shared: z.array(relativePathSchema).default([]),
+  dependencies: z.array(z.string()).default([]),
+  example: z.object({
+    entry: relativePathSchema,
+    export: z.string().regex(/^[A-Za-z_$][\w$]*$/),
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
+  }),
+}).strict().refine((meta) => meta.files.includes(meta.entry), 'Entry must be a declared runtime file')
+  .refine((meta) => !meta.files.includes(meta.example.entry), 'Examples must not ship as runtime files');
+
+export const nodexMetaSchema = z.object({
+  language: z.string(),
+  ...componentFields,
+  preview: z.object({
+    path: relativePathSchema,
+    width: z.number().positive(),
+    height: z.number().positive(),
+  }),
+});
+
+/** A shadcn-compatible item; every file has an explicit consumer destination. */
+export const registryItemFileSchema = z.object({
+  path: relativePathSchema,
+  target: relativePathSchema,
+  content: z.string().optional(),
+  type: z.enum(['registry:component', 'registry:ui', 'registry:hook', 'registry:lib', 'registry:file']),
 });
 
 export const registryItemSchema = z.object({
   $schema: z.string().optional(),
   name: z.string(),
-  type: registryItemTypeSchema,
+  type: z.enum(['registry:component', 'registry:ui']),
   title: z.string(),
   description: z.string().optional(),
-  extends: z.string().optional(),
-  dependencies: z.array(z.string()).optional(),
-  devDependencies: z.array(z.string()).optional(),
-  registryDependencies: z.array(z.string()).optional(),
-  files: z.array(registryItemFileSchema).optional(),
-  cssVars: cssVarsSchema.optional(),
-  css: z.record(z.string(), z.unknown()).optional(),
-  docs: z.string().optional(),
-  categories: z.array(z.string()).optional(),
+  dependencies: z.array(z.string()).default([]),
+  files: z.array(registryItemFileSchema).min(1),
   meta: nodexMetaSchema,
-});
+}).refine((item) => item.files.some((file) => file.target === item.meta.entry), 'Entry must match a file target');
 
 export const registrySchema = z.object({
   $schema: z.string().optional(),
   name: z.string(),
-  homepage: z.string(),
-  items: z.array(registryItemSchema).default([]),
+  homepage: z.string().optional(),
+  items: z.array(registryItemSchema),
 });
 
-/**
- * `languages/<slug>/meta.json` — the language's own declaration.
- *
- * `visibility` exists from day one even though everything is currently public,
- * because adding it later would mean a migration. `density` lists the legal
- * values for this language; a component may only declare a density that appears
- * here, and may not declare one at all if this is absent.
- */
 export const languageMetaSchema = z.object({
-  slug: z
-    .string()
-    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'language slug must be kebab-case'),
-  name: z.string(),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  name: z.string().min(1),
   description: z.string(),
   visibility: z.enum(['public', 'restricted']).default('public'),
   density: z.array(densitySchema).optional(),
-  /** Component slugs shown as the live composite on the gallery index. */
   featured: z.array(z.string()).default([]),
+}).strict();
+
+export const languageFilesSchema = z.object({
+  tokens: relativePathSchema,
+  tokensJson: relativePathSchema,
+  design: relativePathSchema,
 });
 
-/** `expressive/<slug>/meta.json` — one component's own declaration. */
-export const componentMetaSchema = z.object({
-  slug: z
-    .string()
-    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'component slug must be kebab-case'),
-  title: z.string(),
-  description: z.string().optional(),
-  component: z.enum([...COMPONENT_TYPES, ...PRIMITIVE_TYPES]),
-  tier: tierSchema,
-  runtime: z.enum(RUNTIMES),
-  density: densitySchema.optional(),
-  aspectRatio: aspectRatioSchema.optional(),
-  tags: z.array(z.string()).default([]),
-  dependencies: z.array(z.string()).default([]),
-  /**
-   * Set when the stroke IS the area rather than an outline — sankey flows,
-   * streamgraph ribbons, violin bodies, heatmap cells drawn as thick lines.
-   * There the width encodes magnitude, so the hairline ceiling does not apply.
-   * Declared explicitly rather than inferred from component type, because the
-   * same type can be drawn either way.
-   */
-  strokeAsArea: z.boolean().default(false),
-  /**
-   * URLs the component fetches data from at runtime. Declared rather than left
-   * buried in the chart body, because a component that silently pulls from a
-   * third-party host is a supply-chain surface the consumer should see.
-   */
-  externalData: z.array(z.string().url()).default([]),
+export const publishedLanguageSchema = languageMetaSchema.extend({
+  files: languageFilesSchema,
+  counts: z.object({ expressive: z.number().int().nonnegative(), primitives: z.number().int().nonnegative() }),
 });
 
 export type RegistryItem = z.infer<typeof registryItemSchema>;
 export type Registry = z.infer<typeof registrySchema>;
 export type LanguageMeta = z.infer<typeof languageMetaSchema>;
+export type PublishedLanguage = z.infer<typeof publishedLanguageSchema>;
 export type ComponentMeta = z.infer<typeof componentMetaSchema>;
 export type NodexMeta = z.infer<typeof nodexMetaSchema>;
 export type Tier = z.infer<typeof tierSchema>;

@@ -4,7 +4,46 @@
   "description": "Native checkbox with a border-drawn tick, plus indeterminate and disabled states",
   "component": "checkbox",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["form", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "form",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Checkbox",
+    "CheckboxGroup"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Checkbox: visible label wrapping the native input.",
+      "required": true
+    },
+    {
+      "name": "indeterminate",
+      "type": "boolean",
+      "description": "Checkbox: controlled mixed state; defaults to false. Update it with checked in the native onChange handler.",
+      "required": false
+    },
+    {
+      "name": "wrapperClassName",
+      "type": "string",
+      "description": "Checkbox: classes on the outer label. className and ref target the input; CheckboxGroup accepts native div props.",
+      "required": false
+    }
+  ]
 }

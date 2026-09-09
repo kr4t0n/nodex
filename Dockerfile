@@ -6,8 +6,8 @@
 # app is one workspace of several and the image needs `registry/` to generate
 # previews and the manifest before Next can prerender the routes that read it.
 #
-# Three stages so the runtime image carries no toolchain and no source: install,
-# build, then a runtime holding only Next's standalone output.
+# Three stages keep browser/build tooling out of the runtime, which holds the
+# standalone server and the published registry assets it serves.
 
 # ---------------------------------------------------------------- dependencies
 
@@ -27,12 +27,16 @@ COPY packages/cli/package.json packages/cli/
 # and the build fails looking for a `.node` file.
 RUN npm ci
 
+# The registry build uses a real browser. Keep the browser and its OS libraries
+# in the dependency layer so editing component or app source does not download
+# them again. The independent runtime stage never inherits this toolchain.
+RUN npx playwright install --with-deps chromium
+
 # ----------------------------------------------------------------------- build
 
-FROM node:24-bookworm-slim AS build
+FROM deps AS build
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Baked in, not read at runtime. Next inlines NEXT_PUBLIC_* into the client
@@ -45,7 +49,7 @@ ENV NEXT_PUBLIC_REGISTRY_URL=$NEXT_PUBLIC_REGISTRY_URL
 # prerenders its routes from that manifest, so this has to come first.
 RUN npm run build:registry
 
-# `prebuild` copies registry/ and public/r/ into apps/web/public.
+# `prebuild` copies the built public/registry/ and public/r/ into apps/web/public.
 RUN npm run build --workspace @nodex/web
 
 # --------------------------------------------------------------------- runtime

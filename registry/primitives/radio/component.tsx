@@ -1,33 +1,24 @@
-/**
- * Radio — every variant, as a specimen sheet.
- *
- * Native radio marked with a filled dot, echoing how the charts mark a chosen point
- *
- * This is not a component API. A primitive's artifact is its stylesheet, and
- * this file records which classes produce which variant so you can copy the one
- * you need. Apply the classes to your own element, or to a headless Radix or
- * Ark component when you need real keyboard and ARIA behaviour — that is what
- * keeps the presentational rule intact for controls this file cannot implement.
- */
-export function RadioSpecimens() {
+import type { ComponentPropsWithRef, ReactNode } from 'react';
+import './component.css';
+
+export type RadioProps = Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'> & {
+  label: ReactNode;
+  name: string;
+  wrapperClassName?: string;
+};
+
+/** Radios in one group must share a name, distinct from other groups on the page. */
+export function Radio({ label, disabled, className = '', wrapperClassName = '', ...props }: RadioProps) {
   return (
-    <>
-      <div className="nx-choice-group" role="radiogroup" aria-label="Reading speed">
-        <label className="nx-choice">
-          <input className="nx-radio" type="radio" name="nx-density" defaultChecked />{' '}
-          Close read
-        </label>{' '}
-
-        <label className="nx-choice">
-          <input className="nx-radio" type="radio" name="nx-density" />{' '}
-          Glance
-        </label>{' '}
-
-        <label className="nx-choice nx-choice--disabled">
-          <input className="nx-radio" type="radio" name="nx-density" disabled />{' '}
-          Either
-        </label>
-      </div>
-    </>
+    <label className={`nx-choice${disabled ? ' nx-choice--disabled' : ''} ${wrapperClassName}`.trim()}>
+      <input {...props} className={`nx-radio ${className}`.trim()} type="radio" disabled={disabled} />
+      {label}
+    </label>
   );
+}
+
+export type RadioGroupProps = ComponentPropsWithRef<'div'> & { orientation?: 'horizontal' | 'vertical' };
+
+export function RadioGroup({ orientation = 'vertical', className = '', ...props }: RadioGroupProps) {
+  return <div {...props} role="radiogroup" aria-orientation={orientation} className={`nx-choice-group${orientation === 'horizontal' ? ' nx-choice-group--row' : ''} ${className}`.trim()} />;
 }

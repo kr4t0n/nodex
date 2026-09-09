@@ -4,30 +4,20 @@
   The shell has no palette of its own. Every surface colour, type face, radius,
   and hairline comes from the active language's tokens.css, which is swapped at
   runtime. Browsing mono-editorial turns the whole interface to paper and ink;
-  a future language will harden or soften it without a line of change here.
-
-  There is exactly one entry here, and it is the one something uses. Colour and
-  type aliases lived here too (`--color-ink`, `--color-muted`, `--font-sans`)
-  and were removed: every view reaches for `var(--nx-*)` directly, so the
-  aliases were a second name for the same value that nothing ever called. If a
-  future view would rather write `text-muted` than an inline style, add the
-  alias back and adopt it everywhere, rather than keeping both vocabularies.
-
-  The fallback exists only for the first paint, before tokens.css lands.
+  another language hardens or softens it without a local palette. RootLayout
+  links the default language's published token stylesheet before first paint;
+  subsequent navigation selects a language through the same manifest.
 */
-@theme {
-  --radius-card: var(--nx-radius-card, 24px);
-}
 
 html {
-  background: var(--nx-bg, #f0efeb);
+  background: var(--nx-bg);
 }
 
 body {
   margin: 0;
-  background: var(--nx-bg, #f0efeb);
-  color: var(--nx-ink, #1c1c1a);
-  font-family: var(--nx-font-sans, ui-sans-serif, system-ui, sans-serif);
+  background: var(--nx-bg);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
