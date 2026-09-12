@@ -25,6 +25,7 @@ tmp/
 .DS_Store
 *.log
 .turbo/
+.argus/
 
 # next
 apps/web/.next/

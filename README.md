@@ -5,8 +5,9 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-This reconstruction contains **24 reusable primitives and three Recharts proofs
-of concept**: `mono-editorial/hairline-line`, `mono-editorial/arc-matrix`, and
+This reconstruction contains **24 reusable primitives and four Recharts proofs
+of concept**: `mono-editorial/hairline-line`, `mono-editorial/arc-matrix`,
+`mono-editorial/dual-area`, and
 `signal-console/endpoint-latency`. The previous expressive catalogue has been
 removed from this branch; it remains in Git history. This is a new source
 contract, with no legacy HTML/mount-function compatibility path.
@@ -39,7 +40,7 @@ CLI from an existing consumer app using absolute checkout paths:
 
 ```bash
 node /path/to/nodex/packages/cli/src/index.ts init mono-editorial --registry /path/to/nodex/public
-node /path/to/nodex/packages/cli/src/index.ts add hairline-line arc-matrix button
+node /path/to/nodex/packages/cli/src/index.ts add hairline-line arc-matrix dual-area button
 ```
 
 The installed CLI provides the same commands as `nodex init` and `nodex add`.
@@ -102,6 +103,7 @@ A typical installation contains:
 src/components/nodex/
   hairline-line/component.tsx
   arc-matrix/component.tsx
+  dual-area/component.tsx
   button/component.tsx
   button/component.css
   _shared/use-chart-motion.ts
@@ -129,6 +131,14 @@ and `objectiveMs`. It uses signal-console's
 tokens. When mixing languages, apply each language's token values to its own
 ancestor scope; installing a chart does not switch the application's theme.
 `init` selects one default language.
+
+`dual-area` takes ordered `{ day, spendK, signUps }` observations. Spend is in
+thousands of dollars; sign-ups are counts. Spend bars descend from the top and
+the sign-up area rises below them, with aligned days and one combined tooltip.
+Both plots support arrow-key inspection. Null, negative or non-finite measures
+remain unavailable without removing the day; zero remains a measured value.
+The spend scale retains its original $0–18K range and expands for larger values;
+the sign-up scale starts at zero and adapts to the supplied data.
 
 ## Tokens and rendering
 

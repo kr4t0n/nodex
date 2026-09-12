@@ -15,7 +15,7 @@ also encode identity through geometry, annotation and information density.
 - **Primitives** live once under `registry/primitives/` and accept every language's
   shared token roles. Their React APIs wrap native elements and retain editable CSS.
 
-The current reconstruction deliberately contains three expressive POCs and all
+The current reconstruction deliberately contains four expressive POCs and all
 24 primitives. The old expressive catalogue remains in Git history. Do not restore
 legacy artifacts or automatically port the old catalogue before this contract is
 validated against a new chart's requirements.
@@ -324,6 +324,20 @@ relative to its own location. Helm uses an external database and migration Job.
   Unused request-rate values belong to sample/application data, not the chart API.
 - Arc-matrix has one observation series so guide curves cannot become tooltip or
   keyboard stops. Its custom active cells use stable observation identifiers.
+- Dual-area coordinates a reversed spend bar plot with a sign-up area plot.
+  Both retain identical ordered rows and band scales, including unavailable
+  measures. Recharts' public tooltip hooks publish the inspected day to local
+  React state, and two ReferenceLines place aligned cursors through the scales.
+  `syncId` alone leaves a receiving plot's prior mouse/keyboard state active,
+  which can strand its cursor on another day. Input ownership follows pointer
+  movement, focus and keydown; only that plot displays the combined tooltip.
+  Selection and gradient IDs belong to each component instance. Spend retains
+  its original $18K scale ceiling unless larger caller values require expansion;
+  sign-ups use a zero-based scale.
+- Recharts prioritizes a plot's active mouse hover over its keyboard selection.
+  Move the pointer away for keyboard-only inspection. The coordinated chart
+  follows the library's selected observation; it does not replace keyboard
+  navigation or reach into the library's private state.
 - Recharts vertical bars advance to the next route with ArrowLeft in the pinned
   release; the accessible description documents the library's direction.
 - Recharts makes the chart SVG focusable. Suppress its browser outline for

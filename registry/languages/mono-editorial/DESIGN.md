@@ -29,7 +29,7 @@ of marks, never from color.
 | `--nx-faint` | `#C6C5BF` | captions, the quietest rules |
 | `--nx-grid` | `#DEDDD6` | gridlines, hairline separators |
 | `--nx-markMuted` | `#6A6963` | middle-value matrix cells and product labels |
-| `--nx-markQuiet` | `#B0AFA9` | low-value matrix cells |
+| `--nx-markQuiet` | `#B0AFA9` | low-value matrix cells and descending spend bars |
 | `--nx-plotGrid` | `#E3E2DB` | bowed matrix guides |
 | `--nx-plotFaint` | `#D8D6CE` | measured zeroes in the matrix |
 | `--nx-plotFloor` | `#CFCEC7` | the line chart's barcode floor |
@@ -103,6 +103,15 @@ observation. The largest cells carry their values without labelling the whole
 matrix. Preserve the existing 27-unit column spacing, 29-unit row spacing and
 16-unit bow when mapping that composition through the chart's scales.
 
+Dual area aligns descending ad-spend bars above a rising sign-up area across
+the same ordered days. Spend uses thousands of dollars; sign-ups are counts.
+Its two scales start at zero, with the spend direction reversed. Preserve the
+55% band-width bars, the open gap between plots and the original 580/320 plot
+proportions. The ink area fades from 22% opacity to transparent toward zero;
+this retained data encoding is an exception to the ban on decorative gradients.
+Aligned pointers inspect both measures with one combined tooltip. Missing
+measures keep their calendar position; they are not zeroes or interpolated data.
+
 Recharts supplies the scales, series and tooltip navigation. Matrix guides and
 custom cells live inside that composition. Hover exposes the observation, and
 the library's accessibility layer supports keyboard inspection. These are
@@ -163,7 +172,8 @@ scoped overrides.
 - **Never** introduce a hue. No blue, no accent, no semantic red or green.
 - **Never** aggregate in `close-read` mode. One mark per record, always.
 - **Never** fill a large area where a hairline will carry the same information.
-- **Never** use a drop shadow, a gradient, or a border-radius above `24px`.
+- **Never** use a drop shadow, a decorative gradient, or a border-radius above
+  `24px`. Dual area's retained ink-to-transparent fill belongs to its data marks.
 - **Never** add a repeated heading or unrelated controls around a drawing.
 - **Never** animate on a loop or decoratively on hover.
 - **Never** use `Math.random()` for sample data. Keep examples deterministic so

@@ -1,0 +1,56 @@
+{
+  "slug": "dual-area",
+  "title": "Campaigns rain down, sign-ups flow",
+  "description": "daily ad spend (from top, $K) vs sign-ups (flow, hundreds) · 30 days",
+  "component": "area",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "glance",
+  "entry": "component.tsx",
+  "exports": ["DualArea"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
+  "dependencies": ["recharts@3.10.1"],
+  "example": { "entry": "example.tsx", "export": "Example", "width": 676, "height": 426 },
+  "tags": ["growth", "ads"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly DualAreaDatum[]",
+      "description": "Ordered daily observations: day, spendK in thousands of dollars, and signUps as a count. Null or invalid measures remain unavailable without removing their day; zero is measured. The spend scale starts at $0–18K and expands for larger values; the sign-up scale starts at zero and adapts to the data.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot aspect ratio.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Fixed width in pixels; otherwise fills the containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures; each plot identifies its measure.",
+      "required": false
+    }
+  ],
+  "aspectRatio": "580/320"
+}
