@@ -1,0 +1,74 @@
+{
+  "slug": "paired-rungs",
+  "title": "This year against last, plan by plan",
+  "description": "two ladders per plan · solid rungs = 2026 · faint rungs = 2025 · one rung = $1k",
+  "component": "grouped-bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "glance",
+  "entry": "component.tsx",
+  "exports": [
+    "PairedRungs"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "rung-marks.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "tags": [
+    "billing",
+    "yoy"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly PairedRungsDatum[]",
+      "description": "Ordered plans with beforeK and afterK in whole thousands of dollars. Missing measures retain their plan and comparison slot. Null, negative, fractional and non-finite values are unavailable; zero is measured.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ],
+  "aspectRatio": "560/340"
+}

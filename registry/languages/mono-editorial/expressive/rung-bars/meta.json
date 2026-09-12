@@ -1,0 +1,73 @@
+{
+  "slug": "rung-bars",
+  "title": "Revenue by plan, rung by rung",
+  "description": "one rung = one $k of MRR · the bar is a ladder you can count",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "glance",
+  "entry": "component.tsx",
+  "exports": [
+    "RungBars"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "rung-marks.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "tags": [
+    "billing"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly RungBarsDatum[]",
+      "description": "Ordered plans with mrrK in whole thousands of dollars. Each rung is $1K; zero is measured, and null, negative, fractional or non-finite values are unavailable.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ],
+  "aspectRatio": "560/340"
+}

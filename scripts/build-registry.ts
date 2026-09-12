@@ -223,7 +223,7 @@ async function main() {
           await page.waitForFunction(() => document.documentElement.dataset.nxReady === 'true');
           await page.evaluate(async () => { await document.fonts.ready; });
           if (preview.item.meta.tier === 'expressive') {
-            await page.waitForFunction(() => document.querySelectorAll('#nx-preview svg path,#nx-preview svg circle').length > 0);
+            await page.waitForFunction(() => document.querySelector('#nx-preview svg :is(path,circle,ellipse,rect,line,polyline,polygon):not(defs *)') !== null);
             const marks = await renderedMarks(page);
             if (!marks.some((mark) => mark.tag !== 'text' && (mark.fill !== 'none' || mark.stroke !== 'none'))) throw new Error(`${preview.key}: rendered no chart marks`);
             const problems = lintRendered(marks, rulesFromTokens(preview.languages[0]!.tokens), { strokeAsArea: preview.item.meta.strokeAsArea });

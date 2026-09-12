@@ -31,6 +31,7 @@ of marks, never from color.
 | `--nx-markMuted` | `#6A6963` | middle-value matrix cells and product labels |
 | `--nx-markStrong` | `#4A4944` | strong intermediate petals in the rose |
 | `--nx-markQuiet` | `#B0AFA9` | low-value matrix cells and descending spend bars |
+| `--nx-markPale` | `#C0BFB8` | the services segment in stacked rungs |
 | `--nx-plotGrid` | `#E3E2DB` | bowed matrix guides |
 | `--nx-plotFaint` | `#D8D6CE` | measured zeroes in the matrix |
 | `--nx-plotFloor` | `#CFCEC7` | the line chart's barcode floor |
@@ -126,6 +127,18 @@ ring, above both track and petal; long petals receive paper and faint labels.
 The contrast threshold follows the specimen's relative reach, so proportional
 changes to all counts retain the same drawing. Zero leaves its track and zero
 label; missing counts keep a slot with an em dash and an unavailable tooltip.
+
+Chunky bars keep plan order, rounded top caps, the 52% category width and the
+580/320 plot proportions. Rank selects ink, muted, quiet and faint tones; value
+labels sit above each bar. The three rung charts retain 560/340 proportions and
+one visible mark per whole $1K. Rungs are 1px thick at the default `stroke.mark`,
+with deterministic width and opacity variation. Single stacks have a counting
+dot every fifth rung; pairs sit 13px either side of each category center and
+compare grey before with ink after. Stacked rungs retain core, add-ons and services
+in ink, muted and pale, with one empty rung between segments. Those gaps never
+enter revenue totals. Preserve the total labels, segment labels and explanatory
+footers, including their original opacity and typography proportions. An unknown
+segment makes the region's complete stack unavailable; zero remains measured.
 
 Recharts supplies the scales, series and tooltip navigation. Matrix guides and
 custom cells live inside that composition. Hover exposes the observation, and

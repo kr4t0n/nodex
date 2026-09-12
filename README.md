@@ -5,9 +5,11 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-This reconstruction contains **24 reusable primitives and five Recharts proofs
-of concept**: `mono-editorial/hairline-line`, `mono-editorial/arc-matrix`,
-`mono-editorial/dual-area`, `mono-editorial/petal-rose`, and
+This reconstruction contains **24 reusable primitives and nine Recharts charts**:
+`mono-editorial/hairline-line`, `mono-editorial/arc-matrix`,
+`mono-editorial/dual-area`, `mono-editorial/petal-rose`,
+`mono-editorial/chunky-bars`, `mono-editorial/rung-bars`,
+`mono-editorial/paired-rungs`, `mono-editorial/stacked-rungs`, and
 `signal-console/endpoint-latency`. The previous expressive catalogue has been
 removed from this branch; it remains in Git history. This is a new source
 contract, with no legacy HTML/mount-function compatibility path.
@@ -105,10 +107,15 @@ src/components/nodex/
   arc-matrix/component.tsx
   dual-area/component.tsx
   petal-rose/component.tsx
+  chunky-bars/component.tsx
+  rung-bars/component.tsx
+  paired-rungs/component.tsx
+  stacked-rungs/component.tsx
   button/component.tsx
   button/component.css
   _shared/use-chart-motion.ts
   _shared/use-reduced-motion.ts
+  _shared/rung-marks.tsx
 ```
 
 Only declared, reachable runtime files are copied. There is no Nodex runtime
@@ -148,6 +155,28 @@ inspection stop once per category. Zero leaves a track and a zero label;
 unavailable counts retain their slot with an em dash. The numeric labels consume
 `type.plotValue`; `plotTrack` and `markStrong` preserve the original track and
 intermediate petal paints as language tokens.
+
+The bar family preserves each specimen's original marks and labels:
+
+| Component | Required observation fields | Encoding |
+| --- | --- | --- |
+| `chunky-bars` | `plan`, `mrrK` | Rounded bars; tone ranks revenue without changing plan order |
+| `rung-bars` | `plan`, `mrrK` | One rung per $1K, with a counting dot every fifth rung |
+| `paired-rungs` | `plan`, `beforeK`, `afterK` | Grey and ink rung stacks compare both measures for a plan |
+| `stacked-rungs` | `region`, `coreK`, `addOnsK`, `servicesK` | Three revenue segments separated by empty rung positions |
+
+Each component takes a required `data` array and the same optional dimensions,
+`animate`, `className` and `aria-label` props as the other charts. Zero is measured;
+null, negative and non-finite values are unavailable. The three rung charts require
+whole thousands: fractional values are unavailable rather than rounded to marks.
+An incomplete stacked region retains its category with an unavailable total and
+no stack, because missing revenue cannot establish the next segment's baseline.
+Keyboard inspection visits plans or regions, not each decorative rung. The shared
+`rung-marks.tsx` is copied only with the rung charts and reused across them.
+
+```bash
+nodex add chunky-bars rung-bars paired-rungs stacked-rungs
+```
 
 ## Tokens and rendering
 

@@ -1,0 +1,56 @@
+{
+  "slug": "chunky-bars",
+  "title": "Revenue by plan",
+  "description": "Q2 2026 · MRR, $K",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "glance",
+  "entry": "component.tsx",
+  "exports": ["ChunkyBars"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
+  "dependencies": ["recharts@3.10.1"],
+  "example": { "entry": "example.tsx", "export": "Example", "width": 676, "height": 426 },
+  "tags": ["billing"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ChunkyBarsDatum[]",
+      "description": "Ordered plan labels and monthly recurring revenue in thousands of dollars. Tone ranks available values without reordering categories; ties follow input order and ranks beyond the four-tone ramp retain its lightest tone. Null, negative and non-finite values remain unavailable in their category slot; zero retains its value label without a bar.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot aspect ratio.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Fixed width in pixels; otherwise fills the containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ],
+  "aspectRatio": "580/320"
+}

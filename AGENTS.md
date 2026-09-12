@@ -15,7 +15,7 @@ also encode identity through geometry, annotation and information density.
 - **Primitives** live once under `registry/primitives/` and accept every language's
   shared token roles. Their React APIs wrap native elements and retain editable CSS.
 
-The current reconstruction deliberately contains five expressive POCs and all
+The current reconstruction deliberately contains nine expressive charts and all
 24 primitives. The old expressive catalogue remains in Git history. Do not restore
 legacy artifacts or automatically port the old catalogue before this contract is
 validated against a new chart's requirements.
@@ -174,6 +174,8 @@ real browser rendering and inspect resolved SVG paint, gradient stops and
 screen-space stroke widths. Background knockouts and declared area strokes have
 different semantics from ordinary outlines. Tests include invalid paint and
 scaled strokes so conformance cannot pass merely because a parser skipped them.
+Preview readiness accepts all supported SVG mark shapes; a chart composed of
+rectangles and lines need not emit a path or circle before it can be inspected.
 
 ESLint and TypeScript include registry code, examples and build scripts. Do not
 reinstate the old registry-wide ESLint ignore. Run the required checks from
@@ -338,6 +340,8 @@ relative to its own location. Helm uses an external database and migration Job.
   Move the pointer away for keyboard-only inspection. The coordinated chart
   follows the library's selected observation; it does not replace keyboard
   navigation or reach into the library's private state.
+  Focus can retain an earlier index; browser tests establish selection with real
+  arrow keys and allow the library's animation-frame input throttling to settle.
 - Petal-rose uses one equal-angle Pie with a per-observation outer radius.
   Library Sector shapes compose the track and petal; labels share that
   observation, so decorative layers cannot become extra keyboard stops.
@@ -350,6 +354,21 @@ relative to its own location. Helm uses an external database and migration Job.
   labels use `type.plotValue`, separate from card headings.
 - Recharts vertical bars advance to the next route with ArrowLeft in the pinned
   release; the accessible description documents the library's direction.
+- The bar family uses Recharts Bar series, category indices and public scale
+  hooks. Repeated labels do not merge categories. Chunky-bars keeps caller order
+  while rank selects tone, and zero retains a label without a visible bar.
+  Rung charts require nonnegative safe integers: each mark is exactly $1K, so
+  silently rounding fractional counts would change the data. Shared `rung-marks`
+  owns only unit marks and their preserved deterministic width/opacity variation;
+  each component retains its series, scales, geometry, types and annotations.
+  Paired-rungs has two real series and a combined plan tooltip. Stacked-rungs
+  stacks three actual counts, then shifts custom marks by one scale unit per
+  preceding segment to retain gaps without adding synthetic revenue to the stack.
+  An incomplete region suppresses its whole stack and total; treating a missing
+  segment as zero would misplace every later segment. Categories remain available
+  to keyboard inspection. Totals use the library's LabelList so zero/unavailable
+  labels survive zero-height bar filtering. Rung thickness uses `stroke.mark`;
+  numeric label sizes derive from `type.plotValue` with preserved proportions.
 - Recharts makes the chart SVG focusable. Suppress its browser outline for
   pointer focus and style `:focus-visible` with language ink and mark-stroke
   tokens. Pie sectors can also receive pointer focus despite `tabindex="-1"`;
