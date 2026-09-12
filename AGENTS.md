@@ -15,7 +15,7 @@ also encode identity through geometry, annotation and information density.
 - **Primitives** live once under `registry/primitives/` and accept every language's
   shared token roles. Their React APIs wrap native elements and retain editable CSS.
 
-The current reconstruction deliberately contains four expressive POCs and all
+The current reconstruction deliberately contains five expressive POCs and all
 24 primitives. The old expressive catalogue remains in Git history. Do not restore
 legacy artifacts or automatically port the old catalogue before this contract is
 validated against a new chart's requirements.
@@ -338,11 +338,23 @@ relative to its own location. Helm uses an external database and migration Job.
   Move the pointer away for keyboard-only inspection. The coordinated chart
   follows the library's selected observation; it does not replace keyboard
   navigation or reach into the library's private state.
+- Petal-rose uses one equal-angle Pie with a per-observation outer radius.
+  Library Sector shapes compose the track and petal; labels share that
+  observation, so decorative layers cannot become extra keyboard stops.
+  Radius grows linearly from the inner ring to the current dataset maximum,
+  preserving the old rose renderer's actual encoding despite its `area` name.
+  Zero leaves no petal; do not copy the old all-zero midpoint-radius bug.
+  Label contrast retains the specimen's 8-of-12 reach threshold as a ratio so
+  changing count units cannot put light labels onto short, pale petals.
+  The 5px background strokes are knockout gaps, not data outlines. Numeric
+  labels use `type.plotValue`, separate from card headings.
 - Recharts vertical bars advance to the next route with ArrowLeft in the pinned
   release; the accessible description documents the library's direction.
 - Recharts makes the chart SVG focusable. Suppress its browser outline for
   pointer focus and style `:focus-visible` with language ink and mark-stroke
-  tokens. Keep the accessibility layer and keyboard navigation enabled.
+  tokens. Pie sectors can also receive pointer focus despite `tabindex="-1"`;
+  include these descendants in the same treatment. Keep the accessibility layer
+  and keyboard navigation enabled.
 
 ## Remaining scope
 

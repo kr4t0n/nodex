@@ -29,10 +29,12 @@ of marks, never from color.
 | `--nx-faint` | `#C6C5BF` | captions, the quietest rules |
 | `--nx-grid` | `#DEDDD6` | gridlines, hairline separators |
 | `--nx-markMuted` | `#6A6963` | middle-value matrix cells and product labels |
+| `--nx-markStrong` | `#4A4944` | strong intermediate petals in the rose |
 | `--nx-markQuiet` | `#B0AFA9` | low-value matrix cells and descending spend bars |
 | `--nx-plotGrid` | `#E3E2DB` | bowed matrix guides |
 | `--nx-plotFaint` | `#D8D6CE` | measured zeroes in the matrix |
 | `--nx-plotFloor` | `#CFCEC7` | the line chart's barcode floor |
+| `--nx-plotTrack` | `#E4E3DD` | full-reach tracks behind rose petals |
 
 The chart roles name paints already used by the retained specimens. Their tone
 relationships are preserved when moving paint into tokens.
@@ -62,6 +64,8 @@ is barely larger than body text — the hierarchy comes from weight and from the
 uppercase tracking of the captions, not from size jumps. Captions run `9.5px`
 uppercase at `0.08em`, small enough to read as a printed credit line. The axis
 token remains `8px`; individual annotations retain their existing proportions.
+Rose counts use `plotValue`, a `17px/700` numeric mark label; card headings and
+these data values remain independently adjustable.
 
 Negative tracking on headings, positive tracking on anything uppercase. Never
 the reverse. The generated token stylesheet bundles the configured Inter face
@@ -111,6 +115,17 @@ proportions. The ink area fades from 22% opacity to transparent toward zero;
 this retained data encoding is an exception to the ban on decorative gradients.
 Aligned pointers inspect both measures with one combined tooltip. Missing
 measures keep their calendar position; they are not zeroes or interpolated data.
+
+Petal rose gives every category the same angle, clockwise from twelve o'clock.
+Counts change radial reach linearly against the dataset maximum; tone follows
+the same relative count. Full-reach pale tracks remain behind the petals. Keep
+the 14% inner radius, 92% track radius, 88% maximum petal radius, 16/14px rounded
+corners and 5px gaps painted in the card ground. These gaps are background
+knockouts, not heavy outlines. Counts and category names sit on a fixed label
+ring, above both track and petal; long petals receive paper and faint labels.
+The contrast threshold follows the specimen's relative reach, so proportional
+changes to all counts retain the same drawing. Zero leaves its track and zero
+label; missing counts keep a slot with an em dash and an unavailable tooltip.
 
 Recharts supplies the scales, series and tooltip navigation. Matrix guides and
 custom cells live inside that composition. Hover exposes the observation, and

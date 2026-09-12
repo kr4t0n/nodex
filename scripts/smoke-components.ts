@@ -12,6 +12,7 @@ import type { Browser, Page } from '@playwright/test';
 
 import { renderedMarks, serveDirectory } from './lib/browser.ts';
 import { checkDualAreaConsumer, DUAL_AREA_CONSUMER_SOURCE } from './lib/dual-area-consumer.ts';
+import { checkPetalRoseConsumer, PETAL_ROSE_CONSUMER_SOURCE } from './lib/petal-rose-consumer.ts';
 import { checkPrimitiveConsumer, PRIMITIVE_CONSUMER_SOURCE, PRIMITIVE_SLUGS } from './lib/primitive-consumer.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -83,6 +84,7 @@ import { Button } from './components/nodex/button/component';
 import { Input } from './components/nodex/input/component';
 import { PrimitiveConsumer } from './primitive-consumer';
 import { DualAreaConsumer } from './dual-area-consumer';
+import { PetalRoseConsumer } from './petal-rose-consumer';
 
 type Mode = 'normal' | 'empty' | 'single' | 'zero' | 'invalid';
 declare global { interface Window { nodexFixture: { setMode: (value: Mode) => void; setAnimate: (value: boolean) => void } } }
@@ -115,6 +117,7 @@ function Consumer() {
     <section id="matrix" className="w-[660px]"><ArcMatrix data={matrixData} height={360} animate={animate} aria-label="Accounts by city and product" /></section>
     <section id="latency" data-signal className="w-[660px]"><EndpointLatency data={endpointData} objectiveMs={mode === 'invalid' ? NaN : 300} height={320} animate={animate} aria-label="Route latency" /></section>
     <DualAreaConsumer animate={animate} />
+    <PetalRoseConsumer animate={animate} />
     <PrimitiveConsumer />
   </main>;
 }
@@ -138,7 +141,7 @@ async function consumerFixture(): Promise<string> {
     const cli = path.join(ROOT, 'packages/cli/dist/index.js');
     const registry = path.join(ROOT, 'public');
     await run(process.execPath, [cli, 'init', 'mono-editorial', '--registry', registry], fixture);
-    await run(process.execPath, [cli, 'add', 'hairline-line', 'arc-matrix', 'dual-area', 'signal-console/endpoint-latency', ...PRIMITIVE_SLUGS], fixture);
+    await run(process.execPath, [cli, 'add', 'hairline-line', 'arc-matrix', 'dual-area', 'petal-rose', 'signal-console/endpoint-latency', ...PRIMITIVE_SLUGS], fixture);
     const installed = JSON.parse(await readFile(path.join(fixture, 'package.json'), 'utf8')) as { dependencies: Record<string, string> };
     assert.equal(installed.dependencies.recharts, '3.10.1', 'CLI must install the exact chart dependency');
     assert.equal(installed.dependencies['react-is'], installed.dependencies.react, 'react-is must match the consumer React version');
@@ -156,6 +159,7 @@ async function consumerFixture(): Promise<string> {
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/primitive-consumer.tsx'), PRIMITIVE_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/dual-area-consumer.tsx'), DUAL_AREA_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/petal-rose-consumer.tsx'), PETAL_ROSE_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2023', lib: ['ES2023', 'DOM', 'DOM.Iterable'], module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx', strict: true, noUncheckedIndexedAccess: true, skipLibCheck: true, noEmit: true }, include: ['src'] }, null, 2));
     await writeFile(path.join(fixture, 'bundle.mjs'), `import { build } from 'esbuild';\nawait build({ entryPoints:['src/main.tsx'], outfile:'dist/main.js', bundle:true, format:'esm', jsx:'automatic', define:{'process.env.NODE_ENV':'"production"'} });\n`);
     console.log('Checking and bundling only CLI-delivered source using the consumer’s own dependencies.');
@@ -171,7 +175,7 @@ async function consumerFixture(): Promise<string> {
 }
 
 async function waitForCharts(page: Page) {
-  for (const selector of ['#line-primary', '#line-secondary', '#matrix', '#latency']) {
+  for (const selector of ['#line-primary', '#line-secondary', '#matrix', '#latency', '#petal-primary', '#petal-secondary']) {
     await expect(page.locator(`${selector} svg`)).toHaveCount(1);
   }
   await expect(page.locator('#matrix [data-nx-cell]')).toHaveCount(6);
@@ -221,6 +225,7 @@ async function checkConsumer(browser: Browser): Promise<void> {
     const ids = await page.locator('[id]').evaluateAll((elements) => elements.map((element) => element.id));
     assert.equal(new Set(ids).size, ids.length, 'Multiple installed components generated duplicate IDs');
     await checkDualAreaConsumer(page);
+    await checkPetalRoseConsumer(page);
 
     const linePath = page.locator('#line-primary .recharts-line-curve');
     const previousPath = await linePath.getAttribute('d');
@@ -265,9 +270,16 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await page.evaluate(() => (window as unknown as { nodexFixture: { setAnimate: (value: boolean) => void } }).nodexFixture.setAnimate(true));
     await expect(page.locator('#line-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await expect(page.locator('#dual-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
+    await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await expect(page.locator('#line-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
     await expect(page.locator('#dual-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
+    await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
+    await page.locator('#petal-primary').evaluate((element) => (element as HTMLElement).style.setProperty('--nx-motion-draw-duration', '0s'));
+    await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
+    await expect(page.locator('#line-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
+    await page.locator('#petal-primary').evaluate((element) => (element as HTMLElement).style.setProperty('--nx-motion-draw-duration', '120ms'));
+    await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
     await page.locator('#dual-primary').evaluate((element) => (element as HTMLElement).style.setProperty('--nx-motion-draw-duration', '0s'));
     await expect(page.locator('#dual-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await expect(page.locator('#line-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
@@ -281,6 +293,7 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(page.locator('#matrix [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await expect(page.locator('#dual-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
+    await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
 
     for (const mode of ['empty', 'single', 'zero', 'invalid'] as const) {
       await page.evaluate((value) => (window as unknown as { nodexFixture: { setMode: (mode: string) => void } }).nodexFixture.setMode(value), mode);

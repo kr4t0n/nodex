@@ -5,9 +5,9 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-This reconstruction contains **24 reusable primitives and four Recharts proofs
+This reconstruction contains **24 reusable primitives and five Recharts proofs
 of concept**: `mono-editorial/hairline-line`, `mono-editorial/arc-matrix`,
-`mono-editorial/dual-area`, and
+`mono-editorial/dual-area`, `mono-editorial/petal-rose`, and
 `signal-console/endpoint-latency`. The previous expressive catalogue has been
 removed from this branch; it remains in Git history. This is a new source
 contract, with no legacy HTML/mount-function compatibility path.
@@ -40,7 +40,7 @@ CLI from an existing consumer app using absolute checkout paths:
 
 ```bash
 node /path/to/nodex/packages/cli/src/index.ts init mono-editorial --registry /path/to/nodex/public
-node /path/to/nodex/packages/cli/src/index.ts add hairline-line arc-matrix dual-area button
+node /path/to/nodex/packages/cli/src/index.ts add hairline-line arc-matrix dual-area petal-rose button
 ```
 
 The installed CLI provides the same commands as `nodex init` and `nodex add`.
@@ -104,6 +104,7 @@ src/components/nodex/
   hairline-line/component.tsx
   arc-matrix/component.tsx
   dual-area/component.tsx
+  petal-rose/component.tsx
   button/component.tsx
   button/component.css
   _shared/use-chart-motion.ts
@@ -139,6 +140,14 @@ Both plots support arrow-key inspection. Null, negative or non-finite measures
 remain unavailable without removing the day; zero remains a measured value.
 The spend scale retains its original $0–18K range and expands for larger values;
 the sign-up scale starts at zero and adapts to the supplied data.
+
+`petal-rose` takes ordered `{ name, count }` categories. Each category has the
+same angle; its petal radius and tone compare its count to the dataset maximum.
+Tracks and labels belong to the same observation, so hover and keyboard
+inspection stop once per category. Zero leaves a track and a zero label;
+unavailable counts retain their slot with an em dash. The numeric labels consume
+`type.plotValue`; `plotTrack` and `markStrong` preserve the original track and
+intermediate petal paints as language tokens.
 
 ## Tokens and rendering
 

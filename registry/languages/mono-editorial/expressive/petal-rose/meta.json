@@ -1,0 +1,56 @@
+{
+  "slug": "petal-rose",
+  "title": "How releases made us feel",
+  "description": "reactions tagged in retro · H1 2026",
+  "component": "polar-area",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "glance",
+  "entry": "component.tsx",
+  "exports": ["PetalRose"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
+  "dependencies": ["recharts@3.10.1"],
+  "example": { "entry": "example.tsx", "export": "Example", "width": 676, "height": 456 },
+  "tags": ["team", "retro", "board"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly PetalRoseDatum[]",
+      "description": "Ordered categories with name and count. Every category has an equal angle; petal reach and tone compare each count to the current maximum. Null, negative or non-finite counts remain unavailable in their category slot; zero leaves its track and zero label.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot aspect ratio.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Fixed width in pixels; otherwise fills the containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ],
+  "aspectRatio": "560/340"
+}
