@@ -1,0 +1,79 @@
+{
+  "slug": "radial-convergence",
+  "title": "48 requests pull toward five themes",
+  "description": "every rim node = a feature request · lines bundle into the theme that claimed it",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "close-read",
+  "aspectRatio": "420/380",
+  "tags": [
+    "feedback",
+    "board"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "RadialConvergence"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 617
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly RadialConvergenceDatum[]",
+      "required": true,
+      "description": "Ordered request IDs and their caller-assigned theme IDs. Unique nonempty request IDs are required. An unknown or missing theme retains its request on the rim without inventing a connection."
+    },
+    {
+      "name": "themes",
+      "type": "readonly RadialConvergenceTheme[]",
+      "required": true,
+      "description": "Unique theme IDs, caller labels and finite angular positions in degrees. Hub area encodes the count of requests actually assigned to each theme; zero-count themes retain labels without a hub."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

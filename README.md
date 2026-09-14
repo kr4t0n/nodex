@@ -5,14 +5,12 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-This reconstruction contains **24 reusable primitives and nine Recharts charts**:
-`mono-editorial/hairline-line`, `mono-editorial/arc-matrix`,
-`mono-editorial/dual-area`, `mono-editorial/petal-rose`,
-`mono-editorial/chunky-bars`, `mono-editorial/rung-bars`,
-`mono-editorial/paired-rungs`, `mono-editorial/stacked-rungs`, and
-`signal-console/endpoint-latency`. The previous expressive catalogue has been
-removed from this branch; it remains in Git history. This is a new source
-contract, with no legacy HTML/mount-function compatibility path.
+The reconstruction contains the complete original **65-chart catalogue** and
+**24 reusable primitives**, delivered as editable React source. Nine initial
+charts validated the source-delivery and token contract; the remaining specimens
+now use the same workflow. Run `nodex list` against the built registry for the
+current catalogue. The previous implementations remain in Git
+history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
 ## Develop the registry and gallery
 
@@ -54,8 +52,10 @@ hosted manifests do not provide the required entry, file-target and language-ass
 fields; the CLI intentionally reports that mismatch instead of guessing paths.
 
 `init` writes `nodex.json`, `src/styles/nodex-tokens.css`, `docs/DESIGN.md`, and
-a managed section of `AGENTS.md`. Read the design document. Import the token
-stylesheet once after Tailwind in your application stylesheet:
+a managed section of `AGENTS.md`. The design document defines the language's
+visual foundations and token rules for all UI, including projects without charts.
+Component descriptions and APIs belong to the component metadata and source.
+Import the token stylesheet once after Tailwind in your application stylesheet:
 
 ```css
 @import "tailwindcss";
@@ -88,10 +88,24 @@ export function Report() {
 }
 ```
 
+Force networks preserve their deterministic layout, draggable nodes and, for the
+dense mesh, background pan and scroll zoom. Their shared local force calculation
+retains its upstream license notices; Recharts owns the scales, observations and
+rendering. The simple force graph automatically fits its full layout into the
+available frame, including node circles and labels, while keeping their sizes
+and the force geometry intact. It adapts to resizing and refits after a drag is
+released. The scatter morph advances on click through native scatter, ranked bar
+and donut series, carrying each product's outline between encodings. Reduced
+motion settles networks immediately and changes morph views without animation.
+
 Each chart requires real data. Fixtures remain in registry examples. Gallery
 titles belong to the caller; the original drawing annotations and console status
 header/footer remain part of their charts. Charts have no data dropdown or table.
+Barcode-lollipop omits the left description and legend, keeping its plot and footer key.
 Primitive modules import their own required CSS.
+Calendar peak notes and bubble-almanac marginal notes wrap above their plotted
+marks. Almanac notes retain leader lines to caller-supplied targets, and its
+numeric labels use the scoped background color to remain readable over bubbles.
 `nodex show` documents the explicit props for charts and primitives; descriptions
 identify which export owns a prop when an item contains several components.
 
@@ -178,6 +192,104 @@ Keyboard inspection visits plans or regions, not each decorative rung. The share
 nodex add chunky-bars rung-bars paired-rungs stacked-rungs
 ```
 
+The next bar variants extend that composition:
+
+| Component | Required observation fields | Encoding |
+| --- | --- | --- |
+| `rung-histogram` | `fromHours`, `toHours`, `tickets` | One rung per integer ticket; interval ticks and a median flag |
+| `diverging-bar` | `segment`, `netAccounts` | Signed bars extend from zero; tone and caps reinforce direction |
+| `range-capsules` | `day`, `lowK`, `highK` | Each capsule spans an observed minimum and maximum |
+| `rung-waterfall` | `label`, `kind`, and `valueK` for starts/changes | Integer changes update a running total; broken rungs mark deductions |
+
+Waterfall `kind` is `start`, `change` or `total`. A start sets the running value,
+a change adjusts it, and a total displays it. An unavailable change leaves later
+totals unavailable until a new start; labels have no arithmetic meaning. Missing
+histogram counts suppress the median. Reversed ranges are unavailable, while
+equal endpoints preserve their observation with no visible capsule.
+
+```bash
+nodex add rung-histogram diverging-bar range-capsules rung-waterfall
+```
+
+The scatter and heatmap components also require caller observations:
+
+| Component | Data contract |
+| --- | --- |
+| `plumb-scatter` | Product, price percentile and satisfaction; both measures range from 0 to 100 |
+| `single-axis` / `dot-heat` | Day, hour and ticket count; the former uses linear diameter, the latter the original square-root size curve |
+| `brand-spectrum` | Opposing traits, our position and competitor positions, all on a 0–1 scale |
+| `matrix-heat` | Feature labels and a square matrix of co-usage percentages; self-pairs are inapplicable |
+| `matrix-heat-glance` | Feature labels and ordered releases with adoption percentages |
+| `calendar-heat` | Ordered week labels and Monday–Sunday deploy counts; optional period and peak labels come from the caller |
+| `dotty-matrix` | Ordered squads with task matrices indexed by lane and week |
+| `beeswarm` | Deal values in thousands and enterprise flags; one dot per deal, piled into calibrated lanes |
+| `violin` | Plan labels, observed reply times and positive density bandwidths in hours |
+| `tick-box` | Plan labels, ordered five-number summaries and individual outliers in hours |
+| `hairline-area` | Ordered days and values in thousands, with caller-supplied sparse axis labels |
+| `jitter-strip` | Nonnegative hours with caller-supplied fractional band positions; ordered band labels |
+| `trend-lineage` | Feature events, survival state and an explicit year window; incomplete timelines are unavailable |
+| `type-colonnade` | Ordered repository ownership indices and team labels, with derived team counts |
+| `dumbbell-queue` | Before/after whole-minute times; one bead per saved minute, with independently available endpoints |
+| `rank-strip` | Positive integer product ranks and ordered periods; rows sort by the final period, with unavailable finishes last |
+| `force-graph` | Caller hub and service IDs, monthly syncs and side roads; preserved force layout, dragging and adjacency |
+| `force-graph-dense` | Service domains, daily calls and explicit weighted links; preserved mesh physics, dragging, pan and zoom |
+| `scatter-morph` | Stable product IDs, price, satisfaction and revenue; reader-controlled scatter/bar/donut outline transitions |
+| `choropleth-states` | State sign-ups, preserved geographic insets and five-band controls; optional caller annotations |
+| `choropleth-world` | Country monthly actives, the original latitude window and five-band controls; offline geography |
+| `tree` | Caller root, product areas and feature membership; tidy hierarchy layout with all branches expanded |
+| `nested-treemap` | Complete team effort hours grouped by area; native nested layouts, header bands and derived shares |
+| `circular-graph` | Ordered teams and indexed ties; headcount diameters, weighted threads and adjacency inspection |
+| `circular-graph-dense` | Repositories, organizations and shared-contributor ties; diameter-aware ring spacing and selective rotated labels |
+| `aggregate-sankey` | Complete channel-to-plan counts; ranked source tones, native weighted layout and node/link inspection |
+| `parallel-coords` | Caller dimensions and scored ranges; complete product paths, axis brushing and derived best-all-round highlight |
+| `thread-triptych` | Ordered route endpoints and volume; one continuous weighted path through three caller-owned columns |
+| `cluster-field` | Whole core and island contributor counts, caller layout positions and explicit cross-contribution flags |
+| `hourglass-stream` | Whole stage populations, nearest-40-person ticks and exact adjacent conversion rates |
+| `stream-ribbon` | Ordered surfaces and weeks in a regular stacked area, preserving the original renderer’s actual encoding |
+| `bubble-almanac` | Indexed product/year ticket counts and beta flags, with caller event shelf and marginal notes |
+| `candlestick` | Ordered open/close/low/high quotes; hollow up bodies, ink down bodies and unchanged-price marks |
+| `radial-patchwork` | Deployment hour, angular window, files touched and incident status; overlapping independent sectors |
+| `radial-convergence` | Explicit request-to-theme assignments; hub area counts actual assignments |
+| `bar-race` | Period revenue frames with stable product IDs; one playback, replay, and final-frame reduced motion |
+| `stagger-delay` | Caller-ordered market values, magnitude tones and a token-timed bar stagger |
+| `dynamic-data` | Caller samples and static source status; last sample owns the current value |
+| `draw-in-counter` | Daily bookings and period label; cumulative area and exact headline share the library animation |
+| `dot-cascade` | Whole incident counts above a sloping baseline; odd totals round the final two-incident dot up |
+| `launch-fan` | Feature launch weeks and caller week guides, projected through the original fan |
+| `donut-redesigned` | Complete whole-percent source shares in a ten-by-ten dot grid |
+| `custom-pie` | User shares determine angle; minutes determine radius, with caller reference scale and rings |
+| `tick-donut` | Ordered whole-percent channel shares totaling 100; one tick per percent |
+| `tick-gauge` | Whole-percent progress and caller goal label; 100 reached or remaining ticks |
+| `pictorial-bar` | Yearly trees in thousands and a caller target; continuous bars clip a repeated tree texture |
+| `tick-rows` | Whole release counts by team; one tick per release and one counting dot per five |
+| `barcode-lollipop` | Day labels, peak users and weekend flags; unavailable readings retain their calendar hairlines |
+| `hundred-field` | Up to four whole-percent disposition shares; each dot is one person in a hundred, with no invented unallocated people |
+| `ballot-tally` | Each option has a whole picked count out of 100; repeated choices permit row totals above 100. Automatic height reserves readable spacing for each option's heading and ticks |
+| `ridgeline` | Ordered pipeline density profiles with unique nonnegative hours and nullable density weights |
+
+Tick-donut and tick-gauge keep circular geometry at responsive and explicit
+dimensions. Their ticks and counting guides share equal axis scales, and the
+gauge fits its complete arc inside the plot.
+
+Heatmaps preserve measured zeros and omit unavailable observations. Their fixed
+percentage bands do not rescale to the input maximum. The co-usage legend retains
+its band toggles, with independent state per instance. Decorative guides and peak
+annotations do not introduce extra keyboard stops. Use `nodex show <slug>` for
+each exported type and prop contract.
+
+The violin accepts observed values, with its sample generation confined to the
+example. Each plan's density is normalized to its own peak and uses the supplied
+bandwidth. Violin and beeswarm preserve the specimens' upper-middle median
+convention. Beeswarm retains its $180K/44-lane calibration when the visible scale
+expands for larger deals.
+Boxplot outliers remain available even when their plan's summary is unavailable.
+Hairline-area retains missing days as gaps in its line, with one native Bar mark
+per available day and a Line dot for the maximum.
+Ridgeline normalizes each supplied profile to its own maximum and retains the
+specimen's presentation without visible row labels or a tooltip. Keyboard
+inspection announces the actual selected hour to assistive technology; an
+unsampled hour in another profile remains unavailable.
+
 ## Tokens and rendering
 
 Language `tokens.json` is canonical. The build emits CSS custom properties;
@@ -214,6 +326,14 @@ not React hydration. Downstream applications receive ordinary client charts;
 the gallery's pre-rendered snapshot is not a server-rendering guarantee for
 consumer apps.
 
+Gallery previews give chart compositions and primitive examples the same 28px
+top and left inset. Charts scale within that frame using build-measured outer
+spacing; their internal layout and standalone preview proportions are preserved.
+Primitives continue to render at native size.
+
+Within each language, charts are sorted alphabetically by chart type, then title.
+Search results and type filters retain this order.
+
 ## Source and build layout
 
 ```text
@@ -227,7 +347,7 @@ registry/
   languages/<slug>/
     meta.json                      identity, visibility, featured charts, density
     tokens.json                    canonical values
-    DESIGN.md                      geometry, semantics and interaction rules
+    DESIGN.md                      language-wide visual foundations and token rules
     expressive/<slug>/
       component.tsx
       example.tsx

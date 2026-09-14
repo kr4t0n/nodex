@@ -1,0 +1,85 @@
+{
+  "slug": "force-graph-dense",
+  "title": "A galaxy of one hundred eighty services",
+  "description": "8 domains self-organize · node = call volume · drag anything, the galaxy fights back · click empty space to replay",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "react",
+  "strokeAsArea": true,
+  "density": "close-read",
+  "tags": [
+    "source",
+    "service",
+    "mesh"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "560/420",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ForceGraphDense"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "force-layout.ts",
+    "use-force-drag.ts",
+    "force-scatter.ts",
+    "circular-layout.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 533
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ForceGraphDenseDatum[]",
+      "required": true,
+      "description": "Services with stable IDs, display names, nullable nonnegative daily calls in thousands, hub flag and nonnegative domainIndex for the preserved eight-tone cycle."
+    },
+    {
+      "name": "edges",
+      "type": "readonly ForceGraphDenseEdge[]",
+      "required": true,
+      "description": "Source/target IDs, nullable nonnegative encoded width, and spoke/shortcut/backbone/stray treatment. Width is caller data because the original specimen derived it from unrounded traffic. Unknown endpoints are omitted; duplicate directed links keep their first occurrence."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

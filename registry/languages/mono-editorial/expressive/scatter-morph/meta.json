@@ -1,0 +1,72 @@
+{
+  "slug": "scatter-morph",
+  "title": "One dataset, three views",
+  "description": "the same 12 products as price vs rating, ranked revenue, and revenue share · click to morph between them, each product travelling to its new position",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "glance",
+  "tags": [
+    "cohorts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "580/320",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ScatterMorph"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 426
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ScatterMorphDatum[]",
+      "required": true,
+      "description": "Stable product IDs and caller-owned names, nullable nonnegative price, satisfaction and revenue in thousands. IDs must be unique; repeated display names remain separate products. Revenue rank assigns a stable tone across all three encodings."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "slug": "beeswarm",
+  "title": "A hundred and twenty deals, swarming",
+  "description": "one dot = one closed deal \u00b7 the swarm piles up where deals cluster \u00b7 hollow = enterprise \u00b7 dashed = median",
+  "component": "beeswarm",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "close-read",
+  "aspectRatio": "560/340",
+  "tags": [
+    "sales",
+    "ops"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "Beeswarm"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "zero-axis-rail.tsx"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly BeeswarmDatum[]",
+      "required": true,
+      "description": "Closed-deal values in thousands and enterprise flags. Values retain the specimen\u2019s $180K/44-lane calibration; larger values expand the visible scale. Null, negative and nonfinite values are unavailable."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

@@ -100,6 +100,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                 title={item.title}
                 width={item.meta.preview.width}
                 height={item.meta.preview.height}
+                insets={item.meta.preview.insets}
                 aspectRatio={item.meta.aspectRatio}
                 fluid={isPrimitive}
               />

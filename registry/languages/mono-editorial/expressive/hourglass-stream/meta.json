@@ -1,0 +1,72 @@
+{
+  "slug": "hourglass-stream",
+  "title": "The funnel, poured",
+  "description": "each strip's width = people at that stage · threads trickle down · Q2 2026 cohort",
+  "component": "funnel",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "close-read",
+  "aspectRatio": "560/340",
+  "tags": [
+    "growth"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "HourglassStream"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HourglassStreamDatum[]",
+      "required": true,
+      "description": "Ordered stage names and nonnegative whole person counts. Strip width is relative to the largest available stage, and ticks retain the original nearest-40-person rounding. Missing stages do not create threads or conversion rates; a zero denominator makes the rate unavailable."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

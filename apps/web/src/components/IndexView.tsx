@@ -251,6 +251,7 @@ function LanguageTile({
               title={item.title}
               width={item.meta.preview.width}
               height={item.meta.preview.height}
+              insets={item.meta.preview.insets}
               boxHeight={TILE_HEIGHT}
               fluid={item.meta.tier === 'primitive'}
             />

@@ -1,0 +1,92 @@
+{
+  "slug": "thread-triptych",
+  "title": "Where the data actually goes — now answerable",
+  "description": "source → processor → destination · one thread per data path · hover to trace a route · hover any label to pull its whole bundle · click to pin, click empty space to release",
+  "component": "sankey",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "close-read",
+  "aspectRatio": "1140/640",
+  "tags": [
+    "data",
+    "map"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "strokeAsArea": true,
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ThreadTriptych"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 431
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ThreadTriptychDatum[]",
+      "required": true,
+      "description": "Ordered source/processor/destination indices and nonnegative volume in thousands of events per day. Missing volume or an invalid endpoint makes the route unavailable. Zero-volume routes have no thread."
+    },
+    {
+      "name": "sources",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered source labels; indices preserve repeated names as separate nodes."
+    },
+    {
+      "name": "processors",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered processor labels, revealed on inspection."
+    },
+    {
+      "name": "destinations",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered destination labels."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

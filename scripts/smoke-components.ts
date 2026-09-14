@@ -12,9 +12,30 @@ import type { Browser, Page } from '@playwright/test';
 
 import { renderedMarks, serveDirectory } from './lib/browser.ts';
 import { BAR_FAMILY_CONSUMER_SOURCE, BAR_FAMILY_PRIMARY_SELECTORS, checkBarFamilyConsumer } from './lib/bar-family-consumer.ts';
+import { BAR_EXTENSION_SLUGS, BAR_EXTENSIONS_CONSUMER_SOURCE, checkBarExtensionsConsumer } from './lib/bar-extensions-consumer.ts';
 import { checkDualAreaConsumer, DUAL_AREA_CONSUMER_SOURCE } from './lib/dual-area-consumer.ts';
+import { HEATMAP_CONSUMER_SOURCE, HEATMAP_SLUGS, checkHeatmapConsumer } from './lib/heatmap-consumer.ts';
 import { checkPetalRoseConsumer, PETAL_ROSE_CONSUMER_SOURCE } from './lib/petal-rose-consumer.ts';
 import { checkPrimitiveConsumer, PRIMITIVE_CONSUMER_SOURCE, PRIMITIVE_SLUGS } from './lib/primitive-consumer.ts';
+import { MORPH_CONSUMER_SOURCE, MORPH_SLUGS, checkMorphConsumer } from './lib/morph-consumer.ts';
+import { FORCE_CONSUMER_SOURCE, FORCE_SLUGS, checkForceConsumer, checkForceFit } from './lib/force-consumer.ts';
+import { MAP_CONSUMER_SOURCE, MAP_SLUGS, checkMapConsumer } from './lib/map-consumer.ts';
+import { HIERARCHY_CONSUMER_SOURCE, HIERARCHY_SLUGS, checkHierarchyConsumer } from './lib/hierarchy-consumer.ts';
+import { CIRCULAR_CONSUMER_SOURCE, CIRCULAR_SLUGS, checkCircularConsumer } from './lib/circular-consumer.ts';
+import { FLOW_CONSUMER_SOURCE, FLOW_SLUGS, checkFlowConsumer } from './lib/flow-consumer.ts';
+import { POPULATION_CONSUMER_SOURCE, POPULATION_SLUGS, checkPopulationConsumer } from './lib/population-consumer.ts';
+import { PATH_CONSUMER_SOURCE, PATH_SLUGS, checkPathConsumer } from './lib/path-consumer.ts';
+import { ALMANAC_CONSUMER_SOURCE, ALMANAC_SLUGS, checkAlmanacConsumer } from './lib/almanac-consumer.ts';
+import { RADIAL_CONSUMER_SOURCE, RADIAL_SLUGS, checkRadialConsumer } from './lib/radial-consumer.ts';
+import { MARKET_CONSUMER_SOURCE, MARKET_SLUGS, checkMarketConsumer } from './lib/market-consumer.ts';
+import { RACE_CONSUMER_SOURCE, RACE_SLUGS, checkRaceConsumer } from './lib/race-consumer.ts';
+import { PROGRESS_CONSUMER_SOURCE, PROGRESS_SLUGS, checkProgressConsumer } from './lib/progress-consumer.ts';
+import { UNIT_CONSUMER_SOURCE, UNIT_SLUGS, checkBallotLayout, checkRadialGeometry, checkUnitConsumer } from './lib/unit-consumer.ts';
+import { CONNECTION_CONSUMER_SOURCE, CONNECTION_SLUGS, checkConnectionConsumer } from './lib/connection-consumer.ts';
+import { TIMELINE_CONSUMER_SOURCE, TIMELINE_SLUGS, checkTimelineConsumer } from './lib/timeline-consumer.ts';
+import { SUMMARY_CONSUMER_SOURCE, SUMMARY_SLUGS, checkSummaryConsumer } from './lib/summary-consumer.ts';
+import { SCATTER_LAYOUT_CONSUMER_SOURCE, SCATTER_LAYOUT_SLUGS, checkScatterLayoutConsumer } from './lib/scatter-layout-consumer.ts';
+import { SCATTER_FAMILY_CONSUMER_SOURCE, SCATTER_FAMILY_SLUGS, checkScatterFamilyConsumer } from './lib/scatter-family-consumer.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const runFile = promisify(execFile);
@@ -56,6 +77,9 @@ async function checkPreviews(browser: Browser): Promise<void> {
           assert.equal(response?.status(), 200, `${item.name}: preview must be served statically`);
           if (javaScriptEnabled) await page.waitForFunction(() => document.documentElement.dataset.nxReady === 'true');
           assert(await page.locator('#nx-preview').evaluate((element) => element.childElementCount > 0), `${item.name}: preview is empty`);
+          if (item.name === 'force-graph') await checkForceFit(page.locator('[data-nx-chart="force-graph"]'));
+          if (item.name === 'ballot-tally') await checkBallotLayout(page.locator('[data-nx-chart="ballot-tally"]'));
+          if (item.name === 'tick-donut' || item.name === 'tick-gauge') await checkRadialGeometry(page.locator(`[data-nx-chart="${item.name}"]`));
           if (item.meta.tier === 'expressive') {
             const marks = (await renderedMarks(page)).filter((mark) => mark.tag !== 'text');
             assert(marks.length > 0, `${item.name}: chart has no visible marks with JS ${javaScriptEnabled ? 'on' : 'off'}`);
@@ -87,6 +111,27 @@ import { PrimitiveConsumer } from './primitive-consumer';
 import { DualAreaConsumer } from './dual-area-consumer';
 import { PetalRoseConsumer } from './petal-rose-consumer';
 import { BarFamilyConsumer } from './bar-family-consumer';
+import { BarExtensionsConsumer } from './bar-extensions-consumer';
+import { ScatterFamilyConsumer } from './scatter-family-consumer';
+import { HeatmapConsumer } from './heatmap-consumer';
+import { ScatterLayoutConsumer } from './scatter-layout-consumer';
+import { SummaryConsumer } from './summary-consumer';
+import { TimelineConsumer } from './timeline-consumer';
+import { ConnectionConsumer } from './connection-consumer';
+import { UnitConsumer } from './unit-consumer';
+import { ProgressConsumer } from './progress-consumer';
+import { RaceConsumer } from './race-consumer';
+import { MarketConsumer } from './market-consumer';
+import { RadialConsumer } from './radial-consumer';
+import { AlmanacConsumer } from './almanac-consumer';
+import { PathConsumer } from './path-consumer';
+import { PopulationConsumer } from './population-consumer';
+import { FlowConsumer } from './flow-consumer';
+import { CircularConsumer } from './circular-consumer';
+import { HierarchyConsumer } from './hierarchy-consumer';
+import { MapConsumer } from './map-consumer';
+import { ForceConsumer } from './force-consumer';
+import { MorphConsumer } from './morph-consumer';
 
 type Mode = 'normal' | 'empty' | 'single' | 'zero' | 'invalid';
 declare global { interface Window { nodexFixture: { setMode: (value: Mode) => void; setAnimate: (value: boolean) => void } } }
@@ -121,6 +166,8 @@ function Consumer() {
     <DualAreaConsumer animate={animate} />
     <PetalRoseConsumer animate={animate} />
     <BarFamilyConsumer animate={animate} />
+    <BarExtensionsConsumer animate={animate} />
+    <ScatterFamilyConsumer animate={animate} /><HeatmapConsumer animate={animate} /><ScatterLayoutConsumer animate={animate} /><SummaryConsumer animate={animate} /><TimelineConsumer animate={animate} /><ConnectionConsumer animate={animate} /><UnitConsumer animate={animate} /><ProgressConsumer animate={animate} /><RaceConsumer animate={animate} /><MarketConsumer animate={animate} /><RadialConsumer animate={animate} /><AlmanacConsumer animate={animate} /><PathConsumer animate={animate} /><PopulationConsumer animate={animate} /><FlowConsumer animate={animate} /><CircularConsumer animate={animate} /><HierarchyConsumer animate={animate} /><MapConsumer animate={animate} /><ForceConsumer animate={animate} /><MorphConsumer animate={animate} />
     <PrimitiveConsumer />
   </main>;
 }
@@ -144,7 +191,9 @@ async function consumerFixture(): Promise<string> {
     const cli = path.join(ROOT, 'packages/cli/dist/index.js');
     const registry = path.join(ROOT, 'public');
     await run(process.execPath, [cli, 'init', 'mono-editorial', '--registry', registry], fixture);
-    await run(process.execPath, [cli, 'add', 'hairline-line', 'arc-matrix', 'dual-area', 'petal-rose', 'chunky-bars', 'rung-bars', 'paired-rungs', 'stacked-rungs', 'signal-console/endpoint-latency', ...PRIMITIVE_SLUGS], fixture);
+    const manifest = JSON.parse(await readFile(path.join(ROOT, 'public/r/registry.json'), 'utf8')) as { items: PreviewItem[] };
+    const charts = manifest.items.filter((item) => item.meta.tier === 'expressive').map((item) => `${item.meta.language}/${item.name}`);
+    await run(process.execPath, [cli, 'add', ...charts, ...PRIMITIVE_SLUGS], fixture);
     const installed = JSON.parse(await readFile(path.join(fixture, 'package.json'), 'utf8')) as { dependencies: Record<string, string> };
     assert.equal(installed.dependencies.recharts, '3.10.1', 'CLI must install the exact chart dependency');
     assert.equal(installed.dependencies['react-is'], installed.dependencies.react, 'react-is must match the consumer React version');
@@ -164,6 +213,27 @@ async function consumerFixture(): Promise<string> {
     await writeFile(path.join(fixture, 'src/dual-area-consumer.tsx'), DUAL_AREA_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/petal-rose-consumer.tsx'), PETAL_ROSE_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/bar-family-consumer.tsx'), BAR_FAMILY_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/bar-extensions-consumer.tsx'), BAR_EXTENSIONS_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/scatter-family-consumer.tsx'), SCATTER_FAMILY_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/heatmap-consumer.tsx'), HEATMAP_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/scatter-layout-consumer.tsx'), SCATTER_LAYOUT_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/summary-consumer.tsx'), SUMMARY_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/timeline-consumer.tsx'), TIMELINE_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/connection-consumer.tsx'), CONNECTION_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/unit-consumer.tsx'), UNIT_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/progress-consumer.tsx'), PROGRESS_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/race-consumer.tsx'), RACE_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/market-consumer.tsx'), MARKET_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/radial-consumer.tsx'), RADIAL_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/almanac-consumer.tsx'), ALMANAC_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/path-consumer.tsx'), PATH_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/population-consumer.tsx'), POPULATION_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/flow-consumer.tsx'), FLOW_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/circular-consumer.tsx'), CIRCULAR_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/hierarchy-consumer.tsx'), HIERARCHY_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/map-consumer.tsx'), MAP_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/force-consumer.tsx'), FORCE_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/morph-consumer.tsx'), MORPH_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2023', lib: ['ES2023', 'DOM', 'DOM.Iterable'], module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx', strict: true, noUncheckedIndexedAccess: true, skipLibCheck: true, noEmit: true }, include: ['src'] }, null, 2));
     await writeFile(path.join(fixture, 'bundle.mjs'), `import { build } from 'esbuild';\nawait build({ entryPoints:['src/main.tsx'], outfile:'dist/main.js', bundle:true, format:'esm', jsx:'automatic', define:{'process.env.NODE_ENV':'"production"'} });\n`);
     console.log('Checking and bundling only CLI-delivered source using the consumer’s own dependencies.');
@@ -188,6 +258,12 @@ async function waitForCharts(page: Page) {
   }
   for (const selector of [...BAR_FAMILY_PRIMARY_SELECTORS, ...BAR_FAMILY_PRIMARY_SELECTORS.map((value) => value.replace('-primary', '-secondary'))]) {
     await expect(page.locator(`${selector} svg.recharts-surface`)).toHaveCount(1);
+  }
+  for (const scope of ['primary', 'secondary']) for (const slug of BAR_EXTENSION_SLUGS) {
+    await expect(page.locator(`#bar-extensions-${scope} [data-nx-chart="${slug}"] svg.recharts-surface`)).toHaveCount(1);
+  }
+  for (const scope of ['primary', 'secondary']) for (const slug of SCATTER_FAMILY_SLUGS) {
+    await expect(page.locator(`#scatter-${scope} [data-nx-chart="${slug}"] svg.recharts-surface`)).toHaveCount(1);
   }
 }
 
@@ -234,6 +310,27 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await checkDualAreaConsumer(page);
     await checkPetalRoseConsumer(page);
     await checkBarFamilyConsumer(page);
+    await checkBarExtensionsConsumer(page);
+    await checkScatterFamilyConsumer(page);
+    await checkHeatmapConsumer(page);
+    await checkScatterLayoutConsumer(page);
+    await checkSummaryConsumer(page);
+    await checkTimelineConsumer(page);
+    await checkConnectionConsumer(page);
+    await checkUnitConsumer(page);
+    await checkProgressConsumer(page);
+    await checkRaceConsumer(page);
+    await checkMarketConsumer(page);
+    await checkRadialConsumer(page);
+    await checkAlmanacConsumer(page);
+    await checkPathConsumer(page);
+    await checkPopulationConsumer(page);
+    await checkFlowConsumer(page);
+    await checkCircularConsumer(page);
+    await checkHierarchyConsumer(page);
+    await checkMapConsumer(page);
+    await checkForceConsumer(page);
+    await checkMorphConsumer(page);
 
     const linePath = page.locator('#line-primary .recharts-line-curve');
     const previousPath = await linePath.getAttribute('d');
@@ -275,22 +372,23 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await expect.poll(async () => Number(await page.locator('#line-primary svg').getAttribute('width'))).toBeLessThan(previousWidth);
     assert(Number(await page.locator('#line-secondary svg').getAttribute('width')) > 340, 'Resizing one instance resized another');
 
+    const motionSelectors = [...BAR_FAMILY_PRIMARY_SELECTORS, ...BAR_EXTENSION_SLUGS.map((slug) => `#bar-extensions-primary [data-nx-chart="${slug}"]`), ...SCATTER_FAMILY_SLUGS.map((slug) => `#scatter-primary [data-nx-chart="${slug}"]`), ...HEATMAP_SLUGS.map((slug) => `#heatmap-primary [data-nx-chart="${slug}"]`), ...SCATTER_LAYOUT_SLUGS.map((slug) => `#scatter-layout-primary [data-nx-chart="${slug}"]`), ...SUMMARY_SLUGS.map((slug) => `#summary-primary [data-nx-chart="${slug}"]`), ...TIMELINE_SLUGS.map((slug) => `#timeline-primary [data-nx-chart="${slug}"]`), ...CONNECTION_SLUGS.map((slug) => `#connection-primary [data-nx-chart="${slug}"]`), ...UNIT_SLUGS.map((slug) => `#unit-primary [data-nx-chart="${slug}"]`), ...PROGRESS_SLUGS.map((slug) => `#progress-primary [data-nx-chart="${slug}"]`), ...MORPH_SLUGS.map((slug) => `#morph-primary [data-nx-chart="${slug}"]`), ...FORCE_SLUGS.map((slug) => `#force-primary [data-nx-chart="${slug}"]`), ...MAP_SLUGS.map((slug) => `#map-primary [data-nx-chart="${slug}"]`), ...HIERARCHY_SLUGS.map((slug) => `#hierarchy-primary [data-nx-chart="${slug}"]`), ...CIRCULAR_SLUGS.map((slug) => `#circular-primary [data-nx-chart="${slug}"]`), ...FLOW_SLUGS.map((slug) => `#flow-primary [data-nx-chart="${slug}"]`), ...POPULATION_SLUGS.map((slug) => `#population-primary [data-nx-chart="${slug}"]`), ...PATH_SLUGS.map((slug) => `#path-primary [data-nx-chart="${slug}"]`), ...ALMANAC_SLUGS.map((slug) => `#almanac-primary [data-nx-chart="${slug}"]`), ...RADIAL_SLUGS.map((slug) => `#radial-primary [data-nx-chart="${slug}"]`), ...MARKET_SLUGS.map((slug) => `#market-primary [data-nx-chart="${slug}"]`), ...RACE_SLUGS.map((slug) => `#race-primary [data-nx-chart="${slug}"]`)];
     await page.evaluate(() => (window as unknown as { nodexFixture: { setAnimate: (value: boolean) => void } }).nodexFixture.setAnimate(true));
     await expect(page.locator('#line-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await expect(page.locator('#dual-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
-    for (const selector of BAR_FAMILY_PRIMARY_SELECTORS) await expect(page.locator(`${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'false');
+    for (const selector of motionSelectors) await expect(page.locator(`${selector}:is([data-nx-animated]), ${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'false');
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await expect(page.locator('#line-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
     await expect(page.locator('#dual-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
     await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
-    for (const selector of BAR_FAMILY_PRIMARY_SELECTORS) {
-      await expect(page.locator(`${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'true');
+    for (const selector of motionSelectors) {
+      await expect(page.locator(`${selector}:is([data-nx-animated]), ${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'true');
       await page.locator(selector).evaluate((element) => (element as HTMLElement).style.setProperty('--nx-motion-draw-duration', '0s'));
-      await expect(page.locator(`${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'false');
+      await expect(page.locator(`${selector}:is([data-nx-animated]), ${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'false');
       await expect(page.locator('#line-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'true');
       await page.locator(selector).evaluate((element) => (element as HTMLElement).style.setProperty('--nx-motion-draw-duration', '120ms'));
-      await expect(page.locator(`${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'true');
+      await expect(page.locator(`${selector}:is([data-nx-animated]), ${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'true');
     }
     await page.locator('#petal-primary').evaluate((element) => (element as HTMLElement).style.setProperty('--nx-motion-draw-duration', '0s'));
     await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
@@ -311,7 +409,7 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await expect(page.locator('#matrix [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await expect(page.locator('#dual-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
     await expect(page.locator('#petal-primary [data-nx-animated]')).toHaveAttribute('data-nx-animated', 'false');
-    for (const selector of BAR_FAMILY_PRIMARY_SELECTORS) await expect(page.locator(`${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'false');
+    for (const selector of motionSelectors) await expect(page.locator(`${selector}:is([data-nx-animated]), ${selector} [data-nx-animated]`)).toHaveAttribute('data-nx-animated', 'false');
 
     for (const mode of ['empty', 'single', 'zero', 'invalid'] as const) {
       await page.evaluate((value) => (window as unknown as { nodexFixture: { setMode: (mode: string) => void } }).nodexFixture.setMode(value), mode);

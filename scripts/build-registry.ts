@@ -242,10 +242,24 @@ async function main() {
               else if (original instanceof HTMLOptionElement) copy.toggleAttribute('selected', original.selected);
             });
             const body = getComputedStyle(document.body);
-            return { html: clone.innerHTML, height: Math.ceil(root.getBoundingClientRect().height + Number.parseFloat(body.paddingTop) + Number.parseFloat(body.paddingBottom)) };
+            const height = Math.ceil(root.getBoundingClientRect().height + Number.parseFloat(body.paddingTop) + Number.parseFloat(body.paddingBottom));
+            // Keep the standalone document and chart geometry intact. The
+            // gallery can frame the content using these measured outer spaces
+            // instead of shrinking page and card padding into its thumbnails.
+            const chart = root.querySelector<HTMLElement>(':scope > [data-nx-chart]');
+            const bounds = chart?.getBoundingClientRect();
+            const style = chart && getComputedStyle(chart);
+            const insets = bounds && style ? {
+              top: bounds.top + Number.parseFloat(style.paddingTop),
+              right: window.innerWidth - bounds.right + Number.parseFloat(style.paddingRight),
+              bottom: height - bounds.bottom + Number.parseFloat(style.paddingBottom),
+              left: bounds.left + Number.parseFloat(style.paddingLeft),
+            } : undefined;
+            return { html: clone.innerHTML, height, insets };
           });
           if (!snapshot.html.trim()) throw new Error(`${preview.key}: empty example`);
           preview.item.meta.preview.height = snapshot.height;
+          if (preview.item.meta.tier === 'expressive') preview.item.meta.preview.insets = snapshot.insets;
           await put(stage, preview.item.meta.preview.path, previewDocument(preview, assets, snapshot.html));
         } finally { await page.close(); }
       }

@@ -1,0 +1,88 @@
+{
+  "slug": "circular-graph-dense",
+  "title": "Six hundred collaborations, one ring",
+  "description": "60 repos · line = shared contributors · hover a repo to light up its world · click to replay",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "react",
+  "strokeAsArea": true,
+  "density": "close-read",
+  "tags": [
+    "source",
+    "git",
+    "log"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "560/400",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "CircularGraphDense"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "circular-layout.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 514
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly CircularGraphDenseDatum[]",
+      "required": true,
+      "description": "Ordered repositories with organization indices and nullable nonnegative contributor counts. Diameter remains 3.5 + square root of contributors × 1.7. Only counts at least 26 earn standing labels."
+    },
+    {
+      "name": "ties",
+      "type": "readonly CircularGraphDenseTie[]",
+      "required": true,
+      "description": "Indexed repository pairs and nullable nonnegative shared-contributor counts. Width remains 0.4 + shared × 0.28, including the zero-count relationship baseline. Invalid counts have no link ink."
+    },
+    {
+      "name": "organizations",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered organization names. The first five organizations use the preserved semantic tones; later indices use ink. Invalid indices have unavailable membership."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

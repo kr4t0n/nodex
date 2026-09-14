@@ -346,6 +346,7 @@ function ComponentBelt({
                     title={item.title}
                     width={item.meta.preview.width}
                     height={item.meta.preview.height}
+                    insets={item.meta.preview.insets}
                     boxHeight={RUN_CARD_HEIGHT}
                   />
                 </figure>

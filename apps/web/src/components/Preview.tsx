@@ -6,6 +6,15 @@ import { useNearViewport } from '@/lib/hooks.ts';
 
 /** Used only when preview metadata is unavailable or invalid. */
 const FALLBACK_WIDTH = 660;
+/** Matches the native-size primitive examples' visible gallery inset. */
+const PREVIEW_INSET = 28;
+
+interface PreviewInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
 
 interface PreviewProps {
   src: string;
@@ -13,6 +22,8 @@ interface PreviewProps {
   /** Explicit example dimensions from item.meta.preview. */
   width?: number;
   height?: number;
+  /** Build-measured page/card space surrounding a chart's composition. */
+  insets?: PreviewInsets;
   /** Secondary height fallback; the document reports its measured content height. */
   aspectRatio?: string;
   className?: string;
@@ -43,6 +54,7 @@ export function Preview({
   title,
   width: previewWidth,
   height: previewHeight,
+  insets,
   aspectRatio,
   className,
   boxHeight,
@@ -99,9 +111,16 @@ export function Preview({
   const logicalWidth = previewWidth !== undefined && Number.isFinite(previewWidth) && previewWidth > 0 ? previewWidth : FALLBACK_WIDTH;
   const initialHeight = previewHeight !== undefined && Number.isFinite(previewHeight) && previewHeight > 0 ? previewHeight : logicalWidth / fallbackRatio;
   const logicalHeight = contentHeight ?? initialHeight;
+  const framed = !fluid && insets !== undefined &&
+    Object.values(insets).every((value) => Number.isFinite(value) && value >= 0) &&
+    insets.left + insets.right < logicalWidth && insets.top + insets.bottom < logicalHeight;
+  const contentWidth = framed ? logicalWidth - insets.left - insets.right : logicalWidth;
+  const framedHeight = framed ? logicalHeight - insets.top - insets.bottom : logicalHeight;
+  const inset = framed ? PREVIEW_INSET : 0;
 
   /**
-   * Fit to width, or to the smaller of width and box when a height is fixed.
+   * Fit the composition inside the common inset, respecting a fixed box's
+   * height as well as its width. Older previews fit their whole document.
    *
    * Capped at 1, so a preview shrinks but never enlarges. Past that the frame
    * would show the component bigger than its own container could ever draw it,
@@ -115,8 +134,8 @@ export function Preview({
       : Math.min(
           1,
           boxHeight
-            ? Math.min(width / logicalWidth, boxHeight / logicalHeight)
-            : width / logicalWidth,
+            ? Math.min(Math.max(0, width - inset * 2) / contentWidth, Math.max(0, boxHeight - inset * 2) / framedHeight)
+            : Math.max(0, width - inset * 2) / contentWidth,
         );
 
   const ready = fluid ? near : near && scale > 0;
@@ -144,16 +163,13 @@ export function Preview({
       <div
         ref={nearRef}
         className="nx-frame relative w-full overflow-hidden rounded-[var(--nx-radius-card)]"
-        // Never wider than the document inside it. Once the scale is capped at
-        // 1 a wide column would otherwise leave a band of empty frame beside a
-        // component already at full size. This converges rather than looping:
-        // the frame settles at the logical width, and the measurement taken
-        // inside it then agrees.
-        style={{ background: 'var(--nx-bg)', maxWidth: fluid ? undefined : logicalWidth }}
+        // Cap the frame at the composition's native width plus its gallery
+        // inset, so a wide column cannot add space beside a full-size chart.
+        style={{ background: 'var(--nx-bg)', maxWidth: fluid ? undefined : contentWidth + inset * 2 }}
       >
         <div
           ref={boxRef}
-          style={{ height: fluid ? frameHeight : (boxHeight ?? logicalHeight * scale) }}
+          style={{ height: fluid ? frameHeight : (boxHeight ?? framedHeight * scale + inset * 2) }}
         >
           {ready ? (
             <iframe
@@ -172,7 +188,10 @@ export function Preview({
                   : {
                       width: logicalWidth,
                       height: logicalHeight,
-                      transform: `scale(${scale})`,
+                      // Move only the surrounding page space out of the view.
+                      // Internal chart coordinates, labels and interactions
+                      // still use the original logical document dimensions.
+                      transform: `translate(${inset - (framed ? insets.left * scale : 0)}px, ${inset - (framed ? insets.top * scale : 0)}px) scale(${scale})`,
                       transformOrigin: 'top left',
                       border: 0,
                       display: 'block',

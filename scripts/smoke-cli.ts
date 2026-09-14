@@ -11,6 +11,7 @@ import { promisify } from 'node:util';
 import { lintRendered, lintSource, rulesFromTokens } from '../packages/cli/src/lint.ts';
 import { dependencyPin, planInstall } from '../packages/cli/src/install.ts';
 import type { Item } from '../packages/cli/src/registry.ts';
+import { loadSource } from '../packages/core/src/index.ts';
 
 const run = promisify(execFile);
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -120,7 +121,10 @@ try {
   await checkNewLanguage();
   // The real registry is the end-to-end contract. Tests never modify its output.
   const manifest = await json<{ items: Item[] }>(path.join(ROOT, 'public/r/registry.json'));
-  assert.equal(manifest.items.filter((item) => item.meta.tier === 'expressive').length, 9);
+  const source = await loadSource(path.join(ROOT, 'registry'));
+  const charts = manifest.items.filter((item) => item.meta.tier === 'expressive');
+  const chartNames = charts.map((item) => `${item.meta.language}/${item.name}`);
+  assert.deepEqual([...chartNames].sort(), source.languages.flatMap((language) => language.expressive.map((item) => `${language.meta.slug}/${item.meta.slug}`)).sort(), 'The built catalogue must contain every authored chart');
   assert.equal(manifest.items.filter((item) => item.meta.tier === 'primitive').length, 24);
   const blank = path.join(temp, 'blank');
   await mkdir(blank);
@@ -149,10 +153,10 @@ try {
   assert.ok(!typed.some((item) => item.name === 'hairline-line'));
   checks += 7;
 
-  const report = JSON.parse(await cli(project, ['add', 'hairline-line', 'arc-matrix', 'dual-area', 'petal-rose', 'chunky-bars', 'rung-bars', 'paired-rungs', 'stacked-rungs', 'signal-console/endpoint-latency', 'button', '--no-install', '--json'])) as {
+  const report = JSON.parse(await cli(project, ['add', ...chartNames, 'button', '--no-install', '--json'])) as {
     added: { name: string; files: string[] }[]; files: string[]; dependencies: string[]; installed: string[];
   };
-  assert.equal(report.added.length, 10);
+  assert.equal(report.added.length, chartNames.length + 1);
   assert.deepEqual(report.installed, []);
   assert.ok(report.dependencies.includes('recharts@3.10.1'));
   assert.equal(new Set(report.files).size, report.files.length);
@@ -163,7 +167,7 @@ try {
   }
   const component = path.join(project, config.paths.components, 'hairline-line/component.tsx');
   const original = await readFile(component, 'utf8');
-  const second = JSON.parse(await cli(project, ['add', 'hairline-line', 'arc-matrix', 'dual-area', 'petal-rose', 'chunky-bars', 'rung-bars', 'paired-rungs', 'stacked-rungs', '--no-install', '--json'])) as { written: string[] };
+  const second = JSON.parse(await cli(project, ['add', ...chartNames, '--no-install', '--json'])) as { written: string[] };
   assert.deepEqual(second.written, []);
   await writeFile(component, `${original}\n// Consumer edit.\n`);
   await refuses(project, ['add', 'hairline-line', '--no-install'], /different content/);
@@ -186,7 +190,8 @@ try {
   assert.match(await readFile(tokensFile, 'utf8'), /Application override/);
   await cli(project, ['init', 'mono-editorial', '--force']);
   assert.equal(await readFile(tokensFile, 'utf8'), tokenContent);
-  const linted = await cli(project, ['lint', ...['hairline-line', 'arc-matrix', 'dual-area', 'petal-rose', 'chunky-bars', 'rung-bars', 'paired-rungs', 'stacked-rungs', 'button', '_shared'].map((slug) => `${config.paths.components}/${slug}`)]);
+  const monoCharts = charts.filter((item) => item.meta.language === 'mono-editorial').map((item) => item.name);
+  const linted = await cli(project, ['lint', ...[...monoCharts, 'button', '_shared'].map((slug) => `${config.paths.components}/${slug}`)]);
   assert.match(linted, /0 errors/);
   assert.match(await cli(project, ['lint', `${config.paths.components}/endpoint-latency`, '--design', 'signal-console']), /0 errors/);
   checks += 3;

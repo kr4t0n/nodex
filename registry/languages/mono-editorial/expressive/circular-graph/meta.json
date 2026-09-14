@@ -1,0 +1,80 @@
+{
+  "slug": "circular-graph",
+  "title": "Who works with whom",
+  "description": "cross-team collaborations · Q2 2026 · line = shared project",
+  "component": "network",
+  "tier": "expressive",
+  "runtime": "react",
+  "strokeAsArea": true,
+  "density": "glance",
+  "tags": [
+    "project"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "560/360",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "CircularGraph"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "circular-layout.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 475
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly CircularGraphDatum[]",
+      "required": true,
+      "description": "Ordered teams and nullable nonnegative headcounts. Diameter remains headcount × 0.62; the first four use ink, the next four muted, and later teams quiet."
+    },
+    {
+      "name": "ties",
+      "type": "readonly CircularGraphTie[]",
+      "required": true,
+      "description": "Indexed source and target teams with nullable nonnegative weekly threads. Width is threads × 0.7. Invalid endpoint indices are omitted; missing counts have no link ink."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

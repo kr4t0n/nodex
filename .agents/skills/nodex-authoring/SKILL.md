@@ -25,8 +25,14 @@ language; keep the role names consumed by primitives.
   Keep an intentional palette; never add a color solely to silence a lint.
 - The common primitive contract requires shared roles in every language. Run
   the whole build to catch missing references across primitive CSS and TSX.
-- Write the geometry, data semantics, annotation and interaction rules in
-  `DESIGN.md`. Make anti-patterns concrete and explain real exceptions.
+- Keep `DESIGN.md` useful for a downstream interface with no charts: visual
+  atmosphere, semantic token roles, typography, spacing, geometry, interaction,
+  motion and anti-patterns. It is a language foundation, not a component catalogue.
+- Keep named chart descriptions, specimen dimensions, reconstruction notes and
+  runtime/build procedures out of `DESIGN.md`. Put component-specific guidance
+  in its metadata/source comments or root `AGENTS.md` gotchas, and procedures in
+  this skill. Adding a chart does not require appending its description to the
+  language document.
 - Declare optional density values only if the reading distinction matters.
   `featured` lists actual expressive slugs and may be empty during scaffolding.
 
@@ -111,7 +117,7 @@ must be declared. No imports from another registry item, app code or build tools
 `component` uses the fixed taxonomy and names the mark/encoding. `density`, if
 present, must be declared by the language. `strokeAsArea` is a reasoned exemption
 for a stroke whose width encodes an area, not an escape hatch for thick outlines.
-`externalData` records unavoidable external fetches; current POCs require none.
+`externalData` records unavoidable external fetches; current charts require none.
 
 ## Tokens, animation and content
 

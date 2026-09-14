@@ -1,0 +1,81 @@
+{
+  "slug": "tree",
+  "title": "Everything the platform ships",
+  "description": "product areas and capabilities · Jun 2026",
+  "component": "tree",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "glance",
+  "tags": [
+    "product",
+    "catalog"
+  ],
+  "dependencies": [
+    "recharts@3.10.1",
+    "d3-hierarchy@3.1.2",
+    "@types/d3-hierarchy@3.1.7"
+  ],
+  "aspectRatio": "580/320",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "Tree"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 426
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly TreeDatum[]",
+      "required": true,
+      "description": "Ordered product areas with their feature labels. Membership is explicit; repeated names remain separate indexed nodes."
+    },
+    {
+      "name": "root",
+      "type": "string",
+      "required": true,
+      "description": "Caller-owned platform/root label."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

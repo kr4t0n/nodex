@@ -1,0 +1,74 @@
+{
+  "slug": "ridgeline",
+  "title": "Five pipelines, five tempos",
+  "description": "each crest = one pipeline's completion-time shape \u00b7 the area is made of hairlines \u00b7 dot = the peak",
+  "component": "ridgeline",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "close-read",
+  "aspectRatio": "560/340",
+  "tags": [
+    "data",
+    "platform"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "Ridgeline"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "zero-axis-rail.tsx"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly RidgelineDatum[]",
+      "required": true,
+      "description": "Ordered pipeline density profiles. Hours must be unique and nonnegative within each profile; density weights are normalized within each available profile. Missing weights leave gaps. The original specimen has no visible tooltip or row labels; keyboard inspection is announced to assistive technology."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

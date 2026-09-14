@@ -1,0 +1,78 @@
+{
+  "slug": "rank-strip",
+  "title": "Flows climbs to the top",
+  "description": "one row per product, one cell per quarter · darker = higher rank · a bar race you can print",
+  "component": "heatmap",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "glance",
+  "aspectRatio": "560/300",
+  "tags": [
+    "billing"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "RankStrip"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 417
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly RankStripDatum[]",
+      "required": true,
+      "description": "Product ranks indexed by period. Positive safe integers are available, and rows sort by the final declared period with missing final ranks last. Rank 1–5 tones stay absolute; lower ranks retain the palest tone."
+    },
+    {
+      "name": "periods",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered period labels. Repeated labels remain separate columns; extra ranks beyond this window are not displayed."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

@@ -203,7 +203,11 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
         item.meta.component.includes(q) ||
         item.meta.tags.some((tag) => tag.includes(q))
       );
-    });
+    }).sort((a, b) =>
+      a.meta.component.localeCompare(b.meta.component, 'en') ||
+      a.title.localeCompare(b.title, 'en') ||
+      a.name.localeCompare(b.name, 'en'),
+    );
   }, [items, query, type]);
 
   // Motivated motion: the set changed, so the new set announces itself. A
@@ -331,6 +335,7 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                   title={item.title}
                   width={item.meta.preview.width}
                   height={item.meta.preview.height}
+                  insets={item.meta.preview.insets}
                   aspectRatio={item.meta.aspectRatio}
                   boxHeight={THUMB_HEIGHT}
                 />

@@ -1,0 +1,11 @@
+@layer components {
+  @keyframes nx-allocation-enter {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nx-aggregate-sankey[data-nx-animated="true"] .nx-allocation-plot > svg {
+      animation: nx-allocation-enter var(--nx-motion-draw-duration) var(--nx-motion-draw-easing) both;
+    }
+  }
+}

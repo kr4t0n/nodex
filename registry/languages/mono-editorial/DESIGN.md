@@ -1,210 +1,131 @@
 # Mono Editorial
 
-Hairline data drawing on warm paper. Every mark is thin, every caption is small,
-and the page is mostly empty. Charts are drawn to be read, not glanced at.
+Quiet editorial interfaces on warm paper. Thin rules, restrained typography and
+ample space give content room to be read carefully.
 
-This file is the written half of the design language. `tokens.json` holds the
-values; this holds the reasoning values cannot carry.
+This language applies to complete interfaces: pages, navigation, forms, controls,
+prose and data displays. `tokens.json` holds the canonical values; this document
+explains the visual decisions and relationships those values support.
 
 ## Visual atmosphere
 
-- **Density** — airy. Generous margins, one idea per card, nothing crowded.
-- **Variance** — restrained. A predictable grid; the interest lives in the marks.
-- **Motion** — quiet. Marks draw themselves once on arrival, then hold still.
+- **Density.** Airy. Generous margins and clear grouping give each idea its own
+  space.
+- **Structure.** A predictable grid and shared reading edges establish order.
+  Variation comes from the content and its hierarchy.
+- **Motion.** Quiet. Content arrives, settles and remains available for reading.
 
-The reference feeling is a printed statistical annual, not a dashboard. If a
-chart looks like it belongs in a control room, it is wrong for this language.
+The reference is a printed statistical annual: measured, precise and unhurried.
+Preserve that character in ordinary pages and forms as well as in reports.
 
-## Color calibration
+## Color and contrast
 
-Warm off-white paper and near-black ink. There is no accent color and no hue at
-all — every value is a warm grey. Emphasis comes from weight, size, and density
-of marks, never from color.
+Warm off-white paper and near-black ink define the palette. Every intermediate
+value is a warm grey. Emphasis comes from weight, size, position and density.
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `--nx-bg` / `--nx-paper` | `#F0EFEB` | page and card ground |
-| `--nx-ink` / `--nx-dark` | `#1C1C1A` | text, primary marks, inverted card ground |
-| `--nx-muted` | `#8F8E88` | subtitles, axis labels, secondary marks |
-| `--nx-faint` | `#C6C5BF` | captions, the quietest rules |
-| `--nx-grid` | `#DEDDD6` | gridlines, hairline separators |
-| `--nx-markMuted` | `#6A6963` | middle-value matrix cells and product labels |
-| `--nx-markStrong` | `#4A4944` | strong intermediate petals in the rose |
-| `--nx-markQuiet` | `#B0AFA9` | low-value matrix cells and descending spend bars |
-| `--nx-markPale` | `#C0BFB8` | the services segment in stacked rungs |
-| `--nx-plotGrid` | `#E3E2DB` | bowed matrix guides |
-| `--nx-plotFaint` | `#D8D6CE` | measured zeroes in the matrix |
-| `--nx-plotFloor` | `#CFCEC7` | the line chart's barcode floor |
-| `--nx-plotTrack` | `#E4E3DD` | full-reach tracks behind rose petals |
+| `--nx-bg` / `--nx-paper` | `#F0EFEB` | page and surface ground |
+| `--nx-ink` / `--nx-dark` | `#1C1C1A` | primary text, marks and inverted surfaces |
+| `--nx-muted` | `#8F8E88` | supporting text and secondary emphasis |
+| `--nx-faint` | `#C6C5BF` | quiet captions and minor details |
+| `--nx-grid` | `#DEDDD6` | structural rules and separators |
 
-The chart roles name paints already used by the retained specimens. Their tone
-relationships are preserved when moving paint into tokens.
+Use the semantic role appropriate to the content. Additional tonal roles refine
+this hierarchy; they do not introduce an accent palette. Selection, urgency and
+validation remain monochrome and need clear wording or form to convey meaning.
 
-Cards may invert to ink ground with paper text. On inverted cards,
-`--nx-onDarkMuted` is `#8F8E88` and `--nx-onDarkFaint` is `#55554F`. The current
-chart specimens stay on paper. Inversion remains a choice for a card that needs
-to stand apart, not something to reach for while building a set.
+An occasional surface may invert to ink with paper text. Its secondary text uses
+`--nx-onDarkMuted` and `--nx-onDarkFaint`. Rebalance all foreground contrast when
+inverting a surface so the strongest emphasis remains the most visible.
 
-Inverting is not a background swap. Mark colour encodes rank, so the ramp has to
-be reversed with it: on ink the brightest mark carries the most, on paper the
-darkest does. A card whose ground flipped but whose marks did not will read with
-its emphasis exactly backwards.
+Reference semantic variables directly. Local token overrides must apply within
+their containing scope. Avoid copying literal colors or creating a parallel
+palette that can drift from the language.
 
-Chart paint references semantic CSS variables directly. `tokens.json` is the
-authority; the build generates its stylesheet. Do not copy literal colors into
-the component or maintain a second JavaScript palette. Direct references also
-let a consumer override tokens on a containing element without a root alias
-retaining the old value.
+## Typography
 
-## Typographic architecture
+Inter is the single typeface, using the defined weights from 400 to 800. The
+scale is restrained; weight, tracking and surrounding space establish hierarchy.
 
-Inter throughout, 400 to 800. Nothing else.
+| Role | Size | Treatment |
+| --- | --- | --- |
+| Page title | `22px` | weight 800, `-0.02em` tracking |
+| Card title | `16.5px` | weight 700, `-0.02em` tracking |
+| Body | `11.5px` | `1.7` line height |
+| Control | `12px` | `1.4` line height |
+| Action | `11.5px` | weight 600, `0.01em` tracking |
+| Caption | `9.5px` | weight 500, uppercase, `0.08em` tracking |
 
-The scale is small and tight. Card titles are `16.5px/700` at `-0.02em`, which
-is barely larger than body text — the hierarchy comes from weight and from the
-uppercase tracking of the captions, not from size jumps. Captions run `9.5px`
-uppercase at `0.08em`, small enough to read as a printed credit line. The axis
-token remains `8px`; individual annotations retain their existing proportions.
-Rose counts use `plotValue`, a `17px/700` numeric mark label; card headings and
-these data values remain independently adjustable.
+Use negative tracking for headings and positive tracking for uppercase labels.
+Small captions should read as supporting credit lines, leaving primary content
+visually dominant. Long-form prose and prominent values have their own roles;
+use those roles instead of stretching the caption or heading scale to fit.
 
-Negative tracking on headings, positive tracking on anything uppercase. Never
-the reverse. The generated token stylesheet bundles the configured Inter face
-for previews and copied components.
+Choose tokens by purpose. Card and dialog headings share `type.cardTitle`;
+form text uses `type.control`, actions use `type.action`, and supporting captions
+use `type.caption`. Separate heading and value roles remain independently
+adjustable even when their sizes are similar.
 
-Shared primitives consume these roles directly: Card and Dialog titles follow
-`cardTitle`, Card padding follows `space.cardPadding`, and captions follow
-`caption`. Control, action, prose and stat roles preserve the existing primitive
-scale. Their spacing and interaction timing are tokenized too; control feedback
-uses `motion.control`, independently of chart `motion.draw`. Scoped overrides
-apply to the rendered primitives without changing their native behavior.
+## Layout and geometry
 
-## Component behaviors
+The baseline composition uses two columns, `22px` gaps and `40px` page padding.
+Collapse columns when needed to preserve readable content and usable controls.
+Wider content can span the grid while retaining its shared starting edge.
 
-**A chart is the drawing and nothing else.** The card holds the marks; whatever
-names the chart is printed by whatever embeds it. The title and type live in the
-manifest, where the consumer, CLI and gallery all read them. A component does
-not repeat that heading or add a source footer to a Mono Editorial drawing.
+Surface padding is `28px 28px 20px`, with `24px` card corners. Pill controls use
+their own `radius.pill` role; smaller controls, code and focus treatments retain
+their dedicated geometry. A surface's radius is not a universal radius for every
+element inside it.
 
-The drawing is **left-aligned, never centred**. When a drawing reaches its size
-limit, unused space belongs after it. A wall of cards shares one starting edge
-and reads as a set; each drawing should not float at its own offset. Preserve
-the composition inside the chart as well as the alignment of its outer box.
+Align headings, prose and related groups on the left. When content reaches its
+width limit, leave the remaining space after it. Use whitespace to separate
+ideas before adding another border or container.
 
-**Annotation is not a heading, and still belongs.** A note explains the marks
-and sits in the composition; a title names the component and belongs to whatever
-is listing it. Keep each specimen's existing annotation rather than adding
-explanatory sections around it.
+Rules are delicate. `stroke.hairline` is `0.7px`, ordinary marks use `1px`, and
+emphasis uses `1.1px`. Strokes that read as lines stay at or below `1.4px`.
+A width that encodes an amount, or a background gap separating filled regions,
+has a different role from an outline.
 
-Hairline line places one dot per supplied day above a barcode floor. The stems
-keep the spacing between days visible, hollow dots indicate weekends, and the
-two highest observations carry sparse, rounded labels. Its annotation remains
-`ONE DOT = ONE DAY · HOLLOW = WEEKEND`.
+## Content and interaction
 
-Arc matrix places product rows on shallow bowed guides, with city labels angled
-along the top. Cell area encodes accounts; tone reinforces the same count with
-fixed thresholds at 12 and 25. A measured zero is a pinprick, not a missing
-observation. The largest cells carry their values without labelling the whole
-matrix. Preserve the existing 27-unit column spacing, 29-unit row spacing and
-16-unit bow when mapping that composition through the chart's scales.
+**One clear hierarchy.** Give each section a meaningful heading, supporting
+context where needed, and the content itself. Avoid repeating a heading inside
+a surface that is already named by its surrounding section.
 
-Dual area aligns descending ad-spend bars above a rising sign-up area across
-the same ordered days. Spend uses thousands of dollars; sign-ups are counts.
-Its two scales start at zero, with the spend direction reversed. Preserve the
-55% band-width bars, the open gap between plots and the original 580/320 plot
-proportions. The ink area fades from 22% opacity to transparent toward zero;
-this retained data encoding is an exception to the ban on decorative gradients.
-Aligned pointers inspect both measures with one combined tooltip. Missing
-measures keep their calendar position; they are not zeroes or interpolated data.
+**Purposeful annotation.** Place explanations beside the content they clarify.
+A note should explain a relationship, unit or exception without competing with
+the heading. Keep labels concise and information density deliberate.
 
-Petal rose gives every category the same angle, clockwise from twelve o'clock.
-Counts change radial reach linearly against the dataset maximum; tone follows
-the same relative count. Full-reach pale tracks remain behind the petals. Keep
-the 14% inner radius, 92% track radius, 88% maximum petal radius, 16/14px rounded
-corners and 5px gaps painted in the card ground. These gaps are background
-knockouts, not heavy outlines. Counts and category names sit on a fixed label
-ring, above both track and petal; long petals receive paper and faint labels.
-The contrast threshold follows the specimen's relative reach, so proportional
-changes to all counts retain the same drawing. Zero leaves its track and zero
-label; missing counts keep a slot with an em dash and an unavailable tooltip.
+**Readable detail.** Close reading preserves individual records and their
+relationships. In data displays, use a hairline where it carries the same
+information as a large fill. Distinguish unavailable information from measured
+zero and keep the meaning of tone and size consistent.
 
-Chunky bars keep plan order, rounded top caps, the 52% category width and the
-580/320 plot proportions. Rank selects ink, muted, quiet and faint tones; value
-labels sit above each bar. The three rung charts retain 560/340 proportions and
-one visible mark per whole $1K. Rungs are 1px thick at the default `stroke.mark`,
-with deterministic width and opacity variation. Single stacks have a counting
-dot every fifth rung; pairs sit 13px either side of each category center and
-compare grey before with ink after. Stacked rungs retain core, add-ons and services
-in ink, muted and pale, with one empty rung between segments. Those gaps never
-enter revenue totals. Preserve the total labels, segment labels and explanatory
-footers, including their original opacity and typography proportions. An unknown
-segment makes the region's complete stack unavailable; zero remains measured.
+**Functional feedback.** Inputs, actions and selections use their semantic text,
+spacing and state roles. Preserve visible focus, clear labels and keyboard
+operation. Hover or press feedback should explain an available action or changed
+state without becoming an ornament.
 
-Recharts supplies the scales, series and tooltip navigation. Matrix guides and
-custom cells live inside that composition. Hover exposes the observation, and
-the library's accessibility layer supports keyboard inspection. These are
-interactive library tooltips, not native SVG title popups. Chart data comes from
-the caller; absent or invalid data must not produce invented observations.
+## Motion
 
-## Layout principles
+Use the language's motion roles for the purpose they name. Content drawing has
+an unhurried `1s` duration; control feedback uses the separate `160ms` control
+role. A small interaction should not inherit the duration of a large reveal.
 
-Two-column grid, `22px` gap, `40px` page padding, `24px` card radius. A card may
-span both columns when its chart needs width — a long barcode does, a donut
-does not.
-
-Wide cards may split into a `250px` text column beside the chart. Use that when
-the chart genuinely needs prose to be read correctly, and put real reasoning
-there rather than filler. The retained specimens keep their authored aspect
-ratios; a consumer can constrain width or height through the component API.
-
-## Motion philosophy
-
-Marks arrive quietly, then hold still. Nothing animates on a loop or decoratively
-on hover. The gallery defers previews until they approach the viewport. The
-retained React charts do not replay on click.
-
-Entry and data transitions use the language's motion tokens. The shared motion
-helper reads scoped timing for Recharts; there is no separate JavaScript theme.
-Reduced motion disables transitions, including when the preference changes
-after mounting. Initial server and client markup remains stable, with animation
-disabled until the preference and timing are known. Consumers may also disable
-animation explicitly. CSS animations must retain a reduced-motion guard.
-
-## React delivery and validation
-
-Each chart is a typed React component. Its data and prop types and private
-layout calculations normally live together; deterministic sample records live
-in a separate example. Delivered components require application data and never
-default to the example's fixtures.
-
-Metadata declares the entry, exports, copied files and pinned dependencies. The
-CLI copies the component and its reachable local helpers; consumers own that
-source. Recharts is the default chart library, including simple charts. Custom
-marks compose with its scales and series rather than introducing another chart
-renderer or an adapter that hides its React API.
-
-The build leaves authored source untouched. It renders the real example in a
-browser, captures the static preview and bundles that same example for
-interaction. This does not give consumer charts server-rendered SVG. Validation
-checks both source token references and resolved browser paint, strokes and
-scoped overrides.
+Entry and meaningful state changes may animate, then settle. Avoid continuous
+loops and decorative hover motion. Respect reduced motion whenever the preference
+changes, presenting the complete state without requiring an animation to finish.
 
 ## Anti-patterns
 
-- **Never** exceed `1.4px` on a stroke that reads as a *line* — axes, rules,
-  connectors, series lines, stems, leaders. Hairlines are the language; a 2px
-  line reads as a different product. The exception is where the stroke **is**
-  the area rather than an outline: its width encodes magnitude. The test is
-  whether thinning the stroke would lose information. If it would only make
-  the chart more delicate, thin it. Declare the exception in metadata.
-- **Never** introduce a hue. No blue, no accent, no semantic red or green.
-- **Never** aggregate in `close-read` mode. One mark per record, always.
-- **Never** fill a large area where a hairline will carry the same information.
-- **Never** use a drop shadow, a decorative gradient, or a border-radius above
-  `24px`. Dual area's retained ink-to-transparent fill belongs to its data marks.
-- **Never** add a repeated heading or unrelated controls around a drawing.
-- **Never** animate on a loop or decoratively on hover.
-- **Never** use `Math.random()` for sample data. Keep examples deterministic so
-  previews and screenshots reproduce exactly.
-- **Never** duplicate token values in chart code or generate application data
-  inside a delivered component.
+- Introducing hue, colored status accents or a second palette.
+- Heavy outlines, drop shadows or gradients used as decoration.
+- Enlarging surface corners beyond the `24px` card role or applying that role
+  indiscriminately to controls.
+- Crowding unrelated ideas into one group or filling space with extra containers.
+- Oversized headings, dense captions or inconsistent reading edges.
+- Aggregating away the individual records required for close reading.
+- Repeated headings, unrelated controls or annotations that overwhelm content.
+- Looping decoration, fabricated information or ambiguous missing states.
+- Duplicating token values instead of applying their semantic roles.

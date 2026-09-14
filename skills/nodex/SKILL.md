@@ -16,8 +16,10 @@ root and destination paths. Do not hand-create it. If absent, run `nodex list`
 and `nodex init <language>` when the user wants to use Nodex.
 
 Read the configured design document before writing UI. Tokens carry values;
-`DESIGN.md` explains geometry, hierarchy, annotation and anti-patterns. Follow
-both. Import the configured token stylesheet once after Tailwind, and ensure
+`DESIGN.md` explains the language's typography, spacing, geometry, hierarchy,
+interaction, motion and anti-patterns. These foundations apply to every page,
+form and control, including applications with no charts. Follow both. Import
+the configured token stylesheet once after Tailwind, and ensure
 Tailwind scans the configured component destination.
 
 Typical configuration:

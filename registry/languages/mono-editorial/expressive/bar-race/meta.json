@@ -1,0 +1,78 @@
+{
+  "slug": "bar-race",
+  "title": "Eight products race for revenue",
+  "description": "eight products racing on revenue, 2019 to 2026 · tone follows rank so the leader is always ink · plays through once on view, click to replay",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "glance",
+  "tags": [
+    "billing"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "580/320",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "BarRace"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 426
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly BarRaceFrame[]",
+      "required": true,
+      "description": "Ordered period frames, each with one nonnegative finite revenue value in thousands per product. Null is unavailable; incomplete frame arrays suppress that frame. Playback runs once and holds the final frame."
+    },
+    {
+      "name": "products",
+      "type": "readonly BarRaceProduct[]",
+      "required": true,
+      "description": "Stable unique product IDs and caller display names, in the same column order as every frame. Repeated display names are supported."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

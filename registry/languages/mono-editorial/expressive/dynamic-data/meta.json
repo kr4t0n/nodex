@@ -1,0 +1,80 @@
+{
+  "slug": "dynamic-data",
+  "title": "Concurrent users, streaming",
+  "description": "one new reading every 300ms · window of 50 · click to restart",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "glance",
+  "tags": [
+    "live",
+    "ops"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "580/320",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "DynamicData"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "constrained-curve.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 426
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly DynamicDataDatum[]",
+      "required": true,
+      "description": "Ordered sample labels and nonnegative finite active-user counts in thousands. Invalid values create gaps; an unavailable final sample does not borrow a previous current value."
+    },
+    {
+      "name": "sourceStatus",
+      "type": "string",
+      "required": true,
+      "description": "Caller-owned static status badge. The chart never fetches or generates live observations."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}

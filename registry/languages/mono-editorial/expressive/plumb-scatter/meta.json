@@ -1,0 +1,73 @@
+{
+  "slug": "plumb-scatter",
+  "title": "Price against satisfaction, twelve products",
+  "description": "every dot hangs a plumb line to the floor · read x by the line, y by the height",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "react",
+  "density": "glance",
+  "aspectRatio": "560/340",
+  "tags": [
+    "product",
+    "panel"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "PlumbScatter"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly PlumbScatterDatum[]",
+      "required": true,
+      "description": "Ordered products with pricePercentile and satisfaction on 0–100 scales. Invalid coordinates remain unavailable; the two satisfaction extremes are labelled."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
+}
