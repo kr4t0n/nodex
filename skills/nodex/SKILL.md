@@ -14,6 +14,8 @@ React 19, React DOM, TypeScript and Tailwind CSS 4, for the web.
 Find `nodex.json` at the project root. It records the selected language, registry
 root and destination paths. Do not hand-create it. If absent, run `nodex list`
 and `nodex init <language>` when the user wants to use Nodex.
+In a monorepo, initialize Nodex in the React app package that will own the
+components and dependencies.
 
 Read the configured design document before writing UI. Tokens carry values;
 `DESIGN.md` explains the language's typography, spacing, geometry, hierarchy,
@@ -40,19 +42,20 @@ Typical configuration:
 
 ```bash
 nodex list --json
-nodex search --design mono-editorial --json
-nodex search --type line --design mono-editorial
+nodex search --type line --design mono-editorial --json
 nodex search --tier primitive
 nodex show mono-editorial/hairline-line --json
 ```
 
 Search the actual registry; do not assume an older catalogue's component still
-exists. Types describe marks/encoding across languages. Optional `--density`
+exists. Narrow searches by query, language, type or tier, then inspect selected
+refs. Types describe marks/encoding across languages. Optional `--density`
 selects reading intent, not stroke weight or a preferred visual style.
 
-`show` reports the declared exports, entry, props, dependencies and runtime
-files. Read the delivered TypeScript for detailed data types; fixtures are not
-part of the public component API.
+`search --json` and `show --json` report declared exports, entry, props,
+dependencies and runtime file addresses without source contents. After `add`,
+read the delivered TypeScript for detailed data types; fixtures are not part of
+the public component API.
 
 ## Add and use
 
@@ -67,6 +70,11 @@ with the application's package manager. It reuses identical shared files and
 protects edited files. `--no-install` reports packages for manual installation;
 `--force` replaces differing source and conflicting dependency versions, so use
 it only when that replacement is intended. Nodex preserves platform packages.
+
+The CLI inherits the closest package-manager declaration or lockfile from the
+app through its Git root; `pnpm-workspace.yaml` also identifies pnpm. Installation
+and dependency checks stay in the app package. `--no-install` reports the same
+detected manager for manual installation.
 
 A chart normally delivers `component.tsx`; required local support appears beside
 it under `_shared/`. Primitive modules also import their delivered CSS. Examples,
@@ -125,8 +133,14 @@ conventions; delivered interactive entries already carry `use client`.
   the application. `nodex lint` checks source spellings and token references;
   it cannot prove rendering or accessibility.
 
+`nodex lint` defaults to `paths.components` in `nodex.json`. An `add --to`
+destination does not change that setting; lint custom destinations explicitly.
+Paths resolve from the directory containing `nodex.json`. Each target must exist
+and contain `.ts`, `.tsx` or `.css` source; missing or empty targets fail.
+
 ```bash
 nodex lint
+nodex lint src/charts --design mono-editorial
 nodex lint src/components/nodex/endpoint-latency --design signal-console
 ```
 

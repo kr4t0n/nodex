@@ -95,17 +95,30 @@ is checked before writing, including shared-file conflicts and package pins.
 `init --force` explicitly replaces differing generated language files or changes
 the configured language. Custom destination paths are preserved.
 
-The package manager comes from `package.json`'s `packageManager` field, then its
-lockfile, then npm. Conflicting lockfiles require an explicit `packageManager`.
-Package-manager output goes to stderr so `--json` stdout remains parseable.
+Initialize Nodex in the React app package, including inside a monorepo. Package
+manager detection starts there and walks through parent directories up to and
+including the nearest Git root (or filesystem root when there is no Git marker).
+The closest directory with settings wins: its `package.json` `packageManager`
+field takes precedence over lockfiles; `pnpm-workspace.yaml` also identifies pnpm.
+Conflicting manager files in that directory require an explicit `packageManager`.
+With no settings, Nodex uses npm. Git worktree and submodule boundaries are
+respected too.
+
+For example, `apps/web/nodex.json` can use the pnpm declaration or lockfile at
+the workspace root. Installation still runs in `apps/web`, and package conflicts
+and React peers are checked against that app. `--no-install` uses the same
+detection for its suggested command. Package-manager output goes to stderr so
+`--json` stdout remains parseable.
 
 ## Agent-facing output and validation
 
 `list`, `search`, `show`, `init` and `add` support `--json`. `show` and `search`
 report explicit exports, import paths, prop types, preview dimensions, library
-dependencies and delivered file targets. `add` also reports actual destination
-paths, written files and installed packages. No source parsing is used to guess
-exports or sample-data shapes.
+dependencies and delivered file addresses (`path` and `target`), without source
+contents. Filter searches before inspecting individual refs, then read source
+after `add`. `add` also reports actual destination paths, written files and
+installed packages. No source parsing is used to guess exports or sample-data
+shapes.
 
 `nodex lint` checks TypeScript/TSX and CSS source for literal colors, unknown
 `var(--nx-*)` references, nondeterministic data and explicit animation guards.
@@ -113,6 +126,13 @@ It shares these checks with the registry build. It does **not** execute React or
 prove computed geometry, token override behavior, keyboard interaction or
 accessibility. The registry additionally validates rendered previews in a browser;
 consumer modifications still need application verification.
+
+Without paths, lint checks `paths.components` in `nodex.json`. `add --to` does
+not change that setting: use `nodex lint src/ui` after `nodex add <ref> --to src/ui`.
+Paths resolve from the directory containing `nodex.json`, or the working directory
+when no config exists. Each target must exist and contain `.ts`, `.tsx` or `.css`
+source. Missing targets, unsupported files and directories with no matching source
+fail with a nonzero exit code; no empty scan is reported as successful.
 
 ## Registry and credentials
 

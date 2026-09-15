@@ -1,5 +1,5 @@
 import { execFile, spawn } from 'node:child_process';
-import { readFile, stat } from 'node:fs/promises';
+import { lstat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { promisify } from 'node:util';
@@ -10,6 +10,11 @@ const exec = promisify(execFile);
 const PLATFORM = new Set(['react', 'react-dom', 'typescript', 'tailwindcss', '@types/react', '@types/react-dom']);
 const PIN = /^((?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*)@((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[a-z0-9.-]+)?(?:\+[a-z0-9.-]+)?)$/i;
 type Manager = 'npm' | 'pnpm' | 'yarn' | 'bun';
+const LOCKFILES = [
+  ['package-lock.json', 'npm'], ['npm-shrinkwrap.json', 'npm'],
+  ['pnpm-lock.yaml', 'pnpm'], ['yarn.lock', 'yarn'],
+  ['bun.lock', 'bun'], ['bun.lockb', 'bun'],
+] as const satisfies ReadonlyArray<readonly [string, Manager]>;
 
 interface PackageJson {
   packageManager?: string;
@@ -32,25 +37,44 @@ export function dependencyPin(spec: string): { name: string; version: string } {
 }
 
 async function exists(file: string): Promise<boolean> {
-  try { await stat(file); return true; }
+  try { await lstat(file); return true; }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
     throw error;
   }
 }
 
-async function managerFor(dir: string, pkg: PackageJson): Promise<Manager> {
-  if (pkg.packageManager) {
-    const declared = /^(npm|pnpm|yarn|bun)@/.exec(pkg.packageManager)?.[1];
-    if (!declared) throw new Error(`Unsupported packageManager: ${pkg.packageManager}.`);
-    return declared as Manager;
+/** Inherit workspace settings without moving the installation out of the app. */
+async function managerFor(dir: string, pkg: PackageJson): Promise<{ manager: Manager; root: string }> {
+  let current = path.resolve(dir);
+  let currentPackage = pkg;
+  for (;;) {
+    if (currentPackage.packageManager) {
+      const declared = /^(npm|pnpm|yarn|bun)@/.exec(currentPackage.packageManager)?.[1];
+      if (!declared) throw new Error(`Unsupported packageManager in ${path.join(current, 'package.json')}: ${currentPackage.packageManager}.`);
+      return { manager: declared as Manager, root: current };
+    }
+    const managers = new Set<Manager>();
+    for (const [file, manager] of LOCKFILES) {
+      if (await exists(path.join(current, file))) managers.add(manager);
+    }
+    if (await exists(path.join(current, 'pnpm-workspace.yaml'))) managers.add('pnpm');
+    if (managers.size > 1) throw new Error(`Conflicting package-manager files in ${current}. Set packageManager in its package.json.`);
+    if (managers.size) return { manager: [...managers][0]!, root: current };
+
+    // A .git file also marks a worktree/submodule boundary. Inspect this root's
+    // settings first, but never borrow a manager from an enclosing repository.
+    const parent = path.dirname(current);
+    if (parent === current || await exists(path.join(current, '.git'))) return { manager: 'npm', root: dir };
+    current = parent;
+    try {
+      const packageFile = await writablePath(current, 'package.json');
+      currentPackage = JSON.parse(await readFile(packageFile, 'utf8')) as PackageJson;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      currentPackage = {};
+    }
   }
-  const managers = new Set<Manager>();
-  for (const [file, manager] of [['package-lock.json', 'npm'], ['npm-shrinkwrap.json', 'npm'], ['pnpm-lock.yaml', 'pnpm'], ['yarn.lock', 'yarn'], ['bun.lock', 'bun'], ['bun.lockb', 'bun']] as const) {
-    if (await exists(path.join(dir, file))) managers.add(manager);
-  }
-  if (managers.size > 1) throw new Error('Several package-manager lockfiles exist. Set packageManager in package.json.');
-  return [...managers][0] ?? 'npm';
 }
 
 /** Support common version declarations without changing the consumer's React setup. */
@@ -101,9 +125,13 @@ export async function planInstall(dir: string, dependencies: string[], options: 
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     throw new Error('Nodex components require an existing React 19 application with package.json. Nodex does not install the application platform.', { cause: error });
   }
-  const manager = await managerFor(dir, pkg);
-  for (const lock of ['package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb']) {
-    await writablePath(dir, lock);
+  const { manager, root } = await managerFor(dir, pkg);
+  // The selected workspace may own the lockfile even though its app owns the
+  // dependencies. Apply the existing symlink checks to both destinations.
+  for (const directory of new Set([dir, root])) {
+    for (const file of ['package.json', 'pnpm-workspace.yaml', ...LOCKFILES.map(([file]) => file)]) {
+      await writablePath(directory, file);
+    }
   }
   const present = { ...pkg.peerDependencies, ...pkg.devDependencies, ...pkg.dependencies };
   if (!present.react || !present['react-dom']) throw new Error('Nodex components require an existing React 19 and React DOM 19 app. Nodex does not install or replace the application platform.');

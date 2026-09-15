@@ -268,6 +268,13 @@ hosted default. It does not guess a registry from the working directory. An
 explicit checkout root resolves to its built `public/`; an already-served root
 works directly. `init` records the canonical selected root.
 
+CLI discovery JSON projects runtime files to `path` and `target` explicitly.
+Do not serialize manifest file objects unchanged: their embedded source would
+flood `search` and `show`, especially for charts with large geography modules.
+Lint defaults to the configured component directory; `add --to` does not change
+that path. Every lint target must exist and yield supported source. Missing or
+empty targets are errors, including when another target contains valid files.
+
 `add` preflights the complete file batch and packages before mutation. It copies
 manifest targets, deduplicates identical helpers and protects differing files.
 Pinned packages install using the consumer's detected package manager. Existing
@@ -276,6 +283,14 @@ installed or replaced. `react-is` matches the consumer's installed React.
 `--no-install` preserves package ownership and prints the required command.
 An install failure can leave package-manager changes; source writes happen only
 after the installer succeeds and paths are rechecked.
+
+Package-manager detection walks from the app through the nearest Git root,
+including `.git` file boundaries for worktrees and submodules. The closest
+directory with a declaration, lockfile or `pnpm-workspace.yaml` supplies the
+manager; an explicit `packageManager` wins within that directory. Installation
+stays in the app, and its dependency declarations and React versions remain
+authoritative. Preflight checks lockfile paths in both the app and the selected
+parent directory before invoking the installer.
 
 Local paths reject traversal and symlink escapes. Remote roots use HTTPS except
 loopback development servers. Auth headers attach only to same-origin guarded

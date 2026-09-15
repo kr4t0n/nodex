@@ -53,6 +53,73 @@ async function newProject(name: string, registry: string): Promise<string> {
   return dir;
 }
 
+async function newWorkspace(name: string): Promise<{ root: string; app: string }> {
+  const root = path.join(temp, name);
+  const app = path.join(root, 'apps/web');
+  await write(path.join(root, 'package.json'), JSON.stringify({ name: 'workspace', private: true, workspaces: ['apps/*'] }));
+  await mkdir(path.join(root, '.git'));
+  await write(path.join(app, 'package.json'), JSON.stringify({ name: '@consumer/web', private: true, dependencies: { react: '19.2.8', 'react-dom': '19.2.8' } }));
+  return { root, app };
+}
+
+async function checkWorkspaceDetection(): Promise<void> {
+  for (const [file, manager] of [
+    ['package-lock.json', 'npm'], ['npm-shrinkwrap.json', 'npm'],
+    ['pnpm-lock.yaml', 'pnpm'], ['yarn.lock', 'yarn'],
+    ['bun.lock', 'bun'], ['bun.lockb', 'bun'], ['pnpm-workspace.yaml', 'pnpm'],
+  ] as const) {
+    const workspace = await newWorkspace(`workspace-${file}`);
+    await write(path.join(workspace.root, file), file === 'pnpm-workspace.yaml' ? "packages:\n  - 'apps/*'\n" : '{}');
+    assert.equal((await planInstall(workspace.app, ['recharts@3.10.1'], { noInstall: true })).manager, manager, `Inherit ${file} through the apps directory`);
+    checks++;
+  }
+
+  const local = await newWorkspace('workspace-local-override');
+  await write(path.join(local.root, 'package.json'), JSON.stringify({ packageManager: 'pnpm@10.0.0', workspaces: ['apps/*'] }));
+  const appPackage = await json(path.join(local.app, 'package.json'));
+  await write(path.join(local.app, 'package.json'), JSON.stringify({ ...appPackage, packageManager: 'yarn@4.0.0' }));
+  await write(path.join(local.app, 'bun.lock'), '{}');
+  assert.equal((await planInstall(local.app, [], { noInstall: true })).manager, 'yarn', 'Local declaration takes precedence over local and parent lockfiles');
+  await write(path.join(local.app, 'package.json'), JSON.stringify(appPackage));
+  assert.equal((await planInstall(local.app, [], { noInstall: true })).manager, 'bun', 'Local lockfile takes precedence over parent settings');
+  await rm(path.join(local.app, 'bun.lock'));
+  assert.equal((await planInstall(local.app, [], { noInstall: true })).manager, 'pnpm');
+  checks += 3;
+
+  const conflict = await newWorkspace('workspace-conflict');
+  await write(path.join(conflict.root, 'pnpm-lock.yaml'), '{}');
+  await write(path.join(conflict.root, 'yarn.lock'), '{}');
+  await cli(conflict.app, ['init', 'mono-editorial'], ROOT);
+  await refuses(conflict.app, ['add', 'hairline-line', '--no-install'], /Conflicting package-manager files in .*workspace-conflict/);
+  assert.equal(await exists(path.join(conflict.app, 'src/components/nodex')), false);
+  await write(path.join(conflict.root, 'package.json'), JSON.stringify({ packageManager: 'pnpm@10.0.0' }));
+  assert.equal((await planInstall(conflict.app, [], { noInstall: true })).manager, 'pnpm', 'An explicit declaration resolves conflicting lockfiles');
+  await write(path.join(conflict.root, 'package.json'), JSON.stringify({ packageManager: 'unknown@1.0.0' }));
+  await assert.rejects(planInstall(conflict.app, [], { noInstall: true }), /Unsupported packageManager in .*workspace-conflict/);
+  checks += 3;
+
+  // Repositories and worktrees nested under another project must not inherit it.
+  for (const marker of ['directory', 'file']) {
+    const nested = await newWorkspace(`workspace-local-override/nested-${marker}`);
+    if (marker === 'file') {
+      await rm(path.join(nested.root, '.git'), { recursive: true });
+      await write(path.join(nested.root, '.git'), 'gitdir: /unused/worktree\n');
+    }
+    assert.equal((await planInstall(nested.app, [], { noInstall: true })).manager, 'npm');
+    checks++;
+  }
+
+  const unsafe = await newWorkspace('workspace-unsafe-lock');
+  const outside = path.join(temp, 'outside-workspace-lock');
+  await write(outside, 'Unchanged.\n');
+  await symlink(outside, path.join(unsafe.root, 'pnpm-lock.yaml'));
+  await assert.rejects(planInstall(unsafe.app, ['recharts@3.10.1'], { noInstall: true }), /symbolic link/);
+  assert.equal(await readFile(outside, 'utf8'), 'Unchanged.\n');
+  await rm(outside);
+  await assert.rejects(planInstall(unsafe.app, ['recharts@3.10.1'], { noInstall: true }), /symbolic link/, 'Broken parent lockfile symlinks must also be rejected');
+  checks += 3;
+}
+
 async function checkNewLanguage(): Promise<void> {
   const checkout = path.join(temp, 'authoring-checkout');
   const sourceTokens = await json(path.join(ROOT, 'registry/languages/mono-editorial/tokens.json'));
@@ -119,6 +186,7 @@ const server = createServer(async (request, response) => {
 
 try {
   await checkNewLanguage();
+  await checkWorkspaceDetection();
   // The real registry is the end-to-end contract. Tests never modify its output.
   const manifest = await json<{ items: Item[] }>(path.join(ROOT, 'public/r/registry.json'));
   const source = await loadSource(path.join(ROOT, 'registry'));
@@ -142,7 +210,7 @@ try {
   await refuses(project, ['init', 'signal-console'], /already uses another/);
   checks += 4;
 
-  const show = JSON.parse(await cli(project, ['show', 'hairline-line', '--json'])) as { entry: string; exports: string[]; props: { name: string }[]; mounts?: unknown; data?: unknown };
+  const show = JSON.parse(await cli(project, ['show', 'hairline-line', '--json'])) as { entry: string; exports: string[]; props: { name: string }[]; files: Record<string, unknown>[]; mounts?: unknown; data?: unknown };
   assert.equal(show.entry, 'hairline-line/component.tsx');
   assert.ok(show.exports.includes('HairlineLine'));
   assert.ok(show.props.some((prop) => prop.name === 'data'));
@@ -152,6 +220,14 @@ try {
   assert.ok(typed.some((item) => item.name === 'endpoint-latency'));
   assert.ok(!typed.some((item) => item.name === 'hairline-line'));
   checks += 7;
+
+  const discovery = JSON.parse(await cli(project, ['search', '--design', 'mono-editorial', '--json'])) as { name: string; files: Record<string, unknown>[] }[];
+  assert.deepEqual(discovery.map((item) => item.name).sort(), manifest.items.filter((item) => item.meta.language === 'mono-editorial' || item.meta.language === 'shared').map((item) => item.name).sort());
+  assert.ok([show, ...discovery].every((item) => item.files.length > 0 && item.files.every((file) =>
+    typeof file.path === 'string' && typeof file.target === 'string' && Object.keys(file).length === 2)),
+  'Discovery JSON must expose file addresses without embedded source or extra manifest fields');
+  checks += 2;
+  await refuses(project, ['lint'], /Lint target does not exist: .*nodex/);
 
   const report = JSON.parse(await cli(project, ['add', ...chartNames, 'button', '--no-install', '--json'])) as {
     added: { name: string; files: string[] }[]; files: string[]; dependencies: string[]; installed: string[];
@@ -195,6 +271,22 @@ try {
   assert.match(linted, /0 errors/);
   assert.match(await cli(project, ['lint', `${config.paths.components}/endpoint-latency`, '--design', 'signal-console']), /0 errors/);
   checks += 3;
+
+  // Custom destinations must be checked explicitly, including from subdirectories.
+  assert.match(await cli(path.join(project, 'src'), ['lint', 'src/charts']), /[1-9]\d* source files checked; 0 errors/);
+  const singleSource = `${config.paths.components}/hairline-line/component.tsx`;
+  assert.match(await cli(project, ['lint', singleSource, singleSource]), /1 source files checked; 0 errors/);
+  checks += 2;
+  await refuses(project, ['lint', 'src/charts/misspelled'], /Lint target does not exist: .*misspelled/);
+  await refuses(project, ['lint', 'src/charts/missing.tsx'], /Lint target does not exist: .*missing\.tsx/);
+  await refuses(project, ['lint', 'src/charts', 'src/charts/misspelled'], /Lint target does not exist: .*misspelled/);
+  await mkdir(path.join(project, 'src/empty'));
+  await refuses(project, ['lint', 'src/empty'], /No \.ts, \.tsx or \.css source files found in lint target: .*empty/);
+  await write(path.join(project, 'src/empty/README.md'), 'No source here.\n');
+  await write(path.join(project, 'src/empty/.hidden/ignored.ts'), 'export {};\n');
+  await write(path.join(project, 'src/empty/node_modules/ignored/index.ts'), 'export {};\n');
+  await refuses(project, ['lint', 'src/empty'], /No \.ts, \.tsx or \.css source files found/);
+  await refuses(project, ['lint', 'src/empty/README.md'], /Lint target must be a directory or a \.ts, \.tsx or \.css file/);
 
   // Direct public roots and served roots use exactly the same file addresses.
   assert.ok(JSON.parse(await cli(blank, ['list', '--json'], path.join(ROOT, 'public'))).length >= 2);
@@ -283,9 +375,10 @@ try {
   const bin = path.join(temp, 'bin');
   await mkdir(bin);
   const managerLog = path.join(temp, 'manager.log');
+  const expectedCalls: Array<{ manager: string; cwd: string }> = [];
   for (const manager of ['npm', 'pnpm', 'yarn', 'bun']) {
     const file = path.join(bin, manager);
-    await writeFile(file, `#!${process.execPath}\nconst fs = require('node:fs');\nif (process.argv[2] === '--version') { process.stdout.write('1.0.0\\n'); process.exit(0); }\nfs.appendFileSync(process.env.NODEX_SMOKE_MANAGER_LOG, JSON.stringify({manager: '${manager}', args: process.argv.slice(2)}) + '\\n');\nconst p = JSON.parse(fs.readFileSync('package.json', 'utf8'));\np.dependencies ||= {};\nfor (const spec of process.argv.slice(3)) { if (spec.startsWith('--')) continue; const i = spec.lastIndexOf('@'); p.dependencies[spec.slice(0, i)] = spec.slice(i + 1); }\nfs.writeFileSync('package.json', JSON.stringify(p));\nfs.writeFileSync('${manager === 'npm' ? 'package-lock.json' : manager === 'pnpm' ? 'pnpm-lock.yaml' : manager === 'yarn' ? 'yarn.lock' : 'bun.lock'}', '{}');\nconsole.log('package-manager log');\n`);
+    await writeFile(file, `#!${process.execPath}\nconst fs = require('node:fs');\nif (process.argv[2] === '--version') { process.stdout.write('1.0.0\\n'); process.exit(0); }\nfs.appendFileSync(process.env.NODEX_SMOKE_MANAGER_LOG, JSON.stringify({manager: '${manager}', cwd: process.cwd(), args: process.argv.slice(2)}) + '\\n');\nconst p = JSON.parse(fs.readFileSync('package.json', 'utf8'));\np.dependencies ||= {};\nfor (const spec of process.argv.slice(3)) { if (spec.startsWith('--')) continue; const i = spec.lastIndexOf('@'); p.dependencies[spec.slice(0, i)] = spec.slice(i + 1); }\nfs.writeFileSync('package.json', JSON.stringify(p));\nfs.writeFileSync('${manager === 'npm' ? 'package-lock.json' : manager === 'pnpm' ? 'pnpm-lock.yaml' : manager === 'yarn' ? 'yarn.lock' : 'bun.lock'}', '{}');\nconsole.log('package-manager log');\n`);
     await chmod(file, 0o755);
     const target = await newProject(`manager-${manager}`, ROOT);
     const pkg = await json<Record<string, unknown>>(path.join(target, 'package.json'));
@@ -301,9 +394,27 @@ try {
     assert.equal(after.dependencies.recharts, '3.10.1');
     assert.equal(after.dependencies['react-is'], '19.2.8');
     checks += 7;
+    expectedCalls.push({ manager, cwd: target });
+
+    const workspace = await newWorkspace(`manager-workspace-${manager}`);
+    const rootPackage = JSON.stringify({ name: 'workspace', private: true, workspaces: ['apps/*'], packageManager: `${manager}@1.0.0`, devDependencies: { recharts: '3.9.0' } });
+    await write(path.join(workspace.root, 'package.json'), rootPackage);
+    if (manager === 'pnpm') await write(path.join(workspace.root, 'pnpm-workspace.yaml'), "packages:\n  - 'apps/*'\n");
+    await cli(workspace.app, ['init', 'mono-editorial'], ROOT);
+    const skipped = JSON.parse(await cli(workspace.app, ['add', 'hairline-line', '--no-install', '--json'])) as { packageManager: string; installed: string[] };
+    assert.equal(skipped.packageManager, manager);
+    assert.deepEqual(skipped.installed, []);
+    assert.equal((await json<{ dependencies: Record<string, string> }>(path.join(workspace.app, 'package.json'))).dependencies.recharts, undefined);
+    const workspaceInstall = JSON.parse(await cli(path.join(workspace.app, 'src'), ['add', 'hairline-line', '--json'], undefined, { PATH: `${bin}${path.delimiter}${process.env.PATH}`, NODEX_SMOKE_MANAGER_LOG: managerLog })) as { packageManager: string; installed: string[] };
+    assert.equal(workspaceInstall.packageManager, manager);
+    assert.ok(workspaceInstall.installed.includes('react-is@19.2.8'));
+    assert.equal((await json<{ dependencies: Record<string, string> }>(path.join(workspace.app, 'package.json'))).dependencies.recharts, '3.10.1');
+    assert.equal(await readFile(path.join(workspace.root, 'package.json'), 'utf8'), rootPackage, 'The app owns the new dependency; preserve the workspace root manifest');
+    expectedCalls.push({ manager, cwd: workspace.app });
+    checks += 7;
   }
-  const calls = (await readFile(managerLog, 'utf8')).trim().split('\n').map((line) => JSON.parse(line) as { manager: string; args: string[] });
-  assert.equal(calls.length, 4);
+  const calls = (await readFile(managerLog, 'utf8')).trim().split('\n').map((line) => JSON.parse(line) as { manager: string; cwd: string; args: string[] });
+  assert.deepEqual(calls.map(({ manager, cwd }) => ({ manager, cwd })), expectedCalls);
   assert.ok(calls.every((call) => call.args.includes(call.manager === 'yarn' ? '--exact' : '--save-exact')));
   const peerRange = await newProject('peer-range', ROOT);
   await writeFile(path.join(peerRange, 'package.json'), JSON.stringify({ dependencies: { react: '19.2.8', 'react-dom': '19.2.8', 'react-is': '^19.0.0' } }));

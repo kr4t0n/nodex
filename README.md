@@ -137,10 +137,13 @@ src/components/nodex/
 Only declared, reachable runtime files are copied. There is no Nodex runtime
 package, example dataset, preview bundle or ECharts adapter in the consumer.
 `add` installs pinned chart dependencies using npm, pnpm, Yarn or Bun and
-matches `react-is` to the consumer's React version. `--no-install` reports the
-packages for manual installation. Identical files are reused; differing files
-or package versions require `--force`. Review that flag before replacing code
-that the consumer has edited.
+matches `react-is` to the consumer's React version. In a monorepo, initialize
+Nodex in the React app package. The CLI inherits the closest package-manager
+declaration or lockfile up to the Git root; `pnpm-workspace.yaml` also identifies
+pnpm. Dependencies are still installed into the app package. `--no-install`
+reports the packages for manual installation. Identical files are reused;
+differing files or package versions require `--force`. Review that flag before
+replacing code that the consumer has edited.
 
 ```bash
 nodex list
@@ -149,6 +152,13 @@ nodex show mono-editorial/hairline-line --json
 nodex add signal-console/endpoint-latency
 nodex lint src/components/nodex/endpoint-latency --design signal-console
 ```
+
+`search --json` and `show --json` return component metadata and file addresses
+without embedded source. Read delivered code after `add` for full types and
+implementation. `nodex lint` defaults to the configured component directory;
+after `add --to src/charts`, check that destination with `nodex lint src/charts`.
+Each lint target must exist and contain `.ts`, `.tsx` or `.css` source. Missing
+or empty targets fail instead of reporting a successful check of zero files.
 
 The latency chart requires `data` (each observation supplies `route` and `p99Ms`)
 and `objectiveMs`. It uses signal-console's

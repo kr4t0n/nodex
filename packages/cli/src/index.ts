@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, readdir, readFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { parseArgs } from 'node:util';
@@ -17,11 +17,11 @@ const COMMAND_HELP: Record<string, string> = {
   list: 'nodex list [--json]\n\n  List design languages and component counts.',
   design: 'nodex design <language>\n\n  Print the design rules delivered by the language manifest.',
   tokens: 'nodex tokens <language> [--json]\n\n  Print generated CSS tokens, or their authored JSON tree.',
-  search: 'nodex search [query] [--design <slug>] [--type <type>] [--tag <tag>]\n  [--tier primitive|expressive] [--density close-read|glance] [--json]\n\n  Find components by name, title, type and tags. JSON includes imports and typed props.',
-  show: 'nodex show <ref> [--design <slug>] [--json]\n\n  Inspect explicit exports, props, preview dimensions, dependencies and delivered files.',
+  search: 'nodex search [query] [--design <slug>] [--type <type>] [--tag <tag>]\n  [--tier primitive|expressive] [--density close-read|glance] [--json]\n\n  Find components by name, title, type and tags. JSON includes imports,\n  typed props and file addresses, without source contents.',
+  show: 'nodex show <ref> [--design <slug>] [--json]\n\n  Inspect explicit exports, props, preview dimensions, dependencies and\n  delivered file addresses, without source contents.',
   init: 'nodex init <language> [--force] [--json]\n\n  Install tokens and design guidance, record nodex.json and append AGENTS.md.\n  Existing project paths are preserved. --force replaces differing generated files.',
-  add: 'nodex add <ref...> [--to <dir>] [--design <slug>] [--no-install] [--force] [--json]\n\n  Copy editable React components and their declared local dependencies.\n  Install exact package versions with the project package manager.\n  --no-install copies source and reports packages to install yourself.\n  --force replaces differing source and conflicting package versions.\n  React 19, React DOM 19, TypeScript and Tailwind must already belong to the app.',
-  lint: 'nodex lint [path...] [--design <slug>]\n\n  Check React/CSS source for literal colors, unknown token references,\n  nondeterministic data and explicit animation guards. Defaults to the\n  configured components directory. This source check does not render charts\n  or verify computed geometry, interaction behavior or accessibility.',
+  add: 'nodex add <ref...> [--to <dir>] [--design <slug>] [--no-install] [--force] [--json]\n\n  Copy editable React components and their declared local dependencies.\n  Install exact package versions with the project package manager.\n  Detect manager settings up to the Git root; install into the app package.\n  --no-install copies source and reports packages to install yourself.\n  --force replaces differing source and conflicting package versions.\n  React 19, React DOM 19, TypeScript and Tailwind must already belong to the app.',
+  lint: 'nodex lint [path...] [--design <slug>]\n\n  Check React/CSS source for literal colors, unknown token references,\n  nondeterministic data and explicit animation guards. Defaults to the\n  configured components directory; pass custom add --to paths explicitly.\n  Each target must exist and contain .ts, .tsx or .css source.\n  This source check does not render charts or verify computed geometry,\n  interaction behavior or accessibility.',
   login: 'nodex login\n\n  Sign in by device code. Credentials stay in ~/.nodex/auth.json.\n  CI can use NODEX_TOKEN instead.',
   logout: 'nodex logout\n\n  Forget this registry origin\'s stored token.',
   whoami: 'nodex whoami\n\n  Check the current registry session.',
@@ -71,7 +71,7 @@ function itemDescription(item: Item, language = item.meta.language) {
     preview: item.meta.preview,
     dependencies: item.dependencies,
     ...(item.meta.externalData.length ? { externalData: item.meta.externalData } : {}),
-    files: item.files,
+    files: item.files.map(({ path, target }) => ({ path, target })),
     tags: item.meta.tags,
   };
 }
@@ -218,10 +218,7 @@ async function cmdAdd(registry: Registry, refs: string[], options: { to?: string
 }
 
 async function sourceFiles(root: string): Promise<string[]> {
-  const entries = await readdir(root, { withFileTypes: true }).catch((error: NodeJS.ErrnoException) => {
-    if (error.code === 'ENOENT') return [];
-    throw error;
-  });
+  const entries = await readdir(root, { withFileTypes: true });
   const files: string[] = [];
   for (const entry of entries) {
     if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
@@ -242,8 +239,16 @@ async function cmdLint(registry: Registry, paths: string[], design: string | und
   const files = new Set<string>();
   for (const root of roots) {
     const absolute = path.resolve(dir, root);
-    if (/\.(tsx?|css)$/.test(root)) files.add(absolute);
-    else for (const file of await sourceFiles(absolute)) files.add(file);
+    const info = await stat(absolute).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') fail(`Lint target does not exist: ${absolute}`);
+      throw error;
+    });
+    let selected: string[];
+    if (info.isDirectory()) selected = await sourceFiles(absolute);
+    else if (info.isFile() && /\.(tsx?|css)$/.test(absolute)) selected = [absolute];
+    else fail(`Lint target must be a directory or a .ts, .tsx or .css file: ${absolute}`);
+    if (!selected.length) fail(`No .ts, .tsx or .css source files found in lint target: ${absolute}`);
+    for (const file of selected) files.add(file);
   }
   let errors = 0;
   for (const file of files) {
