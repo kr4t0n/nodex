@@ -13,8 +13,9 @@ function Charts({mode,animate}:{mode:Mode;animate:boolean}){const values=mode===
 export function ForceConsumer({animate}:{animate:boolean}){const[mode,setMode]=useState<Mode>('normal');const[manual,setManual]=useState(false);useEffect(()=>{window.nodexForceFixture={setMode,setManual,seek:p=>pending.forEach(fn=>fn(p)),pending:()=>pending.size};},[]);return <><section id='force-primary' className='w-[660px] space-y-6'><AnimationControllerProvider value={controller}><Charts mode={mode} animate={animate||manual}/></AnimationControllerProvider></section><section id='force-secondary' className='w-[520px] space-y-6'><Charts mode='normal' animate={false}/></section></>;}
 `;
 async function setMode(page: Page, mode: string) { await page.evaluate(value => (window as unknown as { nodexForceFixture: { setMode: (mode: string) => void } }).nodexForceFixture.setMode(value), mode); }
-async function center(chart: Locator, index = 0): Promise<{ x: number; y: number }> {
-  let position: { x: number; y: number } | null = null;
+interface ForceScreenPosition { x: number; y: number; localX: number; localY: number; svgX: number; svgY: number; scrollX: number; scrollY: number; scrollWidth: number }
+async function center(chart: Locator, index = 0): Promise<ForceScreenPosition> {
+  let position: ForceScreenPosition | null = null;
   // Marks remount as their coordinates change; find and measure one atomically from the stable root.
   await expect.poll(async () => {
     position = await chart.evaluate((root, index) => {
@@ -22,7 +23,10 @@ async function center(chart: Locator, index = 0): Promise<{ x: number; y: number
       const matrix = circle?.getScreenCTM();
       if (!circle?.isConnected || !matrix) return null;
       const point = new DOMPoint(circle.cx.baseVal.value, circle.cy.baseVal.value).matrixTransform(matrix);
-      return Number.isFinite(point.x) && Number.isFinite(point.y) ? { x: point.x, y: point.y } : null;
+      return Number.isFinite(point.x) && Number.isFinite(point.y) ? {
+        x: point.x, y: point.y, localX: circle.cx.baseVal.value, localY: circle.cy.baseVal.value,
+        svgX: matrix.e, svgY: matrix.f, scrollX, scrollY, scrollWidth: document.documentElement.scrollWidth,
+      } : null;
     }, index);
     return position;
   }, { message: 'The current force mark must have connected, finite screen coordinates' }).not.toBeNull();
@@ -54,8 +58,13 @@ export async function checkForceConsumer(page: Page): Promise<void> {
     await expect(node.locator('[data-nx-force-node="3"]')).toHaveAttribute('data-nx-related','false');
     const p = await center(node); await page.mouse.move(p.x,p.y); await expect(node.getByRole('status')).toContainText(node === simple ? '52k syncs/mo' : '52k calls/day');
     const before = await positions(node); await page.mouse.down(); await page.mouse.move(p.x+35,p.y+18,{steps:5});
-    await expect.poll(async () => (await center(node)).x).toBeCloseTo(p.x + 35, 3);
-    await expect.poll(async () => (await center(node)).y).toBeCloseTo(p.y + 18, 3);
+    try {
+      await expect.poll(async () => (await center(node)).x).toBeCloseTo(p.x + 35, 3);
+      await expect.poll(async () => (await center(node)).y).toBeCloseTo(p.y + 18, 3);
+    } catch (error) {
+      console.error('Force drag diagnostics', JSON.stringify({ chart: await node.getAttribute('data-nx-chart'), start: p, end: await center(node) }));
+      throw error;
+    }
     await page.mouse.up(); await page.mouse.move(880,10); await expect.poll(async () => JSON.stringify(await positions(node))).not.toBe(JSON.stringify(before));
     if (node === simple) await checkForceFit(simple);
     const after = await positions(node); await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))); assert.deepEqual(await positions(node),after,'Released force graph must settle and hold without a timer');
