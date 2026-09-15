@@ -13,7 +13,22 @@ function Charts({mode,animate}:{mode:Mode;animate:boolean}){const values=mode===
 export function ForceConsumer({animate}:{animate:boolean}){const[mode,setMode]=useState<Mode>('normal');const[manual,setManual]=useState(false);useEffect(()=>{window.nodexForceFixture={setMode,setManual,seek:p=>pending.forEach(fn=>fn(p)),pending:()=>pending.size};},[]);return <><section id='force-primary' className='w-[660px] space-y-6'><AnimationControllerProvider value={controller}><Charts mode={mode} animate={animate||manual}/></AnimationControllerProvider></section><section id='force-secondary' className='w-[520px] space-y-6'><Charts mode='normal' animate={false}/></section></>;}
 `;
 async function setMode(page: Page, mode: string) { await page.evaluate(value => (window as unknown as { nodexForceFixture: { setMode: (mode: string) => void } }).nodexForceFixture.setMode(value), mode); }
-async function center(mark: Locator) { return mark.evaluate(element => { const circle = element as SVGCircleElement; const point = circle.ownerSVGElement!.createSVGPoint(); point.x = circle.cx.baseVal.value; point.y = circle.cy.baseVal.value; const p = point.matrixTransform(circle.getScreenCTM()!); return { x: p.x, y: p.y }; }); }
+async function center(chart: Locator, index = 0): Promise<{ x: number; y: number }> {
+  let position: { x: number; y: number } | null = null;
+  // Marks remount as their coordinates change; find and measure one atomically from the stable root.
+  await expect.poll(async () => {
+    position = await chart.evaluate((root, index) => {
+      const circle = root.querySelector<SVGCircleElement>(`[data-nx-service-mark="${index}"]`);
+      const matrix = circle?.getScreenCTM();
+      if (!circle?.isConnected || !matrix) return null;
+      const point = new DOMPoint(circle.cx.baseVal.value, circle.cy.baseVal.value).matrixTransform(matrix);
+      return Number.isFinite(point.x) && Number.isFinite(point.y) ? { x: point.x, y: point.y } : null;
+    }, index);
+    return position;
+  }, { message: 'The current force mark must have connected, finite screen coordinates' }).not.toBeNull();
+  assert(position);
+  return position;
+}
 async function positions(node: Locator) { return node.locator('[data-nx-force-position]').evaluateAll(elements => elements.map(e => [Number(e.getAttribute('data-nx-model-x')), Number(e.getAttribute('data-nx-model-y'))])); }
 export async function checkForceFit(chart: Locator): Promise<void> {
   await expect.poll(() => chart.evaluate(root => {
@@ -37,10 +52,10 @@ export async function checkForceConsumer(page: Page): Promise<void> {
   for (const node of [simple, dense]) {
     await node.scrollIntoViewIfNeeded(); await page.mouse.move(880,10); await node.locator('svg.recharts-surface').focus(); await page.keyboard.press('ArrowLeft'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub'); await page.keyboard.press('ArrowRight'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub');
     await expect(node.locator('[data-nx-force-node="3"]')).toHaveAttribute('data-nx-related','false');
-    const mark = node.locator('[data-nx-service-mark="0"]'); const p = await center(mark); await page.mouse.move(p.x,p.y); await expect(node.getByRole('status')).toContainText(node === simple ? '52k syncs/mo' : '52k calls/day');
+    const p = await center(node); await page.mouse.move(p.x,p.y); await expect(node.getByRole('status')).toContainText(node === simple ? '52k syncs/mo' : '52k calls/day');
     const before = await positions(node); await page.mouse.down(); await page.mouse.move(p.x+35,p.y+18,{steps:5});
-    await expect.poll(async () => (await center(mark)).x).toBeCloseTo(p.x + 35, 3);
-    await expect.poll(async () => (await center(mark)).y).toBeCloseTo(p.y + 18, 3);
+    await expect.poll(async () => (await center(node)).x).toBeCloseTo(p.x + 35, 3);
+    await expect.poll(async () => (await center(node)).y).toBeCloseTo(p.y + 18, 3);
     await page.mouse.up(); await page.mouse.move(880,10); await expect.poll(async () => JSON.stringify(await positions(node))).not.toBe(JSON.stringify(before));
     if (node === simple) await checkForceFit(simple);
     const after = await positions(node); await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))); assert.deepEqual(await positions(node),after,'Released force graph must settle and hold without a timer');

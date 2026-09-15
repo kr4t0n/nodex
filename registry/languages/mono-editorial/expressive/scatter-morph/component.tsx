@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { Bar, BarChart, CartesianGrid, Curve, Pie, PieChart, Rectangle, ResponsiveContainer, Scatter, ScatterChart, Sector, Tooltip, XAxis, YAxis, ZAxis, usePlotArea } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Curve, Pie, PieChart, Rectangle, ResponsiveContainer, Scatter, ScatterChart, Sector, Tooltip, XAxis, YAxis, ZAxis, matchByDataKey, usePlotArea } from 'recharts';
 import type { AnimationItem, BarShapeProps, PieSectorShapeProps, ScatterPointItem } from 'recharts';
 import { useChartMotion } from '../../../../_shared/use-chart-motion';
 
@@ -20,6 +20,7 @@ interface Product extends ScatterMorphDatum { index: number; tone: string; areaV
 interface Point { x: number; y: number }
 interface Transition { view: View; from: ReadonlyMap<string, readonly Point[]>; data?: readonly ScatterMorphDatum[] }
 const noOutlines: ReadonlyMap<string, readonly Point[]> = new Map();
+const matchProduct = matchByDataKey('id');
 const views: readonly View[] = ['scatter', 'bar', 'donut'];
 const captions = { scatter: 'PRICE VS RATING', bar: 'REVENUE, RANKED', donut: 'REVENUE SHARE' };
 const tones = ['var(--nx-ink)', 'var(--nx-markStrong)', 'var(--nx-markMuted)', 'var(--nx-muted)', 'var(--nx-markQuiet)', 'var(--nx-faint)'];
@@ -133,14 +134,14 @@ export function ScatterMorph({ data, height, width, animate = true, className = 
             <XAxis dataKey="priceUsd" type="number" domain={[5,26]} ticks={[5,10,15,20,25,26]} allowDataOverflow axisLine={false} tickLine={false} tickSize={0} height={40} interval={0} tickMargin={8} tick={axisText} />
             <YAxis dataKey="csat" type="number" domain={[6,9.6]} ticks={[6,7,8,9,9.6]} allowDataOverflow axisLine={false} tickLine={false} tickSize={0} width={56} tickMargin={8} tick={axisText} />
             <AxisNames /><ZAxis dataKey="areaValue" domain={[0,Math.max(1,...rows.map(row=>row.areaValue))]} range={[0,Math.max(1,...rows.map(row=>row.areaValue))]} />{tooltip}
-            <Scatter id={`${id}-scatter`} data={rows} shape={value=><ScatterProduct value={value} transition={getTransition()} enabled={motion.isAnimationActive}/>} activeShape={false} fill="var(--nx-ink)" {...motion} onAnimationEnd={finishTransition} animationInterpolateFn={currentTransition.from.size ? finalItems : undefined} />
+            <Scatter id={`${id}-scatter`} data={rows} shape={value=><ScatterProduct value={value} transition={getTransition()} enabled={motion.isAnimationActive}/>} activeShape={false} fill="var(--nx-ink)" {...motion} animationMatchBy={matchProduct} onAnimationEnd={finishTransition} animationInterpolateFn={currentTransition.from.size ? finalItems : undefined} />
           </ScatterChart> : view === 'bar' ? <BarChart data={ranked.map((row,index)=>({...row,category:index}))} accessibilityLayer title={label} desc={description} className={focusClass} margin={{ top: 34, bottom: 0, left: 0, right: 16 }} barCategoryGap="16%">
             <CartesianGrid vertical={false} stroke="var(--nx-grid)" strokeWidth="var(--nx-stroke-mark)" />
             <XAxis dataKey="category" type="category" scale="band" interval={0} axisLine={false} tickLine={false} tickSize={0} height={52} tickMargin={8} tick={value=><ProductTick {...value} rows={ranked}/>} />
             <YAxis type="number" interval={0} tickFormatter={value => value === 520 ? '' : String(value)} ticks={ranked.every(row=>(row.revenueK ?? 0)<=520) ? [0,100,200,300,400,500,520] : undefined} domain={[0,Math.max(520,...ranked.map(row=>row.revenueK ?? 0))]} axisLine={false} tickLine={false} tickSize={0} width={44} tickMargin={8} tick={axisText} />{tooltip}
-            <Bar id={`${id}-bar`} dataKey="revenueK" name="Revenue" shape={value=><BarProduct value={value} transition={getTransition()} enabled={motion.isAnimationActive}/>} activeBar={false} fill="var(--nx-ink)" stroke="none" {...motion} onAnimationEnd={finishTransition} animationInterpolateFn={currentTransition.from.size ? finalItems : undefined} />
+            <Bar id={`${id}-bar`} dataKey="revenueK" name="Revenue" shape={value=><BarProduct value={value} transition={getTransition()} enabled={motion.isAnimationActive}/>} activeBar={false} fill="var(--nx-ink)" stroke="none" {...motion} animationMatchBy={matchProduct} onAnimationEnd={finishTransition} animationInterpolateFn={currentTransition.from.size ? finalItems : undefined} />
           </BarChart> : <PieChart accessibilityLayer title={label} desc={description} className={focusClass} margin={{top:0,bottom:0,left:0,right:0}}>{tooltip}
-            <Pie id={`${id}-donut`} data={ranked} dataKey="revenueK" nameKey="product" cx="50%" cy="54%" innerRadius="26%" outerRadius="68%" startAngle={90} endAngle={-270} shape={value=><DonutProduct value={value} transition={getTransition()} enabled={motion.isAnimationActive}/>} activeShape={false} fill="var(--nx-ink)" stroke="var(--nx-paper)" strokeWidth={2} label={false} labelLine={false} {...motion} onAnimationEnd={finishTransition} animationInterpolateFn={currentTransition.from.size ? finalItems : undefined} />
+            <Pie id={`${id}-donut`} data={ranked} dataKey="revenueK" nameKey="product" cx="50%" cy="54%" innerRadius="26%" outerRadius="68%" startAngle={90} endAngle={-270} shape={value=><DonutProduct value={value} transition={getTransition()} enabled={motion.isAnimationActive}/>} activeShape={false} fill="var(--nx-ink)" stroke="var(--nx-paper)" strokeWidth={2} label={false} labelLine={false} {...motion} animationMatchBy={matchProduct} onAnimationEnd={finishTransition} animationInterpolateFn={currentTransition.from.size ? finalItems : undefined} />
           </PieChart>}
         </ResponsiveContainer>}
       </div>

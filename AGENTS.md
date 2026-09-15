@@ -573,16 +573,22 @@ relative to its own location. Helm uses an external database and migration Job.
   movement updates the simulation; release settles it without a background timer.
   The dense viewport keeps node size at 1 + (zoom - 1) × 0.6 and scopes pan/zoom
   to the instance. The old dense metadata's replay claim had no handler.
+  Consumer drag checks query and measure the current mark from the stable chart
+  root in one browser evaluation, retrying while a connected mark is unavailable.
+  Evaluating a previously resolved mark can race its removal from the SVG.
 - Scatter-morph uses actual Scatter, Bar and Pie series. On a requested view
   change, sample the currently visible native outlines by stable product ID;
   custom marks follow the next native series' animation clock to its geometry.
   Keep native final shapes, preserve all observations through the transition,
   and capture the current intermediate outline if clicked again. Completed view
   transitions must not replay their saved outlines on later data updates; those
-  updates belong to the current native series. Read completion inside native
-  shape callbacks too: a container resize can update them without rendering
-  the parent component. A crossfade
-  loses the component's identity tracking. The whole plot still advances on click;
+  updates belong to the current native series. All three series must match
+  animation records by product ID; the library's positional default transfers
+  geometry between products after reordering, insertion, removal or revenue-rank
+  changes. Consumer checks inspect intermediate geometry for these cases.
+  Read completion inside native shape callbacks too: a container resize can
+  update them without rendering the parent component. A crossfade loses the
+  component's identity tracking. The whole plot still advances on click;
   its keyboard button is a sibling of the focusable chart SVG. Zero revenue is
   not an equal-slice donut, and a missing revenue prevents a truthful share total.
 - Recharts makes the chart SVG focusable. Suppress its browser outline for

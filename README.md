@@ -95,8 +95,10 @@ rendering. The simple force graph automatically fits its full layout into the
 available frame, including node circles and labels, while keeping their sizes
 and the force geometry intact. It adapts to resizing and refits after a drag is
 released. The scatter morph advances on click through native scatter, ranked bar
-and donut series, carrying each product's outline between encodings. Reduced
-motion settles networks immediately and changes morph views without animation.
+and donut series, carrying each product's outline between encodings. Data updates
+match products by stable ID so reordering records or changing revenue ranks keeps
+each product's own starting geometry. Reduced motion settles networks immediately
+and changes morph views without animation.
 
 Each chart requires real data. Fixtures remain in registry examples. Gallery
 titles belong to the caller; the original drawing annotations and console status
