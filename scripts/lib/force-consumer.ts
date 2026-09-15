@@ -13,9 +13,8 @@ function Charts({mode,animate}:{mode:Mode;animate:boolean}){const values=mode===
 export function ForceConsumer({animate}:{animate:boolean}){const[mode,setMode]=useState<Mode>('normal');const[manual,setManual]=useState(false);useEffect(()=>{window.nodexForceFixture={setMode,setManual,seek:p=>pending.forEach(fn=>fn(p)),pending:()=>pending.size};},[]);return <><section id='force-primary' className='w-[660px] space-y-6'><AnimationControllerProvider value={controller}><Charts mode={mode} animate={animate||manual}/></AnimationControllerProvider></section><section id='force-secondary' className='w-[520px] space-y-6'><Charts mode='normal' animate={false}/></section></>;}
 `;
 async function setMode(page: Page, mode: string) { await page.evaluate(value => (window as unknown as { nodexForceFixture: { setMode: (mode: string) => void } }).nodexForceFixture.setMode(value), mode); }
-interface ForceScreenPosition { x: number; y: number; localX: number; localY: number; svgX: number; svgY: number; scrollX: number; scrollY: number; scrollWidth: number }
-async function center(chart: Locator, index = 0): Promise<ForceScreenPosition> {
-  let position: ForceScreenPosition | null = null;
+async function center(chart: Locator, index = 0): Promise<{ x: number; y: number }> {
+  let position: { x: number; y: number } | null = null;
   // Marks remount as their coordinates change; find and measure one atomically from the stable root.
   await expect.poll(async () => {
     position = await chart.evaluate((root, index) => {
@@ -23,10 +22,7 @@ async function center(chart: Locator, index = 0): Promise<ForceScreenPosition> {
       const matrix = circle?.getScreenCTM();
       if (!circle?.isConnected || !matrix) return null;
       const point = new DOMPoint(circle.cx.baseVal.value, circle.cy.baseVal.value).matrixTransform(matrix);
-      return Number.isFinite(point.x) && Number.isFinite(point.y) ? {
-        x: point.x, y: point.y, localX: circle.cx.baseVal.value, localY: circle.cy.baseVal.value,
-        svgX: matrix.e, svgY: matrix.f, scrollX, scrollY, scrollWidth: document.documentElement.scrollWidth,
-      } : null;
+      return Number.isFinite(point.x) && Number.isFinite(point.y) ? { x: point.x, y: point.y } : null;
     }, index);
     return position;
   }, { message: 'The current force mark must have connected, finite screen coordinates' }).not.toBeNull();
@@ -53,26 +49,32 @@ export async function checkForceConsumer(page: Page): Promise<void> {
   await checkForceFit(simple);
   assert(Math.abs(Number(await dense.locator('[data-nx-service-mark="0"]').getAttribute('r')) - (16 + Math.sqrt(52) * 1.6) / 2) < 1e-8);
   await expect.poll(() => dense.locator('[data-nx-service-mark="1"]').evaluate(e => getComputedStyle(e).fill)).toBe('rgb(51, 50, 45)');
-  for (const node of [simple, dense]) {
-    await node.scrollIntoViewIfNeeded(); await page.mouse.move(880,10); await node.locator('svg.recharts-surface').focus(); await page.keyboard.press('ArrowLeft'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub'); await page.keyboard.press('ArrowRight'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub');
-    await expect(node.locator('[data-nx-force-node="3"]')).toHaveAttribute('data-nx-related','false');
-    const p = await center(node); await page.mouse.move(p.x,p.y); await expect(node.getByRole('status')).toContainText(node === simple ? '52k syncs/mo' : '52k calls/day');
-    const before = await positions(node); await page.mouse.down(); await page.mouse.move(p.x+35,p.y+18,{steps:5});
-    try {
+  // Earlier consumer checks can overflow horizontally. Exercise that condition in focused runs too.
+  const overflow = await page.addStyleTag({ content: 'body::after { content: ""; display: block; width: calc(100vw + 180px); height: 1px; }' });
+  try {
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeGreaterThan(0);
+    for (const node of [simple, dense]) {
+      await node.scrollIntoViewIfNeeded(); await page.mouse.move(880,10); await node.locator('svg.recharts-surface').focus(); await page.keyboard.press('ArrowLeft'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub'); await page.keyboard.press('ArrowRight'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub');
+      await expect(node.locator('[data-nx-force-node="3"]')).toHaveAttribute('data-nx-related','false');
+      // Recharts leaves the arrows' native page scrolling enabled. Stop that scroll before
+      // measuring screen coordinates for the independent pointer check.
+      await page.evaluate(() => window.scrollTo({ left: 0, top: window.scrollY, behavior: 'instant' }));
+      const p = await center(node); await page.mouse.move(p.x,p.y); await expect(node.getByRole('status')).toContainText(node === simple ? '52k syncs/mo' : '52k calls/day');
+      const before = await positions(node); await page.mouse.down(); await page.mouse.move(p.x+35,p.y+18,{steps:5});
       await expect.poll(async () => (await center(node)).x).toBeCloseTo(p.x + 35, 3);
       await expect.poll(async () => (await center(node)).y).toBeCloseTo(p.y + 18, 3);
-    } catch (error) {
-      console.error('Force drag diagnostics', JSON.stringify({ chart: await node.getAttribute('data-nx-chart'), start: p, end: await center(node) }));
-      throw error;
+      await page.mouse.up(); await page.mouse.move(880,10); await expect.poll(async () => JSON.stringify(await positions(node))).not.toBe(JSON.stringify(before));
+      if (node === simple) await checkForceFit(simple);
+      const after = await positions(node); await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))); assert.deepEqual(await positions(node),after,'Released force graph must settle and hold without a timer');
+      await node.evaluate(e => { const s=(e as HTMLElement).style; s.setProperty('--nx-ink','#123456'); s.setProperty('--nx-markHeavy','#234567'); s.setProperty('--nx-type-axis-size','12px'); });
+      await expect.poll(() => node.locator('[data-nx-service-mark="0"]').evaluate(e=>getComputedStyle(e).fill)).toBe('rgb(18, 52, 86)');
+      await expect.poll(() => node.locator('[data-nx-service-label="0"]').evaluate(e=>getComputedStyle(e).fontSize)).toBe(node===simple?'15.75px':'14.25px');
+      if (node === simple) await checkForceFit(simple);
+      const width=Number(await node.locator('svg').getAttribute('width')); await node.evaluate(e=>{(e as HTMLElement).style.width='400px';}); await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBeLessThan(width); await node.evaluate(e=>{(e as HTMLElement).style.width='';}); await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBe(width);
     }
-    await page.mouse.up(); await page.mouse.move(880,10); await expect.poll(async () => JSON.stringify(await positions(node))).not.toBe(JSON.stringify(before));
-    if (node === simple) await checkForceFit(simple);
-    const after = await positions(node); await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))); assert.deepEqual(await positions(node),after,'Released force graph must settle and hold without a timer');
-    await node.evaluate(e => { const s=(e as HTMLElement).style; s.setProperty('--nx-ink','#123456'); s.setProperty('--nx-markHeavy','#234567'); s.setProperty('--nx-type-axis-size','12px'); });
-    await expect.poll(() => node.locator('[data-nx-service-mark="0"]').evaluate(e=>getComputedStyle(e).fill)).toBe('rgb(18, 52, 86)');
-    await expect.poll(() => node.locator('[data-nx-service-label="0"]').evaluate(e=>getComputedStyle(e).fontSize)).toBe(node===simple?'15.75px':'14.25px');
-    if (node === simple) await checkForceFit(simple);
-    const width=Number(await node.locator('svg').getAttribute('width')); await node.evaluate(e=>{(e as HTMLElement).style.width='400px';}); await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBeLessThan(width); await node.evaluate(e=>{(e as HTMLElement).style.width='';}); await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBe(width);
+  } finally {
+    await overflow.evaluate(element => { element.parentNode?.removeChild(element); });
+    await overflow.dispose();
   }
   const padding = await simple.evaluate(element => { const style = getComputedStyle(element); return parseFloat(style.paddingLeft) + parseFloat(style.paddingRight); });
   for (const width of [320, 800]) {
