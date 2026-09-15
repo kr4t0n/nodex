@@ -1,178 +1,131 @@
 # Mono Editorial
 
-Hairline data drawing on warm paper. Every mark is thin, every caption is small,
-and the page is mostly empty. Charts are drawn to be read, not glanced at.
+Quiet editorial interfaces on warm paper. Thin rules, restrained typography and
+ample space give content room to be read carefully.
 
-This file is the written half of the design language. `tokens.json` holds the
-values; this holds the reasoning values cannot carry.
+This language applies to complete interfaces: pages, navigation, forms, controls,
+prose and data displays. `tokens.json` holds the canonical values; this document
+explains the visual decisions and relationships those values support.
 
 ## Visual atmosphere
 
-- **Density** — airy. Generous margins, one idea per card, nothing crowded.
-- **Variance** — restrained. A predictable grid; the interest lives in the marks.
-- **Motion** — quiet. Marks draw themselves once on arrival, then hold still.
+- **Density.** Airy. Generous margins and clear grouping give each idea its own
+  space.
+- **Structure.** A predictable grid and shared reading edges establish order.
+  Variation comes from the content and its hierarchy.
+- **Motion.** Quiet. Content arrives, settles and remains available for reading.
 
-The reference feeling is a printed statistical annual, not a dashboard. If a
-chart looks like it belongs in a control room, it is wrong for this language.
+The reference is a printed statistical annual: measured, precise and unhurried.
+Preserve that character in ordinary pages and forms as well as in reports.
 
-## Color calibration
+## Color and contrast
 
-Warm off-white paper and near-black ink. There is no accent color and no hue at
-all — every value is a warm grey. Emphasis comes from weight, size, and density
-of marks, never from color.
+Warm off-white paper and near-black ink define the palette. Every intermediate
+value is a warm grey. Emphasis comes from weight, size, position and density.
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `--nx-bg` / `--nx-paper` | `#F0EFEB` | page and card ground |
-| `--nx-ink` / `--nx-dark` | `#1C1C1A` | text, primary marks, inverted card ground |
-| `--nx-muted` | `#8F8E88` | subtitles, axis labels, secondary marks |
-| `--nx-faint` | `#C6C5BF` | captions, the quietest rules |
-| `--nx-grid` | `#DEDDD6` | gridlines, hairline separators |
+| `--nx-bg` / `--nx-paper` | `#F0EFEB` | page and surface ground |
+| `--nx-ink` / `--nx-dark` | `#1C1C1A` | primary text, marks and inverted surfaces |
+| `--nx-muted` | `#8F8E88` | supporting text and secondary emphasis |
+| `--nx-faint` | `#C6C5BF` | quiet captions and minor details |
+| `--nx-grid` | `#DEDDD6` | structural rules and separators |
 
-Cards may invert to ink ground with paper text. On inverted cards, captions drop
-to `#55554F` so they recede the same amount they do on paper.
+Use the semantic role appropriate to the content. Additional tonal roles refine
+this hierarchy; they do not introduce an accent palette. Selection, urgency and
+validation remain monochrome and need clear wording or form to convey meaning.
 
-**No chart in the collection currently inverts.** Seven did — `circular-graph`,
-`circular-graph-dense`, `dot-cascade`, `force-graph`, `force-graph-dense`,
-`petal-rose`, and `thread-triptych` — and were moved onto paper so a page of
-them reads as one language rather than two. The affordance and its CSS stay,
-because inversion is a legitimate choice for a single card that has to stand
-apart; it is just not something to reach for while building a set.
+An occasional surface may invert to ink with paper text. Its secondary text uses
+`--nx-onDarkMuted` and `--nx-onDarkFaint`. Rebalance all foreground contrast when
+inverting a surface so the strongest emphasis remains the most visible.
 
-Note that only four carried the `card dark` modifier. The other three set a dark
-background on `.card` itself, so grepping for the modifier finds the wrong
-answer; check the resolved background instead.
+Reference semantic variables directly. Local token overrides must apply within
+their containing scope. Avoid copying literal colors or creating a parallel
+palette that can drift from the language.
 
-Inverting is not a background swap. Mark colour encodes rank, so the ramp has to
-be reversed with it: on ink the brightest mark carries the most, on paper the
-darkest does. A card whose ground flipped but whose marks did not will read with
-its emphasis exactly backwards.
+## Typography
 
-Chart marks are drawn in JavaScript with literal hex from the warm-grey ramp in
-`tokens.json`. That is deliberate: SVG attributes are set imperatively, so there
-is no `var()` to reference. The conformance lint therefore checks that literals
-are **members of the ramp**, not that they use custom properties.
+Inter is the single typeface, using the defined weights from 400 to 800. The
+scale is restrained; weight, tracking and surrounding space establish hierarchy.
 
-Run it yourself with `nodex lint`. It checks this project's components against
-this language and reports what fails, so a claim of conformance can be verified
-rather than asserted.
+| Role | Size | Treatment |
+| --- | --- | --- |
+| Page title | `22px` | weight 800, `-0.02em` tracking |
+| Card title | `16.5px` | weight 700, `-0.02em` tracking |
+| Body | `11.5px` | `1.7` line height |
+| Control | `12px` | `1.4` line height |
+| Action | `11.5px` | weight 600, `0.01em` tracking |
+| Caption | `9.5px` | weight 500, uppercase, `0.08em` tracking |
 
-Known debt: 37 distinct greys appear across the collection. The ramp in
-`tokens.json` records the load-bearing steps; consolidating the rest is a
-cleanup task, not a redesign.
+Use negative tracking for headings and positive tracking for uppercase labels.
+Small captions should read as supporting credit lines, leaving primary content
+visually dominant. Long-form prose and prominent values have their own roles;
+use those roles instead of stretching the caption or heading scale to fit.
 
-## Typographic architecture
+Choose tokens by purpose. Card and dialog headings share `type.cardTitle`;
+form text uses `type.control`, actions use `type.action`, and supporting captions
+use `type.caption`. Separate heading and value roles remain independently
+adjustable even when their sizes are similar.
 
-Inter throughout, 400 to 800. Nothing else.
+## Layout and geometry
 
-The scale is small and tight. Card titles are `16.5px/700` at `-0.02em`, which
-is barely larger than body text — the hierarchy comes from weight and from the
-uppercase tracking of the captions, not from size jumps. Captions run `9.5px`
-uppercase at `0.08em`, small enough to read as a printed credit line.
+The baseline composition uses two columns, `22px` gaps and `40px` page padding.
+Collapse columns when needed to preserve readable content and usable controls.
+Wider content can span the grid while retaining its shared starting edge.
 
-No chart currently uses that caption size: it belonged to the `div.src` footer,
-which was removed. The token stays because it is the language's vocabulary for
-an annotation smaller than a legend, and a consumer captioning their own data
-needs a size to reach for. Do not read its absence from the shipped charts as a
-reason to delete it.
+Surface padding is `28px 28px 20px`, with `24px` card corners. Pill controls use
+their own `radius.pill` role; smaller controls, code and focus treatments retain
+their dedicated geometry. A surface's radius is not a universal radius for every
+element inside it.
 
-Negative tracking on headings, positive tracking on anything uppercase. Never
-the reverse.
+Align headings, prose and related groups on the left. When content reaches its
+width limit, leave the remaining space after it. Use whitespace to separate
+ideas before adding another border or container.
 
-## Component behaviors
+Rules are delicate. `stroke.hairline` is `0.7px`, ordinary marks use `1px`, and
+emphasis uses `1.1px`. Strokes that read as lines stay at or below `1.4px`.
+A width that encodes an amount, or a background gap separating filled regions,
+has a different role from an outline.
 
-Every chart card follows the same three-part anatomy, in this order, always:
+## Content and interaction
 
-```
-h2.title      what the chart says, as a sentence
-div.sub       the reading instructions — units, span, what one mark means
-[the chart]
-```
+**One clear hierarchy.** Give each section a meaningful heading, supporting
+context where needed, and the content itself. Avoid repeating a heading inside
+a surface that is already named by its surrounding section.
 
-The drawing is **left-aligned to the title, never centred**. Every SVG carries
-`preserveAspectRatio="xMinYMid meet"` and no `margin: 0 auto`. A chart with a
-`max-height` reaches its cap before it runs out of width, so in any container
-wider than its aspect ratio needs there is slack — and the default `xMidYMid`
-spends that slack centring the drawing away from the title and subtitle sitting
-at the card's left edge. Left-aligned, a wall of these cards shares one starting
-edge and reads as a set. Centred, each one floats at its own offset.
+**Purposeful annotation.** Place explanations beside the content they clarify.
+A note should explain a relationship, unit or exception without competing with
+the heading. Keep labels concise and information density deliberate.
 
-This aligns the SVG's own box. A chart that centres its composition *inside* its
-viewBox — a donut, a network — still sits wherever it was drawn, because that is
-a property of the drawing rather than of the box. Fix those by moving the marks
-in the viewBox, not by re-centring the box.
+**Readable detail.** Close reading preserves individual records and their
+relationships. In data displays, use a hairline where it carries the same
+information as a large fill. Distinguish unavailable information from measured
+zero and keep the meaning of tone and size consistent.
 
-The subtitle is not decoration. It tells the reader what one mark represents,
-which is the only way a one-mark-per-record chart is legible. Write it as
-instructions, not as a description.
+**Functional feedback.** Inputs, actions and selections use their semantic text,
+spacing and state roles. Preserve visible focus, clear labels and keyboard
+operation. Hover or press feedback should explain an available action or changed
+state without becoming an ornament.
 
-There is deliberately **no footer credit line.** An earlier anatomy ended each
-card with a `div.src` reading `CHART TYPE · LANGUAGE · DATA SOURCE`, and it was
-removed for two reasons. It states facts the manifest already records, so it
-went stale the moment a component was renamed or moved — 53 of 64 ended up
-naming a design language that had never existed. And it is the only left-aligned
-element under a chart that centres itself, so it read as misalignment on every
-card wide enough to letterbox.
+## Motion
 
-A caption naming the *data* rather than the component is a different thing and
-still belongs, when a chart genuinely needs sourcing. Write it as a `div.note`.
+Use the language's motion roles for the purpose they name. Content drawing has
+an unhurried `1s` duration; control feedback uses the separate `160ms` control
+role. A small interaction should not inherit the duration of a large reveal.
 
-Interactive marks carry an SVG `<title>` child so hovering yields a native
-tooltip with no JavaScript. Prefer that over a custom tooltip layer.
-
-## Layout principles
-
-Two-column grid, `22px` gap, `40px` page padding, `24px` card radius. A card may
-span both columns when its chart needs width — a 90-day barcode does, a donut
-does not.
-
-Wide cards may split into a `250px` text column beside the chart. Use that when
-the chart genuinely needs prose to be read correctly, and put real reasoning
-there rather than filler.
-
-## Motion philosophy
-
-One rule: **marks draw themselves when they scroll into view, and clicking
-replays.** Nothing animates on a loop, nothing animates on hover except the
-native tooltip.
-
-Implemented as an IntersectionObserver at `0.3` threshold that disconnects after
-firing once, plus a click handler that clears and redraws. Three keyframes are
-available — `draw` for stroke-dashoffset reveals, `pop` for marks scaling in,
-`fade` for labels — and stagger delays are computed per index so a field of
-marks arrives as a wave rather than all at once.
-
-Every animated component must ship a `prefers-reduced-motion: reduce` block that
-disables the animations and resets `stroke-dashoffset` to `0`. This is not
-optional, and `nodex lint` checks for it.
-
-## Runtime token bindings
-
-The same rule is spelled differently per runtime. A `0.8px` hairline is:
-
-- **Raw SVG** — `stroke-width="0.8"`
-- **ECharts** — `lineStyle: { width: 0.8 }`, or `itemStyle.borderWidth`
-
-Only these two runtimes exist in this language. Do not introduce a third.
+Entry and meaningful state changes may animate, then settle. Avoid continuous
+loops and decorative hover motion. Respect reduced motion whenever the preference
+changes, presenting the complete state without requiring an animation to finish.
 
 ## Anti-patterns
 
-- **Never** exceed `1.4px` on a stroke that reads as a *line* — axes, rules,
-  connectors, series lines, stems, leaders. Hairlines are the language; a 2px
-  line reads as a different product.
-  The exception, and it is a real one: where the stroke **is** the area rather
-  than an outline, its width encodes magnitude and may be as thick as the data
-  demands. Sankey flows, streamgraph ribbons, violin bodies, box plots, and
-  histogram bands all legitimately draw at 2px and above. The test is whether
-  thinning the stroke would lose information. If it would only make the chart
-  more delicate, thin it.
-- **Never** introduce a hue. No blue, no accent, no semantic red or green.
-- **Never** aggregate in `close-read` mode. One mark per record, always — if
-  there are 90 days, draw 90 marks.
-- **Never** fill a large area where a hairline will carry the same information.
-- **Never** use a drop shadow, a gradient, or a border-radius above `24px`.
-- **Never** reorder or drop the card anatomy. A chart without a `.sub` is not
-  readable in this language.
-- **Never** animate on a loop or on hover.
-- **Never** use `Math.random()` for sample data. Use a deterministic hash so
-  previews and screenshots reproduce exactly.
+- Introducing hue, colored status accents or a second palette.
+- Heavy outlines, drop shadows or gradients used as decoration.
+- Enlarging surface corners beyond the `24px` card role or applying that role
+  indiscriminately to controls.
+- Crowding unrelated ideas into one group or filling space with extra containers.
+- Oversized headings, dense captions or inconsistent reading edges.
+- Aggregating away the individual records required for close reading.
+- Repeated headings, unrelated controls or annotations that overwhelm content.
+- Looping decoration, fabricated information or ambiguous missing states.
+- Duplicating token values instead of applying their semantic roles.

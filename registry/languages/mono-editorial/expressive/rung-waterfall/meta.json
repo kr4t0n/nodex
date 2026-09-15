@@ -4,9 +4,68 @@
   "description": "one rung = $1k · solid rungs add, hollow rungs take away · the ladder walks down",
   "component": "waterfall",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "RungWaterfall"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "rung-marks.tsx"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly RungWaterfallDatum[]",
+      "description": "Ordered start, change and total steps. Start/change require signed integer valueK; totals report the running value. Missing changes invalidate subsequent totals until a new start.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

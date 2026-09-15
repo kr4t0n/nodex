@@ -4,12 +4,77 @@
   "description": "one hairline = one product across price · satisfaction · retention · growth · ink = the one that wins everywhere",
   "component": "parallel-coordinates",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "product",
     "panel"
   ],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ParallelCoords"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "constrained-curve.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ParallelCoordsDatum[]",
+      "required": true,
+      "description": "Product labels and one finite reading per dimension. Incomplete rows stay unavailable; readings outside the reference ranges are extrapolated without changing those ranges. Repeated labels remain separate observations."
+    },
+    {
+      "name": "dimensions",
+      "type": "readonly ParallelCoordsDimension[]",
+      "required": true,
+      "description": "At least two labeled finite min/max ranges, with at least one scored dimension. The highlighted complete product maximizes the sum of normalized scored values; unscored dimensions such as price do not affect the result."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { ArrowRight } from '@phosphor-icons/react';
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import Link, { type LinkProps } from 'next/link';
 
 import { Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
@@ -10,8 +10,8 @@ import { useLanguageTokens, useScopedLanguageTokens } from '@/lib/hooks.ts';
 import {
   loadCatalog,
   previewUrl,
-  primitivePreviewUrl,
   type Catalog,
+  type Item,
   type Language,
 } from '@/lib/registry.ts';
 
@@ -20,8 +20,8 @@ import {
  * by looking. So a language is presented as a live composite of its own
  * components rather than a name and a paragraph.
  *
- * Deliberately thin while one language exists: there is nothing to compare yet.
- * It grows into a comparison surface when a second arrives.
+ * Scoped token layers let several languages appear together without changing
+ * the identity of neighboring tiles.
  */
 export function IndexView({
   user,
@@ -63,7 +63,11 @@ export function IndexView({
 
         <div className="flex flex-col gap-10">
           {catalog.languages.map((language) => (
-            <LanguageTile key={language.slug} language={language} />
+            <LanguageTile
+              key={language.slug}
+              language={language}
+              items={catalog.items}
+            />
           ))}
         </div>
       </PageShell>
@@ -78,13 +82,65 @@ export function IndexView({
  * image can show: how colour is used (status), the type face (link), shape and
  * radius (slider), and mark weight (progress).
  *
- * Chosen for compatible natural height as well as for coverage. Primitives
- * render fluid, at true size, so the row is only as tidy as the components in
- * it: `stat` and `alert` are more characterful but measure 274px and 361px
- * against `badge`'s 63px, and a composite with a sixfold height spread reads as
- * broken rather than as varied. These four sit within 151px to 185px.
+ * These examples have compatible compositions for an unscaled tile. Their
+ * authored dimensions reserve space until each document reports its height.
  */
 const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
+
+/**
+ * One labelled tile: title, description, then the component.
+ *
+ * Three subgrid rows rather than a plain stack, because a title that wraps to
+ * two lines would otherwise drop its own preview below its neighbours' and the
+ * composite would read as misaligned rather than as varied.
+ *
+ * `min-w-0` on every level down to the Preview: a grid item's default minimum
+ * is its content size, and a preview renders an iframe at a fixed wide logical
+ * width, so without it the column is forced open and the inflated width is then
+ * measured back as the one the scale is computed from.
+ */
+function TileCell<T>({
+  href,
+  title,
+  kind,
+  children,
+}: {
+  // Next types its routes, so the prop borrows Link's own href type rather than
+  // widening to string, which would drop the check at every call site. It is
+  // generic because that type is parameterised by the route being linked to.
+  href: LinkProps<T>['href'];
+  title: string;
+  kind: string;
+  children: ReactNode;
+}) {
+  return (
+    // Both levels restate rowGap. A subgrid adopts its parent's gap along the
+    // axis it inherits, and the tile grid sets 20px to separate whole cells —
+    // left alone, that 20px would also open up between a title, its description
+    // and its chart, so each cell would read as three loose parts.
+    <article
+      className="grid min-w-0 grid-rows-subgrid row-span-3"
+      style={{ rowGap: 6 }}
+    >
+      <Link
+        href={href}
+        className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+        style={{ color: 'inherit', rowGap: 6 }}
+      >
+        <h3 className="m-0 self-start text-[12.5px] leading-[1.4] font-bold tracking-[-0.01em]">
+          {title}
+        </h3>
+        <p
+          className="m-0 self-start text-[10.5px] tracking-[0.06em] uppercase"
+          style={{ color: 'var(--nx-faint)' }}
+        >
+          {kind}
+        </p>
+        <div className="mt-2 min-w-0 self-start">{children}</div>
+      </Link>
+    </article>
+  );
+}
 
 /**
  * One box height for every tile on this page, charts and primitives alike.
@@ -97,12 +153,24 @@ const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
  */
 const TILE_HEIGHT = 260;
 
-function LanguageTile({ language }: { language: Language }) {
-  const featured = language.featured.slice(0, 4);
+function LanguageTile({
+  language,
+  items,
+}: {
+  language: Language;
+  items: Item[];
+}) {
+  const featured = language.featured.slice(0, 4).map((name) => items.find(
+    (item) => item.name === name && item.meta.language === language.slug,
+  )).filter((item): item is Item => item !== undefined);
 
   // A language under construction has tokens and primitives before it has a
   // single chart. Rendering nothing there makes a real language look broken.
   const showing = featured.length > 0 ? 'expressive' : 'primitives';
+
+  const visibleItems = showing === 'expressive' ? featured : SAMPLE_PRIMITIVES.map(
+    (name) => items.find((item) => item.name === name && item.meta.tier === 'primitive'),
+  ).filter((item): item is Item => item !== undefined);
 
   return (
     /**
@@ -146,10 +214,12 @@ function LanguageTile({ language }: { language: Language }) {
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="nx-badge nx-badge--dashed">
-              {language.counts.expressive} components
+              {language.counts.expressive}{' '}
+              {language.counts.expressive === 1 ? 'component' : 'components'}
             </span>
             <span className="nx-badge nx-badge--dashed">
-              {language.counts.primitives} primitives
+              {language.counts.primitives}{' '}
+              {language.counts.primitives === 1 ? 'primitive' : 'primitives'}
             </span>
             {language.visibility === 'restricted' ? (
               <span className="nx-badge nx-badge--solid">Restricted</span>
@@ -164,40 +234,29 @@ function LanguageTile({ language }: { language: Language }) {
       </div>
 
       {/* The composite IS the description. A name and a paragraph cannot convey
-          taste, and these are real running components rather than screenshots. */}
+          taste, and these are real running components rather than screenshots.
+
+          Subgrid, so a title or description that wraps to an extra line moves
+          its own text and not its neighbours' previews out of line. */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {showing === 'expressive'
-          ? featured.map((name) => (
-              <Link
-                key={name}
-                href={`/l/${language.slug}/${name}`}
-                className="min-w-0 no-underline"
-                aria-label={`${name} in ${language.name}`}
-              >
-                <Preview
-                  src={previewUrl(language.slug, name)}
-                  title={`${name} in ${language.name}`}
-                  boxHeight={TILE_HEIGHT}
-                />
-              </Link>
-            ))
-          : SAMPLE_PRIMITIVES.map((name) => (
-              <Link
-                key={name}
-                href={`/l/${language.slug}/${name}`}
-                className="min-w-0 no-underline"
-                aria-label={`${name} in ${language.name}`}
-              >
-                {/* Fluid, so the component is shown at the size it really is,
-                    but inside the same box as every other tile. */}
-                <Preview
-                  src={primitivePreviewUrl(name, language.slug)}
-                  title={`${name} in ${language.name}`}
-                  boxHeight={TILE_HEIGHT}
-                  fluid
-                />
-              </Link>
-            ))}
+        {visibleItems.map((item) => (
+          <TileCell
+            key={item.name}
+            href={`/l/${language.slug}/${item.name}`}
+            title={item.title}
+            kind={item.meta.component}
+          >
+            <Preview
+              src={previewUrl(item, language.slug)}
+              title={item.title}
+              width={item.meta.preview.width}
+              height={item.meta.preview.height}
+              insets={item.meta.preview.insets}
+              boxHeight={TILE_HEIGHT}
+              fluid={item.meta.tier === 'primitive'}
+            />
+          </TileCell>
+        ))}
       </div>
 
       {showing === 'primitives' ? (

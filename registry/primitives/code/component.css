@@ -1,3 +1,4 @@
+@layer components {
 /* code - shared primitive, themed by the active language's tokens.
 
    Inline code, keyboard keys, and code blocks. The tint is mixed from the grid
@@ -6,9 +7,9 @@
 
 .nx-code {
   font-family: var(--nx-font-mono);
-  font-size: 0.88em;
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
+  font-size: var(--nx-type-code-inlineSize);
+  padding: var(--nx-space-inlineCodePadding);
+  border-radius: var(--nx-radius-code);
   background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
   color: var(--nx-ink);
   /* Long identifiers and URLs must not push a column wider than its container. */
@@ -20,14 +21,14 @@
 .nx-kbd {
   display: inline-block;
   min-width: 1.5em;
-  padding: 0.1em 0.4em;
-  border: var(--nx-hairline) solid var(--nx-grid);
-  border-bottom-width: calc(var(--nx-hairline) * 2);
-  border-radius: 4px;
+  padding: var(--nx-space-keyPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-bottom-width: calc(var(--nx-stroke-hairline) * 2);
+  border-radius: var(--nx-radius-code);
   background: var(--nx-bg);
   font-family: var(--nx-font-mono);
-  font-size: 0.82em;
-  line-height: 1.5;
+  font-size: var(--nx-type-code-keySize);
+  line-height: var(--nx-type-code-keyLineHeight);
   text-align: center;
   color: var(--nx-ink);
 }
@@ -36,14 +37,14 @@
    and this language separates with lines. */
 .nx-pre {
   margin: 0;
-  padding: 14px 16px;
-  border: var(--nx-hairline) solid var(--nx-grid);
+  padding: var(--nx-space-codeBlockPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-card);
   background: var(--nx-bg);
   overflow-x: auto;
   font-family: var(--nx-font-mono);
-  font-size: 11px;
-  line-height: 1.7;
+  font-size: var(--nx-type-code-blockSize);
+  line-height: var(--nx-type-code-blockLineHeight);
   color: var(--nx-ink);
   tab-size: 2;
 }
@@ -59,13 +60,14 @@
 .nx-command {
   display: flex;
   align-items: center;
-  gap: 0.8em;
-  padding: 0.55em 0.9em;
-  border: var(--nx-hairline) solid var(--nx-grid);
+  gap: var(--nx-space-commandGap);
+  padding: var(--nx-space-commandPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-card);
   font-family: var(--nx-font-mono);
-  font-size: 11.5px;
-  line-height: 1.6;
+  font-size: var(--nx-type-code-commandSize);
+  line-height: var(--nx-type-code-commandLineHeight);
   color: var(--nx-ink);
   overflow-wrap: anywhere;
+}
 }

@@ -2,14 +2,78 @@
   "slug": "type-colonnade",
   "title": "Forty-four repos, ten owners",
   "description": "every hairline hands a repo to the team that owns it · the pile-ups are the org chart nobody drew",
-  "component": "bar",
+  "component": "network",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "code",
     "ownership"
   ],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "TypeColonnade"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly TypeColonnadeDatum[]",
+      "required": true,
+      "description": "Ordered repositories and their zero-based owner indices. Nullable, noninteger or out-of-range owners are unavailable. Repeated repository and team names retain their separate positions."
+    },
+    {
+      "name": "teams",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered owner labels. Counts are derived only from available repository ownership observations."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

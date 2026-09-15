@@ -4,7 +4,44 @@
   "description": "Container with the fixed title, sub, body, and caption anatomy, plus an inverted variant",
   "component": "card",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["container", "surface"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "container",
+    "surface"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Card",
+    "CardLink",
+    "CardTitle",
+    "CardSubtitle",
+    "CardBody",
+    "CardCaption"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "variant",
+      "type": "'default' | 'inverted' | 'plain'",
+      "description": "Card and CardLink: surface treatment; defaults to default.",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Compose Card or CardLink with CardTitle, CardSubtitle, CardBody and CardCaption. Each export forwards its native element props; CardLink uses an anchor.",
+      "required": false
+    }
+  ]
 }

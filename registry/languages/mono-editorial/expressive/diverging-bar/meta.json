@@ -4,12 +4,69 @@
   "description": "net accounts per segment · Q2 2026 · churn left, growth right",
   "component": "diverging-bar",
   "tier": "expressive",
-  "runtime": "echarts",
+  "runtime": "react",
   "density": "glance",
   "tags": [
     "crm"
   ],
   "dependencies": [
-    "echarts@6"
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "580/320",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "DivergingBar"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 426
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly DivergingBarDatum[]",
+      "description": "Ordered segments with signed netAccounts. Null and non-finite measures are unavailable; zero retains a label without a bar.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
   ]
 }

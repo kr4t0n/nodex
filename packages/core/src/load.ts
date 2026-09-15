@@ -14,7 +14,7 @@ export interface LoadedComponent {
   meta: ComponentMeta;
   /** Absolute path to the component's directory. */
   dir: string;
-  /** Fragment file names present in the directory. */
+  /** Explicit runtime files, relative to the component directory. */
   files: string[];
 }
 
@@ -22,8 +22,6 @@ export interface LoadedLanguage {
   meta: LanguageMeta;
   dir: string;
   expressive: LoadedComponent[];
-  /** Slugs this language overrides from the shared primitive set. */
-  overrides: string[];
 }
 
 export interface LoadedSource {
@@ -63,12 +61,10 @@ async function loadComponent(dir: string): Promise<LoadedComponent> {
   const meta = await readJson(path.join(dir, 'meta.json'), (value) =>
     componentMetaSchema.parse(value),
   );
-  const entries = await readdir(dir);
-  const files = entries.filter((name) => name.startsWith('component.')).sort();
-  if (files.length === 0) {
-    throw new Error(`${dir}: no component.* fragment files found`);
+  for (const name of [...meta.files, meta.example.entry]) {
+    if (!(await pathExists(path.join(dir, name)))) throw new Error(`${dir}: missing declared file ${name}`);
   }
-  return { meta, dir, files };
+  return { meta, dir, files: meta.files };
 }
 
 /**
@@ -105,7 +101,6 @@ export async function loadSource(registryDir: string): Promise<LoadedSource> {
         meta,
         dir,
         expressive,
-        overrides: await listDirs(path.join(dir, 'overrides')),
       } satisfies LoadedLanguage;
     }),
   );

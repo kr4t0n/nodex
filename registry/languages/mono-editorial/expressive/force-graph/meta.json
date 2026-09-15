@@ -4,7 +4,7 @@
   "description": "force layout · node = monthly syncs · drag a node, the web fights back",
   "component": "network",
   "tier": "expressive",
-  "runtime": "echarts",
+  "runtime": "react",
   "strokeAsArea": true,
   "density": "glance",
   "tags": [
@@ -12,6 +12,78 @@
     "hub"
   ],
   "dependencies": [
-    "echarts@6"
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "560/360",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ForceGraph"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "force-layout.ts",
+    "use-force-drag.ts",
+    "force-scatter.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 475
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ForceGraphDatum[]",
+      "required": true,
+      "description": "Services with stable IDs, display names, nullable nonnegative monthly syncs in thousands and a tier (0, 1 or 2). Diameter remains 8 + syncs × 0.75."
+    },
+    {
+      "name": "hubId",
+      "type": "string",
+      "required": true,
+      "description": "ID of the hub. Every other service connects to it; the caller supplies the hub rather than the runtime inventing one."
+    },
+    {
+      "name": "sideRoads",
+      "type": "readonly ForceGraphSideRoad[]",
+      "required": true,
+      "description": "Additional directed source/target service IDs. Unknown endpoints are omitted; repeated directed links keep their first occurrence."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
   ]
 }

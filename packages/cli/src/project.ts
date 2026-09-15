@@ -1,6 +1,8 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+
+import { containedPath } from './safety.ts';
 
 /**
  * `nodex.json` records the choices `init` made, so every later `add` needs no
@@ -30,24 +32,31 @@ export async function findConfig(
 ): Promise<{ dir: string; config: ProjectConfig } | undefined> {
   let dir = path.resolve(from);
   for (;;) {
+    let raw: string;
     try {
-      const raw = await readFile(path.join(dir, CONFIG_FILE), 'utf8');
-      return { dir, config: JSON.parse(raw) as ProjectConfig };
-    } catch {
+      raw = await readFile(path.join(dir, CONFIG_FILE), 'utf8');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
       const parent = path.dirname(dir);
       if (parent === dir) return undefined;
       dir = parent;
+      continue;
     }
+    let config: ProjectConfig;
+    try {
+      config = JSON.parse(raw) as ProjectConfig;
+      if (!config || typeof config.language !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.language)) throw new Error('language must be a slug');
+      if (config.registry !== undefined && typeof config.registry !== 'string') throw new Error('registry must be a path or URL');
+      for (const name of ['components', 'tokens', 'design'] as const) {
+        const value = config.paths?.[name];
+        if (typeof value !== 'string' || path.isAbsolute(value)) throw new Error(`paths.${name} must be project-relative`);
+        containedPath(dir, value);
+      }
+    } catch (cause) {
+      throw new Error(`Invalid ${path.join(dir, CONFIG_FILE)}: ${String(cause)}`, { cause });
+    }
+    return { dir, config };
   }
-}
-
-export async function writeConfig(
-  dir: string,
-  config: ProjectConfig,
-): Promise<string> {
-  const file = path.join(dir, CONFIG_FILE);
-  await writeFile(file, `${JSON.stringify(config, null, 2)}\n`);
-  return file;
 }
 
 /**
@@ -58,7 +67,7 @@ export async function writeConfig(
  * without telling the agent they exist would waste the whole exercise.
  */
 export function agentsSnippet(config: ProjectConfig, languageName: string): string {
-  return `
+  return `<!-- nodex:start -->
 ## Design language: ${languageName}
 
 This project uses the \`${config.language}\` design language from nodex.
@@ -71,28 +80,21 @@ This project uses the \`${config.language}\` design language from nodex.
   yours to edit; nodex does not update them.
 - Add more with \`nodex add ${config.language}/<component>\`, and search what is
   available with \`nodex search --design ${config.language}\`.
+- Components accept real data through typed React props. Example datasets stay
+  in the registry. Import the token stylesheet once at the application entry.
+- \`nodex lint\` checks explicit source token references. Rendering, interactions,
+  responsiveness and accessibility still need application verification.
+<!-- nodex:end -->
 `;
 }
 
-export async function appendToAgentsFile(
-  dir: string,
-  snippet: string,
-): Promise<{ file: string; created: boolean; skipped: boolean }> {
-  const file = path.join(dir, 'AGENTS.md');
-  let existing: string;
-  let created = true;
-  try {
-    existing = await readFile(file, 'utf8');
-    created = false;
-  } catch {
-    existing = '# AGENTS.md\n';
+/** Only replace the section nodex owns; retain all other project instructions. */
+export function withAgentsSnippet(existing: string | undefined, snippet: string): string {
+  const source = existing ?? '# AGENTS.md\n';
+  const start = source.indexOf('<!-- nodex:start -->');
+  const end = source.indexOf('<!-- nodex:end -->', start);
+  if (start !== -1 && end !== -1) {
+    return `${source.slice(0, start)}${snippet.trimEnd()}${source.slice(end + '<!-- nodex:end -->'.length)}`;
   }
-
-  // Idempotent: re-running init must not stack duplicate sections.
-  if (existing.includes('## Design language:')) {
-    return { file, created: false, skipped: true };
-  }
-
-  await writeFile(file, `${existing.trimEnd()}\n${snippet}`);
-  return { file, created, skipped: false };
+  return `${source.trimEnd()}\n\n${snippet}`;
 }

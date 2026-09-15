@@ -1,3 +1,4 @@
+@layer components {
 /* tooltip - shared primitive, themed by the active language's tokens.
 
    Presentational only, and this one carries a real caveat. The label lives in a
@@ -6,9 +7,8 @@
    tooltip that genuinely conveys information, either use a headless tooltip
    (Radix, Ark) with these visuals, or wire aria-describedby yourself.
 
-   Worth knowing before reaching for this at all: the charts in this language use
-   the SVG <title> element for their tooltips, which the browser announces and
-   renders with no CSS whatsoever. Prefer that where it applies.
+   Charts use Recharts tooltips and its accessibility layer for observations.
+   This primitive covers text hints outside the chart composition.
 
    Use this for UI chrome where the label is a convenience and the same
    information is already available elsewhere. */
@@ -22,26 +22,26 @@
 .nx-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: calc(100% + 7px);
+  bottom: calc(100% + var(--nx-space-tooltipOffset));
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
-  padding: 5px 9px;
-  border-radius: 6px;
+  padding: var(--nx-space-tooltipPadding);
+  border-radius: var(--nx-radius-tooltip);
   background: var(--nx-ink);
   color: var(--nx-bg);
   font-family: var(--nx-font-sans);
-  font-size: 10.5px;
-  font-weight: 500;
-  line-height: 1.45;
-  letter-spacing: 0.01em;
+  font-size: var(--nx-type-tooltip-size);
+  font-weight: var(--nx-type-tooltip-weight);
+  line-height: var(--nx-type-tooltip-lineHeight);
+  letter-spacing: var(--nx-type-tooltip-tracking);
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition:
-    opacity 140ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 140ms;
+    opacity var(--nx-motion-tooltip-duration) var(--nx-motion-tooltip-easing),
+    visibility var(--nx-motion-tooltip-duration);
 }
 
 /* Focus-within as well as hover, so a keyboard user reaches it too. */
@@ -55,7 +55,7 @@
    be clipped. */
 .nx-tooltip--below::after {
   bottom: auto;
-  top: calc(100% + 7px);
+  top: calc(100% + var(--nx-space-tooltipOffset));
 }
 
 /* Wrapping variant, for a sentence rather than a label. A tooltip long enough to
@@ -111,12 +111,12 @@
     left: auto;
     right: auto;
     transform: none;
-    margin: 0 0 7px;
+    margin: 0 0 var(--nx-space-tooltipOffset);
   }
 
   .nx-tooltip--below::after {
     position-area: block-end;
-    margin: 7px 0 0;
+    margin: var(--nx-space-tooltipOffset) 0 0;
   }
 
   .nx-tooltip--start::after {
@@ -137,18 +137,19 @@
    tooltip is reachable by mouse only, which is exactly the failure this pattern
    is notorious for. */
 .nx-tooltip__trigger {
-  border-bottom: var(--nx-hairline) dashed var(--nx-muted);
+  border-bottom: var(--nx-stroke-hairline) dashed var(--nx-muted);
   cursor: help;
 }
 
 .nx-tooltip__trigger:focus-visible {
-  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--nx-radius-focus);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nx-tooltip::after {
     transition: none;
   }
+}
 }

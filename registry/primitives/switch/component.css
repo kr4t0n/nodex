@@ -1,3 +1,4 @@
+@layer components {
 /* switch - shared primitive, themed by the active language's tokens.
 
    A checkbox with role="switch" rather than a bespoke widget, so it keeps form
@@ -14,10 +15,10 @@
 .nx-choice {
   display: inline-flex;
   align-items: center;
-  gap: 0.65em;
+  gap: var(--nx-space-choiceGap);
   font-family: var(--nx-font-sans);
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: var(--nx-type-control-size);
+  line-height: var(--nx-type-control-lineHeight);
   color: var(--nx-ink);
   cursor: pointer;
 }
@@ -34,13 +35,13 @@
   width: 26px;
   height: 15px;
   margin: 0;
-  border: var(--nx-hairline) solid var(--nx-muted);
+  border: var(--nx-stroke-hairline) solid var(--nx-muted);
   border-radius: var(--nx-radius-pill);
   background: var(--nx-bg);
   cursor: inherit;
   transition:
-    background-color 180ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-color var(--nx-motion-surface-duration) var(--nx-motion-surface-easing),
+    border-color var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
 }
 
 /* The thumb is the same filled circle the charts use for a data point, so the
@@ -56,8 +57,8 @@
   background: var(--nx-muted);
   transform: translateY(-50%);
   transition:
-    transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform var(--nx-motion-surface-duration) var(--nx-motion-surface-easing),
+    background-color var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
 }
 
 .nx-switch:hover {
@@ -79,7 +80,7 @@
 }
 
 .nx-switch:focus-visible {
-  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
   outline-offset: 3px;
 }
 
@@ -94,13 +95,13 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  gap: 1.5em;
+  gap: var(--nx-space-choiceSpreadGap);
 }
 
 .nx-choice-group {
   display: flex;
   flex-direction: column;
-  gap: 0.7em;
+  gap: var(--nx-space-choiceGroupGap);
   width: 100%;
 }
 
@@ -109,4 +110,5 @@
   .nx-switch::before {
     transition: none;
   }
+}
 }

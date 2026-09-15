@@ -4,11 +4,63 @@
   "description": "one dot = one day · hollow = weekend · the barcode floor keeps the calendar honest",
   "component": "line",
   "tier": "expressive",
-  "runtime": "svg",
-  "density": "glance",
-  "aspectRatio": "400/320",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "HairlineLine"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
   "tags": [
     "growth"
   ],
-  "dependencies": []
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HairlineDatum[]",
+      "description": "Application observations. Samples are kept in the registry example.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot aspect ratio.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Fixed width in pixels; otherwise fills the containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ],
+  "density": "glance",
+  "aspectRatio": "560/340"
 }

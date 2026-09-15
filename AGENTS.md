@@ -1,996 +1,739 @@
 # AGENTS.md
 
-Architecture and reasoning for nodex. Read this before changing anything
-structural. Procedures live elsewhere; this file explains *why*.
-
-## The core idea
-
-Conventional component libraries are `tokens × components`: one implementation,
-many themes. That model assumes a design language only changes **paint** —
-colour, radius, spacing, type. True for a button. False for a chart: a
-one-mark-per-record hairline barcode cannot be re-skinned into a thick-bar
-brutalist chart, because the language determined its **geometry**.
-
-So nodex splits by tier:
-
-- **Expressive** components (charts, and later heroes) are owned by a language.
-  Their form *is* the language.
-- **Primitives** are shared once at `registry/primitives/` and themed by tokens.
-  A button is a button everywhere. Twenty-four currently: alert, avatar, badge,
-  button, card, checkbox, code, details, dialog, empty-state, input, link,
-  progress, prose, radio, rule, select, slider, stat, status, switch, table,
-  textarea, tooltip.
-
-The web app is the completeness test. It is built from primitives, so anything
-it has to style itself is a gap in the registry. It is now down to one class of
-its own, `.nx-frame`, which is genuinely specific to embedding previews.
-
-The boundary is whether the language changes the **form** or only the **paint**.
-A slider is a track and a thumb in every language, so it is a primitive. A
-slider drawn over a distribution is a chart with a control on it, so it is
-expressive.
-
-The split is invisible at the CLI. `nodex add button --design mono-editorial`
-will give you a correctly styled button either way; the split exists so you
-maintain one button instead of one per language.
-
-## Storage is not organisation
-
-Folders are shelves — a file sits on exactly one. The **manifest** is the card
-catalogue: one entry per component recording language, type, tier, runtime,
-density, and tags, so the same component is findable along any axis without
-moving files.
-
-This is why the app can group primitives under each design language even
-though they are stored once, and why `nodex search --type bar --design X` is
-answerable at all.
-
-## Two names per component
-
-Every component has a **slug** — the language's own word for it, `rung-bars` —
-and a **type** from a fixed enum, `bar`. The slug is what you type; the type is
-the cross-language join key that makes "your bar chart, please" answerable.
-
-Governing rule for the enum: **a type names the mark and encoding, never the
-animation or the data domain.** Without it, `bar-race`, `dynamic-data`, and
-`draw-in-counter` become types instead of a bar and two lines carrying motion
-tags. The enum lives in `packages/core/src/taxonomy.ts`.
-
-## Components ship as fragments
-
-The authored artifact is `component.html` / `.css` / `.js` — a fragment. The
-standalone `index.html` is **generated** from it at build time and exists only
-for previews. One source of truth; a consumer never receives a document with a
-doctype and a `body` rule.
-
-This forces two things the source did not do:
-
-- **CSS is partitioned.** Page chrome (`body`, `.grid2`, `.pagehead`,
-  `.card.wide`) is dropped; component rules are scoped by ancestor under
-  `.nx-<slug>`; the global `*{margin:0;padding:0}` reset is discarded, because it
-  would trash a consumer's layout.
-- **JS is root-scoped.** Every mount point is `data-nx-mount="name"`, never an
-  `id`, and `mount(root)` queries within its own subtree. This fixes the real ID
-  collisions in the source (`#ch` appeared in three components, `#stream` in two)
-  rather than relying on an iframe to hide them.
-
-## Self-contained, deliberately duplicated
-
-Expressive components inline their own helpers. There is no shared lib and no
-imports between registry items.
-
-In an application, duplicating twelve lines across 42 files would be a defect.
-In a catalogue of reference implementations meant to be lifted one at a time, it
-is the point — a consumer takes two or three charts, never all 42, and one file
-is the whole component.
-
-The cost is that no module can enforce the language contract. That job moved to
-`scripts/build-registry.mjs`, which is a better place for it: the contract is
-specified in prose in `DESIGN.md` and enforced mechanically by lints.
-
-**The copies must stay byte-identical, and now a lint says so.** Nothing was
-holding them together and they drifted: six components carried an `rnd` missing
-its `Math.abs`, so the XOR could go negative and the seed returned a value below
-zero on 26–49% of the inputs those components actually use. Every chart still
-drew, which is why it survived for so long — wrong sample data still looks like
-sample data. `lintPrelude` now pins `rnd`, `el`, `txt` and `tip` to one spelling,
-ignoring trailing comments, which is the same shape as `lintDuplicatedRules`
-already applies to the primitives' shared CSS.
-
-A consumer proposed extracting the prelude to a `_shared.js` instead, on the
-grounds that copying is what let it drift. The diagnosis was right and the
-remedy is the wrong trade: sharing makes `add` resolve a dependency graph and
-ends "one file is the whole component", which costs every consumer to save
-context for an agent reading several at once. Duplicate on purpose, then refuse
-to let the copies differ.
-
-The context cost is real, though — the prelude is 29 of an average 81 lines, so
-36% of every file is boilerplate an agent has already read. `nodex show` answers
-most discovery questions without opening the source, which is the part worth
-extending if this comes up again.
-
-## Promote on second use
-
-The guiding rule for anything shared. Leave a thing inside its language until a
-second language needs it, then move it up. Primitives are the sole exception,
-starting shared because a button is already known to be universal.
-
-Applied twice already: an earlier design had a `lib/mono-svg.js` in the canonical
-language folder on the evidence of one sample, and a general `axes: {...}` facet
-map for one facet. Both were removed.
-
-## Density is optional
-
-`density` (`close-read` | `glance`) describes **how a component is read, not how
-it is drawn.** Stroke weight is the design language's job; encoding it again here
-would duplicate what tokens already carry. A four-segment donut is a glance read
-however fine its strokes.
-
-It is optional because the split is an artifact of how the first collection was
-authored. A future language may have no such distinction and omits the field. A
-language declares its legal values in `meta.json`; a component may only use a
-declared value.
-
-**Agent-facing only. It is deliberately absent from the app's UI.** Density
-answers a question an agent has when generating code, which is whether this
-component is built to be studied or scanned. A human browsing the grid can see
-that in the thumbnail, so a filter for it was noise. It stays in the manifest, in
-each component's `meta.json`, in `nodex search --density`, and in `DESIGN.md`.
-
-Do not reintroduce it as a UI control.
-
-**The build must never infer density from a slug.** `matrix-heat-glance` and
-`circular-graph-dense` carry density-sounding suffixes, but those are collision
-disambiguation that happens to borrow the vocabulary — not an encoding.
-
-## Two runtimes, never three
-
-Raw SVG (42 components, zero dependencies) and ECharts 6 (22). Chart.js served
-exactly 2 and was ported out.
-
-The reason is maintenance ratio, not library quality: each runtime needs its own
-token binding in `DESIGN.md` and its own lints, because a `0.8px` hairline is
-`stroke-width` in SVG and `lineStyle.width` in ECharts. A permanent third binding
-for 2 of 64 components is a bad trade. The ports live in `PORTED_BLOCKS` in the
-extractor so re-running stays idempotent.
-
-## Conformance lints
-
-The checks live in `packages/cli/src/lint.ts` and are imported by both
-`scripts/build-registry.mjs` and `nodex lint`, so the registry and a consumer's
-project are held to the same rules **by the same code**. That is not tidiness.
-They were two implementations, and only the registry had one:
-
-- `DESIGN.md` ships to consumers via `nodex init` saying "the conformance lint
-  checks that literals are members of the ramp" and "this is not optional and CI
-  checks for it". Both were true of this repository and of nowhere the reader
-  could reach. Describing enforcement a reader cannot run is worse than
-  describing none, because it invites them to assume something is checking.
-- The registry's own copy had a hole. It read widths with
-  `/'stroke-width'\s*:\s*([0-9.]+)/`, which needs a digit straight after the
-  colon, so it could not see `isHero?2:.65` — and **five components shipped a
-  2px mark under a 1.4px ceiling**: `beeswarm`, `calendar-heat`, `matrix-heat`,
-  `parallel-coords`, `ridgeline`. A consumer reported it, having written their
-  own checker because ours was not reachable. `bubble-almanac` was separately
-  over, computing up to 1.499px.
-
-Two rules the stroke reader follows, both learned from that:
-
-- **Read both branches of a ternary**, since that is how a width is normally
-  written when a series is emphasised.
-- **Report what cannot be decided rather than guessing.**
-  `.6+rnd(i+3,j+11)*.9` contains `3` and `11` as function arguments, so
-  "largest number wins" would call it an 11px stroke. Unverifiable widths are a
-  warning, and warnings do not fail: a lint that blocks on a judgement call gets
-  switched off.
-
-`lint.ts` imports nothing, which is what keeps the published CLI at zero
-dependencies while the build script shares its logic.
-
-**A hairline is `stroke-width` in SVG and `lineStyle.width` in ECharts**, and
-the first version read only the former. That left all 22 ECharts components
-unexamined, five of them drawing lines up to 2.6px: `circular-graph-dense`,
-`diverging-bar`, `draw-in-counter`, `dual-area`, `dynamic-data`. Any new
-runtime needs its own spelling added here, which is a standing argument against
-a third one.
-
-`itemStyle.borderWidth` is deliberately **not** checked. Almost every use of it
-in the registry is a knockout gap — a border painted in the page colour to
-separate adjacent segments — which reads as absence rather than as a line, so
-checking it would report mostly false positives. The one genuine ink border it
-would have caught, in `nested-treemap`, was fixed by hand. That is a known hole:
-an ink-coloured border above `lineMax` will not be caught.
-
-`strokeAsArea` is for a stroke whose **width carries data**, and the four
-network and chord components declare it because their link width encodes edge
-weight — thinning those would destroy information. It is not a way to silence
-the lint, and a component that merely draws a thick line does not qualify.
-
-### The registry-only lints
-
-`scripts/check-shell-primitives.mjs` guards one thing outside the registry: the
-app links a **curated** set of primitive stylesheets in `app/layout.tsx`, not all
-twenty-four, because they are render-blocking and the landing page needs almost
-none of them. Loading a stylesheet for a class nothing renders themes nothing,
-since re-theming happens through the `--nx-*` variables rather than through the
-presence of a file.
-
-The curation is the hazard, not the saving: a view that writes `.nx-slider`
-without the stylesheet renders unstyled with nothing in the console to explain
-it. So the lint records reality and freezes it, and CI fails the moment a view
-reaches past the list.
-
-The rest are in `scripts/build-registry.mjs`. These replace what a shared module
-would have enforced:
-
-- a primitive's markup only uses classes its own stylesheet defines
-- anything that animates ships a `prefers-reduced-motion` guard
-- stroke widths stay within `tokens.stroke.lineMax` unless the component declares
-  `strokeAsArea`
-- every colour is a member of the recorded ramp
-- density values match the language's declaration
-- slugs are unique and types are enum members
-
-Two follow the same pattern — **record reality, then freeze it.** The palette
-lint enforces membership of the 37 greys actually present rather than a palette
-someone wished for, so it passes today and fails on any addition. Same for
-`strokeAsArea`.
-
-## The web app re-themes rather than having a style
-
-`apps/web` has no palette, type stack, or radius of its own. Every value
-resolves through `--nx-*`, and swapping the active language's `tokens.css`
-restyles the whole interface. That dogfoods the token system: a broken primitive
-is immediately visible in the app's own chrome.
-
-Consequence worth stating: the shell deliberately has **no independent dark
-mode**. The theme is whatever the viewed language is. An app whose job is to
-present a design language faithfully cannot impose a second one on top.
-
-The line between what the app owns and what the language owns:
-
-- **Craft** belongs to the app: layout composition, spacing rhythm, motion
-  quality, interaction states, restraint.
-- **Identity** belongs to the language: type, colour, stroke weight, radius.
-
-GSAP is app-only and never enters registry content. A component that depended on
-GSAP would force that dependency on everyone who copied it.
-
-### The index wears every language at once, one scope per tile
-
-`useLanguageTokens` swaps a single `:root` layer for the whole document, which is
-right on a page showing one language. `/languages` shows several, and the last
-layer loaded would simply win — so its tiles used to sit in the first language's
-paint while previewing a second, which quietly contradicts the claim above.
-
-`useScopedLanguageTokens` fixes that. The generated `tokens.css` is one `:root`
-block and nothing else, so re-pointing that selector at
-`[data-nx-scope="<slug>"]` yields the same values bound to an element. It is
-deliberately a rename of the build's own output, not a second generated artifact
-and not a client-side reimplementation of its flattening — there is no third
-place for the two to drift apart. If the template ever stops emitting `:root`,
-that language is skipped rather than injected unscoped, since an unscoped layer
-would override every other language on the page.
-
-Two things to keep in mind when scoping a token layer:
-
-- **Inherited values do not re-resolve.** `body` already resolved `--nx-ink`
-  against `:root`, and descendants inherit the resulting colour, not the `var()`.
-  A scoped subtree has to restate the properties it wants — the tile sets
-  `background`, `color`, `font-family`, and `border-radius` itself. Setting the
-  scope attribute alone changes nothing visible.
-- **The hook is ready even when every fetch fails.** It gates whether the page
-  renders, and a tile with no scoped layer inherits the document's, which is the
-  old behaviour and a far better outcome than an index stuck loading.
-
-This is the strongest demonstration the project has: the badges, the button and
-the rules inside each tile are shared primitives, and they re-theme with no
-per-language code. Signal Console's solid button comes out paper-on-ink while
-Mono Editorial's is ink-on-paper, from the same markup.
-
-### The landing page is written in the language it sells
-
-`/` is marketing, `/languages` is the app.
-
-It is **two scenes and nothing after them**: the name, then the work. Feature
-grids, token panels, and CLI walkthroughs were built and then cut, because
-anything that has to be explained belongs behind the sign-in where the reader
-has already decided they are interested. Resist re-adding sections here; the
-restraint is the argument.
-
-The landing takes its dials from `DESIGN.md` rather than from landing-page
-convention, which overrides several things a generic taste pass would reach for:
-
-- **Scene one has no navigation; it becomes the navigation.** The wordmark and
-  the sign-in start as the composition and travel into the corners as the scene
-  is pushed away. There is one of each element on the page, laid out in its
-  final bar position and pushed back out to the hero, rather than a hero copy
-  crossfading into a bar copy. Only `y` and `scale` change, because both are
-  aligned to the same gutter at both ends, so there is no horizontal travel to
-  get wrong at any viewport. The bar carries no rule; it is separated from the
-  page by a backdrop that fades in.
-- **The belt loops, and that is a deliberate exception.** `DESIGN.md` forbids
-  looping animation, and scene two breaks it on the owner's instruction. The
-  rule governs what the registry ships; nothing on this page is shipped to
-  anyone. Do not read it as licence to loop anything inside `registry/`.
-- Two things about that belt are load-bearing. Each pass is **its own flex row
-  with a trailing gap**, so both halves are exactly equal and `xPercent: -50`
-  lands seamlessly; laid out as one row the halves differ by a single gap and
-  the belt jumps that much every cycle. And scene two is **a full viewport
-  tall**, which is what guarantees the page is long enough for the fold above to
-  reach its end state at all.
-- **Variance is restrained.** A predictable grid, because the language says the
-  interest belongs in the marks. The asymmetry is mild by intent.
-- **Inter and the warm-paper palette are not defaults**, they are `tokens.json`.
-  The landing loads the same `tokens.css` the registry ships, so the marketing
-  surface is themed by the product.
-- **No dark mode**, for the reason above: the theme is whatever language is
-  being shown.
-
-Every visual on the page is a running component from the registry. Not a
-screenshot, not a drawing, and specifically not a div dressed up as a product
-shot. That is both the honest thing to show and the strongest argument the
-product has.
-
-One consequence to preserve: `/` reads no cookie, so it stays static. Relabelling
-the button for signed-in visitors would make the highest-traffic page render on
-demand. `/login` redirects an already-signed-in visitor onward instead, which
-reaches the same place for one redirect and no dynamic render.
-
-### Accounts are real, but they still guard nothing
-
-GitHub OAuth issues the session. The cookie carries an opaque random token and
-the database stores only its SHA-256, so a leaked database read hands the reader
-nothing usable: the server only ever compares a token, never reproduces one.
-
-What has not changed is what the session is *for*. It still only sequences the
-landing page ahead of the app. Every language is public, and the registry is
-served as static files that never consult a cookie. When a restricted language
-exists, the check belongs on the route that streams its bytes; a page-level
-check protects the page and not the content behind it.
-
-Three decisions worth keeping:
-
-- **Keyed on GitHub's numeric id, not the login.** Logins are renameable, and
-  keying on one silently creates a second account the first time someone renames.
-- **`state` is not optional.** Without it an attacker can hand someone a crafted
-  callback URL and sign them into an account they do not own. It is generated on
-  the way out, stored httpOnly, compared in constant time on the way back, and
-  deleted after one use so a replayed callback cannot mint a second session.
-- **Failures redirect with a fixed token, never an upstream message.** Anything
-  GitHub says can quote the request, and the request carried the client secret.
-  `lib/github.ts` throws the detail; the callback converts it to `?error=state`
-  and similar, which the login page maps to prose.
-
-Two tables and nothing else. Entitlements, teams, and billing belong to the tier
-that does not exist yet, and guessing their shape now means migrating a guess.
-
-### `currentUser` reads the cookie before it checks configuration
-
-Looks backwards, and is load-bearing. Touching `cookies()` is what marks a route
-dynamic. Returning early when `DATABASE_URL` is absent would make that marking
-depend on whether the build machine happened to have one, and a route that
-prerendered without it serves a cached "signed out" to everyone forever. That is
-exactly what happened to `/languages` the first time: it built as static and
-would have been a permanent redirect to the login page.
-
-`/languages` also declares `dynamic = 'force-dynamic'`, which is belt and braces
-on purpose: the cookie ordering is another module's implementation detail, and
-the page should not silently break when someone refactors it.
-
-### One env var is baked into the image; the rest are not
-
-`NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, and the GitHub credentials are all read
-at runtime, so one container image serves any hostname. Verified rather than
-assumed: an image built with no site URL, run with one, produces OAuth redirects
-pointing at the runtime value.
-
-`NEXT_PUBLIC_REGISTRY_URL` is the exception and has to be a **build argument**.
-Next inlines `NEXT_PUBLIC_*` into the browser bundle, and `lib/registry.ts` runs
-in the browser, so by runtime there is no lookup left to override. The compiled
-bundle contains the resolved path and no reference to the variable name.
-
-The asymmetry is confusing enough to be worth stating plainly: the prefix does
-not decide when a value is read. Where the code runs does.
-
-### The monorepo has one `.env`, and Next has to be told
-
-Next reads `.env` relative to the app directory, which in a workspace means
-`apps/web/.env`. Secrets in two places is how one goes stale, and
-`.env.example`, the migration runner, and `docker-compose.yml` all sit at the
-root. `next.config.ts` loads the root file explicitly before the server starts.
-
-A missing `.env` is not an error. The registry, every public page, the CLI, and
-the whole build work without one; only the accounts layer needs it, and it
-reports itself unconfigured rather than crashing.
-
-### Why Next.js rather than Vite
-
-The app was a Vite SPA and did not need a server: the registry is static and the
-client fetches it. It moved to Next before the accounts backend, not after,
-because the alternative was standing up a second deployable next to the SPA and
-running auth across an origin boundary. Sessions, the GitHub OAuth callback, and
-the CLI device-code endpoints all want to be same-origin with the pages that read
-them, and route handlers give that for free.
-
-Nothing about the migration made the app dynamic. Every route still prerenders,
-the views are still client components fetching the manifest over HTTP, and the
-whole thing still deploys as static files. What changed is that there is now
-somewhere for a server to appear when Phase 5 needs one.
-
-Two consequences worth knowing:
-
-- **Params arrive as props, not from a hook.** Each `page.tsx` is a server
-  component that awaits `params` and passes plain strings down. The views never
-  import a routing hook, so they stay portable and testable.
-- **Routes come from the manifest.** `generateStaticParams` reads
-  `public/r/registry.json` at build time, so the registry stays the only place
-  that decides what exists. Adding a component adds its page; the app is never a
-  second list to keep in sync.
-
-### The registry is copied into `public/`, not served by a route handler
-
-`scripts/sync-registry-public.mjs` copies `registry/` and `public/r/` into
-`apps/web/public/` before dev and before build. A route handler streaming from
-the repo root would have worked too, and was rejected: it would tie serving the
-registry to a Node runtime, when the entire point of the registry being static is
-that it can sit on a CDN with no runtime at all.
-
-`NEXT_PUBLIC_REGISTRY_URL` switches to that CDN. Every registry URL in the app
-resolves through one `BASE` constant in `lib/registry.ts` (and once more in
-`app/layout.tsx`, which renders on the server before any client module runs), so
-pointing elsewhere is configuration rather than a code change.
-
-`apps/web/public/` is generated and gitignored. Never edit it, and never treat it
-as a source of truth.
-
-### Everything previews in an iframe, primitives at true size
-
-Charts and primitives both render in frames pointed at generated preview
-documents, so the two sections of a language page read the same way.
-
-A primitive's preview takes its token layer from a `?lang=` query parameter
-rather than baking one in. One generated file therefore serves every design
-language, and a new language gets primitive previews for free.
-
-Primitives render **fluid**, at the container's own width with no scaling.
-Charts are authored for a full page and must be scaled down; a button is already
-button-sized, and shrinking it to a quarter both makes it illegible and
-misrepresents it.
-
-### An embedded preview is bare; a standalone one is whole
-
-Every expressive fragment carries its own `h2` and `.sub`, because the card
-anatomy `DESIGN.md` fixes includes them and that is what a consumer receives.
-The app prints the same two strings from the manifest above each frame, so
-rendering both labelled all 64 charts twice.
-
-The generated preview therefore takes a `bare=1` parameter that hides the
-fragment's title and subtitle only. The app asks for it wherever it supplies its
-own heading, which is the grid cells and the detail page. The index's featured
-composites are not bare: nothing labels them, so there is nothing to duplicate.
-
-**The app no longer links to the whole version anywhere.** A "Open preview in a
-tab" link on the detail page used to be that escape hatch and was removed as
-clutter. The document is unchanged and still served at the same URL without the
-parameter, so opening a preview directly still shows the component exactly as a
-consumer receives it. Nothing generates the bare version separately; `bare=1`
-only hides two elements at view time.
-
-The fix belongs in the preview rather than in the fragments. A chart that lost
-its title would be a worse component for the consumer, and the app's grid needs
-a legible label because a chart scaled to a quarter cannot supply one.
-
-Two things this must not become: it hides the title and subtitle only, never the
-note or legend, which are annotation rather than heading; and the attribute is
-set from a blocking script in `head`, because applying it after the module runs
-makes the header appear and then vanish.
-
-This rule used to name the source caption alongside note and legend. That
-caption no longer exists — see below — so nothing is being hidden that a reader
-would miss, and the rule still holds for the annotation that remains.
-
-### The `div.src` credit line was removed from every chart
-
-Each chart used to end with `CHART TYPE · LANGUAGE · DATA SOURCE`, uppercase, as
-the fourth part of the card anatomy. All 64 were stripped and `DESIGN.md` now
-fixes a three-part anatomy.
-
-It restated what the manifest already holds, so it could only ever drift out of
-date, and it had: 53 of 64 named a section of the source document the extractor
-read rather than a design language, including `MONO-FANCY4`, `MONO-EDITORIAL2`,
-and `NEW`. A consumer running `nodex add mono-editorial/bar-race` received a
-chart crediting a language that has never existed.
-
-It also read as a layout bug. An SVG carrying `max-height` with
-`preserveAspectRatio="xMidYMid meet"` centres itself in a box wider than its
-aspect ratio, while the caption is left-aligned HTML — so on every card wide
-enough to letterbox, the chart visibly drifted away from its own credit line.
-
-Two consequences to keep in mind. The `type.caption` token now has no consumer
-among the shipped charts and is deliberately kept, because it is the language's
-vocabulary for an annotation smaller than a legend. And a caption naming the
-*data* is a different thing that still belongs when a chart needs sourcing; it
-is written as a `div.note`, which is annotation and is never hidden by `bare=1`.
-
-### Previews must not depend on an observer firing
-
-`IntersectionObserver` and `ResizeObserver` do not deliver in a tab that is never
-painted, which covers background tabs and various headless and embedded
-contexts. Gating the mount solely on them produces an empty page with no error
-to explain it.
-
-So `useNearViewport` carries a timeout fallback, and `Preview` reads its width
-once synchronously before handing off to the observer. The iframes' native
-`loading="lazy"` still defers the actual network work, so the deferral is not
-lost.
-
-### Preview height is measured from the wrapper, not the document
-
-`documentElement.scrollHeight` can never report less than the frame's own height.
-A component shorter than the embedder's initial guess would therefore lock at
-that guess forever, which is exactly what happened to the short primitives. Both
-preview templates measure the content wrapper plus body padding instead.
-
-### Grid items holding a preview need `min-width: 0`
-
-Not defensive, load-bearing. A grid item's default minimum is its content size,
-and a preview renders an iframe at a fixed wide logical width. Without
-`min-width: 0` the item refuses to shrink, forces the column open, and then
-reports that inflated width back as the measurement the scale is computed from,
-which cancels the scaling entirely and pushes charts outside their cells.
-
-This did not bite until the grids moved to subgrid, because a block child fills
-its parent while a grid item sizes to its content. Every element between a grid
-container and a `Preview` needs it.
-
-### Previews are scaled, not cropped
-
-Components were authored for a full page, so dropping one into a 320px card shows
-the top-left corner of a 1400px layout. `Preview` renders at a fixed logical
-width and scales the frame, keeping composition and type proportion intact.
-
-Height is not guessed from the chart's `viewBox`: a card's real height depends on
-its title and notes, so the generated preview posts its measured `scrollHeight`
-to the parent. In grids a fixed `boxHeight` is applied anyway, so titles share a
-baseline. Content-driven heights leave every card a different size and the grid
-reads as broken.
-
-**`LOGICAL_WIDTH` is the width the charts were drawn for, not a desktop
-viewport.** They came from a two-column grid capped at 1400px, so a card was
-about 690px. It was set to 1180 and letterboxed nearly everything: an expressive
-SVG carries `max-height: 330px` with `preserveAspectRatio="xMidYMid meet"`, so
-past a certain width the height caps first and the chart's aspect ratio decides
-how little of the box it can fill, with the browser padding the rest to centre
-it. At 1180 a 400x320 chart drew 488 of 1044 available pixels. At 660 the
-measured fill roughly doubles — `dotty-matrix` 34 to 68%, `arc-matrix` 41 to
-82%, `hairline-line` 47 to 93% — and the wide charts reach 100%. It also fixes
-the vertical gap, because the scale stops being width-bound and the card fills
-its `boxHeight` exactly.
-
-Do not chase letterboxing by removing `max-height` from the components. That cap
-is what stops a chart rendering ~900px tall in a consumer's wide container;
-removing it would degrade what the registry ships to flatter the app's own
-preview. Below roughly 550 the width binds before the height cap and charts
-start shrinking again, so the useful range is narrow.
-
-**The scale is capped at 1, so a preview shrinks but never enlarges.** Past that
-the frame shows the component larger than its container could draw it, which is
-a size the reader cannot reproduce by copying it. It also inflates apparent type
-size, and type is identity rather than craft — a language whose signature is
-tiny uppercase captions must not have them magnified into ordinary ones. The
-frame therefore also carries `max-width: LOGICAL_WIDTH`, or a wide column would
-leave a band of empty frame beside a component already at full size. That
-converges rather than looping: the frame settles at the logical width and the
-measurement taken inside it then agrees.
-
-## One registry root, two kinds of address
-
-The CLI addresses a registry by its **root**, never by its manifest, and
-everything hangs off that root at a fixed shape: `r/registry.json` for the
-manifest, `<item.files[].path>` for sources. The root may be a local directory or
-an https base and no command knows the difference, which is what lets the
-registry move to a CDN later without touching a single command.
-
-One wrinkle, handled in `packages/cli/src/registry.ts`: a checkout does not match
-the served layout exactly, because the manifest is written into `public/` so a
-static host exposes it at `/r` while sources stay at the repo root. A single
-prefix rule reconciles them.
-
-Resolution precedence is flag, then `nodex.json`, then `NODEX_REGISTRY`, then
-`DEFAULT_REGISTRY`, the deployed app. Every step is something someone wrote
-down. **Nothing is inferred from where the command was run**, so the resolved
-root is predictable from the arguments and the project alone.
-
-`nodex.json` outranks the environment so a project pinned to one registry cannot
-be silently served by another, and `init` records the root whenever it is
-remote, which is what makes that pin exist.
-
-### Why the checkout is no longer auto-detected
-
-There used to be a `findLocalRoot` step between the environment and the default:
-walk up from the cwd looking for `public/r/registry.json` and prefer it, so
-working in this repo read local work. It was removed, and it should not come
-back, because implicit resolution failed in both directions on the same evening:
-
-- Inside the checkout, a globally installed `nodex login` reported *"this is a
-  local checkout, so there is nothing to sign in to"* — correct, and unreadable
-  as anything but a bug, because nothing said which root it had chosen or why.
-- Then an `init` run one directory **above** the checkout wrote a `nodex.json`
-  there, which outranks the checkout, so every command inside the repo silently
-  flipped back to production. Two implicit rules, in opposite directions, with
-  no output naming either.
-
-A local root is still reachable, and registry development still works: pass
-`--registry .` or set `NODEX_REGISTRY`. `scripts/smoke-cli.mjs` always passed
-the root explicitly, so it never relied on the detection. The cost is one flag
-while working on the registry; the saving is that nobody has to reason about the
-cwd to know what a command will read.
-
-Two other things about the default worth keeping:
-
-- **It makes `init` self-pinning.** A project set up against the default gets
-  that URL written into its `nodex.json`, so it stays put.
-- **The "no registry found" error is gone**, because there is now always one. A
-  network failure surfaces from the manifest read instead, which is why that
-  message mentions connectivity.
-
-It is a plain registry root reached by the same fixed shape as any other, so no
-command knows it is the default and moving to a CDN is a change to one string.
-
-### Public content must never route through the server
-
-Decided before Phase 5 was built, so it is not accidentally designed away.
-
-The CLI does not know the app exists. It reads static paths under a root, which
-is why pointing `NODEX_REGISTRY` at the running app already works: the app serves
-those paths out of `public/` and no application code runs.
-
-Keep it that way for everything public. Putting an API in front of content that
-needs no authorization costs a server round trip per download and adds a failure
-point in front of the CDN, and buys only download counts, which CDN logs already
-give. Authentication exists for restricted languages and for nothing else.
-
-**Restricted content is streamed by the API, not handed off as a signed CDN
-URL.** Signed URLs keep bytes off the server and are the better endgame, but they
-need a signing-capable CDN and are wasted work at zero paying users. Streaming is
-reversible: the manifest carries each file's address, so moving to signed URLs
-later changes what the server returns, not the CLI.
-
-That reversibility is the load-bearing part. `add` already resolves sources from
-`item.files[].path`, so a restricted item whose path points at `api/r/...`
-flows through the existing code with no policy branch — the manifest decides
-what is guarded. The token is attached only to `api/` paths, so it is never sent
-to a CDN.
-
-**The blocker to fix first:** `init`, `tokens`, and `design` build their paths by
-convention rather than reading them from the manifest, and those three are what
-deliver the design language itself — the thing a restricted tier sells. Until
-`languages.json` carries explicit file addresses the way items do, language-level
-assets cannot be guarded without special-casing them in the CLI.
-
-### The CLI signs in by device code, and holds a nodex session
-
-A terminal cannot receive a redirect, so `nodex login` takes two codes: a long
-one it keeps and polls with, and a short one a person types into `/activate`.
-The shape is RFC 8628's, including the odd-looking convention that
-`authorization_pending` is returned as an error.
-
-What the CLI ends up holding is **a nodex session with `origin = 'cli'`, not a
-GitHub token.** That is why the `sessions` table had an `origin` column from the
-first migration. Revoking a terminal is one delete, and it does not touch the
-browser or anything at GitHub.
-
-Details that are load-bearing rather than incidental:
-
-- **The token attaches only to paths under `api/`.** Public files are served
-  straight off a CDN, and a bearer token sent there is handed to a third party
-  for nothing. Verified on the wire, not by reading the code: a logging proxy
-  saw ten requests during a signed-in `init` and `add`, and none carried the
-  header.
-- **The user code avoids `0/O`, `1/I/L`, `U`, and `V`**, and is generated with
-  `randomInt` rather than `randomBytes` modulo the alphabet. The modulo is
-  biased whenever the alphabet does not divide 256, and 29 does not.
-- **One exchange per request.** The row is deleted when the token is issued, so a
-  replayed poll cannot mint a second session. An unknown device code reports as
-  `expired_token` rather than as unknown, or polling becomes an oracle for
-  whether a code was ever real.
-- **Approving is a form post**, not a link. A link would let a prefetch, a
-  crawler, or an image tag on another site authorise someone's terminal.
-
-### The CLI is published compiled, and has no dependencies
-
-The repo runs TypeScript directly: `tsconfig.base.json` is `emitDeclarationOnly`
-and every specifier ends in `.ts`, because Node strips types natively. That is
-right for development and wrong for a package a stranger installs, who may be on
-a Node without type stripping. So `packages/cli/tsconfig.publish.json` emits real
-JavaScript, using `rewriteRelativeImportExtensions` to turn the `.ts` specifiers
-into `.js` on the way out — which is what lets the source keep the extension the
-rest of the repo uses instead of maintaining a second copy of it.
-
-**The package has no dependencies at all**, and that is not luck worth losing.
-The only `@nodex/core` import in the CLI is `import type`, so `verbatimModuleSyntax`
-erases it entirely and `@nodex/core` never needs publishing alongside. Everything
-else is a `node:` builtin. Adding one runtime import of core would drag a second
-package onto npm and `zod` with it, so keep core imports type-only.
-
-Two details in the workflow that are corrections rather than decoration:
-
-- **The build clears `dist` first.** `tsc --build` writes `.d.ts` there for
-  typechecking and the publish config writes `.js` there, so without the clean
-  the tarball's contents would depend on which ran last.
-- **It installs the packed tarball and runs the binary before publishing.**
-  Compiling is not the same as being runnable, and `files` narrows what ships,
-  so the only honest check is the one a consumer performs.
-
-A version already on npm is skipped with a notice rather than failing, the same
-record-reality-then-freeze shape the Helm chart uses: publishing is only ever
-reached by bumping the version.
-
-### The CLI is read by agents, so it has a parseable shape
-
-`list`, `search`, `add` and `tokens` take `--json`, printed alone on stdout with
-no heading and no dim text. Only `tokens` had it, and a consumer reported
-scraping the aligned columns — which means inventing a parser for a format
-nobody promised to keep stable. `--help` after a command describes that command;
-it used to print the global page, so `add`'s only flag, `--to`, was documented
-nowhere anyone would look.
-
-**`meta.mounts` is the important one.** A component ships three files, and
-nothing in them says how they connect: `mount(root)` fills elements marked
-`data-nx-mount="<name>"`, and the name is chosen in the JS rather than derived
-from the slug. Only 3 of 64 match — `arc-matrix` mounts `arcmatrix`. A consumer
-reported grepping the JS for `obsReveal('...')` to find it, which is a fair
-thing to do and a bad thing to have to do.
-
-The build extracts the names from the markup, so it cannot drift from what
-`mount` actually looks for; authoring it in `meta.json` would let it. `add`
-prints them and `add --json` reports them alongside `files`, `exports` and
-`aspectRatio`, which is the viewBox.
-
-Primitives have no mounts and correctly report none: they are markup and CSS
-with no script to wire up.
-
-### The extractor split by chart family, not by chart
-
-Thirteen components shipped their neighbours' code. `beeswarm/component.js` held
-five chart blocks — matrix heat, calendar heat, beeswarm, ridgeline, parallel
-coordinates — while its markup declared one mount, so four called
-`obsReveal('matheat')` against an element that does not exist and silently did
-nothing. 44 dead blocks across the 13, and consumers received all of it.
-
-Removing them cut those files by 67%. More importantly it was the reason the
-sample data was hard to identify: a reader opening `beeswarm` found five
-datasets and no indication which one the chart drew. A consumer reported
-reverse-engineering the data contract, and this is most of why that was hard.
-
-The live block in each was verified byte-identical before and after, by brace
-matching rather than by pattern, so the prune provably removed only dead code.
-
-**If a component's JS reveals a mount its markup does not declare, that block is
-dead.** That is the check worth re-running after any future import.
-
-Pruning the blocks was not the end of it. The same 13 carried the family
-wrapper's **duplicate prelude**, shadowing the one at the top of `mount`, so 62
-declarations were unreachable. Removing them needed care rather than a blanket
-dedup: four — `aggregate-sankey`, `matrix-heat-glance`, `rank-strip`, `violin` —
-have a *different* `rnd` inside, and `rnd` seeds the sample data, so deleting the
-wrong copy would have silently changed what the chart draws. Only shadowed outer
-declarations went.
-
-The block banners were also removed. `// ════ L18 · beeswarm ════` numbers a
-position in a document no consumer has seen, and with one chart per file the
-filename already says it. Both passes were verified by stripping comments and
-requiring the remaining code to be byte-identical.
-
-`beeswarm` went from roughly 340 lines to 83.
-
-### The data contract is derived, not authored
-
-`meta.data` records the shape of each sample dataset — `dumbbell-queue` reports
-`[string, number, number]` with 5 rows — so "would this fit my numbers?" is one
-`nodex show` away rather than add, read, infer, discard.
-
-Derived from the source at build time on purpose. Authoring 64 of these by hand
-is how they end up half-written and drifting from the file. The 21 components
-that generate data procedurally report no shape and say so, which is better than
-a guess.
-
-What derivation cannot supply is what a field *means*. `fields` is optional
-prose for a human to add per component where it is worth saying, and is
-deliberately not invented by the build.
-
-### `~/.nodex` holds credentials; `nodex.json` holds the project
-
-Two config files, deliberately. `nodex.json` records which language a project
-uses and belongs in the repository. `~/.nodex/auth.json` holds tokens, is written
-`0600` inside a `0700` directory, and must never be committed.
-
-It is keyed by registry origin, because one machine can talk to several
-registries and a token for one is not a token for another. `NODEX_TOKEN`
-overrides the file entirely, so CI and agents can be provisioned without an
-interactive step and without writing anything to disk.
-
-`NODEX_CONFIG_DIR` relocates it, which is what makes the flow testable without
-touching a real home directory.
-
-## Two skills, two audiences
-
-- `skills/nodex/SKILL.md` ships to consumers. Pick a language, init, search,
-  add. It must never mention authoring, because a downstream agent working in
-  someone else's app has no business scaffolding languages.
-- `.agents/skills/nodex-authoring/SKILL.md` is repo-local and loaded on demand.
-  It holds the whole authoring procedure, which is long and rarely needed, and
-  so does not belong in the always-loaded `AGENTS.md`.
-
-`AGENTS.md` explains why and what. The authoring skill explains how. Keep the
-split, or they drift into each other.
-
-### `apps/web/AGENTS.md` is generated, and is not this file
-
-`next dev` writes `apps/web/AGENTS.md` and `apps/web/CLAUDE.md` on every boot and
-re-adds them if deleted. They are committed deliberately: deleting them from a
-diff only recreates the change, and the content is a genuinely useful warning
-that this Next version differs from what most models were trained on.
-
-It is scoped to the app and says nothing about nodex. **This root file remains
-the single source of truth for the project.** Do not move architecture notes into
-the generated one; the next `next dev` will not remove them, but the next person
-reading it will not expect them either.
-
-## Gotchas
-
-- **Markup must not branch on `usePrefersReducedMotion`.** The hook starts
-  `false` and corrects after mount, because reading `matchMedia` during the
-  first render makes the server and client disagree and React reports a
-  hydration mismatch. Gating an animation on it is fine, since GSAP reverts when
-  the value flips. Choosing a class name from it is not: use the CSS
-  `motion-reduce:` variant so both renders emit the same markup.
-- **Generated documents are built inside JS template literals.** A backtick or a
-  `*/` in a comment you write into `renderPreview` closes the literal or the
-  comment early. Both have already happened: a glob in a CSS comment silently
-  truncated a rule, and a backtick in another broke the build outright. Spell
-  such paths out in prose instead.
-- **`rnd` is a deterministic hash, not `Math.random()`.** Sample data must not
-  change between page loads or previews and screenshots stop reproducing. Never
-  replace it with `Math.random()`.
-- **Charts draw on scroll into view and replay on click.** A chart that looks
-  blank in a preview may simply not have been scrolled to. Click it.
-- **The two choropleths fetch GeoJSON from third-party hosts at runtime** —
-  including a `world.json` from `echarts@4.9.0` while the components run ECharts
-  6. Declared in `meta.externalData` and surfaced by the build, but they break
-  offline and cannot be smoke-tested. Vendoring the geo data is open work.
-- **39 of 64 components had no `prefers-reduced-motion` guard in the source.**
-  The extractor synthesises one. `basics` and `glance` never shipped one.
-- **The palette is 37 greys, not a designed scale.** Several pairs differ by one
-  or two values (`#D8D7D1` / `#D8D6CE`). Consolidating is open work; the ramp in
-  `tokens.json` records what exists.
-- **Some primitives cannot exist in every language, and that is unresolved.**
-  mono-editorial's anti-patterns forbid looping animation, so a spinner or a
-  shimmer skeleton cannot exist in it. The progress primitive sidesteps this by
-  showing an indeterminate state as a static dashed track rather than a moving
-  stripe. If a language ever genuinely needs to decline a primitive, the
-  mechanism would be a list in its `meta.json` and the app skipping it. Not
-  built, because nothing has needed it yet.
-- **Behaviour-heavy controls ship as visual treatment only.** A two-thumb range
-  slider, tabs, menus, and combobox all need JavaScript, which breaks the
-  presentational rule. The pattern is the one used for select: style what the
-  platform provides, and document applying the classes to a headless Radix or
-  Ark component.
-- **The select's dropdown is styled progressively.** A native picker is drawn by
-  the operating system, so only a handful of properties cross browsers. The
-  primitive sets those, then layers full picker styling behind
-  `@supports (appearance: base-select)` using `::picker(select)`,
-  `::picker-icon`, and `::checkmark`. Browsers without the customizable select
-  API keep the CSS-drawn chevron and a legible list. Do not collapse the two
-  layers into one; removing the fallback silently regresses older browsers.
-- **The tooltip escapes clipping with anchor positioning, layered.** An
-  absolutely positioned label is cut off by any ancestor that clips, and cannot
-  know when it is too near an edge to open upwards. Behind
-  `@supports (position-try-fallbacks: flip-block)` it switches to `position:
-  fixed` with `position-area` and flip fallbacks, so the browser both lifts it
-  out of the clipping ancestor and flips it when it would overflow. `anchor-scope`
-  confines the anchor name per trigger, or later tooltips would capture earlier
-  labels. Browsers without the API keep the absolute version, which is correct
-  whenever there is room. Nothing escapes an iframe, so a preview frame still
-  bounds it.
-- **A tooltip trigger must be focusable.** `.nx-tooltip` reveals on
-  `:focus-within`, which can never match if the trigger is a bare `<span>`. Use a
-  button or add `tabindex="0"`, or the tooltip is mouse-only. The CSS tooltip is
-  also not announced by assistive technology at all, so where the text carries
-  real information, use these visuals on a headless tooltip. The charts avoid the
-  whole problem by using SVG `<title>`, which the browser announces natively.
-- **A primitive may not borrow a class from a sibling primitive.** They are
-  copied individually, so `nodex add select` referencing `.nx-field__label` from
-  the input primitive hands the consumer markup with no styles for it. Duplicate
-  the rules instead; identical definitions collapse harmlessly when both are
-  installed, and the build lints for it.
-- **Duplicated wrappers must stay byte-identical.** `.nx-field` lives in input,
-  select, and textarea; `.nx-choice` in checkbox, radio, and switch. The
-  duplication is deliberate, but the copies drift silently, and they already had:
-  three different gap values between them when the lint was first written. The
-  build now compares every selector defined by more than one primitive and fails
-  on a mismatch. If a difference is genuinely wanted, rename the class rather
-  than letting the copies diverge.
-- **A component's CSS must not select a mount by `#id`.** The extractor rewrote
-  every mount point from `id="ch"` to `data-nx-mount="ch"` in the markup but
-  left the stylesheets selecting `#ch`, so the rule silently stopped matching.
-  Three charts — `circular-graph-dense`, `force-graph-dense`, and
-  `thread-triptych` — set their height that way, so their containers collapsed
-  to `0` and they rendered nothing at all. Two were on a dark ground, which is
-  why it read as a stray black bar rather than as a missing chart, and it
-  survived the smoke test because jsdom reports a canvas as present regardless
-  of layout. Select `[data-nx-mount="name"]` instead.
-- **`packages/core` uses `.ts` import specifiers.** Node strips types natively;
-  `.js` specifiers would not resolve against `.ts` files.
-- **The extractor is gone, but recoverable.** `tmp/extract-charts.mjs` turned
-  `source-charts.html` into the 64 expressive components and was deleted once the
-  output was verified. It is one-time per source, and the registry is now the
-  source of truth. If a chart looks wrong and you need to know what transform
-  produced it, the last commit holding it is `eaf2136`:
-
-  ```
-  git show eaf2136:tmp/extract-charts.mjs
-  git show eaf2136:tmp/source-charts.html
-  ```
-
-  Ingesting a different collection is a new importer, not a revival of this one.
-- **`tmp/` is now a gitignored scratch space.** Nothing in it is tracked, so put
-  throwaway work there freely and expect it never to be committed.
-- **jsdom timers hang the smoke test** if the window is not closed — several
-  charts stream via `setInterval`.
-
-## The second language is a test, not decoration
-
-`signal-console` exists to prove the tier split is real. One language cannot: if
-expressive components only ever wore one set of paint, "the language decides the
-geometry" was an assertion nobody had checked.
-
-It was chosen to invert as many axes as possible at once. Dark against paper,
-monospace against Inter, hue-with-meaning against no hue at all, filled marks
-from a `1px` floor against hairlines under a `1.4px` ceiling, aggregated against
-one-mark-per-record, and looping motion against draw-once-then-hold.
-
-Two of those inversions are deliberate contradictions and should stay that way.
-mono-editorial forbids looping animation; signal-console requires it for live
-state. mono-editorial demands negative tracking on headings; signal-console
-forbids it, because monospace is already evenly spaced. Neither is a mistake:
-they are the clearest evidence that motion and tracking belong to a language
-rather than to taste in general.
-
-**It omits `density` on purpose.** mono-editorial declares both values, which
-proves nothing about whether the axis is optional. A language that is only ever
-glance-read and names no distinction is what makes it a real option rather than
-a field everyone fills in.
-
-Adding it immediately found two generator bugs that one language had hidden:
-`$comment` keys leaking into `tokens.css` as invalid custom properties, and a
-hardcoded Inter link in every generated preview and in `nodex init`. Both were
-invisible while one language existed and wrong the moment a second arrived. The
-font now comes from `font.webfont` in each language's tokens.
-
-## Technical debt
-
-- Vendor the choropleth geo data; remove the runtime fetches.
-- Consolidate the 37-step grey ramp.
-- `component.js` hardcodes hex literals rather than reading custom properties,
-  so a chart's marks do not follow a re-themed token layer. Acceptable while one
-  language exists; revisit when a second arrives.
-- The extractor leaves a few orphaned trailing comments where a `//` comment
-  followed a statement on the same line.
-- `languages.json` has no file addresses, so `init`, `tokens`, and `design`
-  hardcode `registry/languages/<slug>/...` while `add` reads addresses from the
-  manifest. Harmless today because every language is public and every path
-  resolves statically; a prerequisite for restricted languages, since those three
-  commands are what deliver the paid artifact.
-- Licensing is still unanswered, and it gates a paid tier rather than merely
-  postponing one. The 64 charts came from a found sample; their provenance has to
-  be settled before anything is sold.
-- **The language's secondary text does not meet WCAG AA.** Measured on paper,
-  `--nx-muted` is 2.86:1 and `--nx-faint` is 1.5:1, against a 4.5:1 floor for
-  body text. Every subtitle and caption in the app inherits this, because it is
-  the design language rather than an app choice. The app now keeps full
-  sentences at `muted` or darker and leaves `faint` to captions, which is what
-  `DESIGN.md` already says it is for, but that only limits the damage. Fixing it
-  properly means darkening two token values, which is a change to the product
-  and needs a decision rather than a patch.
+Architecture and reasoning for nodex. This root document is the project's high
+level source of truth. Procedures live in the authoring skill; setup and commands
+live in README.md. Update both alongside architectural or usage changes.
+
+## Design languages determine form
+
+Conventional libraries are tokens × components: one shape, many themes. That is
+sufficient for primitives, where identity mainly changes paint. Expressive charts
+also encode identity through geometry, annotation and information density.
+
+- **Expressive components** belong to one language under
+  `registry/languages/<language>/expressive/`.
+- **Primitives** live once under `registry/primitives/` and accept every language's
+  shared token roles. Their React APIs wrap native elements and retain editable CSS.
+
+The React delivery and token contract was validated with nine expressive charts
+and all 24 primitives. The complete 65-chart catalogue has now been reconstructed
+through that contract under the owner's authorization.
+The old expressive catalogue at `099f1ef` remains the specimen reference in Git
+history. Rebuild each chart against the current contract; never restore legacy
+runtime artifacts. New families still require their rendering and delivery checks.
+
+Reconstruction is not a redesign. Preserve the previous branch's specimen data,
+titles, copy, chart encoding, proportions and existing language values while
+changing the rendering and delivery architecture. Do not add controls, tables,
+annotations or demo variants, or make unrelated dependency upgrades. The data
+dropdowns and other unsolicited specimen changes have been removed. New product
+behavior requires its own user request.
+
+Each language's `DESIGN.md` is a downstream foundation for all UI, including
+projects with no charts. It covers visual atmosphere, semantic token roles,
+typography, spacing, geometry, interaction, motion and anti-patterns. Keep named
+chart descriptions, specimen dimensions, reconstruction history and runtime/build
+procedures out of it. Component metadata, local source comments and this file's
+gotchas hold component-specific guidance; the authoring skill holds procedures.
+
+The manifest is the catalogue, not the folder layout. A slug names the item;
+`component` names its cross-language type. Types describe marks and encoding,
+not animation or business domain. Taxonomy lives in `packages/core/src/taxonomy.ts`.
+
+The language gallery sorts charts by `component`, then title, then slug for ties.
+Search and type filters retain that order. Featured lists keep their authored order.
+
+`density` is optional reading intent (`close-read` or `glance`). Languages declare
+legal values; components may omit it. It remains agent/search metadata and must
+not become a gallery filter or be inferred from a slug suffix.
+
+## React authoring and delivery
+
+The supported component platform is React 19, React DOM, TypeScript and Tailwind
+CSS 4. This is React for the web, not the React Native mobile framework. Primitives
+use React 19 ref-as-prop semantics. The CLI preserves the consumer's platform
+packages and rejects an incompatible React version.
+
+Each item normally has:
+
+- `component.tsx`: reusable React component, exported data/prop types and private
+  layout helpers. Split a module only when its responsibilities justify it.
+- `example.tsx`: deterministic fixtures and the gallery composition, importing the
+  real component. Examples never become production defaults or delivered files.
+- `meta.json`: explicit entry, runtime exports, prop documentation, runtime files,
+  package dependencies, shared files and example export/dimensions.
+- Optional `component.css`: preserved primitive treatment for native selectors,
+  pseudo-elements, anchor positioning and progressive controls. Import it from
+  the component and keep rules in `@layer components`, below Tailwind utilities.
+  Unlayered native CSS overrode `hidden` and broke mobile navigation after the
+  actual font loaded. Use Tailwind for new layout and ordinary styling.
+
+The only delivery runtime is `react`. Library choice is a separate field.
+Recharts is the default even for simple charts; all current charts use its scales,
+series and interactions. Arc-matrix uses ScatterChart, library-generated curves
+and custom cell marks within that composition. It is not an independent SVG
+renderer wrapped in a chart container.
+
+Nivo is a candidate only for a demonstrated specialist gap; visx is a lower-level
+exception when composition needs it. A standalone handwritten SVG chart requires
+a concrete reason. The current build allows only Recharts expressive items;
+adding a second library entails updating that policy and proving its contract.
+Do not introduce a generic multi-library adapter in anticipation of future charts.
+
+**The consumer owns source.** The build produces the declared runtime import
+closure and rewrites local imports to explicit consumer targets. A copied chart
+must compile independently of this checkout. `_shared/` holds support modules
+used across items, copied only when declared and reachable. It is ordinary local
+source, not a package that forces consumers onto a Nodex runtime version.
+
+Promote on demonstrated second use. Keep geometry and types together with their
+component until an actual shared responsibility emerges. Never add a shared
+`ChartOptions` abstraction that hides the chosen library's React composition.
+
+No HTML fragment, imperative `mount(root)`, ECharts option builder, regex export
+inference or production fixture fallback remains in this contract.
+
+## Tokens have one authority
+
+Each language's `tokens.json` is canonical. The build generates CSS variables;
+color keys become `--nx-<role>`, other nested values become
+`--nx-<group>-<role>`. Arrays and documentation keys are not emitted as variables.
+`--nx-stroke-hairline` is canonical; the old `--nx-hairline` alias is removed.
+`--nx-*` names are reserved for language tokens. A local control setting uses a
+different name, such as `--slider-steps`.
+
+`font.faces` is asset metadata, not CSS variables. Each face declares an exact
+Fontsource package, WOFF2 file, family, weight range and style. The build checks
+the pin and license and embeds font bytes with the OFL text in `tokens.css`.
+This keeps `init` self-contained and previews offline. Font loading completes
+before the build captures layout. The old semicolon-containing `font.webfont`
+descriptor is rejected; emitting it as a variable produced invalid Tailwind CSS.
+
+Charts reference semantic variables directly for fills, strokes, labels, fonts,
+radii and spacing. Do not copy literal palette values into chart code or create
+a second JavaScript theme object. Preserve existing language values. Previously
+literal chart paints now have semantic roles in the language tokens; the ramp
+contains the preserved roles used by the retained catalogue.
+
+**Scoped overrides must work.** A root custom-property alias referencing another
+variable resolves where it is declared. Overriding the base variable on a
+child does not re-resolve that alias. Refer directly to `--nx-ink` for ink marks
+instead of defining a root `--nx-chart-line: var(--nx-ink)` alias. The smoke test
+changes tokens on a descendant scope and checks actual rendered paint.
+
+The chart motion helper reads only animation values that Recharts requires as
+JavaScript numbers/strings. It observes scope attributes, stylesheet loading and
+system preference changes, and cleans up its observers. CSSOM-only mutations can
+announce `nodex:tokens-changed`. Reduced motion is conservative during server
+rendering; the initial motion duration is zero. Do not branch structural markup
+on an after-mount motion preference.
+
+All 24 primitives consume type, spacing, radius and interaction-motion roles in
+addition to paint, fonts and strokes. Reuse the role's meaning, not just an equal
+literal: Card and Dialog titles use `type.cardTitle`, Card padding uses
+`space.cardPadding`, control text uses `type.control`, and button text uses
+`type.action`. Canonical Card/title/caption values take precedence over their old
+fixed CSS defaults. New roles preserve existing primitive values in both languages;
+this wiring does not authorize a redesign of the remaining type scale or geometry.
+Keep circular marks, native-control geometry and zero resets local. Interaction
+motion has its own roles (`control`, `toggle`, `surface`, etc.); changing chart
+`draw` must not turn a button hover into a chart-length transition. Every native
+pseudo-element and progressive fallback must consume the same applicable roles.
+
+`new-language` seeds shared roles from the checkout's canonical Mono Editorial
+tokens and keeps neutral starter paint/system fonts; it must not maintain a second
+hardcoded primitive-token list. The CLI smoke verifies the scaffold against all
+primitive CSS. Consumer smoke delivers all 24 primitives and tests descendant
+overrides, unaffected sibling scopes, retained form state, native keyboard/modal/
+picker behavior and reduced motion in both languages.
+
+## Build boundaries and validation
+
+`packages/core` owns schema, taxonomy and source loading. It has browser-safe
+schema/taxonomy entrypoints and a Node-only filesystem loader. The CLI imports
+its types only so the published command stays independent of the monorepo.
+
+`scripts/build-registry.ts` builds into an OS temporary directory, completes
+validation and rendering, then publishes only:
+
+- `public/r/registry.json`, `languages.json` and per-item JSON;
+- `public/registry/` delivered sources, language assets and bundled previews.
+
+Authoring source is never mutated. `--check` performs the same work in temporary
+storage and leaves existing source and public files untouched. The contract test
+compares both content and modification times. Build failures leave prior published
+artifacts available. Run a normal build before commands that consume the manifest.
+
+Metadata is authored explicitly. The build checks entry/file agreement, slug and
+tier/storage consistency, taxonomy, legal density, featured items, exact package
+versions, declared imports and unused delivery files. Every served file has an
+explicit destination, and language assets have explicit manifest addresses too.
+Unknown runtime imports and attempts to import examples fail the build.
+The import closure includes TypeScript inline import types and external
+import-equals declarations, even when their references disappear from emitted
+JavaScript. Their paths must be declared and rewritten just like ordinary imports.
+Primitive prop metadata documents the export that owns each custom or required
+prop; inherited native attributes remain defined by the exported React types.
+
+The runtime source contract currently supports TypeScript, CSS and JSON text.
+CSS is self-contained; asset imports and binary delivery need a deliberate
+extension before they can be authored. Do not silently read binary files as text.
+
+**Source checks and rendering prove different things.** CLI source lint detects
+literal paint, unknown token references and obvious unguarded motion. It cannot
+execute arbitrary expressions or prove layout. Registry builds additionally run
+real browser rendering and inspect resolved SVG paint, gradient stops and
+screen-space stroke widths. Background knockouts and declared area strokes have
+different semantics from ordinary outlines. Tests include invalid paint and
+scaled strokes so conformance cannot pass merely because a parser skipped them.
+Preview readiness accepts all supported SVG mark shapes; a chart composed of
+rectangles and lines need not emit a path or circle before it can be inspected.
+
+ESLint and TypeScript include registry code, examples and build scripts. Do not
+reinstate the old registry-wide ESLint ignore. Run the required checks from
+README after changes; consumer smoke is essential after modifying delivery.
+
+## Previewing actual React
+
+Recharts 3.10.1 emits an empty chart wrapper through `renderToStaticMarkup`, even
+with explicit dimensions and animation disabled. The build therefore bundles and
+mounts the actual example in Chromium. It captures the complete rendered example
+as a static document, then includes a local bundle that mounts the same React
+example for interaction. This is a browser snapshot followed by a client mount,
+not React hydration or a second chart renderer.
+
+Only build/test machines need Chromium. Dependencies are bundled locally;
+previews have no chart-library CDN imports or runtime data fetches. Consumer
+components remain client charts; their server-rendered HTML does not inherit
+the gallery's build-time snapshot. Do not claim general Recharts SSR support.
+
+The gallery embeds static preview URLs declared by the manifest. It never imports
+registry source into its route bundle. Charts scale from each example's logical
+width in thumbnails and detail pages; primitives render fluidly at native size.
+Preserve each specimen's original proportions and standalone preview padding.
+The build records chart content insets from the rendered root's bounds and
+padding. The gallery uses those manifest insets to frame chart compositions with
+the same unscaled 28px top/left gutter as primitive examples, fitting the content
+inside the remaining width/height. Keep internal axes, annotations and component
+geometry intact; do not remove chart padding in delivered source. Older manifests
+without measured insets retain their original framing. Gallery titles
+are supplied by the gallery/caller; existing drawing annotations and console
+status chrome belong to their components. There is no chart data disclosure.
+
+Load-bearing preview behavior:
+
+- Read an initial container width synchronously and keep the viewport-observer
+  timeout fallback. Background tabs may not deliver observers promptly.
+- Measure the example wrapper plus body padding, not document scrollHeight;
+  document height cannot shrink below the existing frame height.
+- Accept height messages only from the matching iframe window and only finite,
+  positive numbers. Grid previews keep fixed boxes for aligned labels.
+- Every grid ancestor holding a scaled frame needs `min-width: 0` or its wide
+  logical content can force the grid open and cancel apparent scaling.
+
+## The gallery dogfoods language tokens
+
+The shell owns layout, interaction quality and motion; the language owns paint,
+type, strokes and radii. RootLayout reads the built manifest and loads default
+mono-editorial tokens before first paint. Client language switching uses explicit
+asset addresses. The language index scopes each tile's tokens independently.
+There is no independent gallery dark mode.
+
+The shell still consumes curated primitive CSS classes for its existing markup.
+`check:shell` checks those classes against `SHELL_PRIMITIVES` in RootLayout. Keep
+the curation synchronized or a valid primitive class can render unstyled. New UI
+can consume reusable primitive APIs; avoid an unrelated wholesale shell rewrite.
+
+The landing is two scenes: name, then work. Actual registry previews fill its
+belt. Each repeated pass owns its trailing gap; both passes must be identical
+width for seamless `xPercent: -50`. Repeat a small catalogue to fill the belt.
+Scene two stays a full viewport tall so the first scene can complete. Landing
+looping is an explicit product exception; it does not relax registry motion rules.
+GSAP is app-only and never enters delivered source.
+
+`/` reads no cookie and remains static. `/languages` and `/login` read sessions;
+`/l/*` routes derive static parameters from the built manifest. Next route files
+await params and pass plain values to views. `apps/web/AGENTS.md` is generated
+Next guidance; this root file remains the project architecture authority.
+
+## Static distribution and CLI ownership
+
+Public downloads bypass application handlers. The gallery copies built
+`public/r/` and `public/registry/` into `apps/web/public/` before dev/build;
+that directory is generated and must never be edited. CDN hosting exposes the
+same paths with no server runtime.
+
+CLI resolution is `--registry`, project `nodex.json`, `NODEX_REGISTRY`, then the
+hosted default. It does not guess a registry from the working directory. An
+explicit checkout root resolves to its built `public/`; an already-served root
+works directly. `init` records the canonical selected root.
+
+CLI discovery JSON projects runtime files to `path` and `target` explicitly.
+Do not serialize manifest file objects unchanged: their embedded source would
+flood `search` and `show`, especially for charts with large geography modules.
+Lint defaults to the configured component directory; `add --to` does not change
+that path. Every lint target must exist and yield supported source. Missing or
+empty targets are errors, including when another target contains valid files.
+
+`add` preflights the complete file batch and packages before mutation. It copies
+manifest targets, deduplicates identical helpers and protects differing files.
+Pinned packages install using the consumer's detected package manager. Existing
+conflicting versions require `--force`; React and the host toolchain are never
+installed or replaced. `react-is` matches the consumer's installed React.
+`--no-install` preserves package ownership and prints the required command.
+An install failure can leave package-manager changes; source writes happen only
+after the installer succeeds and paths are rechecked.
+
+Package-manager detection walks from the app through the nearest Git root,
+including `.git` file boundaries for worktrees and submodules. The closest
+directory with a declaration, lockfile or `pnpm-workspace.yaml` supplies the
+manager; an explicit `packageManager` wins within that directory. Installation
+stays in the app, and its dependency declarations and React versions remain
+authoritative. Preflight checks lockfile paths in both the app and the selected
+parent directory before invoking the installer.
+
+Local paths reject traversal and symlink escapes. Remote roots use HTTPS except
+loopback development servers. Auth headers attach only to same-origin guarded
+`api/` paths; redirects cannot forward credentials elsewhere. Both component
+files and language files use explicit manifest addresses, so future guarded
+assets need no convention-path special case in CLI commands.
+
+`nodex.json` belongs in the consumer repository. `~/.nodex/auth.json` does not:
+it is mode 0600 in a 0700 directory, keyed by registry origin. `NODEX_TOKEN`
+overrides stored credentials; `NODEX_CONFIG_DIR` allows isolated tests. The CLI
+publishes compiled JavaScript for Node 20+, with erased core type imports and no
+runtime workspace dependency. Repo tooling itself needs Node 22.22+.
+
+## Accounts and deployment constraints
+
+GitHub OAuth and browser/CLI sessions are implemented, while all current
+languages are public. Accounts sequence the gallery; no paid entitlements or
+content restriction backend exists yet. A future restriction must protect the
+route serving bytes, not just a page that links them. Static public files must
+remain publicly cached. Explicit manifest addresses remove the old language-asset
+addressing blocker but do not implement authorization by themselves.
+
+Preserve these authentication decisions:
+
+- Accounts key on GitHub numeric ID, not renameable login.
+- Cookies contain opaque random session tokens; the database stores SHA-256.
+- OAuth state is httpOnly, compared in constant time and deleted after use.
+  Errors redirect with fixed public tokens, never upstream messages that might
+  include request credentials.
+- `currentUser` touches cookies before checking configuration so prerendering
+  cannot cache an unconfigured signed-out result. `/languages` also declares
+  force-dynamic.
+- Device authorization returns a Nodex CLI session, never a GitHub token.
+  Approval is a form POST. Codes use unbiased random selection and avoid
+  ambiguous characters; successful exchange consumes the device request.
+
+The monorepo has one root `.env`, explicitly loaded by Next. It is optional for
+public builds. Database, OAuth credentials and `NEXT_PUBLIC_SITE_URL` are read by
+server code at runtime. `NEXT_PUBLIC_REGISTRY_URL` is read in client code and is
+therefore baked into the browser bundle; Docker exposes it as a build argument.
+Do not infer timing solely from the environment variable's prefix.
+
+Next supplies same-origin account/device routes and standalone deployment. Docker
+builds the registry before the site and keeps Chromium out of runtime. Migrations
+retain their monorepo path in the image because the migration runner resolves
+relative to its own location. Helm uses an external database and migration Job.
+
+## Primitive and chart gotchas
+
+- Input IDs use `useId`; independent instances and radio groups must not collide.
+- Native Dialog uses `showModal`/`close`; inline mode exists for specimens. Preserve
+  Escape, focus return and controlled state behavior.
+- Select and tooltip CSS use progressive browser features with fallbacks. Keep
+  native fallback styling. A CSS tooltip remains a visual hint, not a complete
+  accessible headless tooltip widget; use a headless behavior layer where needed.
+- Select's `autoWidth` must opt out of the field wrapper's cross-axis stretching;
+  `width: auto` alone still fills a column flex container.
+- Invalid chart values are unavailable, not synthetic data. Empty datasets
+  render an explicit state. Matrix zero means
+  measured absence, while an omitted pair means missing.
+- Arc-matrix retains absolute area and tone encoding: a value has the same mark
+  size and shade across datasets. Do not normalize its marks to each input maximum.
+- Endpoint source, window and freshness come from caller props. The existing
+  example supplies its original sample labels; the runtime does not invent them.
+- Endpoint observations require only the encoded `route` and `p99Ms` fields.
+  Unused request-rate values belong to sample/application data, not the chart API.
+- Arc-matrix has one observation series so guide curves cannot become tooltip or
+  keyboard stops. Its custom active cells use stable observation identifiers.
+- Dual-area coordinates a reversed spend bar plot with a sign-up area plot.
+  Both retain identical ordered rows and band scales, including unavailable
+  measures. Recharts' public tooltip hooks publish the inspected day to local
+  React state, and two ReferenceLines place aligned cursors through the scales.
+  `syncId` alone leaves a receiving plot's prior mouse/keyboard state active,
+  which can strand its cursor on another day. Input ownership follows pointer
+  movement, focus and keydown; only that plot displays the combined tooltip.
+  Selection and gradient IDs belong to each component instance. Spend retains
+  its original $18K scale ceiling unless larger caller values require expansion;
+  sign-ups use a zero-based scale.
+- Recharts prioritizes a plot's active mouse hover over its keyboard selection.
+  Move the pointer away for keyboard-only inspection. The coordinated chart
+  follows the library's selected observation; it does not replace keyboard
+  navigation or reach into the library's private state.
+  Focus can retain an earlier index; browser tests establish selection with real
+  arrow keys and allow the library's animation-frame input throttling to settle.
+- Petal-rose uses one equal-angle Pie with a per-observation outer radius.
+  Library Sector shapes compose the track and petal; labels share that
+  observation, so decorative layers cannot become extra keyboard stops.
+  Radius grows linearly from the inner ring to the current dataset maximum,
+  preserving the old rose renderer's actual encoding despite its `area` name.
+  Zero leaves no petal; do not copy the old all-zero midpoint-radius bug.
+  Label contrast retains the specimen's 8-of-12 reach threshold as a ratio so
+  changing count units cannot put light labels onto short, pale petals.
+  The 5px background strokes are knockout gaps, not data outlines. Numeric
+  labels use `type.plotValue`, separate from card headings.
+- Recharts vertical bars advance to the next route with ArrowLeft in the pinned
+  release; the accessible description documents the library's direction.
+- Bar-race receives period frames and stable unique product IDs. It plays
+  once, holds the final frame, and retains whole-plot pointer replay plus a
+  separate keyboard replay button so the chart is not nested inside a button.
+  Reduced motion and zero-duration tokens select the final frame and cancel
+  playback timers. Product identity must survive rank changes; repeated display
+  names are not IDs. Missing final readings retain the known period and replay.
+- Stagger-delay uses one native Bar with the public animationInterpolateFn
+  hook. Its per-category delays retain unavailable positions and use the chart
+  motion tokens; there is no extra timer. Dynamic-data and draw-in-counter share
+  only the constrained cubic curve factory supplied to native Area series.
+  Dynamic-data gets its static source badge from the caller and never fabricates
+  a feed. Draw-in-counter uses AreaRevealShape progress for its headline, so
+  the number and area share one library animation. Each changed dataset repeats
+  the original reveal from zero using current library points. Its exact cumulative total
+  stops at missing input; plotted values retain whole-thousand rounding.
+  Recharts parses the Area strokeWidth prop numerically during clipping, so
+  these areas set actual tokenized width through style to avoid NaN clips.
+- Dot-cascade preserves ascending caller order, the sloping baseline and
+  rounded-up two-incident dot stacks, including odd totals. Exact labels are
+  authoritative; zero and unavailable counts add no dots. Launch-fan takes only
+  feature/week observations plus caller guide weeks; legacy MAU copy did not
+  correspond to an encoded field and does not justify adding one. A single
+  launch has a valid leading-edge spoke. Guides never become inspection stops.
+- Donut-redesigned retains its ten-by-ten dot grid and source key; its type is
+  unit-chart, since its slug does not describe donut geometry. Shares must total
+  100 and be whole percents. Tones follow source order. Custom-pie uses a real
+  Pie for share angles and per-observation radius for minutes, with caller scale
+  and reference rings. It sorts by share and ranks tone by minutes. Missing
+  minutes reserve the known angle without a wedge; missing shares invalidate
+  the allocation. Zero minutes leave a label without a synthetic hub sector.
+- Tick-donut requires complete whole-percent shares totaling 100, since an
+  unknown share makes following angular positions unknown. Tones follow caller
+  order, despite old rank comments. Tick-gauge requires one whole percent and
+  caller goal label; zero keeps all remaining ticks. Both retain the original
+  angular sweeps with equal horizontal and vertical pixel units. Fit native axis
+  domains to the actual plot bounds so resizing cannot turn the donut or gauge
+  into an ellipse. The gauge's upper bound includes the complete sweep. Shared
+  radial-tally-marks owns fitted axes, unit texture and library curves; ticks,
+  guides and inspection coordinates use those same public scales.
+  Channels/progress are observations; counting guides are not.
+- Pictorial-bar uses a native continuous Bar clipped through a repeated tree
+  texture. Glyph count changes with width; the old one-tree-per-10K comment was
+  inaccurate. Caller targetK owns the shared track. Preserve labels after the
+  full final glyph, partial clipping, zero tracks and unavailable rows.
+- The bar family uses Recharts Bar series, category indices and public scale
+  hooks. Repeated labels do not merge categories. Chunky-bars keeps caller order
+  while rank selects tone, and zero retains a label without a visible bar.
+  Rung charts require nonnegative safe integers: each mark is exactly $1K, so
+  silently rounding fractional counts would change the data. Shared `rung-marks`
+  owns only unit marks and their preserved deterministic width/opacity variation;
+  each component retains its series, scales, geometry, types and annotations.
+  Paired-rungs has two real series and a combined plan tooltip. Stacked-rungs
+  stacks three actual counts, then shifts custom marks by one scale unit per
+  preceding segment to retain gaps without adding synthetic revenue to the stack.
+  An incomplete region suppresses its whole stack and total; treating a missing
+  segment as zero would misplace every later segment. Categories remain available
+  to keyboard inspection. Totals use the library's LabelList so zero/unavailable
+  labels survive zero-height bar filtering. Rung thickness uses `stroke.mark`;
+  numeric label sizes derive from `type.plotValue` with preserved proportions.
+- Rung-histogram consumes explicit time intervals and integer ticket counts.
+  Preserve its bin-edge ticks, sparse interval labels and median flag. An unknown
+  bin suppresses the median and total-based wording; it is not zero tickets.
+  Diverging-bar retains signed values, directional caps and the dashed zero rule.
+  Range-capsules uses real `[low, high]` Bar values and retains its 50–320K specimen
+  scale, expanding for caller values. Invalid/reversed intervals are unavailable;
+  equal endpoints remain inspectable without a visible capsule.
+- Rung-waterfall declares `start`, `change` and `total` steps explicitly. Labels
+  never determine arithmetic. Missing changes invalidate the running total until
+  a new start establishes it; solid rungs add and broken rungs deduct. Recharts
+  removes null bars before generating LabelList entries, so unavailable totals
+  need an annotation positioned with its public scales, without a synthetic bar.
+- Candlestick uses a real range Bar for each complete OHLC quote. Open/close
+  bodies and low/high wicks share the public Y scale. Invalid ranges suppress
+  the whole quote; unchanged and zero prices retain a horizontal body. Extrema
+  are annotations, not extra series. The original preview uses seven $5 ticks.
+- Radial-patchwork composes independent Sector marks in one Scatter observation
+  series. Hour and angular window remain separate from radial files/6 reach;
+  the original 16-unit hole masks reaches of 96 files or fewer. Dial ticks use
+  Cartesian proportions while sectors stay circular through the smaller scale.
+- Radial-convergence takes explicit request assignments and stable theme IDs.
+  Hub area counts actual assignments; an unresolved assignment keeps its rim
+  node without inventing a strand. Requests and hubs share one native series,
+  while leaders, labels and bundle curves never become extra keyboard stops.
+- Bubble-almanac uses a native Z axis for absolute ticket-to-area scaling and
+  a private Curve factory for its irregular midpoint rims. Its dark cores are
+  the preserved fixed texture, not a second inferred measure. Missing counts
+  and zero counts draw no bubble. Years, areas, marginal notes and shelf events
+  belong to the caller. The example explicitly retains the old 540 × 245 plot;
+  the live default retains its original 320px minimum. plotLedger and plotRule
+  preserve the almanac's distinct original paper-line paints.
+  Marginal notes wrap in separate columns within the existing top margin;
+  caller `from` positions remain leader targets and `to` positions guide their
+  bends. Event captions wrap within their shelf columns. Numeric labels use
+  a per-instance SVG filter that fills their actual text bounds with scoped
+  background paint, including digit interiors. Keep that background opaque;
+  group opacity would let bubble cores and ledger rules show through again.
+  Draw leader curves before the labels and protect product headings with the
+  same background so a leader cannot cross their lettering.
+- Parallel-coordinates scoring includes only caller-marked dimensions. The
+  specimen excludes price; repeated product names remain separate rows. Its
+  parallel polylines use unconstrained chord-weighted tangents, while the area
+  charts retain constrained tangents in the shared curve helper. Reference
+  ranges stay fixed and finite readings can extrapolate beyond them. Preserve
+  the old axis brushing; Escape clears the current instance's selections.
+- Thread-triptych retains continuous bumpX curves through all three columns
+  and volume-encoded stroke widths. Routes and real nodes share native
+  inspection; decorative headings add no stops. The old description mentions
+  pinning and bundle hover, but its actual React renderer implemented neither;
+  do not invent those interactions during reconstruction.
+- Cluster-field has exactly one dot per person, deterministic golden-angle
+  placement and caller-declared cross-contribution bridges. Missing counts
+  retain island labels without people or relationships. Glyph size is texture,
+  not another inferred contributor measure.
+- Hourglass-stream retains nearest-40-person tick rounding and exact stage
+  counts. Its 34 threads per adjacent positive pair are illustrative; conversion
+  labels derive from the actual counts. Unknown stages break the guides, and
+  a zero denominator makes conversion unavailable rather than Infinity.
+- Stream-ribbon is a regular zero-based stacked area in the old renderer;
+  its comments incorrectly described a wiggle stack. Preserve that encoding,
+  the graphic labels behind the bands and the actual every-eighth-week ticks.
+  One missing measure suppresses that whole weekly stack so later bands are
+  never shifted by an invented zero. Background 2px strokes are knockout gaps.
+  Examples of wide charts explicitly retain the old build's pinned aspect
+  heights even when the live component's CSS minimum is taller.
+- Aggregate-sankey uses the native weighted Sankey layout with zero iterations,
+  top-aligned columns and source totals determining rank and tone. Its ribbons
+  are filled Curve areas through native link offsets, preserving vertical
+  thickness rather than substituting a thick perpendicular stroke. Real
+  zero-valued links retain topology without ink; incomplete allocations are
+  unavailable as a whole. The pinned library's generic keyboard handler only
+  handles numeric indices, whereas Sankey uses node/link strings. Keep its
+  focusable surface and pointer events, and traverse the real observations
+  locally for keyboard inspection. Public tooltip hooks drive pointer adjacency.
+  Sankey exposes no native animation clock; its finite opacity entry is local
+  layered CSS with direct motion tokens and a reduced-motion media guard.
+- Circular networks pack each node's diameter into its occupied angle and share
+  the remaining circumference equally. Native scatter scales keep the ring
+  circular, ZAxis retains absolute diameters and Curve supplies the inward
+  quadratic links. One observation series includes real links and nodes, with
+  public tooltip hooks driving adjacency. Duplicate names remain indexed.
+  Simple team diameter is linear in headcount; dense repository diameter retains
+  its 3.5px baseline plus 1.7 times the square root of contributors. Dense link
+  width retains its 0.4px baseline, including measured zero. The old dense
+  specimen's signed hash generates 338 negative shared counts among 556 ties;
+  retain its rows, but invalid counts are unavailable and must not acquire SVG's
+  fallback positive stroke. Shared circular-layout owns only packing and the
+  public quadratic curve factory. Dense metadata's replay copy had no handler
+  in the original component; reconstruction does not invent that behavior.
+- Tree uses pinned d3-hierarchy only for the same tidy node positions as the
+  original. Recharts Scatter owns its scales, nodes and inspection; Curve owns
+  the connectors. Keep the default sibling/cousin separation and preorder
+  inspection. Labels and membership come from the caller; no branches collapse.
+- Nested-treemap composes two actual flat Recharts Treemaps. Separate layouts
+  are required because the library's uniform nodeInset cannot reserve the old
+  asymmetric 32px area headings. A nested chart inside SVG foreignObject owns
+  each area's team layout; native rectangles retain the nested gap treatment.
+  The original also has an empty 32px root band. The library rounds layout
+  coordinates to pixels. ResponsiveContainer inherits an enclosing container
+  even when given explicit dimensions; this composition measures its outer
+  plot and supplies each native Treemap its own numeric size. Filter nested
+  parent hover events so they cannot replace the selected team. Memoize each
+  area's data so hover does not restart its
+  animation. The public pointer callbacks inspect real nodes; a focusable local
+  wrapper supplies keyboard traversal because Treemap exposes no accessibility
+  layer. Zero hours add no rectangle but remain available to inspection; missing
+  hours make the complete share hierarchy unavailable. Clip IDs are per instance.
+- Choropleths retain their vendored TypeScript geography as declared runtime
+  files, with no fetch or binary asset requirement. Native Cartesian scales
+  preserve the old 0.75 longitude/latitude aspect. Top/bottom anchors determine
+  map height, even when that clips horizontal overflow; do not fit the map into
+  a different box. State insets preserve their original bounding transforms;
+  world latitude bounds omit Antarctica. Closed native Curve subpaths preserve
+  polygon holes through even-odd fill. Each region is one Scatter observation.
+  Empty observations are explicit; unknown regions use the no-data paint and
+  measured zero uses the lowest band. The original visualMap legend supports
+  multiple toggles and hover emphasis; keep those interactions. Its literal
+  interval gaps (such as 9.5K) have no selected band but retain the actual value
+  for inspection. Map annotations and offsets come from callers, never from
+  production sample labels. Repeated geographic keys make the input unavailable.
+- Force graphs retain the original seeded spring/gravity/repulsion/friction
+  calculation, shared as local geometry with its Apache and BSD notices. Recharts
+  owns native Scatter observations, axes and the entrance animation clock. Seed
+  bounds still determine the simulation's gravity center. The simple force graph
+  fits the complete entrance trajectory with equal X/Y scale and reserves actual
+  label bounds plus the absolute node radii. Seed-only view bounds clipped settled
+  nodes. Label size observation follows font/token changes and replaced Scatter
+  marks. Refitting after a drag uses released positions; changing the view while
+  the pointer is held would invalidate its captured inverse scales. The dense
+  graph retains its seed-based viewport and explicit pan/zoom.
+  The old SSR snapshot ran only two force steps, while live previews
+  settled, so compare against a fully settled reference. Link width does not
+  influence physical spring length in these specimens. Unknown endpoints and
+  repeated directed edges follow the original graph's omission rules.
+- Force dragging captures the stable chart SVG, because Recharts keys individual
+  scatter marks by coordinates. Disable activeShape's automatic raised layer so
+  selected links cannot cover their endpoint nodes; public tooltip hooks still
+  drive adjacency emphasis. Stop using the entrance trajectory after interaction,
+  or it overwrites dragged coordinates even with animation disabled. Pointer
+  movement updates the simulation; release settles it without a background timer.
+  The dense viewport keeps node size at 1 + (zoom - 1) × 0.6 and scopes pan/zoom
+  to the instance. The old dense metadata's replay claim had no handler.
+  Consumer drag checks query and measure the current mark from the stable chart
+  root in one browser evaluation, retrying while a connected mark is unavailable.
+  Evaluating a previously resolved mark can race its removal from the SVG.
+- Scatter-morph uses actual Scatter, Bar and Pie series. On a requested view
+  change, sample the currently visible native outlines by stable product ID;
+  custom marks follow the next native series' animation clock to its geometry.
+  Keep native final shapes, preserve all observations through the transition,
+  and capture the current intermediate outline if clicked again. Completed view
+  transitions must not replay their saved outlines on later data updates; those
+  updates belong to the current native series. All three series must match
+  animation records by product ID; the library's positional default transfers
+  geometry between products after reordering, insertion, removal or revenue-rank
+  changes. Consumer checks inspect intermediate geometry for these cases.
+  Read completion inside native shape callbacks too: a container resize can
+  update them without rendering the parent component. A crossfade loses the
+  component's identity tracking. The whole plot still advances on click;
+  its keyboard button is a sibling of the focusable chart SVG. Zero revenue is
+  not an equal-slice donut, and a missing revenue prevents a truthful share total.
+- Recharts makes the chart SVG focusable. Suppress its browser outline for
+  pointer focus and style `:focus-visible` with language ink and mark-stroke
+  tokens. Pie sectors can also receive pointer focus despite `tabindex="-1"`;
+  include these descendants in the same treatment. Keep the accessibility layer
+  and keyboard navigation enabled.
+- Scatter marks retain the old renderer's 0.8 opacity where it was implicit.
+  Single-axis retains linear diameter, while dot-heat/calendar-heat retain their
+  original square-root size curves. Tiny dots mean measured zero; missing values
+  have no mark. Peaks annotate one real observation and add no keyboard stops.
+- Matrix heatmaps retain absolute percentage bands, indexed categories and
+  tokenized cell radii. Co-usage self-pairs are inapplicable; an instance with no
+  comparable pairs renders an empty state. Its original band legend toggles
+  visibility per instance. Adoption labels change contrast at 46%. Background
+  strokes are cell gaps. Hover tests target the whole observation group so a
+  value label remains a valid pointer target.
+- Calendar week/period labels and the peak's business description come from
+  caller props. The example alone supplies its original months and release-week
+  wording. Draw the peak annotation above all daily marks through public scales.
+  The note's wrapping box spans the plot width, independently of the peak's
+  week, so peaks at either edge cannot push the text outside the chart.
+  Calendar and almanac annotations use Recharts' public label ZIndexLayer.
+  JSX order alone does not put custom children above Scatter: its portal paints
+  later and can cover lettering and background knockouts, including on hover.
+- Dotty-matrix uses one observation series on projected library scales; slab
+  curves and corner labels are guides. Preserve clipping at the original plot
+  boundary. Beeswarm retains fixed lane calibration while expanding its visible
+  domain; sorting piles must retain stable deal IDs. Its baseline crosses row
+  zero, independently of the below-zero median rule endpoint.
+- Violin takes actual reply-time observations and a positive caller bandwidth.
+  Its 48-sample Gaussian density is normalized within each plan. The example
+  alone generates the old samples. Median rank controls tone; violin and
+  beeswarm retain the original upper-middle median convention. Violin shapes
+  use library-generated closed curves within one Scatter observation series.
+  Median labels sit beyond the scaled silhouette half-width; a fixed offset
+  from the center puts dark text inside the fill as the chart widens.
+- Tick-box validates ordered five-number summaries and retains independent
+  outliers even when a summary is unavailable. Its actual original marks use
+  muted median rules and filled outliers, despite contrary legacy comments.
+  One Scatter observation series retains summary/outlier identities and uses
+  library Rectangle marks with public scales for the whiskers and medians.
+- Hairline-area uses native Bar and Line series. Custom Bar hairlines consume
+  stroke tokens; the line keeps null gaps and contributes the single peak dot.
+  Sparse time labels come from the caller, and unavailable days remain available
+  for keyboard inspection without turning into zero-valued observations.
+- Ridgeline uses native Area, Bar and Line layers over caller density profiles.
+  Bar consumes chart-level data; Area and Line accept their own arrays. Guard
+  hatch dataKey functions because axis calculation can present another series'
+  payload. Its assistive reading uses the public active axis label and the actual
+  union of profile hours: Recharts' own-series tooltip fallback can otherwise
+  return another hour. Preserve the specimen's invisible tooltip/row labels,
+  axis-floor fills and overlap order. The zero-crossing rail is shared with
+  beeswarm; it does not own either chart's series, domains or paint choices.
+
+- Jitter-strip takes fractional band positions directly. The signed fixture hash
+  and rounded band lookup are original behavior. Keep the fixed band viewport;
+  Recharts normally expands a supplied domain to include all data. Overflow is
+  enabled and the Scatter's clip is disabled through its public className so
+  custom marks can retain whole edge dots when their bounds meet the plot.
+- Trend-lineage uses one event series, with scaled guides and survival terminals
+  outside keyboard inspection. The caller supplies its inclusive year window.
+  An incomplete feature timeline cannot claim a continuous history or a tail.
+  Shipped events are filled; reworks are hollow; intervals over two years are
+  dashed. Feature names use column indices so duplicates remain separate.
+
+- Type-colonnade is a network encoding, despite its old bar taxonomy. One
+  repository is one observation and one strand; team counts derive from those
+  available ownership records. Strands retain the original 21-point sampling
+  and library-generated paths. Indexed ownership keeps repeated names distinct.
+
+- Dumbbell-queue requires whole nonnegative minutes because every bead means
+  one minute saved. Missing endpoints stay unavailable, and increases have no
+  saved-minute beads. Its old category axis rounded away the fixture's vertical
+  jitter; the actual original beads sit on the rail. Preserve that placement.
+  Hollow/solid endpoints own inspection; rails and minute beads add no stops.
+
+- Rank-strip is a rank heatmap, not a bump line. Positive integer ranks keep
+  absolute tones; zero is not a rank. Sort by the final declared period, with
+  missing finishes last and stable ties. Do not substitute an earlier known rank
+  for a missing final reading. The original cell edge, pale-cell label paint and
+  radius have semantic token roles; they are not background knockouts.
+
+- Tick-rows uses a native horizontal Bar per team, with one thin vertical
+  mark per release and a counting dot every fifth mark. Keep counts whole and
+  nonnegative, caller order, deterministic height/opacity, and zero/unavailable
+  totals. Category boundaries carry the row rules; labels use library scales.
+
+- Barcode-lollipop renders only the chart, with the side note and legend removed
+  at the owner's request. Its 676px example width retains the original 540px plot
+  and preview padding; the plot fills the component's available width.
+  Day labels, sparse axis labels and weekend flags belong to the caller. The
+  example only shows APR, since the old automatic ticks never reached MAY/JUN's
+  formatter positions. Every supplied day retains a calendar rule; unavailable
+  readings have no peak. Up to three greatest readings at least six day positions
+  apart are labelled; stems are decorative, and only peaks own inspection.
+
+- Hundred-field takes up to four ordered whole-percent shares. Known shares
+  cannot total more than 100; partial allocation does not generate extra people.
+  One segment is one observation, and its exact share determines its dot count.
+  Preserve golden-angle positions and the old spoke schedule (units 0, 5, 10,
+  etc.). Unknown and zero shares keep distinct labels. The four recorded cores
+  determine layout; additional categories require a separate composition.
+
+- Recharts Scatter spreads internal observation fields into symbol props. A
+  field named `option` replaces the custom shape with a default symbol. Keep
+  public business fields on the caller API, but map collisions to distinct
+  internal names before passing observations to the library.
+- Ballot-tally preserves a hundred marks per available option, with distinct
+  selected/unselected heights, offsets and thickness. Rows can total above 100
+  because respondents may choose several options. A missing count must not
+  produce a hundred unselected respondents. Shared tally-marks owns only the
+  vertical unit marks and deterministic variation used by ballot-tally and
+  tick-rows; each retains its series, scales, counting dots, labels and geometry.
+  Ballot option headings use the same Y scale as their ticks. Percentages of the
+  full chart height drift across the margin-adjusted rows and overlap lower
+  tallies. Headings sit above the count labels, including short/zero selections;
+  dividers separate those complete rows. Automatic height reserves at least
+  60px per row for the headings, marks and divider rules.
+
+## Remaining scope
+
+The original 65-chart catalogue now follows the React source-delivery and token
+contract, with original fixtures and encodings preserved subject to explicit
+unavailable-data rules. New chart families, specialist library selection, arbitrary
+asset delivery and large-data performance need their own evidence. Consumer server
+rendering remains limited by Recharts. Commercial provenance for material revived
+from older samples needs review; deleting old files does not establish a license.
+
+Two skills serve different audiences: `skills/nodex/SKILL.md` teaches downstream
+use and must contain no registry-authoring procedure;
+`.agents/skills/nodex-authoring/SKILL.md` owns the repository procedure. Keep the
+split, and replace obsolete instructions when the architecture changes.

@@ -4,12 +4,76 @@
   "description": "cumulative ARR · the line draws, the number counts · click to replay",
   "component": "line",
   "tier": "expressive",
-  "runtime": "echarts",
+  "runtime": "react",
   "density": "glance",
   "tags": [
     "finance"
   ],
   "dependencies": [
-    "echarts@6"
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "580/320",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "DrawInCounter"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "constrained-curve.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 426
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly DrawInCounterDatum[]",
+      "required": true,
+      "description": "Ordered daily bookings in thousands, with caller day and optional axis labels. Missing or invalid bookings make that and every subsequent cumulative value unavailable. The headline uses the exact sum; plotted cumulative values preserve whole-thousand rounding."
+    },
+    {
+      "name": "periodLabel",
+      "type": "string",
+      "required": true,
+      "description": "Caller-owned metric and period caption beneath the cumulative headline."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
   ]
 }

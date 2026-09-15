@@ -4,16 +4,73 @@
   "description": "real outlines · shade = monthly active accounts · gray = markets we haven't opened",
   "component": "choropleth",
   "tier": "expressive",
-  "runtime": "echarts",
+  "runtime": "react",
   "density": "glance",
   "tags": [
     "global",
     "ops"
   ],
   "dependencies": [
-    "echarts@6"
+    "recharts@3.10.1"
   ],
-  "externalData": [
-    "https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/world.json"
+  "aspectRatio": "640/380",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ChoroplethWorld"
+  ],
+  "files": [
+    "component.tsx",
+    "geo.ts"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "geo-geometry.ts",
+    "choropleth-legend.tsx"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 449
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ChoroplethWorldDatum[]",
+      "required": true,
+      "description": "Geographic names and nullable nonnegative monthlyActivesK values. Five literal bands retain the specimen thresholds. Fractional values in a band gap remain inspectable without an invented band. Optional annotations and pixel offsets belong to the caller."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
   ]
 }

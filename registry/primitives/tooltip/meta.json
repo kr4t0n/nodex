@@ -1,10 +1,67 @@
 {
   "slug": "tooltip",
   "title": "Tooltip",
-  "description": "CSS-only label on hover and focus. Not announced by assistive technology, so pair it with a headless tooltip when the text matters",
+  "description": "A CSS visual hint on hover and focus for redundant information. Use a headless tooltip when accessible announcement or dismissal is required",
   "component": "tooltip",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["overlay", "text"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "overlay",
+    "text"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Tooltip",
+    "TooltipTrigger"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "string",
+      "description": "Tooltip: redundant visual hint. Essential information needs an accessible behavior layer.",
+      "required": true
+    },
+    {
+      "name": "placement",
+      "type": "'above' | 'below'",
+      "description": "Tooltip: preferred side of the trigger; defaults to above.",
+      "required": false
+    },
+    {
+      "name": "align",
+      "type": "'center' | 'start' | 'end'",
+      "description": "Tooltip: preferred horizontal alignment; defaults to center.",
+      "required": false
+    },
+    {
+      "name": "wrap",
+      "type": "boolean",
+      "description": "Tooltip: allow a longer hint to wrap; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Tooltip: content containing a focusable trigger, such as a native button or TooltipTrigger.",
+      "required": false
+    },
+    {
+      "name": "tabIndex",
+      "type": "number",
+      "description": "TooltipTrigger only: native tab stop; defaults to 0. The trigger is a span, not an action button.",
+      "required": false
+    }
+  ]
 }

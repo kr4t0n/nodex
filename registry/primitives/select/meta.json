@@ -4,7 +4,51 @@
   "description": "Native select with a hairline chevron and a fully styled dropdown where the browser supports it",
   "component": "select",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["form", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "form",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Select"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Visible label linked to the native select. An instance ID is generated unless id is supplied.",
+      "required": false
+    },
+    {
+      "name": "autoWidth",
+      "type": "boolean",
+      "description": "Size the select to its content instead of the full field width; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "wrapperClassName",
+      "type": "string",
+      "description": "Classes on the field wrapper. className, ref and native select props target the select itself.",
+      "required": false
+    },
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Native option and optgroup elements. Selection uses native value/defaultValue and onChange props.",
+      "required": false
+    }
+  ]
 }

@@ -1,3 +1,4 @@
+@layer components {
 /* progress - shared primitive, themed by the active language's tokens.
 
    A real <progress> element, so assistive technology announces the value and
@@ -13,7 +14,7 @@
   width: 100%;
   /* Deliberately thin. This language measures with lines, so a progress bar is
      a rule that fills rather than a container that drains. */
-  height: calc(var(--nx-hairline) * 4);
+  height: calc(var(--nx-stroke-hairline) * 4);
   border: 0;
   border-radius: var(--nx-radius-pill);
   background: var(--nx-grid);
@@ -30,7 +31,7 @@
 .nx-progress::-webkit-progress-value {
   background: var(--nx-ink);
   border-radius: var(--nx-radius-pill);
-  transition: width 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--nx-motion-progress-duration) var(--nx-motion-progress-easing);
 }
 
 .nx-progress::-moz-progress-bar {
@@ -74,7 +75,7 @@
 .nx-progress-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--nx-space-fieldGap);
   width: 100%;
   font-family: var(--nx-font-sans);
 }
@@ -82,10 +83,10 @@
 .nx-progress-label {
   display: flex;
   justify-content: space-between;
-  gap: 1em;
-  font-size: 9.5px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  gap: var(--nx-space-labelValueGap);
+  font-size: var(--nx-type-caption-size);
+  font-weight: var(--nx-type-caption-weight);
+  letter-spacing: var(--nx-type-caption-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
 }
@@ -100,4 +101,5 @@
   .nx-progress::-webkit-progress-value {
     transition: none;
   }
+}
 }

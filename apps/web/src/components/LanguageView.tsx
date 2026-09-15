@@ -15,7 +15,6 @@ import {
   facetValues,
   loadCatalog,
   previewUrl,
-  primitivePreviewUrl,
   primitivesFor,
   tokensJsonUrl,
   type Catalog,
@@ -37,14 +36,13 @@ const THUMB_HEIGHT = 250;
 export function LanguageView({ slug }: { slug: string }) {
   const [catalog, setCatalog] = useState<Catalog>();
   const themed = useLanguageTokens(slug);
-  const design = useText(designUrl(slug));
-  const tokensRaw = useText(tokensJsonUrl(slug));
+  const language = catalog?.languages.find((entry) => entry.slug === slug);
+  const design = useText(language ? designUrl(language) : undefined);
+  const tokensRaw = useText(language ? tokensJsonUrl(language) : undefined);
 
   useEffect(() => {
     void loadCatalog().then(setCatalog);
   }, []);
-
-  const language = catalog?.languages.find((l) => l.slug === slug);
 
   if (!catalog || !themed) return <Loading label="Loading registry" />;
   if (!language) {
@@ -126,7 +124,7 @@ function TokenPanel({ tokens }: { tokens: Tokens }) {
               className="h-7 w-7 rounded-[3px]"
               style={{
                 background: hex,
-                border: 'var(--nx-hairline) solid color-mix(in oklab, var(--nx-grid) 70%, transparent)',
+                border: 'var(--nx-stroke-hairline) solid color-mix(in oklab, var(--nx-grid) 70%, transparent)',
               }}
             />
           ))}
@@ -205,7 +203,11 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
         item.meta.component.includes(q) ||
         item.meta.tags.some((tag) => tag.includes(q))
       );
-    });
+    }).sort((a, b) =>
+      a.meta.component.localeCompare(b.meta.component, 'en') ||
+      a.title.localeCompare(b.title, 'en') ||
+      a.name.localeCompare(b.name, 'en'),
+    );
   }, [items, query, type]);
 
   // Motivated motion: the set changed, so the new set announces itself. A
@@ -311,9 +313,9 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
               className="grid min-w-0 grid-rows-subgrid row-span-3"
               style={{ rowGap: 6 }}
             >
-              {/* Title above the preview, mirroring the card anatomy DESIGN.md
-                  fixes for the components themselves: title, then sub, then the
-                  chart. */}
+              {/* Title, then type, then the chart. The chart itself is only
+                  the drawing, so everything that names it is printed here from
+                  the manifest. */}
               <Link href={`/l/${language}/${item.name}`}
                 className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
                 style={{ color: 'inherit', rowGap: 6 }}
@@ -327,12 +329,13 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                 >
                   {item.meta.component}
                 </p>
-                {/* Bare: the heading above already states the title, and the
-                    fragment's own copy is illegible at thumbnail scale anyway. */}
                 <Preview
                   className="mt-3 self-start"
-                  src={previewUrl(language, item.name, { bare: true })}
+                  src={previewUrl(item, language)}
                   title={item.title}
+                  width={item.meta.preview.width}
+                  height={item.meta.preview.height}
+                  insets={item.meta.preview.insets}
                   aspectRatio={item.meta.aspectRatio}
                   boxHeight={THUMB_HEIGHT}
                 />
@@ -343,14 +346,15 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
       )}
 
       <p className="mt-10 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-        {filtered.length} of {items.length} charts. Each preview draws when it
-        scrolls into view; click a chart to replay it.
+        {filtered.length} of {items.length}{' '}
+        {items.length === 1 ? 'chart' : 'charts'}. Each preview draws when it
+        scrolls into view.
       </p>
     </section>
   );
 }
 
-/** Primitives render inline, so they re-theme with the rest of the shell. */
+/** Shared primitives preview at their natural size under the viewed language. */
 function PrimitiveStrip({ items, language }: { items: Item[]; language: string }) {
   return (
     <section className="pt-4">
@@ -385,8 +389,10 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
               {/* Fluid: a primitive is shown at the size it actually is. */}
               <Preview
                 className="mt-3 self-start"
-                src={primitivePreviewUrl(item.name, language)}
+                src={previewUrl(item, language)}
                 title={item.title}
+                width={item.meta.preview.width}
+                height={item.meta.preview.height}
                 fluid
               />
             </Link>

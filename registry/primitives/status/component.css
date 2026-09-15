@@ -1,3 +1,4 @@
+@layer components {
 /* status - shared primitive, themed by the active language's tokens.
 
    An inline state indicator: what a process is doing right now.
@@ -14,11 +15,11 @@
 .nx-status {
   display: inline-flex;
   align-items: center;
-  gap: 0.55em;
+  gap: var(--nx-space-statusGap);
   font-family: var(--nx-font-sans);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.4;
+  font-size: var(--nx-type-status-size);
+  font-weight: var(--nx-font-weight-medium);
+  line-height: var(--nx-type-status-lineHeight);
   color: var(--nx-muted);
 }
 
@@ -33,14 +34,14 @@
 /* Idle: hollow, the same way the charts draw a weekend against a weekday. */
 .nx-status--idle .nx-status__mark {
   background: var(--nx-bg);
-  box-shadow: inset 0 0 0 var(--nx-hairline) var(--nx-muted);
+  box-shadow: inset 0 0 0 var(--nx-stroke-hairline) var(--nx-muted);
 }
 
 /* Working: a dashed bar rather than a spinner, matching how progress shows an
    unknown quantity. Static, and deliberately so. */
 .nx-status--working .nx-status__mark {
   width: 14px;
-  height: calc(var(--nx-hairline) * 2);
+  height: calc(var(--nx-stroke-hairline) * 2);
   border-radius: 0;
   background: repeating-linear-gradient(
     to right,
@@ -63,7 +64,7 @@
    "done" without colour. Weight does the rest. */
 .nx-status--failed {
   color: var(--nx-ink);
-  font-weight: 700;
+  font-weight: var(--nx-font-weight-bold);
 }
 
 .nx-status--failed .nx-status__mark {
@@ -78,7 +79,7 @@
   inset: 0;
   margin: auto;
   width: 9px;
-  height: calc(var(--nx-hairline) * 2);
+  height: calc(var(--nx-stroke-hairline) * 2);
   background: var(--nx-ink);
 }
 
@@ -98,21 +99,22 @@
   justify-content: center;
   min-height: 40dvh;
   font-family: var(--nx-font-sans);
-  font-size: 11.5px;
+  font-size: var(--nx-type-body-size);
   color: var(--nx-muted);
 }
 
 .nx-status-block--inline {
   min-height: 0;
-  padding: 26px 0;
+  padding: var(--nx-space-statusBlockPadding);
 }
 
 /* Timestamp or count trailing the label. */
 .nx-status__meta {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-faint);
   font-variant-numeric: tabular-nums;
+}
 }

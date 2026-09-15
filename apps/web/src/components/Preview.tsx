@@ -4,40 +4,27 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useNearViewport } from '@/lib/hooks.ts';
 
-/**
- * The logical width every preview is rendered at before being scaled down.
- *
- * Components were authored for a full page, so embedding one directly in a
- * 320px card shows the top-left corner of a much wider layout. Rendering at a
- * fixed viewport and scaling the whole frame keeps the composition intact and
- * the type proportional, which is how a thumbnail should behave.
- *
- * The value is the width the charts were drawn for, not a guess at a desktop
- * viewport. They came from a two-column grid capped at 1400px, so a card was
- * about 690px and a full-width one about 1400px.
- *
- * This was 1180 and letterboxed almost everything. An expressive SVG carries
- * `max-height: 330px` with `preserveAspectRatio="xMidYMid meet"`, so past a
- * certain width the height caps first and its aspect ratio decides how much of
- * the box it can occupy — the browser pads the rest to centre it. At 1180 the
- * box was 1044px and a 400x320 chart drew 488px of it. Measured fill going to
- * 660: dotty-matrix 34 to 68%, arc-matrix 41 to 82%, hairline-line 47 to 93%,
- * and the wide charts from ~95 to 100%. Nothing regresses.
- *
- * Do not fix letterboxing by removing `max-height` from the components. That
- * cap is what stops a chart being ~900px tall in a consumer's wide container;
- * dropping it would degrade what the registry ships in order to flatter this
- * preview. The width belongs here, where it only affects previews.
- *
- * Lower bound: below about 550 the width binds before the height cap and charts
- * start shrinking again rather than filling.
- */
-const LOGICAL_WIDTH = 660;
+/** Used only when preview metadata is unavailable or invalid. */
+const FALLBACK_WIDTH = 660;
+/** Matches the native-size primitive examples' visible gallery inset. */
+const PREVIEW_INSET = 28;
+
+interface PreviewInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
 
 interface PreviewProps {
   src: string;
   title: string;
-  /** From meta.aspectRatio. Only reserves initial space; real height is measured. */
+  /** Explicit example dimensions from item.meta.preview. */
+  width?: number;
+  height?: number;
+  /** Build-measured page/card space surrounding a chart's composition. */
+  insets?: PreviewInsets;
+  /** Secondary height fallback; the document reports its measured content height. */
   aspectRatio?: string;
   className?: string;
   /**
@@ -51,27 +38,23 @@ interface PreviewProps {
   /**
    * Render at the container's own width with no scaling.
    *
-   * Charts are authored for a full page, so they must be rendered wide and
-   * scaled down. Primitives are small already, and scaling a button down to a
-   * quarter size makes it illegible and misrepresents it. A button should be
-   * shown at the size a button actually is.
+   * Chart thumbnails preserve the declared example composition by scaling.
+   * Primitives stay at their natural size so controls remain legible.
    */
   fluid?: boolean;
 }
 
 /**
- * A component preview, in an iframe pointed at the generated standalone
- * document.
- *
- * An iframe rather than inline markup because React does not execute `<script>`
- * inserted via innerHTML, so inlining sixty-odd chart scripts would mean
- * hand-evaluating and tearing them down on every route change. Pointing at a
- * real URL rather than using srcdoc also lets the browser cache ECharts and the
- * fonts once across every preview instead of per frame.
+ * An isolated React example with a browser-rendered initial snapshot. Its
+ * generated document and bundle are static assets, so the app and a CDN serve
+ * the same preview. The iframe keeps each example's tokens and styles local.
  */
 export function Preview({
   src,
   title,
+  width: previewWidth,
+  height: previewHeight,
+  insets,
   aspectRatio,
   className,
   boxHeight,
@@ -81,8 +64,10 @@ export function Preview({
   const boxRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [width, setWidth] = useState(0);
-  const [contentHeight, setContentHeight] = useState<number>();
-  const [loaded, setLoaded] = useState(false);
+  const [measurement, setMeasurement] = useState<{ src: string; height: number }>();
+  const [loadedSrc, setLoadedSrc] = useState<string>();
+  const contentHeight = measurement?.src === src ? measurement.height : undefined;
+  const loaded = loadedSrc === src;
 
   // Track the rendered width so the fixed-width frame can be scaled to fit.
   //
@@ -110,22 +95,32 @@ export function Preview({
     const onMessage = (event: MessageEvent) => {
       if (event.source !== frameRef.current?.contentWindow) return;
       const data = event.data as { type?: string; height?: number } | null;
-      if (data?.type === 'nx-preview-size' && typeof data.height === 'number') {
-        setContentHeight(data.height);
+      if (data?.type === 'nx-preview-size' && typeof data.height === 'number' && Number.isFinite(data.height) && data.height > 0) {
+        setMeasurement({ src, height: data.height });
       }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, []);
+  }, [src]);
 
-  const fallbackRatio = aspectRatio
+  const rawRatio = aspectRatio
     ? Number.parseFloat(aspectRatio.split('/')[0] ?? '4') /
       Number.parseFloat(aspectRatio.split('/')[1] ?? '3')
     : 4 / 3;
-  const logicalHeight = contentHeight ?? LOGICAL_WIDTH / fallbackRatio;
+  const fallbackRatio = Number.isFinite(rawRatio) && rawRatio > 0 ? rawRatio : 4 / 3;
+  const logicalWidth = previewWidth !== undefined && Number.isFinite(previewWidth) && previewWidth > 0 ? previewWidth : FALLBACK_WIDTH;
+  const initialHeight = previewHeight !== undefined && Number.isFinite(previewHeight) && previewHeight > 0 ? previewHeight : logicalWidth / fallbackRatio;
+  const logicalHeight = contentHeight ?? initialHeight;
+  const framed = !fluid && insets !== undefined &&
+    Object.values(insets).every((value) => Number.isFinite(value) && value >= 0) &&
+    insets.left + insets.right < logicalWidth && insets.top + insets.bottom < logicalHeight;
+  const contentWidth = framed ? logicalWidth - insets.left - insets.right : logicalWidth;
+  const framedHeight = framed ? logicalHeight - insets.top - insets.bottom : logicalHeight;
+  const inset = framed ? PREVIEW_INSET : 0;
 
   /**
-   * Fit to width, or to the smaller of width and box when a height is fixed.
+   * Fit the composition inside the common inset, respecting a fixed box's
+   * height as well as its width. Older previews fit their whole document.
    *
    * Capped at 1, so a preview shrinks but never enlarges. Past that the frame
    * would show the component bigger than its own container could ever draw it,
@@ -139,11 +134,11 @@ export function Preview({
       : Math.min(
           1,
           boxHeight
-            ? Math.min(width / LOGICAL_WIDTH, boxHeight / logicalHeight)
-            : width / LOGICAL_WIDTH,
+            ? Math.min(Math.max(0, width - inset * 2) / contentWidth, Math.max(0, boxHeight - inset * 2) / framedHeight)
+            : Math.max(0, width - inset * 2) / contentWidth,
         );
 
-    const ready = fluid ? near : near && scale > 0;
+  const ready = fluid ? near : near && scale > 0;
 
     /**
      * A fluid preview normally sizes to its content, which is right on a detail
@@ -156,9 +151,7 @@ export function Preview({
      * Pick a height that clears the tallest component in the row: anything
      * taller than the box is clipped, not shrunk.
      */
-    const frameHeight = fluid
-      ? (boxHeight ?? contentHeight ?? 160)
-      : logicalHeight;
+  const frameHeight = fluid ? (boxHeight ?? logicalHeight) : logicalHeight;
 
   return (
     // min-w-0 is load-bearing, not defensive. This sits inside a grid, and a
@@ -169,36 +162,36 @@ export function Preview({
     <div className={`min-w-0 ${className ?? ''}`}>
       <div
         ref={nearRef}
-        className="nx-frame relative w-full overflow-hidden rounded-[var(--radius-card)]"
-        // Never wider than the document inside it. Once the scale is capped at
-        // 1 a wide column would otherwise leave a band of empty frame beside a
-        // component already at full size. This converges rather than looping:
-        // the frame settles at the logical width, and the measurement taken
-        // inside it then agrees.
-        style={{ background: 'var(--nx-bg)', maxWidth: fluid ? undefined : LOGICAL_WIDTH }}
+        className="nx-frame relative w-full overflow-hidden rounded-[var(--nx-radius-card)]"
+        // Cap the frame at the composition's native width plus its gallery
+        // inset, so a wide column cannot add space beside a full-size chart.
+        style={{ background: 'var(--nx-bg)', maxWidth: fluid ? undefined : contentWidth + inset * 2 }}
       >
         <div
           ref={boxRef}
-          style={{ height: fluid ? frameHeight : (boxHeight ?? logicalHeight * scale) }}
+          style={{ height: fluid ? frameHeight : (boxHeight ?? framedHeight * scale + inset * 2) }}
         >
           {ready ? (
             <iframe
+              key={src}
               ref={frameRef}
               src={src}
               title={title}
               loading="lazy"
-              onLoad={() => setLoaded(true)}
-              // Scripts are required (the charts draw themselves). Same-origin
-              // is required for the preview's relative token and stylesheet
-              // references, and for the height message.
+              onLoad={() => setLoadedSrc(src)}
+              // Registry-authored example bundles run inside an isolated
+              // document and may fetch their declared static assets.
               sandbox="allow-scripts allow-same-origin"
               style={
                 fluid
                   ? { width: '100%', height: frameHeight, border: 0, display: 'block' }
                   : {
-                      width: LOGICAL_WIDTH,
+                      width: logicalWidth,
                       height: logicalHeight,
-                      transform: `scale(${scale})`,
+                      // Move only the surrounding page space out of the view.
+                      // Internal chart coordinates, labels and interactions
+                      // still use the original logical document dimensions.
+                      transform: `translate(${inset - (framed ? insets.left * scale : 0)}px, ${inset - (framed ? insets.top * scale : 0)}px) scale(${scale})`,
                       transformOrigin: 'top left',
                       border: 0,
                       display: 'block',

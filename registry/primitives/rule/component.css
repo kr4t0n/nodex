@@ -1,3 +1,4 @@
+@layer components {
 /* rule - shared primitive, themed by the active language's tokens.
 
    The most load-bearing primitive in a language with no elevation model. Where
@@ -6,7 +7,7 @@
 
 .nx-rule {
   border: 0;
-  border-top: var(--nx-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
   margin: 0;
   width: 100%;
 }
@@ -31,16 +32,17 @@
    it matches the content height rather than needing one set. */
 .nx-rule--vertical {
   border-top: 0;
-  border-left: var(--nx-hairline) solid var(--nx-grid);
+  border-left: var(--nx-stroke-hairline) solid var(--nx-grid);
   width: 0;
   height: auto;
   align-self: stretch;
-  margin-inline: 0.9em;
+  margin-inline: var(--nx-space-ruleInlineGap);
 }
 
 /* Inset, for a rule that separates rows inside a container without touching its
    edges. Aligns to the text column rather than the container. */
 .nx-rule--inset {
   width: auto;
-  margin-inline-start: 1.2em;
+  margin-inline-start: var(--nx-space-ruleInset);
+}
 }

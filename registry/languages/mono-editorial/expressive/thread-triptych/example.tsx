@@ -1,0 +1,7 @@
+import { ThreadTriptych, type ThreadTriptychDatum } from './component';
+const sources = ['web-ev', 'ios-ev', 'android-ev', 'srv-log', 'billing-ev', 'auth-ev', 'search-log', 'audit-ev', 'crash-rep', 'perf-beacon', 'cdn-log', 'edge-log', 'job-ev', 'sync-ev', 'import', 'export-req', 'admin-ui', 'partner-api', 'iot-ping', 'backfill'];
+const processors = ['parse', 'validate', 'dedupe', 'enrich', 'geoip', 'sessionize', 'pii-mask', 'score', 'sample', 'route', 'batch', 'window', 'join', 'flatten', 'filter', 'hash', 'encrypt', 'compact', 'index', 'tag'].flatMap(verb => [`${verb}-a`, `${verb}-b`]);
+const destinations = ['WAREHOUSE', 'ANALYTICS', 'CRM', 'ADS', 'BILLING', 'SEARCH', 'ML PIPE', 'ARCHIVE', 'AUDIT', 'EXPORTS'];
+const random = (i: number, k: number) => Math.abs(((i * 73856093) ^ (k * 19349663)) % 1000) / 1000;
+const data: readonly ThreadTriptychDatum[] = sources.flatMap((_, index) => Array.from({ length: 2 + Math.floor(random(index + 1, 5) * 2) }, (__, k) => ({ sourceIndex: index, processorIndex: Math.floor(random(index * 3 + k + 2, 13) * processors.length), destinationIndex: Math.min(destinations.length - 1, Math.floor(random(index * 5 + k + 4, 19) ** 2 * 11)), volumeK: Math.round(1 + random(index * 7 + k + 6, 29) ** 2 * 30) })));
+export function Example() { return <ThreadTriptych data={data} sources={sources} processors={processors} destinations={destinations} height={351} />; }

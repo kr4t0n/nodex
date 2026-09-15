@@ -17,7 +17,6 @@ import {
   findItem,
   loadCatalog,
   previewUrl,
-  primitivePreviewUrl,
   type Catalog,
 } from '@/lib/registry.ts';
 
@@ -55,18 +54,11 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
     );
   }
 
-  // Primitives are stored once and browsed under every language, so their
-  // preview takes the viewed language as a parameter. They also render at true
-  // size rather than scaled: a button shrunk to a quarter misrepresents it.
+  // Shared primitives use the viewed language and render at their natural size.
+  // Charts preserve the specimen's composition and scale to the available width.
   const isPrimitive = item.meta.tier === 'primitive';
 
-  // Bare, because the heading beside it already carries the title and the
-  // description, and printing both labels the component twice. The non-bare
-  // document still exists at the same URL without `?bare=1`, and is still what
-  // opening a preview directly gives you; this page just does not link to it.
-  const embedSrc = isPrimitive
-    ? primitivePreviewUrl(item.name, slug)
-    : previewUrl(slug, item.name, { bare: true });
+  const embedSrc = previewUrl(item, slug);
 
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
@@ -90,19 +82,25 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
             <h1 className="m-0 text-[26px] leading-[1.15] font-extrabold tracking-[-0.025em] sm:text-[32px]">
               {item.title}
             </h1>
-            {item.description ? (
-              <p
-                className="mt-3 max-w-[60ch] text-[12.5px] leading-[1.7]"
-                style={{ color: 'var(--nx-muted)' }}
-              >
-                {item.description}
-              </p>
-            ) : null}
+            {/* The type, not the description. Every surface that names a
+                component names it the same way — title, then type — so the
+                grid, the index and this page read as one thing. The
+                description is still in the manifest, where `nodex show` and
+                `nodex search` use it. */}
+            <p
+              className="mt-3 text-[10.5px] tracking-[0.06em] uppercase"
+              style={{ color: 'var(--nx-faint)' }}
+            >
+              {item.meta.component}
+            </p>
 
             <div className="mt-9">
               <Preview
                 src={embedSrc}
                 title={item.title}
+                width={item.meta.preview.width}
+                height={item.meta.preview.height}
+                insets={item.meta.preview.insets}
                 aspectRatio={item.meta.aspectRatio}
                 fluid={isPrimitive}
               />
@@ -119,14 +117,14 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                     className="py-2.5 text-[9px] font-bold tracking-[0.08em] uppercase"
                     style={{
                       color: 'var(--nx-muted)',
-                      borderTop: 'var(--nx-hairline) solid var(--nx-grid)',
+                      borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)',
                     }}
                   >
                     {label}
                   </dt>
                   <dd
                     className="m-0 py-2.5 text-[11.5px]"
-                    style={{ borderTop: 'var(--nx-hairline) solid var(--nx-grid)' }}
+                    style={{ borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)' }}
                   >
                     {value}
                   </dd>

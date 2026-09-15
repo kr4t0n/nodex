@@ -4,13 +4,71 @@
   "description": "one rung = one ticket in a hundred · bins of two hours · the ladder shows the pile",
   "component": "histogram",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/340",
   "tags": [
     "support",
     "desk"
   ],
-  "dependencies": [],
-  "strokeAsArea": true
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "RungHistogram"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "rung-marks.tsx"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly RungHistogramDatum[]",
+      "description": "Ordered time bins with fromHours, toHours and whole ticket counts. Missing counts suppress the median; zero is measured.",
+      "required": true
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

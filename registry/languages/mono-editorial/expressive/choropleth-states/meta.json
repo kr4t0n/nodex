@@ -4,16 +4,73 @@
   "description": "real outlines · Alaska and Hawaii tucked lower-left · shade = sign-ups, five steps · needs the network for map data",
   "component": "choropleth",
   "tier": "expressive",
-  "runtime": "echarts",
+  "runtime": "react",
   "density": "glance",
   "tags": [
     "growth",
     "geo"
   ],
   "dependencies": [
-    "echarts@6"
+    "recharts@3.10.1"
   ],
-  "externalData": [
-    "https://cdn.jsdelivr.net/gh/apache/echarts-examples@gh-pages/public/data/asset/geo/USA.json"
+  "aspectRatio": "580/380",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ChoroplethStates"
+  ],
+  "files": [
+    "component.tsx",
+    "geo.ts"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "geo-geometry.ts",
+    "choropleth-legend.tsx"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 482
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ChoroplethStatesDatum[]",
+      "required": true,
+      "description": "Geographic names and nullable nonnegative signUpsK values. Five literal bands retain the specimen thresholds. Fractional values in a band gap remain inspectable without an invented band. Optional annotations and pixel offsets belong to the caller."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
   ]
 }

@@ -4,12 +4,71 @@
   "description": "one tick = one percent of target · inked = earned · the dial reads left to right",
   "component": "gauge",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "glance",
-  "aspectRatio": "400/320",
+  "aspectRatio": "560/360",
   "tags": [
     "quarterly",
     "target"
   ],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "TickGauge"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "radial-tally-marks.tsx"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 475
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "TickGaugeDatum | null",
+      "required": true,
+      "description": "A whole percent in 0–100 and the caller-owned goal label. Missing, fractional or out-of-range progress is unavailable; zero retains all 100 remaining ticks."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

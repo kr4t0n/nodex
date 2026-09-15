@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "composite": false,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"]
+}

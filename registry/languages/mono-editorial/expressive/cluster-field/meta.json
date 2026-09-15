@@ -4,12 +4,76 @@
   "description": "80 core contributors orbit the main repo · satellite islands keep their own gravity · dotted paths = cross-contribution",
   "component": "network",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "close-read",
-  "aspectRatio": "840/320",
+  "aspectRatio": "720/320",
   "tags": [
     "contributor",
     "graph"
   ],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ClusterField"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 368
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ClusterFieldDatum[]",
+      "required": true,
+      "description": "Satellite names, finite layout coordinates, nonnegative whole contributor counts and explicit cross-contribution flags. Missing counts retain a label without people or a bridge; each dot represents one contributor."
+    },
+    {
+      "name": "coreContributors",
+      "type": "number | null",
+      "required": true,
+      "description": "Nonnegative whole count of main-repository contributors. Zero is measured absence; null or invalid values are unavailable."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

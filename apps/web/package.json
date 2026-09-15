@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node ../../scripts/sync-registry-public.mjs",
+    "predev": "node ../../scripts/sync-registry-public.ts",
     "dev": "next dev --port 4180",
-    "prebuild": "node ../../scripts/sync-registry-public.mjs",
+    "prebuild": "node ../../scripts/sync-registry-public.ts",
     "build": "next build",
     "start": "next start --port 4180",
     "typecheck": "tsc --noEmit -p tsconfig.json"

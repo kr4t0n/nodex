@@ -4,12 +4,70 @@
   "description": "each wedge = one deploy · angle = time of day · reach = files touched · ink builds where deploys pile up",
   "component": "polar-area",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "close-read",
-  "aspectRatio": "400/320",
+  "aspectRatio": "420/380",
   "tags": [
     "deploy",
     "log"
   ],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "RadialPatchwork"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 617
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly RadialPatchworkDatum[]",
+      "required": true,
+      "description": "Ordered deployments with hour in [0,24), angular window in [0,360] degrees, finite nonnegative files touched and incident status. The original absolute radius is files/6 with a 96-file inner hole; zero-width windows and reaches inside the hole produce no annular ink. Incomplete observations remain unavailable."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

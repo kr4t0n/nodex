@@ -4,12 +4,76 @@
   "description": "● shipped · ○ reworked · dashed = dormant years · line runs on if it's still alive today",
   "component": "bump",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "close-read",
-  "aspectRatio": "400/340",
+  "aspectRatio": "560/340",
   "tags": [
     "product",
     "history"
   ],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "TrendLineage"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly TrendLineageDatum[]",
+      "required": true,
+      "description": "Ordered feature columns with shipped/reworked events and explicit survival state. Years must be safe integers within the caller window. An incomplete feature timeline is unavailable; repeated names remain distinct."
+    },
+    {
+      "name": "years",
+      "type": "readonly [first: number, last: number]",
+      "required": true,
+      "description": "Inclusive caller-owned year window. Years must be ordered safe integers. No current date or specimen window is inferred."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

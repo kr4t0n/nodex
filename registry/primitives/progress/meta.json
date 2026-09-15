@@ -4,7 +4,69 @@
   "description": "A rule that fills rather than a container that drains, with a static dashed indeterminate state",
   "component": "progress",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["feedback", "data"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "feedback",
+    "data"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Progress"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "label",
+      "type": "ReactNode",
+      "description": "Visible label linked to the native progress element.",
+      "required": true
+    },
+    {
+      "name": "value",
+      "type": "number",
+      "description": "Finite progress value, clamped between zero and max. Omit it, or supply a nonfinite value, for the indeterminate state.",
+      "required": false
+    },
+    {
+      "name": "max",
+      "type": "number",
+      "description": "Positive finite maximum; defaults to 100 and falls back to 100 for invalid values.",
+      "required": false
+    },
+    {
+      "name": "valueLabel",
+      "type": "ReactNode",
+      "description": "Displayed value text; otherwise uses a rounded percentage or Unknown for indeterminate progress.",
+      "required": false
+    },
+    {
+      "name": "quiet",
+      "type": "boolean",
+      "description": "Use the quieter progress fill; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "thick",
+      "type": "boolean",
+      "description": "Use the thicker track; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "wrapperClassName",
+      "type": "string",
+      "description": "Classes on the label/progress wrapper. className and ref target the progress element.",
+      "required": false
+    }
+  ]
 }

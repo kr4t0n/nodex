@@ -1,3 +1,4 @@
+@layer components {
 /* textarea - shared primitive, themed by the active language's tokens.
 
    Kept separate from input rather than made a variant of it, because a
@@ -15,14 +16,14 @@
 .nx-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--nx-space-fieldGap);
   font-family: var(--nx-font-sans);
 }
 
 .nx-field__label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
 }
@@ -30,18 +31,18 @@
 .nx-textarea {
   width: 100%;
   min-height: 5.5em;
-  padding: 0.7em 0.95em;
-  border: var(--nx-hairline) solid var(--nx-grid);
+  padding: var(--nx-space-textareaPadding);
+  border: var(--nx-stroke-hairline) solid var(--nx-grid);
   border-radius: var(--nx-radius-card);
   background: var(--nx-bg);
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
-  font-size: 12px;
-  line-height: 1.65;
+  font-size: var(--nx-type-control-size);
+  line-height: var(--nx-type-control-multilineLineHeight);
   /* Vertical only. Horizontal resize breaks the measure, and both axes let a
      reader drag the field into a shape no layout anticipated. */
   resize: vertical;
-  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color var(--nx-motion-control-duration) var(--nx-motion-control-easing);
 }
 
 /* Grow with the content where the browser supports it, which removes the need
@@ -72,7 +73,7 @@
 }
 
 .nx-textarea:focus-visible {
-  outline: var(--nx-hairline) solid var(--nx-ink);
+  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
   outline-offset: 2px;
 }
 
@@ -85,13 +86,13 @@
 /* Monospace, for a field holding tokens, config, or a chart option object. */
 .nx-textarea--mono {
   font-family: var(--nx-font-mono);
-  font-size: 11px;
-  line-height: 1.7;
+  font-size: var(--nx-type-code-blockSize);
+  line-height: var(--nx-type-code-blockLineHeight);
 }
 
 .nx-field__help {
-  font-size: 10.5px;
-  line-height: 1.5;
+  font-size: var(--nx-type-help-size);
+  line-height: var(--nx-type-help-lineHeight);
   color: var(--nx-muted);
 }
 
@@ -100,8 +101,8 @@
 .nx-field__foot {
   display: flex;
   justify-content: space-between;
-  gap: 1em;
-  font-size: 10.5px;
+  gap: var(--nx-space-labelValueGap);
+  font-size: var(--nx-type-help-size);
   color: var(--nx-muted);
 }
 
@@ -118,4 +119,5 @@
   .nx-textarea {
     transition: none;
   }
+}
 }

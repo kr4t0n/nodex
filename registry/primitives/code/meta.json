@@ -1,10 +1,39 @@
 {
   "slug": "code",
   "title": "Code",
-  "description": "Inline code, keyboard keys, code blocks, and a runnable command row",
+  "description": "Inline code, keyboard keys, code blocks, and a command display",
   "component": "code",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["text", "technical"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "text",
+    "technical"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Code",
+    "Kbd",
+    "CodeBlock",
+    "Command"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 360
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "children",
+      "type": "ReactNode",
+      "description": "Code and Kbd render inline content; CodeBlock preserves whitespace inside pre/code; Command accepts command content and caller-supplied actions. Each export forwards its native element props.",
+      "required": false
+    }
+  ]
 }

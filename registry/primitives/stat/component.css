@@ -1,3 +1,4 @@
+@layer components {
 /* stat - shared primitive, themed by the active language's tokens.
 
    A measured figure with its label, for the row of numbers that usually sits
@@ -10,7 +11,7 @@
 .nx-stat {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--nx-space-statGap);
   font-family: var(--nx-font-sans);
   color: var(--nx-ink);
 }
@@ -19,34 +20,34 @@
    looking at before they read it, and a label underneath makes the number
    ambiguous for the length of a glance. */
 .nx-stat__label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--nx-type-label-size);
+  font-weight: var(--nx-type-label-weight);
+  letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
 }
 
 .nx-stat__value {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  font-size: var(--nx-type-stat-size);
+  font-weight: var(--nx-font-weight-bold);
+  letter-spacing: var(--nx-type-stat-tracking);
+  line-height: var(--nx-type-stat-lineHeight);
   font-variant-numeric: tabular-nums;
 }
 
 /* The unit rides with the value at a smaller size rather than being part of the
    number, so a column of values still aligns. */
 .nx-stat__unit {
-  font-size: 0.55em;
-  font-weight: 600;
+  font-size: var(--nx-type-stat-unitSize);
+  font-weight: var(--nx-font-weight-semibold);
   letter-spacing: 0;
   color: var(--nx-muted);
-  margin-left: 0.15em;
+  margin-left: var(--nx-space-statUnitGap);
 }
 
 .nx-stat__note {
-  font-size: 10.5px;
-  line-height: 1.5;
+  font-size: var(--nx-type-help-size);
+  line-height: var(--nx-type-help-lineHeight);
   color: var(--nx-muted);
 }
 
@@ -58,9 +59,9 @@
 .nx-stat__delta {
   display: inline-flex;
   align-items: center;
-  gap: 0.35em;
-  font-size: 10.5px;
-  font-weight: 600;
+  gap: var(--nx-space-statDeltaGap);
+  font-size: var(--nx-type-stat-deltaSize);
+  font-weight: var(--nx-font-weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--nx-muted);
 }
@@ -86,23 +87,23 @@
   width: 7px;
   height: 0;
   border: 0;
-  border-top: calc(var(--nx-hairline) * 2) solid var(--nx-muted);
+  border-top: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-muted);
 }
 
 .nx-stat__delta--strong {
   color: var(--nx-ink);
-  font-weight: 700;
+  font-weight: var(--nx-font-weight-bold);
 }
 
 /* Sizes. Small for a dense row, large for a single headline figure. */
 .nx-stat--sm .nx-stat__value {
-  font-size: 18px;
-  letter-spacing: -0.02em;
+  font-size: var(--nx-type-stat-smallSize);
+  letter-spacing: var(--nx-type-stat-smallTracking);
 }
 
 .nx-stat--lg .nx-stat__value {
-  font-size: 38px;
-  letter-spacing: -0.035em;
+  font-size: var(--nx-type-stat-largeSize);
+  letter-spacing: var(--nx-type-stat-largeTracking);
 }
 
 /* A group separated by hairlines rather than cards, consistent with a language
@@ -110,12 +111,12 @@
 .nx-stat-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 28px;
+  gap: var(--nx-space-statGroupGap);
 }
 
 .nx-stat-group--ruled > .nx-stat + .nx-stat {
-  padding-left: 28px;
-  border-left: var(--nx-hairline) solid var(--nx-grid);
+  padding-left: var(--nx-space-statGroupGap);
+  border-left: var(--nx-stroke-hairline) solid var(--nx-grid);
 }
 
 /* Stacked, for a sidebar beside a chart. */
@@ -125,9 +126,10 @@
 }
 
 .nx-stat-group--stack > .nx-stat {
-  padding: 14px 0;
+  padding: var(--nx-space-statStackPadding);
 }
 
 .nx-stat-group--stack > .nx-stat + .nx-stat {
-  border-top: var(--nx-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+}
 }

@@ -4,12 +4,94 @@
   "description": "bubble area = support tickets per product area, per year · bubbles overlap where years pile up · dark core = escalations · dashed ring = still in beta",
   "component": "bubble",
   "tier": "expressive",
-  "runtime": "svg",
+  "runtime": "react",
   "density": "close-read",
-  "aspectRatio": "840/400",
+  "aspectRatio": "880/400",
   "tags": [
     "support",
     "desk"
   ],
-  "dependencies": []
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "BubbleAlmanac"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 373
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly BubbleAlmanacDatum[]",
+      "required": true,
+      "description": "Indexed product/year readings with nonnegative ticket counts and beta status. Each pair is unique. Missing counts remain unavailable, zero draws no bubble, and the preserved core is a visual texture rather than an additional measure."
+    },
+    {
+      "name": "years",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered year labels; reading yearIndex addresses this array."
+    },
+    {
+      "name": "areas",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered product-area labels; reading areaIndex addresses this array."
+    },
+    {
+      "name": "events",
+      "type": "readonly BubbleAlmanacEvent[]",
+      "required": true,
+      "description": "Caller-owned year/note entries on the event shelf; pass an empty array for no events."
+    },
+    {
+      "name": "annotations",
+      "type": "readonly BubbleAlmanacAnnotation[]",
+      "required": true,
+      "description": "Caller-owned marginal notes. Fractional area/year positions set each pointer's start (from) and bend (to); text wraps in the top margin above the observations. No runtime sample annotations are invented."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
+  ]
 }

@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import type { Catalog, Item, Language } from './registry.ts';
 
 /**
  * Build-time reads of the manifest, for prerendering routes.
@@ -13,14 +14,18 @@ import path from 'node:path';
  */
 const PUBLIC = path.join(process.cwd(), 'public', 'r');
 
-interface ManifestItem {
-  name: string;
-  meta: { language: string; tier: string };
-}
-
 async function readManifest<T>(file: string): Promise<T> {
   const raw = await readFile(path.join(PUBLIC, file), 'utf8');
   return JSON.parse(raw) as T;
+}
+
+/** Server components use the same published addresses as the browser catalog. */
+export async function readCatalog(): Promise<Catalog> {
+  const [{ items }, languages] = await Promise.all([
+    readManifest<{ items: Item[] }>('registry.json'),
+    readManifest<Language[]>('languages.json'),
+  ]);
+  return { items, languages };
 }
 
 export async function languageSlugs(): Promise<string[]> {
@@ -36,7 +41,7 @@ export async function componentParams(): Promise<
   { slug: string; name: string }[]
 > {
   const [{ items }, slugs] = await Promise.all([
-    readManifest<{ items: ManifestItem[] }>('registry.json'),
+    readManifest<{ items: Item[] }>('registry.json'),
     languageSlugs(),
   ]);
 

@@ -4,7 +4,88 @@
   "description": "Native dialog with a mixed-ink backdrop, since a language with no elevation model cannot lift a panel with a shadow",
   "component": "dialog",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["overlay", "interactive"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "overlay",
+    "interactive"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Dialog",
+    "DialogAction"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 380
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "title",
+      "type": "ReactNode",
+      "description": "Dialog: heading used as its accessible name unless aria-labelledby is supplied.",
+      "required": true
+    },
+    {
+      "name": "description",
+      "type": "ReactNode",
+      "description": "Dialog: optional description linked through aria-describedby unless overridden.",
+      "required": false
+    },
+    {
+      "name": "actions",
+      "type": "ReactNode",
+      "description": "Dialog: footer content, typically composed from DialogAction exports.",
+      "required": false
+    },
+    {
+      "name": "open",
+      "type": "boolean",
+      "description": "Dialog: controlled open state. Omit it to open or close through the native dialog ref.",
+      "required": false
+    },
+    {
+      "name": "onOpenChange",
+      "type": "(open: boolean) => void",
+      "description": "Dialog: reports close and cancel requests. Update controlled open in this callback.",
+      "required": false
+    },
+    {
+      "name": "modal",
+      "type": "boolean",
+      "description": "Dialog: use showModal when opening; defaults to true. false uses the nonmodal show method.",
+      "required": false
+    },
+    {
+      "name": "inline",
+      "type": "boolean",
+      "description": "Dialog: in-flow, nonmodal specimen mode using the native open attribute; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "wide",
+      "type": "boolean",
+      "description": "Dialog: wider container treatment; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "confirm",
+      "type": "boolean",
+      "description": "DialogAction only: solid confirmation treatment; defaults to false.",
+      "required": false
+    },
+    {
+      "name": "type",
+      "type": "'button' | 'submit' | 'reset'",
+      "description": "DialogAction only: native button behavior; defaults to button.",
+      "required": false
+    }
+  ]
 }

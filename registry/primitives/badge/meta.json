@@ -4,7 +4,33 @@
   "description": "Uppercase micro-label in solid, outline, dashed, and quiet treatments",
   "component": "badge",
   "tier": "primitive",
-  "runtime": "css",
-  "tags": ["label", "meta"],
-  "dependencies": []
+  "runtime": "react",
+  "tags": [
+    "label",
+    "meta"
+  ],
+  "dependencies": [],
+  "entry": "component.tsx",
+  "exports": [
+    "Badge"
+  ],
+  "files": [
+    "component.tsx",
+    "component.css"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 120
+  },
+  "shared": [],
+  "props": [
+    {
+      "name": "variant",
+      "type": "'solid' | 'outline' | 'dashed' | 'quiet'",
+      "description": "Badge treatment; defaults to outline.",
+      "required": false
+    }
+  ]
 }

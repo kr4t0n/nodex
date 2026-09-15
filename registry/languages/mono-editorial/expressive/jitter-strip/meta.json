@@ -4,13 +4,76 @@
   "description": "every dot = one ticket · jitter reveals the pile-up · by priority",
   "component": "strip-plot",
   "tier": "expressive",
-  "runtime": "echarts",
+  "runtime": "react",
   "density": "glance",
   "tags": [
     "support",
     "desk"
   ],
   "dependencies": [
-    "echarts@6"
+    "recharts@3.10.1"
+  ],
+  "aspectRatio": "580/320",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "JitterStrip"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 426
+  },
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly JitterStripDatum[]",
+      "required": true,
+      "description": "Individual observations with nonnegative hours and caller-supplied fractional band positions. Rounded positions select the band label and tone; the fixed band viewport preserves the supplied jitter. Invalid hours or positions are unavailable."
+    },
+    {
+      "name": "bands",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Ordered labels at integer band positions, starting at zero. Repeated labels retain separate positions."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional fixed width in pixels; otherwise fills its containing element.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable token-timed motion subject to the system reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the component container.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of what this instance measures.",
+      "required": false
+    }
   ]
 }
