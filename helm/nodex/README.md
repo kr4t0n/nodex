@@ -5,8 +5,11 @@ Deploys the nodex web app: the browsable registry and the accounts layer.
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm repo update
-helm install nodex nodex/nodex --set siteUrl=https://nodex.example.com
+helm upgrade --install nodex nodex/nodex --version 0.2.0 --set siteUrl=https://nodex.example.com
 ```
+
+Chart `0.2.0` defaults to `docker.io/kr4t0n/nodex:0.2.0` for both the app
+and migration Job. Set `image.tag` to override that release explicitly.
 
 ## Accounts are optional
 

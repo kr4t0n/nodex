@@ -47,7 +47,7 @@ The installed CLI provides the same commands as `nodex init` and `nodex add`.
 Its default registry is the hosted deployment, which may have a different
 version. Use `--registry` explicitly to exercise this reconstruction.
 
-Release this CLI together with a registry built from the new contract. Older
+Release `0.2.0` pairs the CLI with a registry built from the new contract. Older
 hosted manifests do not provide the required entry, file-target and language-asset
 fields; the CLI intentionally reports that mismatch instead of guessing paths.
 
@@ -469,13 +469,25 @@ and a migration Job. Its release workflow requires a chart-version bump:
 
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
-helm install nodex nodex/nodex --set siteUrl=https://nodex.example.com
+helm repo update
+helm upgrade --install nodex nodex/nodex --version 0.2.0 --set siteUrl=https://nodex.example.com
 ```
+
+Chart `0.2.0` pins the app and migration Job to `kr4t0n/nodex:0.2.0` through
+`appVersion`; `image.tag` is an explicit override.
 
 `npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
 `@kubitnodes/nodex`, has no runtime dependencies on the monorepo. The npm workflow
 publishes on version tags or manual runs, requires `NPM_TOKEN` with rights to
 that package, and verifies the packed artifact before publishing.
+
+For a coordinated release, bump `packages/cli/package.json` and its lockfile
+entry, plus the Helm chart's `version` and `appVersion`. Commit those changes
+on `main` and push a matching annotated tag such as `v0.2.0`. The main push
+publishes the versioned Helm chart; the tag starts the npm and image workflows.
+Image version tags omit the `v` prefix. Confirm the registry artifacts after
+the workflows finish: missing credentials make the current publish jobs skip,
+so a successful workflow alone does not prove a release exists.
 
 ## Extend the catalogue
 

@@ -338,6 +338,14 @@ builds the registry before the site and keeps Chromium out of runtime. Migration
 retain their monorepo path in the image because the migration runner resolves
 relative to its own location. Helm uses an external database and migration Job.
 
+Release tags use `v<version>` and trigger CLI and image publishing. The CLI
+package version and lockfile entry must match the tag; Docker tags omit `v`.
+Helm publication follows chart changes on `main` and preserves existing chart
+versions. Bump both chart `version` and `appVersion` for a coordinated release
+so the default app and migration images use the same versioned image. Check
+published artifacts as well as workflow status: absent npm or Docker credentials
+currently cause their publish jobs to skip successfully.
+
 ## Primitive and chart gotchas
 
 - Input IDs use `useId`; independent instances and radio groups must not collide.

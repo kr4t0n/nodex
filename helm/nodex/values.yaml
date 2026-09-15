@@ -23,9 +23,8 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: kr4t0n/nodex
-  # Falls back to .Chart.AppVersion. Override to pin a release without
-  # bumping the chart. `sha-<short>` tags are immutable and are the safer
-  # choice for anything you care about.
+  # Falls back to the release tag pinned by .Chart.AppVersion. Override to
+  # deploy a different image without changing the chart version.
   tag: ""
   pullPolicy: IfNotPresent
 
