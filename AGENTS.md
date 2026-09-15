@@ -474,6 +474,9 @@ currently cause their publish jobs to skip successfully.
   series. Hour and angular window remain separate from radial files/6 reach;
   the original 16-unit hole masks reaches of 96 files or fewer. Dial ticks use
   Cartesian proportions while sectors stay circular through the smaller scale.
+  Fixture state setters enqueue React work; returning from `page.evaluate`
+  does not guarantee new SVG geometry. Poll the updated radius before checking
+  its ratio so fast runners cannot read the previous mode.
 - Radial-convergence takes explicit request assignments and stable theme IDs.
   Hub area counts actual assignments; an unresolved assignment keeps its rim
   node without inventing a strand. Requests and hubs share one native series,
