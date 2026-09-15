@@ -13,8 +13,9 @@ function Charts({mode,animate}:{mode:Mode;animate:boolean}){const values=mode===
 export function ForceConsumer({animate}:{animate:boolean}){const[mode,setMode]=useState<Mode>('normal');const[manual,setManual]=useState(false);useEffect(()=>{window.nodexForceFixture={setMode,setManual,seek:p=>pending.forEach(fn=>fn(p)),pending:()=>pending.size};},[]);return <><section id='force-primary' className='w-[660px] space-y-6'><AnimationControllerProvider value={controller}><Charts mode={mode} animate={animate||manual}/></AnimationControllerProvider></section><section id='force-secondary' className='w-[520px] space-y-6'><Charts mode='normal' animate={false}/></section></>;}
 `;
 async function setMode(page: Page, mode: string) { await page.evaluate(value => (window as unknown as { nodexForceFixture: { setMode: (mode: string) => void } }).nodexForceFixture.setMode(value), mode); }
-async function center(chart: Locator, index = 0): Promise<{ x: number; y: number }> {
-  let position: { x: number; y: number } | null = null;
+interface ForceMarkPosition { x: number; y: number; localX: number; localY: number; svgX: number; svgY: number; scrollX: number; scrollY: number }
+async function center(chart: Locator, index = 0): Promise<ForceMarkPosition> {
+  let position: ForceMarkPosition | null = null;
   // Marks remount as their coordinates change; find and measure one atomically from the stable root.
   await expect.poll(async () => {
     position = await chart.evaluate((root, index) => {
@@ -22,7 +23,10 @@ async function center(chart: Locator, index = 0): Promise<{ x: number; y: number
       const matrix = circle?.getScreenCTM();
       if (!circle?.isConnected || !matrix) return null;
       const point = new DOMPoint(circle.cx.baseVal.value, circle.cy.baseVal.value).matrixTransform(matrix);
-      return Number.isFinite(point.x) && Number.isFinite(point.y) ? { x: point.x, y: point.y } : null;
+      return Number.isFinite(point.x) && Number.isFinite(point.y) ? {
+        x: point.x, y: point.y, localX: circle.cx.baseVal.value, localY: circle.cy.baseVal.value,
+        svgX: matrix.e, svgY: matrix.f, scrollX: window.scrollX, scrollY: window.scrollY,
+      } : null;
     }, index);
     return position;
   }, { message: 'The current force mark must have connected, finite screen coordinates' }).not.toBeNull();
@@ -51,18 +55,30 @@ export async function checkForceConsumer(page: Page): Promise<void> {
   await expect.poll(() => dense.locator('[data-nx-service-mark="1"]').evaluate(e => getComputedStyle(e).fill)).toBe('rgb(51, 50, 45)');
   // Earlier consumer checks can overflow horizontally. Exercise that condition in focused runs too.
   const overflow = await page.addStyleTag({ content: 'body::after { content: ""; display: block; width: calc(100vw + 180px); height: 1px; }' });
+  const stopPageKeys = await page.locator('#force-primary').evaluateHandle(root => {
+    const stopScroll = (event: KeyboardEvent) => {
+      if (event.target instanceof Node && root.contains(event.target) && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) event.preventDefault();
+    };
+    // React receives the bubbling event first; cancel only the browser's page-scroll default.
+    document.addEventListener('keydown', stopScroll);
+    return () => document.removeEventListener('keydown', stopScroll);
+  });
   try {
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeGreaterThan(0);
     for (const node of [simple, dense]) {
       await node.scrollIntoViewIfNeeded(); await page.mouse.move(880,10); await node.locator('svg.recharts-surface').focus(); await page.keyboard.press('ArrowLeft'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub'); await page.keyboard.press('ArrowRight'); await expect(node.getByRole('status')).toContainText('Same ↔ Caller hub');
       await expect(node.locator('[data-nx-force-node="3"]')).toHaveAttribute('data-nx-related','false');
-      // Recharts leaves the arrows' native page scrolling enabled. Stop that scroll before
-      // measuring screen coordinates for the independent pointer check.
+      // Give the independent pointer check a known viewport before measuring its target.
       await page.evaluate(() => window.scrollTo({ left: 0, top: window.scrollY, behavior: 'instant' }));
       const p = await center(node); await page.mouse.move(p.x,p.y); await expect(node.getByRole('status')).toContainText(node === simple ? '52k syncs/mo' : '52k calls/day');
       const before = await positions(node); await page.mouse.down(); await page.mouse.move(p.x+35,p.y+18,{steps:5});
-      await expect.poll(async () => (await center(node)).x).toBeCloseTo(p.x + 35, 3);
-      await expect.poll(async () => (await center(node)).y).toBeCloseTo(p.y + 18, 3);
+      try {
+        await expect.poll(async () => (await center(node)).x).toBeCloseTo(p.x + 35, 3);
+        await expect.poll(async () => (await center(node)).y).toBeCloseTo(p.y + 18, 3);
+      } catch (error) {
+        console.error('Force drag coordinates', JSON.stringify({ chart: await node.getAttribute('data-nx-chart'), start: p, end: await center(node) }));
+        throw error;
+      }
       await page.mouse.up(); await page.mouse.move(880,10); await expect.poll(async () => JSON.stringify(await positions(node))).not.toBe(JSON.stringify(before));
       if (node === simple) await checkForceFit(simple);
       const after = await positions(node); await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))); assert.deepEqual(await positions(node),after,'Released force graph must settle and hold without a timer');
@@ -73,6 +89,8 @@ export async function checkForceConsumer(page: Page): Promise<void> {
       const width=Number(await node.locator('svg').getAttribute('width')); await node.evaluate(e=>{(e as HTMLElement).style.width='400px';}); await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBeLessThan(width); await node.evaluate(e=>{(e as HTMLElement).style.width='';}); await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBe(width);
     }
   } finally {
+    await stopPageKeys.evaluate(dispose => dispose());
+    await stopPageKeys.dispose();
     await overflow.evaluate(element => { element.parentNode?.removeChild(element); });
     await overflow.dispose();
   }

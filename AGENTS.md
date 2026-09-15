@@ -604,10 +604,11 @@ currently cause their publish jobs to skip successfully.
   Evaluating a previously resolved mark can race its removal from the SVG.
   Recharts leaves native arrow-key page scrolling enabled. On an overflowing
   consumer page, that scroll can continue into a following pointer check and
-  invalidate its screen coordinates. Stop the scroll with an instant viewport
-  reset before measuring drag targets. The force smoke explicitly exercises
-  horizontal overflow and keyboard navigation while retaining its precise
-  drag assertions; the chart's drag behavior does not need changing for this.
+  invalidate its screen coordinates. The force fixture cancels the page-scroll
+  default on the document after React handles each arrow event, then resets the
+  viewport before measuring drag targets. It exercises horizontal overflow and
+  real keyboard navigation while retaining its precise drag assertions. Scope
+  and remove the listener so later consumer checks retain normal browser input.
 - Scatter-morph uses actual Scatter, Bar and Pie series. On a requested view
   change, sample the currently visible native outlines by stable product ID;
   custom marks follow the next native series' animation clock to its geometry.
