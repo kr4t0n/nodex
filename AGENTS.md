@@ -474,6 +474,9 @@ currently cause their publish jobs to skip successfully.
   series. Hour and angular window remain separate from radial files/6 reach;
   the original 16-unit hole masks reaches of 96 files or fewer. Dial ticks use
   Cartesian proportions while sectors stay circular through the smaller scale.
+  Fixture state setters enqueue React work; returning from `page.evaluate`
+  does not guarantee new SVG geometry. Poll the updated radius before checking
+  its ratio so fast runners cannot read the previous mode.
 - Radial-convergence takes explicit request assignments and stable theme IDs.
   Hub area counts actual assignments; an unresolved assignment keeps its rim
   node without inventing a strand. Requests and hubs share one native series,
@@ -599,6 +602,13 @@ currently cause their publish jobs to skip successfully.
   Consumer drag checks query and measure the current mark from the stable chart
   root in one browser evaluation, retrying while a connected mark is unavailable.
   Evaluating a previously resolved mark can race its removal from the SVG.
+  Recharts leaves native arrow-key page scrolling enabled. On an overflowing
+  consumer page, that scroll can continue into a following pointer check and
+  invalidate its screen coordinates. The force fixture cancels the page-scroll
+  default on the document after React handles each arrow event, then resets the
+  viewport before measuring drag targets. It exercises horizontal overflow and
+  real keyboard navigation while retaining its precise drag assertions. Scope
+  and remove the listener so later consumer checks retain normal browser input.
 - Scatter-morph uses actual Scatter, Bar and Pie series. On a requested view
   change, sample the currently visible native outlines by stable product ID;
   custom marks follow the next native series' animation clock to its geometry.
