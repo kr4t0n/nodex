@@ -2,8 +2,33 @@ apiVersion: v1
 entries:
   nodex:
   - apiVersion: v2
+    appVersion: 0.2.1
+    created: "2026-09-16T03:17:58.171255206Z"
+    description: 'nodex — a component registry organised by design language. This
+      chart deploys the web app, which serves the browsable registry and the accounts
+      layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
+      site serves every public page and the sign-in page reports itself unconfigured;
+      point `database.url` at a managed instance when you want accounts. '
+    digest: 984e39754fbcaf955a61e28babbd08f4af3b7d485be3004bc42b1107fb155431
+    home: https://github.com/kr4t0n/nodex
+    keywords:
+    - nodex
+    - design-system
+    - component-registry
+    - design-tokens
+    maintainers:
+    - name: kr4t0n
+      url: https://github.com/kr4t0n
+    name: nodex
+    sources:
+    - https://github.com/kr4t0n/nodex
+    type: application
+    urls:
+    - https://kr4t0n.github.io/nodex/helm/nodex-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
     appVersion: 0.2.0
-    created: "2026-09-15T16:54:41.456335603Z"
+    created: "2026-09-16T03:17:58.170987424Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -28,7 +53,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: latest
-    created: "2026-09-15T16:54:41.455953337Z"
+    created: "2026-09-16T03:17:58.170703657Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -51,4 +76,4 @@ entries:
     urls:
     - https://kr4t0n.github.io/nodex/helm/nodex-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-15T16:54:41.455445366Z"
+generated: "2026-09-16T03:17:58.170262543Z"
