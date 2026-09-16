@@ -342,9 +342,16 @@ Release tags use `v<version>` and trigger CLI and image publishing. The CLI
 package version and lockfile entry must match the tag; Docker tags omit `v`.
 Helm publication follows chart changes on `main` and preserves existing chart
 versions. Bump both chart `version` and `appVersion` for a coordinated release
-so the default app and migration images use the same versioned image. Check
-published artifacts as well as workflow status: absent npm or Docker credentials
-currently cause their publish jobs to skip successfully.
+so the default app and migration images use the same versioned image.
+The npm workflow uses trusted publishing through GitHub OIDC, not a token secret.
+The package's publisher configuration must match `kr4t0n/nodex` and workflow
+filename `npm-publish.yml`, with direct publishing allowed. Keep `id-token: write`,
+a GitHub-hosted runner, npm >=11.5.1 and package-manager caching disabled. Registry
+selection uses `NPM_CONFIG_REGISTRY` without generating token-based npmrc entries.
+Do not restore a token-presence guard: it silently skipped valid trusted releases.
+The workflow rejects tag/package-version mismatches and fails on OIDC errors.
+Check published artifacts as well as workflow status: absent Docker credentials
+still cause the image job to skip successfully.
 
 ## Primitive and chart gotchas
 

@@ -470,24 +470,31 @@ and a migration Job. Its release workflow requires a chart-version bump:
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm repo update
-helm upgrade --install nodex nodex/nodex --version 0.2.0 --set siteUrl=https://nodex.example.com
+helm upgrade --install nodex nodex/nodex --version 0.2.1 --set siteUrl=https://nodex.example.com
 ```
 
-Chart `0.2.0` pins the app and migration Job to `kr4t0n/nodex:0.2.0` through
+Chart `0.2.1` pins the app and migration Job to `kr4t0n/nodex:0.2.1` through
 `appVersion`; `image.tag` is an explicit override.
 
 `npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
 `@kubitnodes/nodex`, has no runtime dependencies on the monorepo. The npm workflow
-publishes on version tags or manual runs, requires `NPM_TOKEN` with rights to
-that package, and verifies the packed artifact before publishing.
+publishes on version tags or manual runs through
+[npm trusted publishing](https://docs.npmjs.com/trusted-publishers/), and verifies
+the packed artifact before publishing. In the npm package settings, authorize
+GitHub owner `kr4t0n`, repository `nodex`, and workflow filename
+`npm-publish.yml` for direct publishing. No npm token secret is required.
+The workflow uses a GitHub-hosted runner, Node 24 with npm 11.5.1 or newer,
+`id-token: write`, and no package-manager cache. npm generates provenance
+automatically; an OIDC configuration error fails the publish job.
 
 For a coordinated release, bump `packages/cli/package.json` and its lockfile
 entry, plus the Helm chart's `version` and `appVersion`. Commit those changes
-on `main` and push a matching annotated tag such as `v0.2.0`. The main push
+on `main` and push a matching annotated tag such as `v0.2.1`. The main push
 publishes the versioned Helm chart; the tag starts the npm and image workflows.
 Image version tags omit the `v` prefix. Confirm the registry artifacts after
-the workflows finish: missing credentials make the current publish jobs skip,
-so a successful workflow alone does not prove a release exists.
+the workflows finish: missing Docker credentials still make the image job skip,
+so a successful workflow alone does not prove a release exists. The npm workflow
+rejects a tag that differs from the CLI package version.
 
 ## Extend the catalogue
 
