@@ -29,6 +29,11 @@ The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
 built artifacts. `dev` and the web build copy those artifacts into the app's
 public directory automatically.
 
+The language overview shows up to four previews from each language's `featured`
+list in `registry/languages/<slug>/meta.json`, in the authored order. Its component
+badge counts the full catalogue; adding charts does not automatically feature
+them. Rebuild the registry and restart dev after changing this list.
+
 ## Use components in a React app
 
 The current component platform is **React 19, React DOM, TypeScript and
