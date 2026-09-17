@@ -385,6 +385,8 @@ apps/web/public/                   GENERATED copy for Next static serving
 Generated files never live beside authored components. Serve both `public/r/`
 and `public/registry/` at the same registry root. Public registry downloads use
 static paths and can be hosted on a CDN without the Next server.
+Docker builds exclude local agent artifacts, compiled packages and TypeScript
+caches from their build context.
 
 ## Verification
 
