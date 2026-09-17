@@ -11,11 +11,6 @@ build/
 public/r/
 public/registry/
 
-# scratch space. The one-shot extractor lived here and was deleted once its
-# output was verified; recover it from git history if a chart's provenance is
-# ever in question (see AGENTS.md).
-tmp/
-
 # env — never commit secrets
 .env
 .env.*

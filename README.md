@@ -387,6 +387,8 @@ and `public/registry/` at the same registry root. Public registry downloads use
 static paths and can be hosted on a CDN without the Next server.
 Docker builds exclude local agent artifacts, compiled packages and TypeScript
 caches from their build context.
+Store temporary logs, screenshots and scratch work in a unique task directory
+under system `/tmp`, and remove it when the work is complete.
 
 ## Verification
 

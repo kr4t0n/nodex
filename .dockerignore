@@ -30,7 +30,6 @@ apps/web/public
 .github
 .agents
 .argus
-tmp
 *.log
 .DS_Store
 

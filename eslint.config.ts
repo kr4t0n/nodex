@@ -11,8 +11,6 @@ export default tseslint.config(
       'public/**',
       // A build-time copy of the registry, for Next to serve from public/.
       'apps/web/public/**',
-      // Throwaway one-shot extractor and its source.
-      'tmp/**',
     ],
   },
   js.configs.recommended,
