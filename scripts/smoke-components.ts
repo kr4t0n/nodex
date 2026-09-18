@@ -207,7 +207,9 @@ async function consumerFixture(): Promise<string> {
     const signalTokens = await run(process.execPath, [cli, 'tokens', 'signal-console'], fixture);
     assert(signalTokens.includes(':root'), 'CLI must deliver a real token stylesheet');
     await writeFile(path.join(fixture, 'src/styles/signal-tokens.css'), signalTokens.replace(':root', '[data-signal]'));
-    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@source "../";\n');
+    const neoTokens = await run(process.execPath, [cli, 'tokens', 'neo-brutalism'], fixture);
+    await writeFile(path.join(fixture, 'src/styles/neo-tokens.css'), neoTokens.replace(':root', '[data-neo]'));
+    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@source "../";\n');
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/primitive-consumer.tsx'), PRIMITIVE_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/dual-area-consumer.tsx'), DUAL_AREA_CONSUMER_SOURCE);
@@ -289,11 +291,11 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await page.goto(server.origin);
     await waitForCharts(page);
     const loadedFonts = await page.evaluate(async () => {
-      await Promise.all(['Inter', 'JetBrains Mono'].map((family) => document.fonts.load(`12px "${family}"`)));
+      await Promise.all(['Inter', 'JetBrains Mono', 'Space Grotesk'].map((family) => document.fonts.load(`12px "${family}"`)));
       await document.fonts.ready;
       return [...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replace(/["']/g, ''));
     });
-    assert(loadedFonts.includes('Inter') && loadedFonts.includes('JetBrains Mono'), 'Both delivered design-language fonts must load without an external host');
+    assert(['Inter', 'JetBrains Mono', 'Space Grotesk'].every((family) => loadedFonts.includes(family)), 'All delivered design-language fonts must load without an external host');
     await checkPrimitiveConsumer(page);
     await expect(page.getByLabel('Find a route')).toBeVisible();
     await page.getByLabel('Find a route').fill('/catalog');

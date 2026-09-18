@@ -1,7 +1,7 @@
 {
   "slug": "alert",
   "title": "Alert",
-  "description": "Severity carried by rule weight rather than by hue, for a language with no accent colour",
+  "description": "Severity expressed through rule weight and readable labels, with an inverted treatment for dark surfaces",
   "component": "alert",
   "tier": "primitive",
   "runtime": "react",

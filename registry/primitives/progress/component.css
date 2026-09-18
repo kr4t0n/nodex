@@ -29,23 +29,23 @@
 
 /* Fill */
 .nx-progress::-webkit-progress-value {
-  background: var(--nx-ink);
+  background: var(--nx-valueFill);
   border-radius: var(--nx-radius-pill);
   transition: width var(--nx-motion-progress-duration) var(--nx-motion-progress-easing);
 }
 
 .nx-progress::-moz-progress-bar {
-  background: var(--nx-ink);
+  background: var(--nx-valueFill);
   border-radius: var(--nx-radius-pill);
 }
 
 /* Quiet, for a secondary measure beside a primary one. */
 .nx-progress--quiet::-webkit-progress-value {
-  background: var(--nx-muted);
+  background: var(--nx-valueQuietFill);
 }
 
 .nx-progress--quiet::-moz-progress-bar {
-  background: var(--nx-muted);
+  background: var(--nx-valueQuietFill);
 }
 
 /* Thick, where the bar is the subject rather than an annotation. */

@@ -36,6 +36,13 @@ chart descriptions, specimen dimensions, reconstruction history and runtime/buil
 procedures out of it. Component metadata, local source comments and this file's
 gotchas hold component-specific guidance; the authoring skill holds procedures.
 
+Neo-brutalism is the third language. Its initial release contains the complete
+shared primitive vocabulary, embedded Space Grotesk/JetBrains Mono and design
+foundations, with no expressive charts yet. Keep its `featured` list empty until
+actual expressive items exist; the index already falls back to primitive previews.
+Its categorical yellow/lilac/mint/coral/blue palette is not a sequential data ramp. Gallery
+palette descriptions must not assume every language is monochrome.
+
 The manifest is the catalogue, not the folder layout. A slug names the item;
 `component` names its cross-language type. Types describe marks and encoding,
 not animation or business domain. Taxonomy lives in `packages/core/src/taxonomy.ts`.
@@ -136,7 +143,7 @@ addition to paint, fonts and strokes. Reuse the role's meaning, not just an equa
 literal: Card and Dialog titles use `type.cardTitle`, Card padding uses
 `space.cardPadding`, control text uses `type.control`, and button text uses
 `type.action`. Canonical Card/title/caption values take precedence over their old
-fixed CSS defaults. New roles preserve existing primitive values in both languages;
+fixed CSS defaults. New roles preserve existing primitive values in the original languages;
 this wiring does not authorize a redesign of the remaining type scale or geometry.
 Keep circular marks, native-control geometry and zero resets local. Interaction
 motion has its own roles (`control`, `toggle`, `surface`, etc.); changing chart
@@ -148,7 +155,29 @@ tokens and keeps neutral starter paint/system fonts; it must not maintain a seco
 hardcoded primitive-token list. The CLI smoke verifies the scaffold against all
 primitive CSS. Consumer smoke delivers all 24 primitives and tests descendant
 overrides, unaffected sibling scopes, retained form state, native keyboard/modal/
-picker behavior and reduced motion in both languages.
+picker behavior and reduced motion in all three languages.
+
+Structural outlines use `color.border`, independently of quiet `color.grid`
+fills. Primary action fill, lettering, border and hover paint have `color.action*`
+roles so a bright action does not require changing body ink. These roles retain
+the prior values in Mono Editorial and Signal Console. `shadow` roles contain
+offset/blur geometry only; each primitive composes them with `--nx-ink` where it
+is rendered so descendant ink overrides recolor the actual shadow. Flat languages
+use zero offsets. Plain cards never cast shadows. Button press travel comes from
+`motion.press.x/y`; reduced motion preserves the resting position and shadow,
+and disabled actions do not respond to hover or press. Inverted secondary text
+uses `onDarkMuted` rather than the supporting text color for paper.
+The language scaffold copies canonical color role names into a neutral palette
+and carries the canonical shadow roles, without a separate primitive-role list.
+
+Surface, field, selection, badge and value paints have independent semantic
+roles. Neo-brutalism uses lilac panels, pale blue fields, mint selections, coral
+solid badges and blue/violet value marks while retaining dark text and outlines.
+Plain cards use the page ground; inverted cards retain their inverse roles.
+Checkbox ticks, mixed marks and switch thumbs use `selectionText`, not the page
+background. Native select fallback/options/picker and both engines' progress and
+slider pseudo-elements must consume the same applicable paint roles. The original
+languages retain their prior paints through the new roles.
 
 ## Build boundaries and validation
 

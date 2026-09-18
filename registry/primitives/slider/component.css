@@ -41,12 +41,12 @@
   background: var(--nx-grid);
 }
 
-/* Filled portion. Firefox exposes this natively; the language marks progress in
-   ink at the same hairline weight rather than with a colour. */
+/* Firefox exposes the filled portion natively. It shares the value paint used
+   by progress indicators and the slider thumb. */
 .nx-slider::-moz-range-progress {
   height: var(--nx-stroke-hairline);
   border-radius: var(--nx-radius-pill);
-  background: var(--nx-ink);
+  background: var(--nx-valueFill);
 }
 
 /* Thumb. A filled circle, the same mark the charts use for a data point. */
@@ -56,7 +56,7 @@
   height: 11px;
   border: 0;
   border-radius: 50%;
-  background: var(--nx-ink);
+  background: var(--nx-valueFill);
   /* Centre the thumb on a sub-pixel track: half the thumb, less half the
      track. */
   margin-top: calc((var(--nx-stroke-hairline) - 11px) / 2);
@@ -68,7 +68,7 @@
   height: 11px;
   border: 0;
   border-radius: 50%;
-  background: var(--nx-ink);
+  background: var(--nx-valueFill);
   transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
 }
 

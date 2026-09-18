@@ -116,7 +116,7 @@
 
 .nx-stat-group--ruled > .nx-stat + .nx-stat {
   padding-left: var(--nx-space-statGroupGap);
-  border-left: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-left: var(--nx-stroke-hairline) solid var(--nx-border);
 }
 
 /* Stacked, for a sidebar beside a chart. */
@@ -130,6 +130,6 @@
 }
 
 .nx-stat-group--stack > .nx-stat + .nx-stat {
-  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
 }
 }

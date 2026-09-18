@@ -35,13 +35,13 @@
   letter-spacing: var(--nx-type-label-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
-  border-bottom: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
   white-space: nowrap;
 }
 
 .nx-table td {
   padding: var(--nx-space-tableCellPadding);
-  border-bottom: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
   vertical-align: top;
 }
 

@@ -137,7 +137,12 @@ async function checkNewLanguage(): Promise<void> {
     type: Record<string, Record<string, unknown>>;
     motion: Record<string, Record<string, unknown>>;
   }>(path.join(checkout, 'registry/languages/neutral-starter/tokens.json'));
-  assert.deepEqual(starter.color, { bg: '#FFFFFF', ink: '#000000', muted: '#000000', faint: '#000000', grid: '#000000', onDarkFaint: '#000000' });
+  const canonicalColors = sourceTokens.color as Record<string, string>;
+  assert.deepEqual(Object.keys(starter.color).sort(), Object.keys(canonicalColors).filter((key) => !key.startsWith('$')).sort());
+  assert.equal(starter.color.bg, '#FFFFFF');
+  assert.equal(starter.color.actionText, '#FFFFFF');
+  assert.equal(starter.color.border, '#000000');
+  assert(Object.values(starter.color).every((color) => color === '#FFFFFF' || color === '#000000'), 'Starter paint must stay neutral');
   assert.equal(starter.font.sans, 'system-ui, sans-serif');
   assert.equal(starter.font.mono, 'ui-monospace, monospace');
   assert.equal(starter.font.faces, undefined, 'The neutral starter must not inherit downloadable language fonts');
@@ -147,7 +152,7 @@ async function checkNewLanguage(): Promise<void> {
   assert.equal(starter.radius.pill, '0px');
   assert.equal(starter.type.cardTitle?.size, '16px');
   assert.equal(starter.motion.draw?.duration, '0.3s');
-  checks += 10;
+  checks += 14;
 
   const rules = rulesFromTokens(starter);
   const primitives = (await readdir(path.join(ROOT, 'registry/primitives'), { withFileTypes: true })).filter((entry) => entry.isDirectory());

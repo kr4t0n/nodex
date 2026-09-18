@@ -23,9 +23,9 @@
 }
 
 .nx-badge--solid {
-  background: var(--nx-ink);
+  background: var(--nx-badgeFill);
   border-color: var(--nx-ink);
-  color: var(--nx-bg);
+  color: var(--nx-badgeText);
 }
 
 .nx-badge--outline {

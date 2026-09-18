@@ -29,12 +29,13 @@
 }
 
 .nx-textarea {
+  box-shadow: var(--nx-shadow-control) var(--nx-ink);
   width: 100%;
   min-height: 5.5em;
   padding: var(--nx-space-textareaPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-card);
-  background: var(--nx-bg);
+  background: var(--nx-fieldFill);
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
   font-size: var(--nx-type-control-size);

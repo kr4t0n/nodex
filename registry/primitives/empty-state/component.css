@@ -14,7 +14,7 @@
   align-items: flex-start;
   gap: var(--nx-space-emptyGap);
   padding: var(--nx-space-emptyPadding);
-  border: var(--nx-stroke-hairline) dashed var(--nx-grid);
+  border: var(--nx-stroke-hairline) dashed var(--nx-border);
   border-radius: var(--nx-radius-card);
   font-family: var(--nx-font-sans);
   color: var(--nx-ink);

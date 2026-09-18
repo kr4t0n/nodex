@@ -70,12 +70,12 @@
 }
 
 .nx-switch:checked {
-  background: var(--nx-ink);
+  background: var(--nx-selectionFill);
   border-color: var(--nx-ink);
 }
 
 .nx-switch:checked::before {
-  background: var(--nx-bg);
+  background: var(--nx-selectionText);
   transform: translateY(-50%) translateX(11px);
 }
 

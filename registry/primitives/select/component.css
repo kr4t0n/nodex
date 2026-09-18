@@ -32,13 +32,14 @@
 }
 
 .nx-select {
+  box-shadow: var(--nx-shadow-control) var(--nx-ink);
   appearance: none;
   width: 100%;
   padding: var(--nx-space-controlPadding);
   padding-right: var(--nx-space-selectIndicatorPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-pill);
-  background-color: var(--nx-bg);
+  background-color: var(--nx-fieldFill);
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
   font-size: var(--nx-type-control-size);
@@ -90,7 +91,7 @@
    that reliably cross browsers are these. Set them so the list at least carries
    the language's paper, ink, and face instead of the OS default. */
 .nx-select option {
-  background-color: var(--nx-bg);
+  background-color: var(--nx-fieldFill);
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
 }
@@ -133,13 +134,12 @@
   }
 
   .nx-select::picker(select) {
-    background: var(--nx-bg);
-    border: var(--nx-stroke-hairline) solid var(--nx-grid);
+    background: var(--nx-fieldFill);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
     border-radius: var(--nx-radius-card);
     padding: var(--nx-space-pickerPadding);
     margin-top: var(--nx-space-pickerOffset);
-    /* No shadow: this language has no elevation model. The hairline separates. */
-    box-shadow: none;
+    box-shadow: var(--nx-shadow-popover) var(--nx-ink);
   }
 
   .nx-select option {

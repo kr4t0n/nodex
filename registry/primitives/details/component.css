@@ -11,14 +11,14 @@
    model and a stack of bordered cards would read as clutter. */
 
 .nx-details {
-  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
   font-family: var(--nx-font-sans);
   color: var(--nx-ink);
 }
 
 /* The last item in a group closes the stack, so the group reads as a block. */
 .nx-details:last-of-type {
-  border-bottom: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
 }
 
 .nx-details__summary {

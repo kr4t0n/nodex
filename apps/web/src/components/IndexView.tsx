@@ -179,7 +179,7 @@ function LanguageTile({
      *
      * This is the claim the whole project makes — that a language is tokens,
      * not a palette we paint on — so the index is the one page that has to
-     * demonstrate it with two at once. The badges, the button, and the rule
+     * demonstrate several at once. The badges, the button, and the rule
      * inside are shared primitives and re-theme for free; that they do is the
      * evidence.
      *
@@ -198,12 +198,12 @@ function LanguageTile({
         // A language whose ground matches the page would otherwise have no
         // edge at all, and the two tiles would read as different kinds of
         // thing rather than as the same thing wearing different paint.
-        border: '1px solid var(--nx-grid)',
+        border: 'var(--nx-stroke-hairline) solid var(--nx-border)',
       }}
     >
       <div className="flex flex-wrap items-end justify-between gap-6 pb-9">
         <div>
-          <h2 className="m-0 text-[24px] font-extrabold tracking-[-0.025em]">
+          <h2 className="m-0 text-[24px] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
             {language.name}
           </h2>
           <p

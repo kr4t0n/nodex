@@ -22,7 +22,7 @@
   display: inline-block;
   min-width: 1.5em;
   padding: var(--nx-space-keyPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-bottom-width: calc(var(--nx-stroke-hairline) * 2);
   border-radius: var(--nx-radius-code);
   background: var(--nx-bg);
@@ -38,7 +38,7 @@
 .nx-pre {
   margin: 0;
   padding: var(--nx-space-codeBlockPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-card);
   background: var(--nx-bg);
   overflow-x: auto;
@@ -62,7 +62,7 @@
   align-items: center;
   gap: var(--nx-space-commandGap);
   padding: var(--nx-space-commandPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-card);
   font-family: var(--nx-font-mono);
   font-size: var(--nx-type-code-commandSize);

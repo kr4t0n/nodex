@@ -12,6 +12,14 @@ now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
+Three design languages are available: Mono Editorial, Signal Console and
+**Neo-brutalism**. Neo-brutalism starts with all 24 shared primitives, a complete
+token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
+It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
+yellow actions, coral badges, mint selections, pale blue fields and blue value
+marks, with square outlines and hard offset shadows. Its expressive chart catalogue
+is currently empty; the language overview uses the existing primitive previews.
+
 ## Develop the registry and gallery
 
 Prerequisites: Node **22.22+** (CI and Docker use Node 24), npm 10+, and Chromium
@@ -60,6 +68,25 @@ fields; the CLI intentionally reports that mismatch instead of guessing paths.
 a managed section of `AGENTS.md`. The design document defines the language's
 visual foundations and token rules for all UI, including projects without charts.
 Component descriptions and APIs belong to the component metadata and source.
+To use Neo-brutalism with the built local registry:
+
+```bash
+node /path/to/nodex/packages/cli/src/index.ts init neo-brutalism --registry /path/to/nodex/public
+node /path/to/nodex/packages/cli/src/index.ts add button card input select dialog
+```
+
+Preview it at `/l/neo-brutalism` after building the registry and starting the
+gallery. The fonts and their licenses are embedded in the token stylesheet.
+Structural outlines use `--nx-border`, independently of quiet `--nx-grid`
+fills. Primary action colors use the `--nx-action*` roles. Panel and field fills
+use `--nx-surfaceFill` and `--nx-fieldFill`; selection, badge and value colors
+have independent roles so recoloring them does not change body text or borders.
+Shadow tokens contain
+only geometry and combine with scoped `--nx-ink` at each primitive; the original
+languages keep zero-offset shadows and their existing colors. Button press
+travel follows `--nx-motion-press-x` and `--nx-motion-press-y`, and reduced motion
+retains the resting position and shadow.
+
 Import the token stylesheet once after Tailwind in your application stylesheet:
 
 ```css
@@ -408,7 +435,7 @@ npm run build --workspace @nodex/web
 | `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
 | `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
 | `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
-| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in both languages, native keyboard/form behavior and reduced motion |
+| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all three languages, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
 | `check:shell` | Gallery primitive classes have their curated stylesheets |
 | `lint` / `typecheck` | Application, registry, CLI and build source |
