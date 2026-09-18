@@ -425,7 +425,7 @@ function DesignDoc({ markdown }: { markdown: string }) {
           </p>
         </div>
         {/* Registry-authored markdown, not user input. */}
-        <div className="nx-prose" dangerouslySetInnerHTML={{ __html: html }} />
+        <div className="nx-prose min-w-0 max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
       </div>
     </section>
   );

@@ -42,6 +42,9 @@ not animation or business domain. Taxonomy lives in `packages/core/src/taxonomy.
 
 The language gallery sorts charts by `component`, then title, then slug for ties.
 Search and type filters retain that order. Featured lists keep their authored order.
+The language index takes up to four previews from `meta.json`'s `featured` list;
+the full catalogue count does not fill empty slots. Restore featured curation
+alongside chart availability after staged reconstruction.
 
 `density` is optional reading intent (`close-read` or `glance`). Languages declare
 legal values; components may omit it. It remains agent/search metadata and must
@@ -250,6 +253,14 @@ width for seamless `xPercent: -50`. Repeat a small catalogue to fill the belt.
 Scene two stays a full viewport tall so the first scene can complete. Landing
 looping is an explicit product exception; it does not relax registry motion rules.
 GSAP is app-only and never enters delivered source.
+
+The landing sign-in aligns to the scaled wordmark in the hero and returns to the
+page gutter in the navigation bar. Measure the wordmark's fractional intrinsic
+width instead of estimating it from its font size, and refresh after fonts load.
+Both motion paths must recompute alignment on resize; fit the wordmark inside
+the viewport gutters on small screens. The tagline aligns with the visible left
+edge of Inter's leading n using its optical inset in em, tied to the wordmark's
+animated size; the text box alone includes the glyph's leading space.
 
 `/` reads no cookie and remains static. `/languages` and `/login` read sessions;
 `/l/*` routes derive static parameters from the built manifest. Next route files

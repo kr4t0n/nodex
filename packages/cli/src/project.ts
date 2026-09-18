@@ -78,6 +78,18 @@ This project uses the \`${config.language}\` design language from nodex.
   Never hardcode a colour, radius, or stroke width that a token already names.
 - Components fetched from nodex land in \`${config.paths.components}\`. They are
   yours to edit; nodex does not update them.
+- **Use Nodex primitives for matching controls and surfaces.** Before implementing
+  UI, inspect the installed primitives and existing application wrappers around
+  them. Reuse, extend or compose them for buttons, inputs, selects, cards, dialogs
+  and other supported interface elements.
+- If a needed primitive is missing locally, search with
+  \`nodex search --tier primitive --design ${config.language}\`, inspect its API
+  with \`nodex show <primitive> --design ${config.language}\`, and install it with
+  \`nodex add <primitive>\`. Read the delivered component's props before using it.
+- Create a custom replacement only when no suitable primitive exists or a
+  concrete functional or accessibility gap prevents reuse or composition.
+  Use semantic HTML and language tokens for layouts and UI the primitives do
+  not cover.
 - Add more with \`nodex add ${config.language}/<component>\`, and search what is
   available with \`nodex search --design ${config.language}\`.
 - Components accept real data through typed React props. Example datasets stay

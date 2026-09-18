@@ -38,6 +38,8 @@ const NAV_FONT = 16;
 const NAV_TOP = 20;
 /** Matches the h1 line-height, so the hero centring maths knows the box. */
 const MARK_LEADING = 0.86;
+/** Optical inset of Inter ExtraBold's leading n, in em. */
+const MARK_LEFT_INSET = 0.056;
 /** Gap between the wordmark and the row beneath it, in the hero. */
 const HERO_ROW_GAP = 44;
 
@@ -57,6 +59,7 @@ export function LandingView() {
   const mark = useRef<HTMLHeadingElement>(null);
   const row = useRef<HTMLDivElement>(null);
   const tagline = useRef<HTMLParagraphElement>(null);
+  const signIn = useRef<HTMLAnchorElement>(null);
   const barBg = useRef<HTMLDivElement>(null);
 
   const language = catalog?.languages.find((entry) => entry.slug === OWN_LANGUAGE);
@@ -86,13 +89,16 @@ export function LandingView() {
    * role instead of crossfading a hero copy into a bar copy, and it means the
    * bar is what renders if this never runs.
    *
-   * Only y and scale change. The wordmark is left-aligned and the sign-in is
-   * right-aligned to the same page gutter in both states, so there is no
-   * horizontal travel to get wrong at any viewport.
+   * The sign-in starts at the scaled wordmark's right edge, then travels back
+   * to the page gutter as the wordmark folds into the bar. All travel uses
+   * transforms, including this horizontal correction.
    */
   useGSAP(
     () => {
-      if (!hero.current || !mark.current || !row.current) return;
+      if (!hero.current || !mark.current || !row.current || !signIn.current) return;
+
+      const markElement = mark.current;
+      const rowElement = row.current;
 
       /**
        * How far scene one is pushed before the bar is assembled. Shared by both
@@ -107,9 +113,18 @@ export function LandingView() {
         Math.round(Math.min(560, window.innerHeight * 0.66));
 
       const gutter = () => (window.innerWidth >= 1024 ? 80 : 48);
+      // Keep fractional font metrics independent of the animation transforms.
+      // A guessed text width drifts from the actual font and can overflow mobile.
+      const markWidth = () =>
+        Number.parseFloat(getComputedStyle(markElement).width);
       const heroSize = () =>
-        Math.min(500, Math.max(64, (window.innerWidth - gutter()) / 2.63));
+        Math.min(
+          500,
+          Math.max(64, (window.innerWidth - gutter()) * NAV_FONT / markWidth()),
+        );
       const heroScale = () => heroSize() / NAV_FONT;
+      const taglineX = () => heroSize() * MARK_LEFT_INSET;
+      const signInX = () => markWidth() * heroScale() - rowElement.clientWidth;
       const markTop = () => (window.innerHeight - heroSize() * MARK_LEADING) / 2;
       const markY = () => markTop() - NAV_TOP;
       const rowY = () =>
@@ -118,15 +133,21 @@ export function LandingView() {
       const toHero = () => {
         gsap.set(mark.current, { y: markY(), scale: heroScale() });
         gsap.set(row.current, { y: rowY() });
-        gsap.set(tagline.current, { opacity: 1 });
+        gsap.set(signIn.current, { x: signInX() });
+        gsap.set(tagline.current, { x: taglineX(), opacity: 1 });
         gsap.set(barBg.current, { opacity: 0 });
       };
       const toBar = () => {
         gsap.set(mark.current, { y: 0, scale: 1 });
         gsap.set(row.current, { y: 0 });
-        gsap.set(tagline.current, { opacity: 0 });
+        gsap.set(signIn.current, { x: 0 });
+        gsap.set(tagline.current, { x: NAV_FONT * MARK_LEFT_INSET, opacity: 0 });
         gsap.set(barBg.current, { opacity: 1 });
       };
+
+      // Font loading can change the wordmark's intrinsic width after mounting.
+      const markObserver = new ResizeObserver(() => ScrollTrigger.refresh());
+      markObserver.observe(markElement);
 
       if (reduced) {
         // A jump cut rather than a scrub. The layout still has to change, or the
@@ -140,8 +161,12 @@ export function LandingView() {
           end: 'max',
           onEnter: toBar,
           onLeaveBack: toHero,
+          onRefresh: (trigger) => {
+            if (trigger.scroll() >= trigger.start) toBar();
+            else toHero();
+          },
         });
-        return;
+        return () => markObserver.disconnect();
       }
 
       const tl = gsap.timeline({
@@ -165,6 +190,13 @@ export function LandingView() {
         0,
       )
         .fromTo(row.current, { y: rowY }, { y: 0, ease: 'none' }, 0)
+        .fromTo(signIn.current, { x: signInX }, { x: 0, ease: 'none' }, 0)
+        .fromTo(
+          tagline.current,
+          { x: taglineX },
+          { x: NAV_FONT * MARK_LEFT_INSET, ease: 'none' },
+          0,
+        )
         .fromTo(
           tagline.current,
           { opacity: 1 },
@@ -177,6 +209,8 @@ export function LandingView() {
           { opacity: 1, ease: 'none', duration: 0.35 },
           0.55,
         );
+
+      return () => markObserver.disconnect();
     },
     { scope: root, dependencies: [reduced], revertOnUpdate: true },
   );
@@ -230,14 +264,15 @@ export function LandingView() {
           >
             <p
               ref={tagline}
-              className="m-0 max-w-[34ch] text-[14px] leading-[1.7]"
+              className="m-0 text-[14px] leading-[1.7] sm:whitespace-nowrap"
               style={{ color: 'var(--nx-muted)' }}
             >
               Components that belong to a design language.
             </p>
             <Link
+              ref={signIn}
               href="/login"
-              className="nx-btn nx-btn--solid pointer-events-auto ml-auto no-underline"
+              className="nx-btn nx-btn--solid pointer-events-auto ml-auto shrink-0 no-underline"
             >
               Sign in
               <ArrowRight size={13} weight="bold" aria-hidden />

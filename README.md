@@ -29,6 +29,11 @@ The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
 built artifacts. `dev` and the web build copy those artifacts into the app's
 public directory automatically.
 
+The language overview shows up to four previews from each language's `featured`
+list in `registry/languages/<slug>/meta.json`, in the authored order. Its component
+badge counts the full catalogue; adding charts does not automatically feature
+them. Rebuild the registry and restart dev after changing this list.
+
 ## Use components in a React app
 
 The current component platform is **React 19, React DOM, TypeScript and
@@ -380,6 +385,10 @@ apps/web/public/                   GENERATED copy for Next static serving
 Generated files never live beside authored components. Serve both `public/r/`
 and `public/registry/` at the same registry root. Public registry downloads use
 static paths and can be hosted on a CDN without the Next server.
+Docker builds exclude local agent artifacts, compiled packages and TypeScript
+caches from their build context.
+Store temporary logs, screenshots and scratch work in a unique task directory
+under system `/tmp`, and remove it when the work is complete.
 
 ## Verification
 
