@@ -1,13 +1,14 @@
 'use client';
 
 import { useGSAP } from '@gsap/react';
-import { ArrowCounterClockwise, Pause, Play, TerminalWindow } from '@phosphor-icons/react';
+import { Pause, Play, TerminalWindow } from '@phosphor-icons/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef, useState, type ReactNode } from 'react';
 
+import { LandingTerminalSession, TerminalLanguages } from '@/components/LandingTerminalSession.tsx';
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
-import { OWN_LANGUAGE, type Language } from '@/lib/registry.ts';
+import type { Language } from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -19,7 +20,7 @@ interface LandingTerminalProps {
   children: ReactNode;
 }
 
-/** A finite CLI demonstration; only completed commands change the page. */
+/** A single CLI demonstration hands control to an interactive terminal. */
 export function LandingTerminal({ languages, activeLanguage, status, onLanguageChange, children }: LandingTerminalProps) {
   const reduced = usePrefersReducedMotion();
   const section = useRef<HTMLElement>(null);
@@ -29,7 +30,8 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
   const nextCommand = useRef<HTMLSpanElement>(null);
   const timeline = useRef<gsap.core.Timeline | null>(null);
   const pausedByUser = useRef(false);
-  const [playback, setPlayback] = useState<'idle' | 'playing' | 'paused' | 'complete'>('idle');
+  const [playback, setPlayback] = useState<'idle' | 'playing' | 'paused' | 'interactive'>('idle');
+  const interactive = playback === 'interactive';
   const first = languages.find((language) => language.slug === 'signal-console');
   const second = languages.find((language) => language.slug === 'neo-brutalism');
   const active = languages.find((language) => language.slug === activeLanguage);
@@ -39,6 +41,10 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
   const nextText = `nodex init ${second?.slug ?? 'neo-brutalism'} --force`;
 
   useGSAP(() => {
+    // The interactive session is a permanent handoff for this mounted page.
+    // Revert the demo's timeline/listeners, and never recreate them on scroll,
+    // theme changes or motion-preference changes.
+    if (interactive) return;
     if (!ready || !first || !second || !section.current || !transcript.current) return;
     const root = transcript.current;
     const cursors = root.querySelectorAll<HTMLElement>('[data-cli-cursor]');
@@ -49,14 +55,17 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
 
     if (reduced) {
       gsap.set(cursors, { opacity: 0 });
+      const finish = () => {
+        onLanguageChange(second.slug);
+        setPlayback('interactive');
+      };
       const trigger = ScrollTrigger.create({
         trigger: section.current,
         start: 'top 12%',
         end: 'bottom 20%',
-        onEnter: () => onLanguageChange(second.slug),
-        onLeaveBack: () => onLanguageChange(OWN_LANGUAGE),
+        onEnter: finish,
       });
-      if (trigger.isActive) onLanguageChange(second.slug);
+      if (trigger.isActive) finish();
       return;
     }
 
@@ -67,7 +76,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
     gsap.set(cursors, { opacity: 0 });
     gsap.set(cursors[0]!, { opacity: 1 });
 
-    const tl = gsap.timeline({ paused: true, onComplete: () => setPlayback('complete') });
+    const tl = gsap.timeline({ paused: true, onComplete: () => setPlayback('interactive') });
     timeline.current = tl;
 
     // Discrete text steps avoid React renders on animation frames and require
@@ -126,13 +135,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
       onEnter: () => { visible = true; play(); },
       onEnterBack: () => { visible = true; play(); },
       onLeave: () => { visible = false; pause(); },
-      onLeaveBack: () => {
-        visible = false;
-        pausedByUser.current = false;
-        tl.pause(0);
-        onLanguageChange(OWN_LANGUAGE);
-        setPlayback('idle');
-      },
+      onLeaveBack: () => { visible = false; pause(); },
     });
     visible = trigger.isActive;
     play();
@@ -142,17 +145,13 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
       timeline.current = null;
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, { scope: section, dependencies: [ready, reduced, first, second, firstText, nextText, onLanguageChange], revertOnUpdate: true });
+  }, { scope: section, dependencies: [interactive, ready, reduced, first, second, firstText, nextText, onLanguageChange], revertOnUpdate: true });
 
-  const control = reduced ? 'Switch' : playback === 'complete' ? 'Replay' : playback === 'playing' ? 'Pause' : 'Play';
-  const ControlIcon = reduced || playback === 'complete' ? ArrowCounterClockwise : playback === 'playing' ? Pause : Play;
+  const control = playback === 'playing' ? 'Pause' : 'Play';
+  const ControlIcon = playback === 'playing' ? Pause : Play;
 
   function handleControl() {
-    if (!ready || !first || !second) return;
-    if (reduced) {
-      onLanguageChange(activeLanguage === second.slug ? first.slug : second.slug);
-      return;
-    }
+    if (!ready || interactive) return;
     const tl = timeline.current;
     if (!tl) return;
     if (playback === 'playing') {
@@ -161,10 +160,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
       setPlayback('paused');
     } else {
       pausedByUser.current = false;
-      if (playback === 'complete' || playback === 'idle') {
-        onLanguageChange(OWN_LANGUAGE);
-        tl.restart();
-      } else tl.play();
+      tl.play();
       setPlayback('playing');
     }
   }
@@ -177,17 +173,22 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
           <h2 id="landing-cli-title" className="m-0 mb-4 text-[24px] leading-[1.15] font-[number:var(--nx-type-pageTitle-weight)] tracking-[var(--nx-type-pageTitle-tracking)] sm:text-[30px] [@media(min-height:900px)]:mb-6">
             One command changes the whole page.
           </h2>
-          <div className="nx-card overflow-hidden p-0" data-terminal-state={playback}>
+          <div className="nx-card overflow-hidden p-0" data-terminal-state={playback} data-terminal-ready={ready}>
             <div className="flex min-h-12 items-center justify-between gap-4 border-b-[length:var(--nx-stroke-hairline)] border-[var(--nx-border)] px-5 sm:px-7 [@media(min-height:900px)]:min-h-14">
               <div className="flex min-w-0 items-center gap-3 text-[12px] [font-family:var(--nx-font-mono)]">
                 <TerminalWindow size={18} className="shrink-0" aria-hidden />
                 <span className="whitespace-nowrap">~/your-app</span>
               </div>
-              <button type="button" className="nx-btn nx-btn--quiet min-h-9 shrink-0 gap-2 px-3 py-2 text-[var(--nx-ink)]" aria-label={reduced ? 'Switch language' : undefined} onClick={handleControl} disabled={!ready}>
+              {interactive ? <span role="status" className="text-[12px] [font-family:var(--nx-font-mono)]">Your turn</span> : reduced ? <span className="text-[12px]">CLI example</span> : <button type="button" className="nx-btn nx-btn--quiet min-h-9 shrink-0 gap-2 px-3 py-2 text-[var(--nx-ink)]" onClick={handleControl} disabled={!ready}>
                 <ControlIcon size={14} aria-hidden />{control}
-              </button>
+              </button>}
             </div>
-            <div className="relative min-h-72 p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:min-h-[348px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
+            {interactive && first && second ? <LandingTerminalSession
+              languages={languages}
+              first={first}
+              second={second}
+              onLanguageChange={onLanguageChange}
+            /> : <div className="relative min-h-72 p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:min-h-[348px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
               {!ready && <p role="status" className="absolute inset-x-5 top-5 m-0 sm:inset-x-7 [@media(min-height:900px)]:top-7">
                 {status === 'error' || status === 'ready' ? 'The demo could not load. Try refreshing the page.' : 'Preparing the terminal…'}
               </p>}
@@ -196,12 +197,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
                   <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={listCommand}>nodex list</span><Cursor /></div>
                 </div>
                 <div data-cli-output className="mt-3 mb-4 pl-[calc(1ch+0.75rem)] [@media(min-height:900px)]:mb-6">
-                  {languages.map((language) => (
-                    <div key={language.slug} className="flex flex-wrap justify-between gap-x-6">
-                      <span>{language.slug}</span>
-                      <span className="hidden sm:inline">{language.counts.expressive} {language.counts.expressive === 1 ? 'chart' : 'charts'}, {language.counts.primitives} primitives</span>
-                    </div>
-                  ))}
+                  <TerminalLanguages languages={languages} />
                 </div>
                 <div data-cli-command className="flex items-start gap-3">
                   <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={firstCommand}>{firstText}</span><Cursor /></div>
@@ -212,7 +208,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
                 </div>
                 <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {second?.name ?? 'Neo-brutalism'}</div>
               </div>
-            </div>
+            </div>}
           </div>
           <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism.</p>
           <p className="mt-3 mb-0 text-[13px]" role="status" aria-live="polite" aria-atomic="true">

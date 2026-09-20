@@ -57,7 +57,7 @@ async function stopSite() {
 
 async function openTerminal(page: Page) {
   const section = page.locator('[data-landing-terminal]');
-  await expect(section.getByRole('button')).toBeEnabled({ timeout: 15_000 });
+  await expect(page.locator('[data-terminal-ready]')).toHaveAttribute('data-terminal-ready', 'true', { timeout: 15_000 });
   await section.evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY));
 }
 
@@ -84,6 +84,19 @@ async function assertFits(page: Page) {
   assert(bounds.action.bottom <= bounds.header.bottom, 'The navbar must contain the themed action');
 }
 
+async function returnToHero(page: Page, slug: string) {
+  await page.evaluate(() => window.scrollTo(0, 0));
+  // Let the wordmark's scrub finish and scroll callbacks settle before checking
+  // the retained theme and its different font metrics.
+  await delay(700);
+  await assertTheme(page, slug);
+  const viewport = page.viewportSize()!;
+  const mark = await page.locator('h1').boundingBox();
+  const action = await page.getByRole('link', { name: 'Sign in', exact: true }).boundingBox();
+  assert(mark && mark.x >= 0 && mark.x + mark.width <= viewport.width, 'The themed hero wordmark must fit');
+  assert(action && action.x >= 0 && action.x + action.width <= viewport.width, 'The themed hero sign-in must fit');
+}
+
 async function main() {
   const origin = process.argv[2] ?? await startSite();
   const browser = await chromium.launch({ headless: true });
@@ -95,6 +108,7 @@ async function main() {
     await page.goto('/');
     await expect(page.locator('[data-landing-terminal] button')).toBeEnabled({ timeout: 15_000 });
     await expect(page.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'idle');
+    await expect(page.getByRole('textbox', { name: 'Terminal command' })).toHaveCount(0);
     await expect(page.locator('html')).toHaveAttribute('data-nx-language', 'mono-editorial');
     // Outlast Preview's observer fallback: the belt must own this deferral.
     await delay(1600);
@@ -108,14 +122,28 @@ async function main() {
     });
     await openTerminal(page);
     await expect(page.locator('[data-cli-command]').first()).toHaveText('$nodex list');
+    await returnToHero(page, 'mono-editorial');
+    await expect(page.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'paused');
+    const offscreenText = await page.locator('[data-cli-command]').allTextContents();
+    await delay(400);
+    assert.deepEqual(await page.locator('[data-cli-command]').allTextContents(), offscreenText, 'Offscreen typing must pause without rewinding');
+    await openTerminal(page);
+    await expect(page.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'playing');
     await assertTheme(page, 'signal-console');
     await page.getByRole('button', { name: 'Pause', exact: true }).click();
     const pausedText = await page.locator('[data-cli-command]').allTextContents();
     await delay(400);
     assert.deepEqual(await page.locator('[data-cli-command]').allTextContents(), pausedText, 'Pause must stop typing');
+    await returnToHero(page, 'signal-console');
+    await expect(page.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'paused');
+    await openTerminal(page);
+    assert.deepEqual(await page.locator('[data-cli-command]').allTextContents(), pausedText, 'Scrolling must preserve a paused transcript');
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await assertTheme(page, 'neo-brutalism');
-    await expect(page.getByRole('button', { name: 'Replay', exact: true })).toBeVisible();
+    const command = page.getByRole('textbox', { name: 'Terminal command', exact: true });
+    await expect(command).toBeEnabled();
+    await expect(command).not.toBeFocused();
+    await expect(page.getByRole('button', { name: /^(Replay|Play|Pause)$/ })).toHaveCount(0);
     const recalled = samples.indexOf('$nodex init signal-console');
     assert(recalled >= 0, 'The previous command must be recalled');
     assert(samples.slice(recalled + 1).some((text) => text.startsWith('$nodex init ') && text.length < '$nodex init signal-console'.length), 'The language argument must visibly be deleted');
@@ -123,16 +151,42 @@ async function main() {
     await assertFits(page);
 
     await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/neo-brutalism/'))), { timeout: 15_000 }).toBe(true);
+    const completedText = await page.locator('[data-terminal-entry]').allTextContents();
+    assert.equal(completedText.length, 3, 'The interactive history must retain all three demo commands');
+    await returnToHero(page, 'neo-brutalism');
+    await expect(page.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'interactive');
     await openTerminal(page);
-    await page.getByRole('button', { name: 'Replay', exact: true }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-nx-language', 'mono-editorial');
-    await expect(page.locator('[data-cli-command]').first()).not.toHaveText('$nodex list');
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await expect(page.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'idle');
-    const mark = await page.locator('h1').boundingBox();
-    assert(mark && mark.x >= 0 && mark.x + mark.width <= 1366, 'The restored hero must fit');
+    assert.deepEqual(await page.locator('[data-terminal-entry]').allTextContents(), completedText, 'Scrolling must preserve the completed transcript');
+    await command.fill('nodex init mono-editorial');
+    await returnToHero(page, 'neo-brutalism');
+    await openTerminal(page);
+    await expect(command).toHaveValue('nodex init mono-editorial');
+    await command.press('Enter');
+    await assertTheme(page, 'mono-editorial');
+    await expect(command).toHaveValue('');
+    await expect(page.locator('[data-terminal-entry]').last()).toContainText('Switched to Mono Editorial');
+    await command.fill('nodex init ');
+    await command.press('ArrowUp');
+    await expect(command).toHaveValue('nodex init mono-editorial');
+    await command.press('ArrowDown');
+    await expect(command).toHaveValue('nodex init ');
 
-    await openTerminal(page);
+    await command.fill('nodex init missing-language');
+    await command.press('Enter');
+    await expect(page.locator('[data-terminal-entry]').last()).toContainText('Unknown language: missing-language');
+    await assertTheme(page, 'mono-editorial');
+    await command.fill('nodex init signal-console --unknown');
+    await command.press('Enter');
+    await expect(page.locator('[data-terminal-entry]').last()).toContainText('Try nodex list or nodex init');
+    await assertTheme(page, 'mono-editorial');
+    await page.getByRole('button', { name: 'nodex list', exact: true }).click();
+    await page.locator('[data-terminal-entry]').last().getByRole('button', { name: 'Apply Signal Console' }).click();
+    await assertTheme(page, 'signal-console');
+    await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/signal-console/'))), { timeout: 15_000 }).toBe(true);
+    await command.fill('nodex init neo-brutalism --force');
+    await page.getByRole('button', { name: 'Run command' }).click();
+    await assertTheme(page, 'neo-brutalism');
+    await expect(page.locator('[data-cli-command]')).toHaveCount(0);
     await page.getByRole('link', { name: 'Sign in', exact: true }).click();
     await page.waitForURL('**/login');
     await delay(5000);
@@ -140,7 +194,7 @@ async function main() {
     await expect(page.locator('style[data-nx-landing-tokens]')).toHaveCount(0);
     await expect(page.locator('html')).toHaveAttribute('data-nx-language', 'mono-editorial');
     await context.close();
-    console.log('Landing animation: typing, deletion, real themes, belt, pause/replay and navigation passed');
+    console.log('Landing terminal: single playback, interactive commands, history, retained themes, belt and navigation passed');
 
     const mobile = await browser.newContext({ baseURL: origin, viewport: { width: 320, height: 740 }, reducedMotion: 'reduce' });
     const small = await mobile.newPage();
@@ -149,18 +203,32 @@ async function main() {
     await openTerminal(small);
     await assertTheme(small, 'neo-brutalism');
     await assertFits(small);
-    await expect(small.locator('[data-cli-command]').last()).toHaveText('$nodex init neo-brutalism --force');
-    const switcher = small.getByRole('button', { name: 'Switch language', exact: true });
-    await switcher.focus();
-    await switcher.press('Enter');
+    const input = small.getByRole('textbox', { name: 'Terminal command' });
+    await expect(input).toBeEnabled();
+    await expect(input).not.toBeFocused();
+    await expect(small.locator('[data-terminal-entry]').last()).toContainText('nodex init neo-brutalism --force');
+    await input.fill('nodex init signal-console');
+    await input.press('Enter');
     await assertTheme(small, 'signal-console');
-    await switcher.press('Enter');
-    await assertTheme(small, 'neo-brutalism');
+    await returnToHero(small, 'signal-console');
+    await openTerminal(small);
+    await assertTheme(small, 'signal-console');
+    await input.fill('nodex init mono-');
+    const mobileHistory = await small.locator('[data-terminal-entry]').allTextContents();
     await small.emulateMedia({ reducedMotion: 'no-preference' });
-    await expect(small.getByRole('button', { name: 'Pause', exact: true })).toBeVisible();
+    await expect(small.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'interactive');
+    await expect(input).toHaveValue('nodex init mono-');
+    await assertTheme(small, 'signal-console');
     await small.emulateMedia({ reducedMotion: 'reduce' });
-    await expect(switcher).toBeVisible();
-    await expect(small.locator('[data-cli-command]').last()).toHaveText('$nodex init neo-brutalism --force');
+    await expect(input).toHaveValue('nodex init mono-');
+    assert.deepEqual(await small.locator('[data-terminal-entry]').allTextContents(), mobileHistory, 'Motion preferences must preserve interactive history');
+    await input.fill('nodex init mono-editorial');
+    await input.press('Enter');
+    await assertTheme(small, 'mono-editorial');
+    await small.getByRole('button', { name: 'nodex list', exact: true }).click();
+    await small.locator('[data-terminal-entry]').last().getByRole('button', { name: 'Apply Neo-brutalism' }).click();
+    await assertTheme(small, 'neo-brutalism');
+    await assertFits(small);
     await mobile.close();
     console.log('Landing accessibility: narrow viewport, keyboard switching and live reduced-motion changes passed');
 

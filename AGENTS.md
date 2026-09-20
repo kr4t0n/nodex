@@ -297,10 +297,22 @@ charts as a substitute.
 The terminal preloads generated token stylesheets and their fonts into a temporary
 document scope before playing. Renaming the generated root selector preserves
 the token authority and makes each switch immediate. Remove that scope and its
-stylesheet on navigation. Returning above the terminal restores Mono Editorial;
-offscreen and background-tab playback pauses. Reduced motion shows the complete
-transcript and provides a manual language switch. Keep typing out of React's
-animation-frame render cycle and out of screen-reader live announcements.
+stylesheet on navigation. Scroll position never resets the page language or the
+transcript: offscreen and background-tab playback pauses, then resumes on return.
+Completion permanently hands control to an interactive terminal for the mounted
+page. Unmount the animated transcript and dispose its GSAP timeline and listeners;
+scrolling, theme changes and motion-preference changes must never recreate it.
+There is no replay control. Reduced motion enters the interactive state directly
+when the scene is reached. Keep demo typing out of React's animation-frame render
+cycle and out of screen-reader live announcements.
+
+`LandingTerminalSession` owns the prompt, scrollback and command recall. Its parser
+only handles `nodex list` and `nodex init <manifest-language> [--force]`; it changes
+page tokens and never executes a shell. List output also offers language buttons.
+Retain the last 20 entries, preserve drafts across scrolling and theme changes,
+and scroll only the history container when commands append. The handoff must not
+steal focus or open a mobile keyboard. Keep the terminal's height stable so the
+history cannot push the chart belt down after every command.
 The navbar reserves room for every language's native action height.
 
 Actual registry previews fill the belt. Each repeated pass owns its trailing gap;
