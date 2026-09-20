@@ -122,7 +122,6 @@ async function main() {
     assert(samples.includes('$nodex init neo-brutalism --force'), 'The replacement command must include --force');
     await assertFits(page);
 
-    await page.getByRole('heading', { name: 'One language, drawn all the way through.' }).scrollIntoViewIfNeeded();
     await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/neo-brutalism/'))), { timeout: 15_000 }).toBe(true);
     await openTerminal(page);
     await page.getByRole('button', { name: 'Replay', exact: true }).click();

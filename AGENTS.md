@@ -285,10 +285,11 @@ The shell still consumes curated primitive CSS classes for its existing markup.
 the curation synchronized or a valid primitive class can render unstyled. New UI
 can consume reusable primitive APIs; avoid an unrelated wholesale shell rewrite.
 
-The landing is three scenes: name, CLI, then work. The terminal runs a finite
-typing sequence after the wordmark folds into the navbar: `nodex list`, then
-`nodex init signal-console`, then a recalled command whose language is backspaced
-and replaced with `neo-brutalism --force`. Only completed commands switch the page.
+The landing is two scenes: the name, then the CLI and chart belt together. The
+terminal runs a finite typing sequence after the wordmark folds into the navbar:
+`nodex list`, then `nodex init signal-console`, then a recalled command whose
+language is backspaced and replaced with `neo-brutalism --force`. Only completed
+commands switch the page.
 Its language list and chart counts come from the manifest. The selected language
 also determines the belt's expressive charts; never recolor another language's
 charts as a substitute.
@@ -306,9 +307,12 @@ Actual registry previews fill the belt. Each repeated pass owns its trailing gap
 both passes must be identical width for seamless `xPercent: -50`. Repeat a small
 catalogue to fill the belt. Reserve each frame's dimensions but mount its preview
 only when the belt approaches the viewport; native iframe lazy loading alone
-starts chart bundles during the terminal's typing sequence.
-The terminal and belt each retain a full viewport of space. Landing
-looping is an explicit product exception; it does not relax registry motion rules.
+starts chart bundles during the opening hero.
+The terminal and belt share one scene, with a 200px chart strip below the terminal.
+Terminal padding and command spacing expand on tall viewports, and the gap above
+the belt grows with viewport height. The scene can grow on short screens so
+content stays readable without clipping. Landing looping is an explicit product
+exception; it does not relax registry motion rules.
 GSAP is app-only and never enters delivered source.
 
 The landing sign-in aligns to the scaled wordmark in the hero and returns to the

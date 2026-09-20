@@ -4,7 +4,7 @@ import { useGSAP } from '@gsap/react';
 import { ArrowCounterClockwise, Pause, Play, TerminalWindow } from '@phosphor-icons/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
 import { OWN_LANGUAGE, type Language } from '@/lib/registry.ts';
@@ -16,10 +16,11 @@ interface LandingTerminalProps {
   activeLanguage: string;
   status: 'loading' | 'ready' | 'error';
   onLanguageChange: (slug: string) => void;
+  children: ReactNode;
 }
 
 /** A finite CLI demonstration; only completed commands change the page. */
-export function LandingTerminal({ languages, activeLanguage, status, onLanguageChange }: LandingTerminalProps) {
+export function LandingTerminal({ languages, activeLanguage, status, onLanguageChange, children }: LandingTerminalProps) {
   const reduced = usePrefersReducedMotion();
   const section = useRef<HTMLElement>(null);
   const transcript = useRef<HTMLDivElement>(null);
@@ -170,53 +171,56 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
 
   return (
     <section ref={section} aria-labelledby="landing-cli-title" data-landing-terminal
-      className="relative -mt-[16dvh] flex min-h-[100dvh] items-center px-6 pt-24 pb-16 lg:px-10">
-      <div className="mx-auto w-full max-w-[780px] min-w-0">
-        <h2 id="landing-cli-title" className="m-0 mb-8 max-w-[24ch] text-[28px] leading-[1.15] font-[number:var(--nx-type-pageTitle-weight)] tracking-[var(--nx-type-pageTitle-tracking)] sm:text-[36px]">
-          One command changes the whole page.
-        </h2>
-        <div className="nx-card overflow-hidden p-0" data-terminal-state={playback}>
-          <div className="flex min-h-14 items-center justify-between gap-4 border-b-[length:var(--nx-stroke-hairline)] border-[var(--nx-border)] px-5 sm:px-7">
-            <div className="flex min-w-0 items-center gap-3 text-[12px] [font-family:var(--nx-font-mono)]">
-              <TerminalWindow size={18} className="shrink-0" aria-hidden />
-              <span className="whitespace-nowrap">~/your-app</span>
+      className="relative -mt-[16dvh] flex min-h-[100dvh] flex-col justify-center gap-[clamp(2rem,6dvh,6rem)] pt-20 pb-4">
+      <div className="w-full px-6 lg:px-10">
+        <div className="mx-auto w-full max-w-[780px] min-w-0">
+          <h2 id="landing-cli-title" className="m-0 mb-4 text-[24px] leading-[1.15] font-[number:var(--nx-type-pageTitle-weight)] tracking-[var(--nx-type-pageTitle-tracking)] sm:text-[30px] [@media(min-height:900px)]:mb-6">
+            One command changes the whole page.
+          </h2>
+          <div className="nx-card overflow-hidden p-0" data-terminal-state={playback}>
+            <div className="flex min-h-12 items-center justify-between gap-4 border-b-[length:var(--nx-stroke-hairline)] border-[var(--nx-border)] px-5 sm:px-7 [@media(min-height:900px)]:min-h-14">
+              <div className="flex min-w-0 items-center gap-3 text-[12px] [font-family:var(--nx-font-mono)]">
+                <TerminalWindow size={18} className="shrink-0" aria-hidden />
+                <span className="whitespace-nowrap">~/your-app</span>
+              </div>
+              <button type="button" className="nx-btn nx-btn--quiet min-h-9 shrink-0 gap-2 px-3 py-2 text-[var(--nx-ink)]" aria-label={reduced ? 'Switch language' : undefined} onClick={handleControl} disabled={!ready}>
+                <ControlIcon size={14} aria-hidden />{control}
+              </button>
             </div>
-            <button type="button" className="nx-btn nx-btn--quiet min-h-9 shrink-0 gap-2 px-3 py-2 text-[var(--nx-ink)]" aria-label={reduced ? 'Switch language' : undefined} onClick={handleControl} disabled={!ready}>
-              <ControlIcon size={14} aria-hidden />{control}
-            </button>
-          </div>
-          <div className="relative min-h-[348px] p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:p-7 sm:text-[15px]">
-            {!ready && <p role="status" className="absolute inset-x-5 top-5 m-0 sm:inset-x-7 sm:top-7">
-              {status === 'error' || status === 'ready' ? 'The demo could not load. Try refreshing the page.' : 'Preparing the terminal…'}
-            </p>}
-            <div ref={transcript} aria-hidden className={ready ? '' : 'invisible'}>
-              <div data-cli-command className="flex items-start gap-3">
-                <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={listCommand}>nodex list</span><Cursor /></div>
+            <div className="relative min-h-72 p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:min-h-[348px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
+              {!ready && <p role="status" className="absolute inset-x-5 top-5 m-0 sm:inset-x-7 [@media(min-height:900px)]:top-7">
+                {status === 'error' || status === 'ready' ? 'The demo could not load. Try refreshing the page.' : 'Preparing the terminal…'}
+              </p>}
+              <div ref={transcript} aria-hidden className={ready ? '' : 'invisible'}>
+                <div data-cli-command className="flex items-start gap-3">
+                  <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={listCommand}>nodex list</span><Cursor /></div>
+                </div>
+                <div data-cli-output className="mt-3 mb-4 pl-[calc(1ch+0.75rem)] [@media(min-height:900px)]:mb-6">
+                  {languages.map((language) => (
+                    <div key={language.slug} className="flex flex-wrap justify-between gap-x-6">
+                      <span>{language.slug}</span>
+                      <span className="hidden sm:inline">{language.counts.expressive} {language.counts.expressive === 1 ? 'chart' : 'charts'}, {language.counts.primitives} primitives</span>
+                    </div>
+                  ))}
+                </div>
+                <div data-cli-command className="flex items-start gap-3">
+                  <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={firstCommand}>{firstText}</span><Cursor /></div>
+                </div>
+                <div data-cli-output className="mb-4 pl-[calc(1ch+0.75rem)] [@media(min-height:900px)]:mb-6">Initialised {first?.name ?? 'Signal Console'}</div>
+                <div data-cli-command className="flex items-start gap-3">
+                  <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={nextCommand}>{nextText}</span><Cursor /></div>
+                </div>
+                <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {second?.name ?? 'Neo-brutalism'}</div>
               </div>
-              <div data-cli-output className="mt-3 mb-6 pl-[calc(1ch+0.75rem)]">
-                {languages.map((language) => (
-                  <div key={language.slug} className="flex flex-wrap justify-between gap-x-6">
-                    <span>{language.slug}</span>
-                    <span className="hidden sm:inline">{language.counts.expressive} {language.counts.expressive === 1 ? 'chart' : 'charts'}, {language.counts.primitives} primitives</span>
-                  </div>
-                ))}
-              </div>
-              <div data-cli-command className="flex items-start gap-3">
-                <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={firstCommand}>{firstText}</span><Cursor /></div>
-              </div>
-              <div data-cli-output className="mb-6 pl-[calc(1ch+0.75rem)]">Initialised {first?.name ?? 'Signal Console'}</div>
-              <div data-cli-command className="flex items-start gap-3">
-                <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={nextCommand}>{nextText}</span><Cursor /></div>
-              </div>
-              <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {second?.name ?? 'Neo-brutalism'}</div>
             </div>
           </div>
+          <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism.</p>
+          <p className="mt-3 mb-0 text-[13px]" role="status" aria-live="polite" aria-atomic="true">
+            Page language: <span className="font-[number:var(--nx-font-weight-bold)]">{active?.name ?? 'Mono Editorial'}</span>
+          </p>
         </div>
-        <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism.</p>
-        <p className="mt-5 mb-0 text-[13px]" role="status" aria-live="polite" aria-atomic="true">
-          Page language: <span className="font-[number:var(--nx-font-weight-bold)]">{active?.name ?? 'Mono Editorial'}</span>
-        </p>
       </div>
+      {children}
     </section>
   );
 }

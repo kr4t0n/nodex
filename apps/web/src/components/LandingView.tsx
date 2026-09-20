@@ -24,7 +24,7 @@ import {
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
- * The marketing surface: the name, the CLI, then the work.
+ * The marketing surface: the name, then the CLI alongside its rendered work.
  *
  * Anything further belongs behind the sign-in, where
  * someone has already decided they are interested.
@@ -46,8 +46,8 @@ const MARK_LEFT_INSET = 0.056;
 const HERO_ROW_GAP = 44;
 
 /** One card in the run. Fixed, so the loop distance is exact. */
-const RUN_CARD_WIDTH = 380;
-const RUN_CARD_HEIGHT = 260;
+const RUN_CARD_WIDTH = 340;
+const RUN_CARD_HEIGHT = 200;
 const RUN_LENGTH = 8;
 /** Seconds per card. The whole belt takes this times the card count. */
 const RUN_SECONDS_PER_CARD = 6;
@@ -296,9 +296,9 @@ export function LandingView() {
           activeLanguage={landingLanguage.slug}
           status={catalogFailed ? 'error' : landingLanguage.status}
           onLanguageChange={landingLanguage.select}
-        />
-
-        <ComponentBelt items={runItems} />
+        >
+          <ComponentBelt items={runItems} />
+        </LandingTerminal>
       </main>
 
       <footer
@@ -315,7 +315,7 @@ export function LandingView() {
 }
 
 /**
- * Scene three: the selected language's collection travels right to left.
+ * The selected language's collection travels beneath the terminal in scene two.
  *
  * This loops, which `DESIGN.md` forbids for components in the language. It is a
  * deliberate, owner-approved exception scoped to this page: the rule governs
@@ -341,7 +341,7 @@ function ComponentBelt({
     () => {
       if (!mounted) {
         // Native iframe lazy loading reaches far below the fold. Wait until
-        // the belt itself is near so chart bundles do not compete with typing.
+        // the belt itself is near so chart bundles stay out of the opening hero.
         const trigger = ScrollTrigger.create({
           trigger: wrap.current,
           start: 'top 120%',
@@ -371,21 +371,14 @@ function ComponentBelt({
   const passes = [0, 1];
 
   return (
-    // A full scene, not a strip. It also guarantees the page is long enough for
-    // the fold above to reach its end state.
-    <section className="flex min-h-[100dvh] flex-col justify-center overflow-hidden py-24">
-      <div className="mx-auto w-full max-w-[1400px] px-6 lg:px-10">
-        <h2 className="m-0 text-[26px] leading-[1.15] font-extrabold tracking-[-0.03em] sm:text-[32px]">
-          One language, drawn all the way through.
-        </h2>
-      </div>
+    <section aria-label="Component previews" className="w-full min-w-0">
 
       {/* The fallback is a CSS variant, not a JS branch: choosing it in
           JavaScript would make the server and client markup differ and trip
           hydration. */}
       <div
         ref={wrap}
-        className="mt-12 overflow-hidden motion-reduce:overflow-x-auto"
+        className="overflow-hidden motion-reduce:overflow-x-auto"
       >
         <div ref={track} className="flex w-max">
           {passes.map((pass) => (

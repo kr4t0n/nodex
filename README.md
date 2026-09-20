@@ -66,8 +66,9 @@ built artifacts. `dev` and the web build copy those artifacts into the app's
 public directory automatically.
 
 The landing page folds its wordmark into the navbar, then demonstrates the CLI
-in a terminal. It types `nodex list`, runs `nodex init signal-console`, recalls
-the command and replaces the language with `neo-brutalism --force`. Each completed
+in a terminal above the chart belt, together in one scene with more generous
+spacing on taller screens. It types `nodex list`, runs `nodex init signal-console`,
+recalls the command and replaces the language with `neo-brutalism --force`. Each completed
 command applies that language's actual tokens to the whole page and selects its
 charts for the belt. The demonstration plays once while visible, with pause and
 replay controls. Returning above it restores Mono Editorial. Reduced motion
@@ -484,7 +485,7 @@ examples need no CDN chart scripts or external data fetches. Chromium belongs to
 the build and test environment, not the production server image.
 
 `smoke:landing` requires the web build above. To check an already running dev
-server instead, run `npm run smoke:landing -- http://127.0.0.1:4180`.
+server instead, run `npm run smoke:landing -- http://localhost:4180`.
 
 ## Accounts and configuration
 
