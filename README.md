@@ -65,6 +65,22 @@ The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
 built artifacts. `dev` and the web build copy those artifacts into the app's
 public directory automatically.
 
+The landing page folds its wordmark into the navbar, then demonstrates the CLI
+in a terminal above the chart belt, together in one scene with more generous
+spacing on taller screens. It types `nodex list`, runs `nodex init signal-console`,
+recalls the command and replaces the language with `neo-brutalism --force`. Each
+completed command applies that language's actual tokens to the whole page and selects its
+charts for the belt. The demonstration plays once while visible, with pause and
+resume controls. Scrolling away preserves the selected language and pauses any
+unfinished typing; returning resumes it.
+
+After that first run, the terminal becomes interactive. Run `nodex list` to see
+and select languages, or type `nodex init <language>` (with optional `--force`)
+to change the page and chart belt. Up/Down recalls commands, and history scrolls
+inside the terminal. Scrolling and motion-preference changes retain the session,
+including unfinished input; the animation never replays during that page visit.
+Reduced motion opens the interactive terminal directly when the scene is reached.
+
 The language overview shows up to four previews from each language's `featured`
 list in `registry/languages/<slug>/meta.json`, in the authored order. Its component
 badge counts the full catalogue; adding charts does not automatically feature
@@ -456,6 +472,7 @@ npm run check:shell
 npm run lint
 npm run typecheck
 npm run build --workspace @nodex/web
+npm run smoke:landing
 ```
 
 | Command | Coverage |
@@ -466,12 +483,16 @@ npm run build --workspace @nodex/web
 | `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all three languages, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
 | `check:shell` | Gallery primitive classes have their curated stylesheets |
+| `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |
 | `lint` / `typecheck` | Application, registry, CLI and build source |
 
 The consumer smoke installs packages in a disposable directory and therefore
 needs npm network access. Build previews bundle dependencies locally; rendered
 examples need no CDN chart scripts or external data fetches. Chromium belongs to
 the build and test environment, not the production server image.
+
+`smoke:landing` requires the web build above. To check an already running dev
+server instead, run `npm run smoke:landing -- http://localhost:4180`.
 
 ## Accounts and configuration
 

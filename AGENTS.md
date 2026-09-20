@@ -285,11 +285,46 @@ The shell still consumes curated primitive CSS classes for its existing markup.
 the curation synchronized or a valid primitive class can render unstyled. New UI
 can consume reusable primitive APIs; avoid an unrelated wholesale shell rewrite.
 
-The landing is two scenes: name, then work. Actual registry previews fill its
-belt. Each repeated pass owns its trailing gap; both passes must be identical
-width for seamless `xPercent: -50`. Repeat a small catalogue to fill the belt.
-Scene two stays a full viewport tall so the first scene can complete. Landing
-looping is an explicit product exception; it does not relax registry motion rules.
+The landing is two scenes: the name, then the CLI and chart belt together. The
+terminal runs a finite typing sequence after the wordmark folds into the navbar:
+`nodex list`, then `nodex init signal-console`, then a recalled command whose
+language is backspaced and replaced with `neo-brutalism --force`. Only completed
+commands switch the page.
+Its language list and chart counts come from the manifest. The selected language
+also determines the belt's expressive charts; never recolor another language's
+charts as a substitute.
+
+The terminal preloads generated token stylesheets and their fonts into a temporary
+document scope before playing. Renaming the generated root selector preserves
+the token authority and makes each switch immediate. Remove that scope and its
+stylesheet on navigation. Scroll position never resets the page language or the
+transcript: offscreen and background-tab playback pauses, then resumes on return.
+Completion permanently hands control to an interactive terminal for the mounted
+page. Unmount the animated transcript and dispose its GSAP timeline and listeners;
+scrolling, theme changes and motion-preference changes must never recreate it.
+There is no replay control. Reduced motion enters the interactive state directly
+when the scene is reached. Keep demo typing out of React's animation-frame render
+cycle and out of screen-reader live announcements.
+
+`LandingTerminalSession` owns the prompt, scrollback and command recall. Its parser
+only handles `nodex list` and `nodex init <manifest-language> [--force]`; it changes
+page tokens and never executes a shell. List output also offers language buttons.
+Retain the last 20 entries, preserve drafts across scrolling and theme changes,
+and scroll only the history container when commands append. The handoff must not
+steal focus or open a mobile keyboard. Keep the terminal's height stable so the
+history cannot push the chart belt down after every command.
+The navbar reserves room for every language's native action height.
+
+Actual registry previews fill the belt. Each repeated pass owns its trailing gap;
+both passes must be identical width for seamless `xPercent: -50`. Repeat a small
+catalogue to fill the belt. Reserve each frame's dimensions but mount its preview
+only when the belt approaches the viewport; native iframe lazy loading alone
+starts chart bundles during the opening hero.
+The terminal and belt share one scene, with a 200px chart strip below the terminal.
+Terminal padding and command spacing expand on tall viewports, and the gap above
+the belt grows with viewport height. The scene can grow on short screens so
+content stays readable without clipping. Landing looping is an explicit product
+exception; it does not relax registry motion rules.
 GSAP is app-only and never enters delivered source.
 
 The landing sign-in aligns to the scaled wordmark in the hero and returns to the
