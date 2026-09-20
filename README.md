@@ -534,10 +534,10 @@ and a migration Job. Its release workflow requires a chart-version bump:
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm repo update
-helm upgrade --install nodex nodex/nodex --version 0.2.1 --set siteUrl=https://nodex.example.com
+helm upgrade --install nodex nodex/nodex --version 0.2.2 --set siteUrl=https://nodex.example.com
 ```
 
-Chart `0.2.1` pins the app and migration Job to `kr4t0n/nodex:0.2.1` through
+Chart `0.2.2` pins the app and migration Job to `kr4t0n/nodex:0.2.2` through
 `appVersion`; `image.tag` is an explicit override.
 
 `npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
@@ -553,7 +553,7 @@ automatically; an OIDC configuration error fails the publish job.
 
 For a coordinated release, bump `packages/cli/package.json` and its lockfile
 entry, plus the Helm chart's `version` and `appVersion`. Commit those changes
-on `main` and push a matching annotated tag such as `v0.2.1`. The main push
+on `main` and push a matching annotated tag such as `v0.2.2`. The main push
 publishes the versioned Helm chart; the tag starts the npm and image workflows.
 Image version tags omit the `v` prefix. Confirm the registry artifacts after
 the workflows finish: missing Docker credentials still make the image job skip,
