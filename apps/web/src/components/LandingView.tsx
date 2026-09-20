@@ -8,23 +8,25 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { LanguageTheme } from '@/components/LanguageTheme.tsx';
+import { LandingTerminal } from '@/components/LandingTerminal.tsx';
 import { Preview } from '@/components/Preview.tsx';
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
+import { useLandingLanguage } from '@/lib/landing-language.ts';
 import {
   expressiveFor,
   loadCatalog,
-  OWN_LANGUAGE,
   previewUrl,
   type Catalog,
   type Item,
+  type Language,
 } from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
- * The marketing surface. Two scenes, and deliberately nothing after them.
+ * The marketing surface: the name, the CLI, then the work.
  *
- * The name, then the work. Anything further belongs behind the sign-in, where
+ * Anything further belongs behind the sign-in, where
  * someone has already decided they are interested.
  *
  * Scene one has no navigation. The wordmark and the sign-in ARE the navigation:
@@ -49,10 +51,13 @@ const RUN_CARD_HEIGHT = 260;
 const RUN_LENGTH = 8;
 /** Seconds per card. The whole belt takes this times the card count. */
 const RUN_SECONDS_PER_CARD = 6;
+const NO_LANGUAGES: Language[] = [];
 
 export function LandingView() {
   const [catalog, setCatalog] = useState<Catalog>();
+  const [catalogFailed, setCatalogFailed] = useState(false);
   const reduced = usePrefersReducedMotion();
+  const landingLanguage = useLandingLanguage(catalog?.languages ?? NO_LANGUAGES);
 
   const root = useRef<HTMLDivElement>(null);
   const hero = useRef<HTMLElement>(null);
@@ -62,10 +67,10 @@ export function LandingView() {
   const signIn = useRef<HTMLAnchorElement>(null);
   const barBg = useRef<HTMLDivElement>(null);
 
-  const language = catalog?.languages.find((entry) => entry.slug === OWN_LANGUAGE);
+  const language = catalog?.languages.find((entry) => entry.slug === landingLanguage.slug);
 
   useEffect(() => {
-    void loadCatalog().then(setCatalog);
+    void loadCatalog().then(setCatalog).catch(() => setCatalogFailed(true));
   }, []);
 
   // Spread a large catalog across the run; repeat a small catalog so each
@@ -174,7 +179,7 @@ export function LandingView() {
           trigger: hero.current,
           start: 'top top',
           // Finishes well before scene one is fully gone, so the bar is
-          // assembled before the belt rises into view.
+          // assembled before the terminal comes into view.
           end: () => `+=${foldDistance()}`,
           scrub: 0.5,
           invalidateOnRefresh: true,
@@ -234,7 +239,7 @@ export function LandingView() {
         />
 
         <div
-          className="relative mx-auto max-w-[1400px] px-6 lg:px-10"
+          className="relative mx-auto min-h-16 max-w-[1400px] px-6 lg:px-10"
           style={{ paddingTop: NAV_TOP }}
         >
           {/* Sized at rest and scaled up for the hero, so the travel is a pure
@@ -242,7 +247,7 @@ export function LandingView() {
               them would relayout on every frame. */}
           <h1
             ref={mark}
-            className="pointer-events-auto m-0 inline-block font-extrabold tracking-[-0.045em]"
+            className="pointer-events-auto m-0 inline-block font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.045em]"
             style={{
               fontSize: NAV_FONT,
               lineHeight: MARK_LEADING,
@@ -281,11 +286,20 @@ export function LandingView() {
         </div>
       </header>
 
-      {/* Scene one is empty on purpose: the bar above is drawn over it, and this
-          is the scroll distance the fold happens across. */}
-      <section ref={hero} className="min-h-[100dvh]" />
+      <main>
+        {/* Scene one is empty on purpose: the bar above is drawn over it, and this
+            is the scroll distance the fold happens across. */}
+        <section ref={hero} className="min-h-[100dvh]" />
 
-      <ComponentBelt items={runItems} />
+        <LandingTerminal
+          languages={catalog?.languages ?? NO_LANGUAGES}
+          activeLanguage={landingLanguage.slug}
+          status={catalogFailed ? 'error' : landingLanguage.status}
+          onLanguageChange={landingLanguage.select}
+        />
+
+        <ComponentBelt items={runItems} />
+      </main>
 
       <footer
         className="mx-auto max-w-[1400px] px-6 pb-14 lg:px-10"
@@ -301,7 +315,7 @@ export function LandingView() {
 }
 
 /**
- * Scene two: the collection travels right to left on its own.
+ * Scene three: the selected language's collection travels right to left.
  *
  * This loops, which `DESIGN.md` forbids for components in the language. It is a
  * deliberate, owner-approved exception scoped to this page: the rule governs
@@ -319,11 +333,24 @@ function ComponentBelt({
   items: Item[];
 }) {
   const reduced = usePrefersReducedMotion();
+  const [mounted, setMounted] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
+      if (!mounted) {
+        // Native iframe lazy loading reaches far below the fold. Wait until
+        // the belt itself is near so chart bundles do not compete with typing.
+        const trigger = ScrollTrigger.create({
+          trigger: wrap.current,
+          start: 'top 120%',
+          once: true,
+          onEnter: () => setMounted(true),
+        });
+        if (trigger.scroll() >= trigger.start) setMounted(true);
+        return;
+      }
       if (reduced || !track.current || items.length === 0) return;
       gsap.to(track.current, {
         xPercent: -50,
@@ -332,7 +359,7 @@ function ComponentBelt({
         repeat: -1,
       });
     },
-    { scope: wrap, dependencies: [reduced, items.length], revertOnUpdate: true },
+    { scope: wrap, dependencies: [reduced, items.length, mounted], revertOnUpdate: true },
   );
 
   /**
@@ -374,16 +401,16 @@ function ComponentBelt({
                 <figure
                   key={`${pass}-${index}-${item.name}`}
                   className="m-0 shrink-0"
-                  style={{ width: RUN_CARD_WIDTH }}
+                  style={{ width: RUN_CARD_WIDTH, height: RUN_CARD_HEIGHT }}
                 >
-                  <Preview
+                  {mounted && <Preview
                     src={previewUrl(item)}
                     title={item.title}
                     width={item.meta.preview.width}
                     height={item.meta.preview.height}
                     insets={item.meta.preview.insets}
                     boxHeight={RUN_CARD_HEIGHT}
-                  />
+                  />}
                 </figure>
               ))}
             </div>

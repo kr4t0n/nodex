@@ -285,10 +285,29 @@ The shell still consumes curated primitive CSS classes for its existing markup.
 the curation synchronized or a valid primitive class can render unstyled. New UI
 can consume reusable primitive APIs; avoid an unrelated wholesale shell rewrite.
 
-The landing is two scenes: name, then work. Actual registry previews fill its
-belt. Each repeated pass owns its trailing gap; both passes must be identical
-width for seamless `xPercent: -50`. Repeat a small catalogue to fill the belt.
-Scene two stays a full viewport tall so the first scene can complete. Landing
+The landing is three scenes: name, CLI, then work. The terminal runs a finite
+typing sequence after the wordmark folds into the navbar: `nodex list`, then
+`nodex init signal-console`, then a recalled command whose language is backspaced
+and replaced with `neo-brutalism --force`. Only completed commands switch the page.
+Its language list and chart counts come from the manifest. The selected language
+also determines the belt's expressive charts; never recolor another language's
+charts as a substitute.
+
+The terminal preloads generated token stylesheets and their fonts into a temporary
+document scope before playing. Renaming the generated root selector preserves
+the token authority and makes each switch immediate. Remove that scope and its
+stylesheet on navigation. Returning above the terminal restores Mono Editorial;
+offscreen and background-tab playback pauses. Reduced motion shows the complete
+transcript and provides a manual language switch. Keep typing out of React's
+animation-frame render cycle and out of screen-reader live announcements.
+The navbar reserves room for every language's native action height.
+
+Actual registry previews fill the belt. Each repeated pass owns its trailing gap;
+both passes must be identical width for seamless `xPercent: -50`. Repeat a small
+catalogue to fill the belt. Reserve each frame's dimensions but mount its preview
+only when the belt approaches the viewport; native iframe lazy loading alone
+starts chart bundles during the terminal's typing sequence.
+The terminal and belt each retain a full viewport of space. Landing
 looping is an explicit product exception; it does not relax registry motion rules.
 GSAP is app-only and never enters delivered source.
 
