@@ -28,25 +28,26 @@
   outline: none;
 }
 
-/* Track */
+/* Native tracks can lose a sub-pixel height when the browser snaps their
+   vertical position. Keep a one-pixel floor local to the range control. */
 .nx-slider::-webkit-slider-runnable-track {
-  height: var(--nx-stroke-hairline);
+  height: max(1px, var(--nx-stroke-hairline));
   border-radius: var(--nx-radius-pill);
   background: var(--nx-grid);
 }
 
 .nx-slider::-moz-range-track {
-  height: var(--nx-stroke-hairline);
+  height: max(1px, var(--nx-stroke-hairline));
   border-radius: var(--nx-radius-pill);
   background: var(--nx-grid);
 }
 
-/* Filled portion. Firefox exposes this natively; the language marks progress in
-   ink at the same hairline weight rather than with a colour. */
+/* Firefox exposes the filled portion natively. It shares the value paint used
+   by progress indicators and the slider thumb. */
 .nx-slider::-moz-range-progress {
-  height: var(--nx-stroke-hairline);
+  height: max(1px, var(--nx-stroke-hairline));
   border-radius: var(--nx-radius-pill);
-  background: var(--nx-ink);
+  background: var(--nx-valueFill);
 }
 
 /* Thumb. A filled circle, the same mark the charts use for a data point. */
@@ -56,10 +57,9 @@
   height: 11px;
   border: 0;
   border-radius: 50%;
-  background: var(--nx-ink);
-  /* Centre the thumb on a sub-pixel track: half the thumb, less half the
-     track. */
-  margin-top: calc((var(--nx-stroke-hairline) - 11px) / 2);
+  background: var(--nx-valueFill);
+  /* Centre the thumb on the track's effective height, including its floor. */
+  margin-top: calc((max(1px, var(--nx-stroke-hairline)) - 11px) / 2);
   transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
 }
 
@@ -68,7 +68,7 @@
   height: 11px;
   border: 0;
   border-radius: 50%;
-  background: var(--nx-ink);
+  background: var(--nx-valueFill);
   transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
 }
 

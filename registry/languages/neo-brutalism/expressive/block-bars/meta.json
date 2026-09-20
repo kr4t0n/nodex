@@ -1,0 +1,27 @@
+{
+  "slug": "block-bars",
+  "title": "Sign-ups by channel",
+  "description": "Categorical color, heavy outlines and hard shadows. Every block rises from zero.",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": ["BlockBars"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts", "neo-categorical.ts"],
+  "dependencies": ["recharts@3.10.1"],
+  "example": { "entry": "example.tsx", "export": "Example", "width": 720, "height": 510 },
+  "tags": ["categorical", "comparison", "acquisition"],
+  "props": [
+    { "name": "data", "type": "readonly BlockBarsDatum[]", "description": "Categories in caller order, each with a unique nonempty id, label, nonnegative value or null, and optional categorical tone a–d. Default colors follow stable IDs. Invalid numbers are unavailable; zero and missing values retain their labels without a bar. Empty or entirely unavailable datasets show an explicit state. More than six categories receive a horizontally scrollable plot.", "required": true },
+    { "name": "unitLabel", "type": "string", "description": "Measurement label in the chart heading and tooltips; defaults to Value.", "required": false },
+    { "name": "contextLabel", "type": "string", "description": "Optional caller-owned context such as a reporting period.", "required": false },
+    { "name": "valueFormatter", "type": "(value: number) => string", "description": "Formats direct labels and tooltips; defaults to en-US numbers with up to two decimal places. Axis ticks use compact numeric notation.", "required": false },
+    { "name": "width", "type": "number", "description": "Optional width in pixels; otherwise fills its container.", "required": false },
+    { "name": "height", "type": "number", "description": "Optional total height in pixels; otherwise the plot follows its aspect ratio with a readable minimum height.", "required": false },
+    { "name": "animate", "type": "boolean", "description": "Enable token-timed Recharts drawing, subject to reduced motion.", "required": false },
+    { "name": "className", "type": "string", "description": "Additional container classes.", "required": false },
+    { "name": "aria-label", "type": "string", "description": "Accessible chart title; defaults to Values by category.", "required": false }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "slug": "tile-heatmap",
+  "title": "Weekly focus hours",
+  "description": "Outlined blue tiles show intensity on a fixed scale. Dots distinguish measured zero from unavailable cells marked with a cross.",
+  "component": "heatmap",
+  "exports": [
+    "TileHeatmap"
+  ],
+  "tags": [
+    "matrix",
+    "intensity",
+    "weekly"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly TileHeatmapDatum[]",
+      "description": "Readings keyed by rowId and columnId, with nonnegative finite value or null. Omitted pairs are unavailable. Values above maxValue are unavailable rather than clamped. Duplicate pairs and undeclared axis IDs show an explicit invalid state.",
+      "required": true
+    },
+    {
+      "name": "rows",
+      "type": "readonly TileHeatmapAxis[]",
+      "description": "Ordered rows with unique nonempty id and display label.",
+      "required": true
+    },
+    {
+      "name": "columns",
+      "type": "readonly TileHeatmapAxis[]",
+      "description": "Ordered columns with unique nonempty id and display label.",
+      "required": true
+    },
+    {
+      "name": "maxValue",
+      "type": "number",
+      "description": "Required finite positive intensity ceiling. This scale remains fixed as data changes.",
+      "required": true
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement or allocation label. Defaults to Value, or Share for Hundred Blocks.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period or other caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct labels and tooltips; defaults to en-US numbers with up to two decimal places. Cartesian ticks use numeric notation.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height. Dense plots scroll locally.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite native Recharts motion subject to the language tokens and reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "neo-chart-frame.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 530
+  }
+}

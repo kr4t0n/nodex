@@ -24,36 +24,37 @@
     background-color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
     color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
     border-color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
+    box-shadow var(--nx-motion-press-duration) var(--nx-motion-press-easing),
     transform var(--nx-motion-press-duration) var(--nx-motion-press-easing);
 }
 
 /* Solid. The only high-emphasis action on a surface. */
 .nx-btn--solid {
-  background: var(--nx-ink);
-  border-color: var(--nx-ink);
-  color: var(--nx-bg);
+  background: var(--nx-actionFill);
+  border-color: var(--nx-actionBorder);
+  color: var(--nx-actionText);
 }
 
-.nx-btn--solid:hover {
-  background: var(--nx-muted);
-  border-color: var(--nx-muted);
+.nx-btn--solid:hover:not(:disabled):not([aria-disabled='true']) {
+  background: var(--nx-actionHoverFill);
+  border-color: var(--nx-actionHoverBorder);
 }
 
-/* Outline. Hairline border, which is this language's whole signature. */
+/* Outline. Structural paint is independent of quiet tracks and grid fills. */
 .nx-btn--outline {
-  border-color: var(--nx-grid);
+  border-color: var(--nx-border);
   color: var(--nx-ink);
 }
 
-.nx-btn--outline:hover {
+.nx-btn--outline:hover:not(:disabled):not([aria-disabled='true']) {
   border-color: var(--nx-ink);
 }
 
 .nx-btn--outline[aria-pressed='true'],
 .nx-btn--outline[data-active='true'] {
-  background: var(--nx-ink);
+  background: var(--nx-selectionFill);
   border-color: var(--nx-ink);
-  color: var(--nx-bg);
+  color: var(--nx-selectionText);
 }
 
 /* Quiet. For tertiary navigation where a border would be noise. */
@@ -62,13 +63,23 @@
   padding-inline: var(--nx-space-quietActionPaddingInline);
 }
 
-.nx-btn--quiet:hover {
+.nx-btn--quiet:hover:not(:disabled):not([aria-disabled='true']) {
   color: var(--nx-ink);
 }
 
-/* Tactile press. Transform only, so it stays on the compositor. */
-.nx-btn:active {
-  transform: translateY(1px);
+.nx-btn--solid,
+.nx-btn--outline {
+  box-shadow: var(--nx-shadow-action) var(--nx-ink);
+}
+
+/* The language owns press travel and the remaining shadow. */
+.nx-btn:active:not(:disabled):not([aria-disabled='true']) {
+  transform: translate(var(--nx-motion-press-x), var(--nx-motion-press-y));
+}
+
+.nx-btn--solid:active:not(:disabled):not([aria-disabled='true']),
+.nx-btn--outline:active:not(:disabled):not([aria-disabled='true']) {
+  box-shadow: var(--nx-shadow-actionPressed) var(--nx-ink);
 }
 
 .nx-btn:focus-visible {
@@ -86,8 +97,12 @@
   .nx-btn {
     transition: none;
   }
-  .nx-btn:active {
+  .nx-btn:active:not(:disabled):not([aria-disabled='true']) {
     transform: none;
+  }
+  .nx-btn--solid:active:not(:disabled):not([aria-disabled='true']),
+  .nx-btn--outline:active:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--nx-shadow-action) var(--nx-ink);
   }
 }
 }

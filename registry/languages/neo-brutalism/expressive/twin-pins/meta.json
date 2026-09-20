@@ -1,0 +1,103 @@
+{
+  "slug": "twin-pins",
+  "title": "Task time before and after",
+  "description": "Yellow circles and lilac squares connect paired readings on a common scale, with direct labels above and below each row.",
+  "component": "dumbbell",
+  "exports": [
+    "TwinPins"
+  ],
+  "tags": [
+    "comparison",
+    "before-after",
+    "paired"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly TwinPinsDatum[]",
+      "description": "Rows in caller order with unique nonempty id, label, before and after numbers or null. Finite signed values are supported. Missing endpoints have no mark or connecting rail; known endpoints and row labels remain. Each row is one keyboard stop.",
+      "required": true
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement or allocation label. Defaults to Value, or Share for Hundred Blocks.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period or other caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "beforeLabel",
+      "type": "string",
+      "description": "First-series label; defaults to Before.",
+      "required": false
+    },
+    {
+      "name": "afterLabel",
+      "type": "string",
+      "description": "Second-series label; defaults to After.",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct labels and tooltips; defaults to en-US numbers with up to two decimal places. Cartesian ticks use numeric notation.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height. Dense plots scroll locally.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite native Recharts motion subject to the language tokens and reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "neo-chart-frame.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 530
+  }
+}

@@ -7,7 +7,7 @@
 
 .nx-rule {
   border: 0;
-  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
   margin: 0;
   width: 100%;
 }
@@ -32,7 +32,7 @@
    it matches the content height rather than needing one set. */
 .nx-rule--vertical {
   border-top: 0;
-  border-left: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-left: var(--nx-stroke-hairline) solid var(--nx-border);
   width: 0;
   height: auto;
   align-self: stretch;

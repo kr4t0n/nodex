@@ -121,7 +121,7 @@
 .nx-prose pre {
   margin: 0;
   padding: var(--nx-space-codeBlockPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-card);
   overflow-x: auto;
   font-family: var(--nx-font-mono);
@@ -142,13 +142,13 @@
 .nx-prose blockquote {
   margin: 0;
   padding-left: var(--nx-space-proseIndent);
-  border-left: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-left: var(--nx-stroke-hairline) solid var(--nx-border);
   color: var(--nx-muted);
 }
 
 .nx-prose hr {
   border: 0;
-  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
   margin-block: var(--nx-space-proseRuleGap);
 }
 
@@ -173,7 +173,7 @@
    boundary is the laziest possible table. */
 .nx-prose td {
   padding: var(--nx-space-proseTablePadding);
-  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
   vertical-align: top;
 }
 

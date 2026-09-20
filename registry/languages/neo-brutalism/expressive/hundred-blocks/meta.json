@@ -1,0 +1,86 @@
+{
+  "slug": "hundred-blocks",
+  "title": "Team capacity allocation",
+  "description": "One hundred outlined blocks make whole-percent shares countable. A bold categorical key names every allocation.",
+  "component": "unit-chart",
+  "exports": [
+    "HundredBlocks"
+  ],
+  "tags": [
+    "share",
+    "waffle",
+    "allocation"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HundredBlocksDatum[]",
+      "description": "Categories with unique nonempty id, label, whole-number percent or null, and optional tone a–d. Requires complete percentages summing to exactly 100; invalid, missing, fractional and all-zero allocations show an explicit state. Zero-share categories retain their key entries. Blocks follow caller order and colors remain stable by ID. Each category is one keyboard stop.",
+      "required": true
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement or allocation label. Defaults to Value, or Share for Hundred Blocks.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period or other caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height. Dense plots scroll locally.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite native Recharts motion subject to the language tokens and reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "neo-chart-frame.tsx",
+    "neo-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 530
+  }
+}

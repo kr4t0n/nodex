@@ -7,17 +7,17 @@
 
    Only opening it is script: `el.showModal()`. Everything below is CSS.
 
-   A modal is the one place this language's lack of an elevation model bites: a
-   panel that must sit above the page cannot say so with a shadow. It says so
-   with the backdrop instead, which dims everything behind it. */
+   The backdrop separates the modal from its surroundings. The active language
+   determines whether its surface also casts a shadow. */
 
 .nx-dialog {
+  box-shadow: var(--nx-shadow-surface) var(--nx-ink);
   margin: auto;
   padding: 0;
   width: min(440px, calc(100vw - 48px));
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-card);
-  background: var(--nx-bg);
+  background: var(--nx-surfaceFill);
   color: var(--nx-ink);
   font-family: var(--nx-font-sans);
 }
@@ -57,7 +57,7 @@
   justify-content: flex-end;
   gap: var(--nx-space-dialogGap);
   padding: var(--nx-space-dialogActionsPadding);
-  border-top: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
 }
 
 /* Actions.
@@ -67,8 +67,9 @@
    not a usable copy. If you have already added the button primitive, use
    .nx-btn here instead and delete these three rules. */
 .nx-dialog__action {
+  box-shadow: var(--nx-shadow-action) var(--nx-ink);
   padding: var(--nx-space-compactActionPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-pill);
   background: transparent;
   color: var(--nx-ink);
@@ -84,13 +85,12 @@
   border-color: var(--nx-ink);
 }
 
-/* The confirming action is the solid one. In a destructive dialog it is still
-   solid rather than red, because there is no red; the copy carries the warning
-   and the wording of the label does the rest. */
+/* Confirmation shares the primary action paint. Destructive intent must also
+   be explicit in the label; action color alone does not express it. */
 .nx-dialog__action--confirm {
-  background: var(--nx-ink);
-  border-color: var(--nx-ink);
-  color: var(--nx-bg);
+  background: var(--nx-actionFill);
+  border-color: var(--nx-actionBorder);
+  color: var(--nx-actionText);
 }
 
 .nx-dialog__action:focus-visible {

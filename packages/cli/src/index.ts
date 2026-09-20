@@ -289,13 +289,18 @@ async function cmdNewLanguage(slug: string, explicit?: string): Promise<void> {
   const template = group(JSON.parse(templateSource), 'root');
   const type = group(template.type, 'type');
   const motion = group(template.motion, 'motion');
+  const colors = group(template.color, 'color');
   const tokens = {
-    color: { bg: '#FFFFFF', ink: '#000000', muted: '#000000', faint: '#000000', grid: '#000000', onDarkFaint: '#000000' },
+    // Carry semantic roles forward without copying the source language's paint.
+    color: Object.fromEntries(Object.entries(colors)
+      .filter(([key]) => !key.startsWith('$'))
+      .map(([key, value]) => [key, value === colors.bg ? '#FFFFFF' : '#000000'])),
     ramp: { steps: ['#FFFFFF', '#000000'] },
     stroke: { hairline: '1px', mark: '1px', emphasis: '1.4px', lineMax: '1.4px' },
     radius: { ...group(template.radius, 'radius'), card: '0px', pill: '0px' },
     font: { sans: 'system-ui, sans-serif', mono: 'ui-monospace, monospace', weight: group(group(template.font, 'font').weight, 'font.weight') },
     space: { ...group(template.space, 'space'), cardPadding: '20px', gridGap: '20px', pagePadding: '32px' },
+    shadow: group(template.shadow, 'shadow'),
     type: {
       ...type,
       axis: { ...group(type.axis, 'type.axis'), size: '11px', weight: 400 },

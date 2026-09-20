@@ -7,12 +7,13 @@
 .nx-card {
   display: flex;
   flex-direction: column;
-  background: var(--nx-bg);
-  border: var(--nx-stroke-hairline) solid var(--nx-grid);
+  background: var(--nx-surfaceFill);
+  border: var(--nx-stroke-hairline) solid var(--nx-border);
   border-radius: var(--nx-radius-card);
   padding: var(--nx-space-cardPadding);
   font-family: var(--nx-font-sans);
   color: var(--nx-ink);
+  box-shadow: var(--nx-shadow-surface) var(--nx-ink);
 }
 
 /* Inverted. Present because the source collection inverts roughly a fifth of
@@ -24,7 +25,7 @@
 }
 
 .nx-card--invert .nx-card__sub {
-  color: var(--nx-muted);
+  color: var(--nx-onDarkMuted);
 }
 
 .nx-card--invert .nx-card__caption {
@@ -33,7 +34,9 @@
 
 /* Borderless, for grids that separate by space rather than by line. */
 .nx-card--plain {
+  background: var(--nx-bg);
   border-color: transparent;
+  box-shadow: none;
 }
 
 /* Card anatomy, in the order DESIGN.md fixes: title, sub, body, caption. */
@@ -65,8 +68,7 @@
   color: var(--nx-faint);
 }
 
-/* Interactive cards get a hairline that firms up. No shadow, no lift: this
-   language has no elevation model. */
+/* Interactive cards strengthen the border; shadow geometry stays stable. */
 .nx-card--link {
   text-decoration: none;
   transition: border-color var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);

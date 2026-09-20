@@ -50,8 +50,8 @@
   width: 3px;
   height: 6.5px;
   margin-top: -2px;
-  border-right: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-bg);
-  border-bottom: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-bg);
+  border-right: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-selectionText);
+  border-bottom: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-selectionText);
   transform: rotate(45deg) scale(0);
   transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
 }
@@ -61,7 +61,7 @@
 }
 
 .nx-checkbox:checked {
-  background: var(--nx-ink);
+  background: var(--nx-selectionFill);
   border-color: var(--nx-ink);
 }
 
@@ -79,7 +79,7 @@
    the real mechanism, and the attribute is what lets rendered markup carry it. */
 .nx-checkbox:indeterminate,
 .nx-checkbox[data-indeterminate='true'] {
-  background: var(--nx-ink);
+  background: var(--nx-selectionFill);
   border-color: var(--nx-ink);
 }
 
@@ -89,7 +89,7 @@
   height: 0;
   margin-top: 0;
   border-right: 0;
-  border-bottom: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-bg);
+  border-bottom: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-selectionText);
   transform: rotate(0deg) scale(1);
 }
 

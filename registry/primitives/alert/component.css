@@ -14,7 +14,7 @@
   flex-direction: column;
   gap: var(--nx-space-alertGap);
   padding: var(--nx-space-alertPadding);
-  border-left: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-grid);
+  border-left: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-border);
   font-family: var(--nx-font-sans);
   font-size: var(--nx-type-body-size);
   line-height: var(--nx-type-body-lineHeight);
@@ -73,6 +73,6 @@
 }
 
 .nx-alert--invert .nx-alert__title {
-  color: var(--nx-muted);
+  color: var(--nx-onDarkMuted);
 }
 }

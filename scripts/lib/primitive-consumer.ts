@@ -48,7 +48,7 @@ function PrimitiveScope({ id }: { id: string }) {
       <Card data-primitive="card"><CardTitle>Saved reports</CardTitle><CardSubtitle>Reports owned by this application.</CardSubtitle><CardBody>Choose a window and delivery settings.</CardBody><CardCaption>Updated after submission</CardCaption></Card>
       <Alert data-primitive="alert" title="Local fixture" severity="important">Settings remain inside this test application.</Alert>
       <AvatarGroup data-primitive="avatar" aria-label="Report owners"><Avatar name="Lee Rivera" shape="square" /><Avatar name="Jo Patel" size="sm" /></AvatarGroup>
-      <div data-primitive="badge"><Badge>Ready</Badge></div>
+      <div data-primitive="badge"><Badge variant="solid">Ready</Badge></div>
       <div data-primitive="input"><Input name="title" label="Report title" help="A title chosen by the caller." defaultValue="Weekly report" required /></div>
       <div data-primitive="textarea"><Textarea name="notes" label="Notes" help="Plain text notes." defaultValue="Initial note" /></div>
       <div data-primitive="select"><Select name="window" label="Reporting window" defaultValue="week"><option value="day">Today</option><option value="week">This week</option><option value="month">This month</option></Select><Select label="Compact window" autoWidth defaultValue="week"><option value="day">Today</option><option value="week">This week</option><option value="month">This month</option></Select></div>
@@ -57,7 +57,7 @@ function PrimitiveScope({ id }: { id: string }) {
       <div data-primitive="switch"><Switch name="notify" label="Notify after export" /></div>
       <div data-primitive="slider"><Slider name="limit" label="Row limit" min={0} max={100} step={5} defaultValue={50} valueLabel="Rows" ticks={5} /></div>
       <div data-primitive="progress"><Progress label="Export progress" value={35} /></div>
-      <div data-primitive="button"><Button type="submit" data-submit>Save settings</Button><Button disabled>Unavailable action</Button></div>
+      <div data-primitive="button"><Button type="submit" data-submit>Save settings</Button><Button disabled>Unavailable action</Button><Button variant="outline" aria-pressed="true" data-selected-action>Selected filter</Button></div>
     </form>
     <p data-form-result>{submitted}</p>
     <div data-primitive="code"><Code>report_id</Code> <Kbd>Enter</Kbd><CodeBlock>{'select report_id;\n'}</CodeBlock></div>
@@ -78,6 +78,7 @@ export function PrimitiveConsumer() {
   return <section aria-label="Installed primitive contract" className="flex flex-col gap-8">
     <div data-primitive-language="mono-editorial" className="grid grid-cols-2"><PrimitiveScope id="primitives-mono-editorial-original" /><PrimitiveScope id="primitives-mono-editorial-edited" /></div>
     <div data-primitive-language="signal-console" data-signal className="grid grid-cols-2"><PrimitiveScope id="primitives-signal-console-original" /><PrimitiveScope id="primitives-signal-console-edited" /></div>
+    <div data-primitive-language="neo-brutalism" data-neo className="grid grid-cols-2"><PrimitiveScope id="primitives-neo-brutalism-original" /><PrimitiveScope id="primitives-neo-brutalism-edited" /></div>
   </section>;
 }
 `;
@@ -94,6 +95,21 @@ const OVERRIDES: Record<string, string> = {
   '--nx-bg': '#edf7f2',
   '--nx-muted': '#516273',
   '--nx-grid': '#8a9baa',
+  '--nx-border': '#8a9baa',
+  '--nx-actionFill': '#fae97b',
+  '--nx-actionText': '#123456',
+  '--nx-actionBorder': '#123456',
+  '--nx-surfaceFill': '#eee2ff',
+  '--nx-fieldFill': '#fff4db',
+  '--nx-selectionFill': '#bae8d0',
+  '--nx-selectionText': '#123456',
+  '--nx-badgeFill': '#ffb7a6',
+  '--nx-badgeText': '#123456',
+  '--nx-shadow-action': '7px 5px 0px',
+  '--nx-shadow-control': '3px 2px 0px',
+  '--nx-shadow-badge': '3px 1px 0px',
+  '--nx-shadow-surface': '9px 7px 0px',
+  '--nx-shadow-popover': '8px 6px 0px',
   '--nx-font-sans': 'Georgia, serif',
   '--nx-font-mono': 'monospace',
   '--nx-stroke-hairline': '2px',
@@ -143,9 +159,31 @@ const OVERRIDES: Record<string, string> = {
 };
 
 const STYLE_CHECKS: StyleCheck[] = [
-  { selector: '.nx-card', property: 'backgroundColor', expected: 'rgb(237, 247, 242)' },
+  { selector: '.nx-card', property: 'backgroundColor', expected: 'rgb(238, 226, 255)' },
+  { selector: '.nx-dialog', property: 'backgroundColor', expected: 'rgb(238, 226, 255)' },
+  { selector: '.nx-input', property: 'backgroundColor', expected: 'rgb(255, 244, 219)' },
+  { selector: '.nx-select', property: 'backgroundColor', expected: 'rgb(255, 244, 219)' },
+  { selector: '.nx-textarea', property: 'backgroundColor', expected: 'rgb(255, 244, 219)' },
+  { selector: '.nx-badge', property: 'backgroundColor', expected: 'rgb(255, 183, 166)' },
+  { selector: '.nx-badge', property: 'color', expected: 'rgb(18, 52, 86)' },
+  { selector: '.nx-checkbox', property: 'backgroundColor', expected: 'rgb(186, 232, 208)' },
+  { selector: '.nx-checkbox', pseudo: '::before', property: 'borderBottomColor', expected: 'rgb(18, 52, 86)' },
+  { selector: '.nx-switch', property: 'backgroundColor', expected: 'rgb(186, 232, 208)' },
+  { selector: '.nx-switch', pseudo: '::before', property: 'backgroundColor', expected: 'rgb(18, 52, 86)' },
+  { selector: '[data-selected-action]', property: 'backgroundColor', expected: 'rgb(186, 232, 208)' },
+  { selector: '[data-selected-action]', property: 'color', expected: 'rgb(18, 52, 86)' },
   { selector: '.nx-card__title', property: 'color', expected: 'rgb(18, 52, 86)' },
   { selector: '.nx-card', property: 'borderTopColor', expected: 'rgb(138, 155, 170)' },
+  { selector: '.nx-card', property: 'boxShadow', expected: 'rgb(18, 52, 86) 9px 7px 0px 0px' },
+  { selector: '[data-primitive="button"] .nx-btn', property: 'backgroundColor', expected: 'rgb(250, 233, 123)' },
+  { selector: '[data-primitive="button"] .nx-btn', property: 'color', expected: 'rgb(18, 52, 86)' },
+  { selector: '[data-primitive="button"] .nx-btn', property: 'borderTopColor', expected: 'rgb(18, 52, 86)' },
+  { selector: '[data-primitive="button"] .nx-btn', property: 'boxShadow', expected: 'rgb(18, 52, 86) 7px 5px 0px 0px' },
+  { selector: '.nx-input', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 2px 0px 0px' },
+  { selector: '.nx-select', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 2px 0px 0px' },
+  { selector: '.nx-textarea', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 2px 0px 0px' },
+  { selector: '.nx-badge', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 1px 0px 0px' },
+  { selector: '.nx-dialog', property: 'boxShadow', expected: 'rgb(18, 52, 86) 9px 7px 0px 0px' },
   { selector: '.nx-card', property: 'fontFamily', expected: 'Georgia, serif' },
   { selector: '.nx-card', property: 'paddingTop', expected: '31px' },
   { selector: '.nx-card', property: 'paddingRight', expected: '29px' },
@@ -276,9 +314,68 @@ async function checkNativeBehavior(scope: Locator): Promise<void> {
   await expect.poll(() => tooltip.evaluate((element) => getComputedStyle(element, '::after').visibility)).toBe('hidden');
 }
 
-export async function checkPrimitiveConsumer(page: Page): Promise<void> {
+async function checkNeoActions(page: Page): Promise<void> {
+  const scope = page.locator('#primitives-neo-brutalism-original');
+  const button = scope.locator('[data-submit]');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.mouse.move(0, 0);
+  await expect(button).toHaveCSS('background-color', 'rgb(255, 216, 77)');
+  await expect(button).toHaveCSS('color', 'rgb(24, 24, 24)');
+  await expect(button).toHaveCSS('border-top-width', '2px');
+  await expect(button).toHaveCSS('border-radius', '4px');
+  await expect(button).toHaveCSS('font-size', '14px');
+  assert((await button.boundingBox())!.height >= 44, 'Neo-brutalism actions must retain a comfortable target height');
+  await expect(button).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 4px 4px 0px 0px');
+  await expect(scope.locator('.nx-card')).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 6px 6px 0px 0px');
+  await expect(scope.locator('.nx-card')).toHaveCSS('border-top-color', 'rgb(24, 24, 24)');
+  await expect(scope.locator('.nx-card')).toHaveCSS('font-family', '"Space Grotesk", ui-sans-serif, system-ui, sans-serif');
+  await expect(scope.locator('.nx-card')).toHaveCSS('background-color', 'rgb(229, 216, 255)');
+  await expect(scope.locator('.nx-card')).toHaveCSS('border-radius', '8px');
+  const input = scope.getByRole('textbox', { name: 'Report title' });
+  await expect(input).toHaveCSS('background-color', 'rgb(255, 243, 214)');
+  await expect(input).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 4px 4px 0px 0px');
+  assert((await input.boundingBox())!.height >= 44, 'Neo-brutalism fields must retain a comfortable target height');
+  await expect(scope.locator('.nx-badge')).toHaveCSS('background-color', 'rgb(255, 143, 181)');
+  await expect(scope.locator('.nx-badge')).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 2px 2px 0px 0px');
+  await expect(scope.locator('[data-selected-action]')).toHaveCSS('background-color', 'rgb(141, 229, 193)');
+
+  await button.hover();
+  await expect(button).toHaveCSS('background-color', 'rgb(241, 194, 50)');
+  await page.mouse.down();
+  try {
+    await expect(button).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 4, 4)');
+    await expect(button).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 0px 0px 0px 0px');
+  } finally {
+    await page.mouse.up();
+  }
+  await expect(button).toHaveCSS('transform', 'none');
+
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const language of ['mono-editorial', 'signal-console']) {
+  await button.hover();
+  await page.mouse.down();
+  try {
+    await expect(button).toHaveCSS('transform', 'none');
+    await expect(button).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 4px 4px 0px 0px');
+    await expect(button).toHaveCSS('transition-duration', '0s');
+  } finally {
+    await page.mouse.up();
+  }
+  const disabled = scope.getByRole('button', { name: 'Unavailable action' });
+  await disabled.hover();
+  await page.mouse.down();
+  try {
+    await expect(disabled).toHaveCSS('background-color', 'rgb(255, 216, 77)');
+    await expect(disabled).toHaveCSS('transform', 'none');
+  } finally {
+    await page.mouse.up();
+  }
+  await page.mouse.move(0, 0);
+}
+
+export async function checkPrimitiveConsumer(page: Page): Promise<void> {
+  await checkNeoActions(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism']) {
     const original = page.locator(`#primitives-${language}-original`);
     const edited = page.locator(`#primitives-${language}-edited`);
     for (const scope of [original, edited]) {
@@ -316,9 +413,9 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
       await expect.poll(() => select.evaluate((element) => element.matches(':open'))).toBe(true);
       const picker = await select.evaluate((element) => {
         const style = getComputedStyle(element, '::picker(select)');
-        return { appearance: style.appearance, background: style.backgroundColor, radius: style.borderTopLeftRadius };
+        return { appearance: style.appearance, background: style.backgroundColor, radius: style.borderTopLeftRadius, shadow: style.boxShadow };
       });
-      assert.deepEqual(picker, { appearance: 'base-select', background: 'rgb(237, 247, 242)', radius: '13px' }, `${language}: opened picker must consume descendant tokens in the browser top layer`);
+      assert.deepEqual(picker, { appearance: 'base-select', background: 'rgb(255, 244, 219)', radius: '13px', shadow: 'rgb(18, 52, 86) 8px 6px 0px 0px' }, `${language}: opened picker must consume descendant tokens in the browser top layer`);
       await page.keyboard.press('Home');
       await page.keyboard.press('Enter');
       await expect(select).toHaveValue('day');
@@ -339,5 +436,5 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
       { selector: '.nx-tooltip', pseudo: '::after', property: 'transitionDuration', expected: '0s' },
     ]) assert.equal(await readStyle(edited, check), check.expected, `${language}: reduced motion must override duration tokens`);
   }
-  console.log('Validated all 24 CLI-delivered primitives in both languages: scoped type/spacing/radius/motion, native controls, custom picker, modal focus/Escape, and sibling/state isolation.');
+  console.log('Validated all 24 CLI-delivered primitives in all three languages: scoped paint/type/spacing/radius/shadows/motion, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.');
 }
