@@ -1,0 +1,91 @@
+{
+  "slug": "bridge-waterfall",
+  "title": "Monthly revenue bridge",
+  "description": "Floating mint gains and pink losses connect yellow opening and lilac closing balances. Signed labels retain direction without color.",
+  "component": "waterfall",
+  "exports": [
+    "BridgeWaterfall"
+  ],
+  "tags": [
+    "change",
+    "balance",
+    "contribution"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly BridgeWaterfallDatum[]",
+      "description": "Ordered steps with unique nonempty id, label, and kind start/change/total. Starts and changes require a finite signed value or null; totals use the current balance. Missing or overflowing changes make later balances unavailable until a new start. Zero changes retain labels without a bar. Long plots scroll inside the component.",
+      "required": true
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement or allocation label. Defaults to Value, or Share for Hundred Blocks.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period or other caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct labels and tooltips; defaults to en-US numbers with up to two decimal places. Cartesian ticks use numeric notation.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height. Dense plots scroll locally.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite native Recharts motion subject to the language tokens and reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "neo-chart-frame.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 530
+  }
+}

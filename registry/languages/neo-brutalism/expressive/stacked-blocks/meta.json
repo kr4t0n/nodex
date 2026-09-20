@@ -1,0 +1,97 @@
+{
+  "slug": "stacked-blocks",
+  "title": "Team effort breakdown",
+  "description": "Yellow, lilac and mint segments stack from zero. Direct labels and row totals make each contribution readable.",
+  "component": "stacked-bar",
+  "exports": [
+    "StackedBlocks"
+  ],
+  "tags": [
+    "comparison",
+    "composition",
+    "categorical"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly StackedBlocksDatum[]",
+      "required": true,
+      "description": "Rows with unique nonempty id, label and values keyed by series ID. Values must be finite and nonnegative. Any absent, null or invalid segment makes its whole row unavailable. Zero and unavailable rows retain labels and totals. Rows remain in caller order. A long or narrow plot scrolls inside the component."
+    },
+    {
+      "name": "series",
+      "type": "readonly StackedBlocksSeries[]",
+      "required": true,
+      "description": "Ordered segments with unique nonempty id, label and optional tone a–d. Colors follow stable IDs by default. Series order defines stack order. Segment widths encode absolute values, not normalized percentages. Tooltips always show exact segment values; labels inside narrow segments are omitted."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label used in annotations and tooltips.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period or other caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats values; defaults to en-US numbers with up to two decimal places. Cartesian axis ticks use compact notation.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite token-timed Recharts drawing, subject to reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "neo-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 510
+  }
+}

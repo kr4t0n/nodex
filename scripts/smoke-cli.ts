@@ -275,7 +275,9 @@ try {
   const linted = await cli(project, ['lint', ...[...monoCharts, 'button', '_shared'].map((slug) => `${config.paths.components}/${slug}`)]);
   assert.match(linted, /0 errors/);
   assert.match(await cli(project, ['lint', `${config.paths.components}/endpoint-latency`, '--design', 'signal-console']), /0 errors/);
-  checks += 3;
+  const neoCharts = charts.filter((item) => item.meta.language === 'neo-brutalism').map((item) => `${config.paths.components}/${item.name}`);
+  assert.match(await cli(project, ['lint', ...neoCharts, '--design', 'neo-brutalism']), /0 errors/);
+  checks += 4;
 
   // Custom destinations must be checked explicitly, including from subdirectories.
   assert.match(await cli(path.join(project, 'src'), ['lint', 'src/charts']), /[1-9]\d* source files checked; 0 errors/);

@@ -1,0 +1,90 @@
+{
+  "slug": "punch-area",
+  "title": "Weekly active users",
+  "description": "An angular mint area, ink outline and square markers. A large final reading anchors the trend.",
+  "component": "area",
+  "exports": [
+    "PunchArea"
+  ],
+  "tags": [
+    "trend",
+    "time-series",
+    "activity"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly PunchAreaDatum[]",
+      "required": true,
+      "description": "Ordered observations with unique nonempty id, label and nonnegative value or null. Observations have equal horizontal spacing, so supply regular intervals. Invalid readings leave gaps; zero remains measured. The headline uses the final supplied observation, never an older fallback. More than ten observations scroll horizontally inside the plot."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label used in annotations and tooltips.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period or other caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats values; defaults to en-US numbers with up to two decimal places. Cartesian axis ticks use compact notation.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite token-timed Recharts drawing, subject to reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 510
+  }
+}

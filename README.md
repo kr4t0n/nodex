@@ -5,8 +5,8 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The reconstruction contains the complete original **65-chart catalogue** and
-**24 reusable primitives**, delivered as editable React source. Nine initial
+The registry contains the complete original **65-chart catalogue**, **nine Neo-brutalism
+charts**, and **24 reusable primitives**, delivered as editable React source. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
@@ -16,9 +16,37 @@ Three design languages are available: Mono Editorial, Signal Console and
 **Neo-brutalism**. Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
-yellow actions, coral badges, mint selections, pale blue fields and blue value
-marks, with square outlines and hard offset shadows. Its expressive chart catalogue
-is currently empty; the language overview uses the existing primitive previews.
+yellow actions, pink badges, mint selections, cream fields and blue value
+marks. Compact corners, larger controls and hard offset shadows give it a tactile
+feel; pressed buttons fully consume their shadow. Nine expressive charts are
+available at `/l/neo-brutalism`:
+
+- **Block Bars** (`block-bars`): outlined category columns with direct labels.
+- **Punch Area** (`punch-area`): an angular mint trend with square markers and the
+  final supplied reading, including an unavailable state for a missing last value.
+- **Split Ring** (`split-ring`): exact part-to-whole angles with a hard shadow and
+  a labelled key; incomplete allocations never become misleading percentages.
+- **Stacked Blocks** (`stacked-blocks`): absolute horizontal stacks with stable
+  series colors, segment values and row totals on a common zero baseline.
+- **Bridge Waterfall** (`bridge-waterfall`): signed changes between opening and
+  closing balances; missing changes break the balance until a new start.
+- **Twin Pins** (`twin-pins`): circles and squares compare two readings on a shared
+  scale, preserving available endpoints when their partner is missing.
+- **Sticker Scatter** (`sticker-scatter`): equal-size, outlined marks compare two
+  measurements, with stable identity colors and explicit unavailable counts.
+- **Tile Heatmap** (`tile-heatmap`): blue intensity on a fixed caller-owned scale;
+  dots mean measured zero and crosses mean missing or out-of-range readings.
+- **Hundred Blocks** (`hundred-blocks`): one countable block per percent, requiring
+  complete whole-percent shares that sum to 100.
+
+Each chart accepts caller data and provides keyboard inspection, scoped tokens
+and reduced motion. Dense plots scroll locally; ring and block-grid keys move
+below their plots in narrow containers. The language index retains four curated
+previews; the language gallery contains all nine charts.
+
+The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
+compact radii, generous control sizing, punchy accents and a small badge shadow.
+Nodex implements these through its own semantic tokens and React primitives.
 
 ## Develop the registry and gallery
 
@@ -72,7 +100,7 @@ To use Neo-brutalism with the built local registry:
 
 ```bash
 node /path/to/nodex/packages/cli/src/index.ts init neo-brutalism --registry /path/to/nodex/public
-node /path/to/nodex/packages/cli/src/index.ts add button card input select dialog
+node /path/to/nodex/packages/cli/src/index.ts add block-bars punch-area split-ring stacked-blocks button card
 ```
 
 Preview it at `/l/neo-brutalism` after building the registry and starting the

@@ -38,10 +38,19 @@ gotchas hold component-specific guidance; the authoring skill holds procedures.
 
 Neo-brutalism is the third language. Its initial release contains the complete
 shared primitive vocabulary, embedded Space Grotesk/JetBrains Mono and design
-foundations, with no expressive charts yet. Keep its `featured` list empty until
-actual expressive items exist; the index already falls back to primitive previews.
-Its categorical yellow/lilac/mint/coral/blue palette is not a sequential data ramp. Gallery
+foundations, plus nine expressive charts: `block-bars`, `punch-area`, `split-ring`,
+`stacked-blocks`, `bridge-waterfall`, `twin-pins`, `sticker-scatter`, `tile-heatmap`
+and `hundred-blocks`. The original four remain the language index's curated
+previews; the language gallery contains all nine. Empty featured lists still
+fall back to primitive previews.
+Its categorical yellow/lilac/mint/pink/blue palette is not a sequential data ramp. Gallery
 palette descriptions must not assume every language is monochrome.
+The ng-brutalism reference study informs compact 8px surface/4px control corners,
+larger control type, stronger field shadows and full shadow compression on press.
+These choices live in Neo-brutalism's tokens. `shadow.badge` is a shared role:
+solid and outlined badges use it, while dashed and quiet badges stay flat.
+Mono Editorial and Signal Console keep zero badge offsets. Reduced motion retains
+resting shadows rather than deleting the visual hierarchy.
 
 The manifest is the catalogue, not the folder layout. A slug names the item;
 `component` names its cross-language type. Types describe marks and encoding,
@@ -171,7 +180,7 @@ The language scaffold copies canonical color role names into a neutral palette
 and carries the canonical shadow roles, without a separate primitive-role list.
 
 Surface, field, selection, badge and value paints have independent semantic
-roles. Neo-brutalism uses lilac panels, pale blue fields, mint selections, coral
+roles. Neo-brutalism uses lilac panels, cream fields, mint selections, pink
 solid badges and blue/violet value marks while retaining dark text and outlines.
 Plain cards use the page ground; inverted cards retain their inverse roles.
 Checkbox ticks, mixed marks and switch thumbs use `selectionText`, not the page
@@ -395,6 +404,61 @@ still cause the image job to skip successfully.
 
 ## Primitive and chart gotchas
 
+- Stacked Blocks and Bridge Waterfall contain library sizing overflow inside
+  their sized plot. Automatic-height wrappers scroll only horizontally when the
+  plot's minimum width requires it; incidental SVG overflow must not create
+  scrollbar pairs in scaled gallery previews. Explicitly height-constrained
+  stacks retain vertical scrolling for additional rows.
+- Bridge Waterfall uses native ranged bars with signed running balances. A null
+  change invalidates following changes and totals until a new start. Zero changes
+  keep labels without visible bars; annotations use public scales so they also
+  survive interrupted animation. Twin Pins has one Scatter observation per row;
+  its circle and square encode the two endpoints on a shared numeric scale.
+  Missing endpoints do not acquire a connecting line. Sticker Scatter retains
+  finite signed coordinates, filters incomplete pairs and reports their count;
+  all stickers have the same size and color follows identity rather than value.
+- Tile Heatmap requires explicit row and column domains and a fixed positive
+  intensity ceiling. Omitted pairs, invalid numbers and out-of-range readings are
+  unavailable. Duplicate pairs and undeclared axis IDs reject the input rather
+  than silently overwriting a reading. Blue fill opacity encodes value/maxValue;
+  the categorical accent palette is not a sequential ramp. Zero and missing cells
+  have different marks. Cells and tooltips use native Scatter coordinates.
+- Hundred Blocks requires whole-percent shares totaling exactly 100. Native
+  Scatter has one observation per category; the custom marks place that category's
+  exact block count on public scales, so decorative units do not create 100
+  keyboard stops. Caller order determines allocation order. Zero-share categories
+  retain key entries. The grid remains square as its container changes width.
+- The five newer Neo charts share `neo-chart-frame.tsx` for their heading, frame,
+  empty state and tooltip surface. It contains only common language-token roles;
+  each component owns its data contract and Recharts composition.
+- Neo-brutalism's Punch Area preserves caller order with equal observation spacing;
+  callers should supply regular intervals. Its headline is the final observation,
+  even when unavailable. Null readings break both line and fill. Square points
+  retain isolated and zero readings. Set Area stroke width through style because
+  Recharts parses the numeric prop while computing its animation clip.
+- Split Ring requires a complete, finite allocation before calculating shares.
+  Zero values have key entries but no sectors; an all-zero allocation has no ring.
+  Native Pie angles are exact, with no minimum angles or padding. Its shadow
+  applies to the whole ring, not to each sector. The legend stacks at narrow
+  container widths. Stacked Blocks likewise hides an entire incomplete row rather
+  than allowing Recharts to stack an unknown segment as zero. Row totals use
+  public scales so zero and unavailable rows remain visible. Segment labels are
+  omitted when they cannot fit, with exact values available in keyboard tooltips.
+- `neo-categorical.ts` owns stable ID-to-tone assignment for Block Bars, Split
+  Ring, Stacked Blocks, Sticker Scatter and Hundred Blocks. Language-specific token references remain in the chart
+  modules: shared helpers are also linted against other installed languages.
+  Caller order and repeated display labels are preserved; IDs
+  must be unique. All five can accept explicit category tones.
+- Neo-brutalism's Block Bars uses native Recharts bars and a common zero baseline.
+  The front face encodes magnitude; CSS hard shadows do not change that geometry.
+  Series colors represent categories, with explicit tones or a stable ID-based
+  default. Caller order and duplicate display labels are preserved; IDs must be
+  unique. Zero and unavailable values keep their labels without visible bars.
+  Recharts omits null bars, so missing-value dashes use its public scales to
+  retain the original category slot at the baseline. Value labels belong to the
+  bar shape; LabelList can stay hidden after reduced motion interrupts a draw.
+  Entirely unavailable data renders an explicit empty state.
+  More than six categories scroll within the plot rather than widening the page.
 - Input IDs use `useId`; independent instances and radio groups must not collide.
 - Native Dialog uses `showModal`/`close`; inline mode exists for specimens. Preserve
   Escape, focus return and controlled state behavior.
@@ -403,6 +467,11 @@ still cause the image job to skip successfully.
   accessible headless tooltip widget; use a headless behavior layer where needed.
 - Select's `autoWidth` must opt out of the field wrapper's cross-axis stretching;
   `width: auto` alone still fills a column flex container.
+- Native slider tracks need a local 1px minimum. Firefox can snap a sub-pixel
+  track and its value fill out of view at some vertical positions, even when
+  Chromium paints the same CSS. Apply the floor to both engines' tracks and
+  Firefox's progress segment, and use the same effective height to center the
+  WebKit thumb. Preserve the language's hairline token for other components.
 - Invalid chart values are unavailable, not synthetic data. Empty datasets
   render an explicit state. Matrix zero means
   measured absence, while an omitted pair means missing.
@@ -448,6 +517,8 @@ still cause the image job to skip successfully.
   Reduced motion and zero-duration tokens select the final frame and cancel
   playback timers. Product identity must survive rank changes; repeated display
   names are not IDs. Missing final readings retain the known period and replay.
+  Browser regression recording must start before playback is enabled; starting
+  it after a frame-zero assertion can miss that entire frame on a busy page.
 - Stagger-delay uses one native Bar with the public animationInterpolateFn
   hook. Its per-category delays retain unavailable positions and use the chart
   motion tokens; there is no extra timer. Dynamic-data and draw-in-counter share

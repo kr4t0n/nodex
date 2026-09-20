@@ -107,6 +107,7 @@ const OVERRIDES: Record<string, string> = {
   '--nx-badgeText': '#123456',
   '--nx-shadow-action': '7px 5px 0px',
   '--nx-shadow-control': '3px 2px 0px',
+  '--nx-shadow-badge': '3px 1px 0px',
   '--nx-shadow-surface': '9px 7px 0px',
   '--nx-shadow-popover': '8px 6px 0px',
   '--nx-font-sans': 'Georgia, serif',
@@ -181,6 +182,7 @@ const STYLE_CHECKS: StyleCheck[] = [
   { selector: '.nx-input', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 2px 0px 0px' },
   { selector: '.nx-select', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 2px 0px 0px' },
   { selector: '.nx-textarea', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 2px 0px 0px' },
+  { selector: '.nx-badge', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 1px 0px 0px' },
   { selector: '.nx-dialog', property: 'boxShadow', expected: 'rgb(18, 52, 86) 9px 7px 0px 0px' },
   { selector: '.nx-card', property: 'fontFamily', expected: 'Georgia, serif' },
   { selector: '.nx-card', property: 'paddingTop', expected: '31px' },
@@ -317,25 +319,32 @@ async function checkNeoActions(page: Page): Promise<void> {
   const button = scope.locator('[data-submit]');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.mouse.move(0, 0);
-  await expect(button).toHaveCSS('background-color', 'rgb(255, 226, 75)');
+  await expect(button).toHaveCSS('background-color', 'rgb(255, 216, 77)');
   await expect(button).toHaveCSS('color', 'rgb(24, 24, 24)');
   await expect(button).toHaveCSS('border-top-width', '2px');
-  await expect(button).toHaveCSS('border-radius', '0px');
+  await expect(button).toHaveCSS('border-radius', '4px');
+  await expect(button).toHaveCSS('font-size', '14px');
+  assert((await button.boundingBox())!.height >= 44, 'Neo-brutalism actions must retain a comfortable target height');
   await expect(button).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 4px 4px 0px 0px');
   await expect(scope.locator('.nx-card')).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 6px 6px 0px 0px');
   await expect(scope.locator('.nx-card')).toHaveCSS('border-top-color', 'rgb(24, 24, 24)');
   await expect(scope.locator('.nx-card')).toHaveCSS('font-family', '"Space Grotesk", ui-sans-serif, system-ui, sans-serif');
-  await expect(scope.locator('.nx-card')).toHaveCSS('background-color', 'rgb(217, 202, 255)');
-  await expect(scope.getByRole('textbox', { name: 'Report title' })).toHaveCSS('background-color', 'rgb(237, 244, 255)');
-  await expect(scope.locator('.nx-badge')).toHaveCSS('background-color', 'rgb(255, 155, 133)');
-  await expect(scope.locator('[data-selected-action]')).toHaveCSS('background-color', 'rgb(136, 213, 176)');
+  await expect(scope.locator('.nx-card')).toHaveCSS('background-color', 'rgb(229, 216, 255)');
+  await expect(scope.locator('.nx-card')).toHaveCSS('border-radius', '8px');
+  const input = scope.getByRole('textbox', { name: 'Report title' });
+  await expect(input).toHaveCSS('background-color', 'rgb(255, 243, 214)');
+  await expect(input).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 4px 4px 0px 0px');
+  assert((await input.boundingBox())!.height >= 44, 'Neo-brutalism fields must retain a comfortable target height');
+  await expect(scope.locator('.nx-badge')).toHaveCSS('background-color', 'rgb(255, 143, 181)');
+  await expect(scope.locator('.nx-badge')).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 2px 2px 0px 0px');
+  await expect(scope.locator('[data-selected-action]')).toHaveCSS('background-color', 'rgb(141, 229, 193)');
 
   await button.hover();
-  await expect(button).toHaveCSS('background-color', 'rgb(244, 205, 34)');
+  await expect(button).toHaveCSS('background-color', 'rgb(241, 194, 50)');
   await page.mouse.down();
   try {
-    await expect(button).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 3, 3)');
-    await expect(button).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 1px 1px 0px 0px');
+    await expect(button).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 4, 4)');
+    await expect(button).toHaveCSS('box-shadow', 'rgb(24, 24, 24) 0px 0px 0px 0px');
   } finally {
     await page.mouse.up();
   }
@@ -355,7 +364,7 @@ async function checkNeoActions(page: Page): Promise<void> {
   await disabled.hover();
   await page.mouse.down();
   try {
-    await expect(disabled).toHaveCSS('background-color', 'rgb(255, 226, 75)');
+    await expect(disabled).toHaveCSS('background-color', 'rgb(255, 216, 77)');
     await expect(disabled).toHaveCSS('transform', 'none');
   } finally {
     await page.mouse.up();

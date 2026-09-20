@@ -1,9 +1,8 @@
 @layer components {
 /* badge - shared primitive, themed by the active language's tokens.
 
-   Derived from the three badge treatments in the source collection: solid,
-   outline, and dashed. Uppercase micro-type at 9px with wide tracking, which is
-   how this language handles labels. */
+   Solid and outlined badges use the language's small offset shadow. Dashed
+   and quiet labels stay flat; their lighter treatment carries less emphasis. */
 
 .nx-badge {
   display: inline-flex;
@@ -26,6 +25,11 @@
   background: var(--nx-badgeFill);
   border-color: var(--nx-ink);
   color: var(--nx-badgeText);
+}
+
+.nx-badge--solid,
+.nx-badge--outline {
+  box-shadow: var(--nx-shadow-badge) var(--nx-ink);
 }
 
 .nx-badge--outline {

@@ -1,0 +1,104 @@
+{
+  "slug": "sticker-scatter",
+  "title": "Campaign reach and engagement",
+  "description": "Equal-size colored stickers plot two measurements, with bold outlines, hard shadows and quiet guide lines.",
+  "component": "scatter",
+  "exports": [
+    "StickerScatter"
+  ],
+  "tags": [
+    "relationship",
+    "correlation",
+    "campaigns"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly StickerScatterDatum[]",
+      "description": "Observations with unique nonempty id, label, finite signed x and y values or null, and optional categorical tone a–d. Incomplete pairs are omitted and counted explicitly. Colors remain stable by ID; all marks have equal size and zero coordinates remain valid.",
+      "required": true
+    },
+    {
+      "name": "xLabel",
+      "type": "string",
+      "description": "Horizontal measurement label; defaults to X value.",
+      "required": false
+    },
+    {
+      "name": "yLabel",
+      "type": "string",
+      "description": "Vertical measurement label; defaults to Y value.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "xFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats horizontal tooltip values. Axis ticks use compact notation.",
+      "required": false
+    },
+    {
+      "name": "yFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats vertical tooltip values. Axis ticks use compact notation.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height. Dense plots scroll locally.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite native Recharts motion subject to the language tokens and reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "neo-chart-frame.tsx",
+    "neo-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 530
+  }
+}

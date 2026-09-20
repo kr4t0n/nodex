@@ -1,0 +1,91 @@
+{
+  "slug": "split-ring",
+  "title": "Orders by channel",
+  "description": "An outlined ring with a hard ink shadow, exact proportions and a directly labelled categorical key.",
+  "component": "donut",
+  "exports": [
+    "SplitRing"
+  ],
+  "tags": [
+    "composition",
+    "share",
+    "categorical"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SplitRingDatum[]",
+      "required": true,
+      "description": "Parts in caller order with unique nonempty id, label, nonnegative value or null, and optional tone a–d. Colors follow stable IDs by default. Every value must be available to calculate truthful shares; incomplete or overflowing totals show an explicit state. Zero parts retain their key entries without a slice; an all-zero allocation has no ring. Small slices are never inflated. The key stacks below the ring in narrow containers."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label used in annotations and tooltips.",
+      "required": false
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period or other caller-owned context.",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats values; defaults to en-US numbers with up to two decimal places. Cartesian axis ticks use compact notation.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise content determines height.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Enable finite token-timed Recharts drawing, subject to reduced motion.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title.",
+      "required": false
+    }
+  ],
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "neo-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 510
+  }
+}

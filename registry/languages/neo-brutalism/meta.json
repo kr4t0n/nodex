@@ -1,7 +1,7 @@
 {
   "slug": "neo-brutalism",
   "name": "Neo-brutalism",
-  "description": "Lilac panels, yellow actions, coral badges and mint selections on warm paper. Heavy ink outlines, hard offset shadows and bold Space Grotesk typography.",
+  "description": "Lilac panels, yellow actions, pink badges and mint selections on warm paper. Bold Space Grotesk type, compact corners and hard ink shadows that compress on press.",
   "visibility": "public",
-  "featured": []
+  "featured": ["block-bars", "punch-area", "split-ring", "stacked-blocks"]
 }
