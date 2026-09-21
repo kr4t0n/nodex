@@ -21,11 +21,11 @@ for its multi-category specimen, rather than extracting the bar default.
 Warm paper, white panels, cream fields, action/selection/badge mappings, darker
 value colors, focus treatment, structural border width, radii, shadows, spacing,
 type sizes and interaction/drawing timing are **Nodex extensions**. Gaegu's use for
-short UI text, natural-case UI labels, uneven CSS corners, secondary surface/action
+body and short UI text, natural-case UI labels, uneven CSS corners, secondary surface/action
 outlines and corner hatching are also Nodex extensions, not extracted roughViz UI.
 The `texture` roles use static CSS decoration; chart geometry continues to use
-the separate numeric `sketch` roles. Inter reading text, editable values and dense
-tables keep complete interfaces readable. Thin axes and
+the separate numeric `sketch` roles. Gaegu also supplies reading text, editable
+values and dense tables; commands retain system monospace. Thin axes and
 Gaegu labels preserve the source relationship without copying chart margins or
 tooltip sizes into application controls.
 
@@ -69,5 +69,5 @@ The supported fills are hachure, cross-hatch and solid.
 
 roughViz and Rough.js use the MIT license. The implementation is new React source;
 roughViz chart code is not copied. Dependency notices remain with the packaged
-dependency. Embedded Gaegu and Inter stylesheets include their package OFL notices.
+dependency. The embedded Gaegu stylesheet includes its package OFL notice.
 Gaegu's first release here includes Latin glyphs.

@@ -75,7 +75,7 @@ export function LanguageView({ slug }: { slug: string }) {
               {language.name}
             </h1>
             <p
-              className="mt-4 max-w-[54ch] text-[13px] leading-[1.7]"
+              className="mt-4 max-w-[54ch] text-[length:var(--nx-type-body-descriptionSize)] leading-[1.7]"
               style={{ color: 'var(--nx-muted)' }}
             >
               {language.description}
@@ -251,7 +251,7 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                   {item.title}
                 </h2>
                 <p
-                  className="m-0 self-start text-[10.5px] tracking-[0.06em] uppercase"
+                  className="m-0 self-start text-[length:var(--nx-type-body-supportingSize)] tracking-[0.06em] uppercase"
                   style={{ color: 'var(--nx-faint)' }}
                 >
                   {item.meta.component}
@@ -268,7 +268,7 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
         </div>
       )}
 
-      <p className="mt-10 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
+      <p className="mt-10 text-[length:var(--nx-type-body-supportingSize)]" style={{ color: 'var(--nx-muted)' }}>
         {filtered.length} of {items.length}{' '}
         {items.length === 1 ? 'chart' : 'charts'}. Each preview draws when it
         scrolls into view.
@@ -304,7 +304,7 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
                 {item.title}
               </h3>
               <p
-                className="m-0 self-start text-[10.5px] leading-[1.6]"
+                className="m-0 self-start text-[length:var(--nx-type-body-supportingSize)] leading-[1.6]"
                 style={{ color: 'var(--nx-faint)' }}
               >
                 {item.description ?? ''}
@@ -337,7 +337,7 @@ function DesignDoc({ markdown }: { markdown: string }) {
             The written language
           </h2>
           <p
-            className="mt-3 text-[11px] leading-[1.7]"
+            className="mt-3 text-[length:var(--nx-type-body-noteSize)] leading-[1.7]"
             style={{ color: 'var(--nx-muted)' }}
           >
             Tokens hold the values. This holds the reasoning they cannot carry,

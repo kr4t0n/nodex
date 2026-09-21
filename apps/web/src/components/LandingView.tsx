@@ -268,7 +268,7 @@ export function LandingView() {
           >
             <p
               ref={tagline}
-              className="m-0 text-[14px] leading-[1.7] sm:whitespace-nowrap"
+              className="m-0 text-[length:var(--nx-type-body-taglineSize)] leading-[1.7] sm:whitespace-nowrap"
               style={{ color: 'var(--nx-muted)' }}
             >
               Components that belong to a design language.
@@ -305,7 +305,7 @@ export function LandingView() {
         style={{ color: 'var(--nx-muted)' }}
       >
         <hr className="nx-rule nx-rule--faint" />
-        <p className="mt-6 mb-0 text-[11.5px]">
+        <p className="mt-6 mb-0 text-[length:var(--nx-type-body-detailSize)]">
           nodex. A component registry organised by design language.
         </p>
       </footer>

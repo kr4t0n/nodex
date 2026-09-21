@@ -414,9 +414,9 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
         assert.match(await readStyle(original, { selector, property: 'fontFamily', expected: '' }), /Gaegu/);
       }
       for (const selector of ['.nx-input', '.nx-select', '.nx-textarea', '.nx-card__body', '.nx-prose p', '.nx-table th', '.nx-table td', '.nx-slider-value > span', '.nx-progress-label > span']) {
-        assert.match(await readStyle(original, { selector, property: 'fontFamily', expected: '' }), /Inter/);
+        assert.match(await readStyle(original, { selector, property: 'fontFamily', expected: '' }), /Gaegu/);
       }
-      await expect(original.locator('.nx-table th').first()).toHaveCSS('font-size', '12px');
+      await expect(original.locator('.nx-table th').first()).toHaveCSS('font-size', '14px');
       const action = original.locator('[data-submit]');
       await action.scrollIntoViewIfNeeded();
       const before = await action.boundingBox();

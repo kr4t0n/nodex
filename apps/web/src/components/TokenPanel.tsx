@@ -99,11 +99,11 @@ function ColorPalette({ title, groups, description, singleRow = false }: {
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-[10.5px] leading-relaxed text-[var(--nx-muted)]">
+      <p className="mt-2 text-[length:var(--nx-type-body-supportingSize)] leading-relaxed text-[var(--nx-muted)]">
         {description}
       </p>
       <details className="mt-2 text-[11px]">
-        <summary className="w-fit cursor-pointer py-1 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--nx-ink)]">
+        <summary className="w-fit cursor-pointer py-1 text-[length:var(--nx-type-body-noteSize)] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--nx-ink)]">
           Roles and values<span className="sr-only"> for {title.toLowerCase()}</span>
         </summary>
         <dl className="mt-3 space-y-4">
@@ -117,9 +117,9 @@ function ColorPalette({ title, groups, description, singleRow = false }: {
                 {roles.length ? roles.map(({ key, label, usage }) => (
                   <div key={key}>
                     <code className="block [font-family:var(--nx-font-mono)] [overflow-wrap:anywhere]">--nx-{key}</code>
-                    <p className="m-0 leading-relaxed text-[var(--nx-muted)]">{usage || label}</p>
+                    <p className="m-0 text-[length:var(--nx-type-body-noteSize)] leading-relaxed text-[var(--nx-muted)]">{usage || label}</p>
                   </div>
-                )) : <p className="text-[var(--nx-muted)]">Chart palette color.</p>}
+                )) : <p className="text-[length:var(--nx-type-body-noteSize)] text-[var(--nx-muted)]">Chart palette color.</p>}
               </dd>
             </div>
           ))}
@@ -163,7 +163,7 @@ export function TokenPanel({ tokens }: { tokens: LanguageTokens }) {
             );
           })}
         </svg>
-        <p className="mt-1 text-[10.5px] text-[var(--nx-muted)]">
+        <p className="mt-1 text-[length:var(--nx-type-body-supportingSize)] text-[var(--nx-muted)]">
           Drawn at 3x so sub-pixel widths are visible. Data marks never exceed the
           line maximum.
         </p>
