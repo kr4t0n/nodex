@@ -5,8 +5,9 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains the complete original **65-chart catalogue**, **nine Neo-brutalism
-charts**, and **24 reusable primitives**, delivered as editable React source. Nine initial
+The registry contains **82 expressive charts** (64 Mono Editorial, nine Signal Console
+and nine Neo-brutalism) and **24 reusable primitives**, delivered as editable React source.
+This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
@@ -47,6 +48,42 @@ previews; the language gallery contains all nine charts.
 The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex implements these through its own semantic tokens and React primitives.
+
+## Signal Console charts
+
+Signal Console has nine charts at `/l/signal-console`, using its existing dark
+surfaces, JetBrains Mono, compact instrument layout and semantic status colors.
+
+| Chart | Type | Reading |
+| --- | --- | --- |
+| `endpoint-latency` | Bar | Routes ranked by P99 latency against an objective |
+| `request-throughput` | Area | Request rate across equal-duration windows |
+| `latency-trend` | Line | P50/P95/P99 patterns and P99 objective breaches |
+| `response-codes` | Stacked bar | Complete HTTP response counts by status class |
+| `latency-histogram` | Histogram | Counts in equal-width latency buckets |
+| `service-health` | Heatmap | Healthy, degraded, down and unavailable service windows |
+| `capacity-ring` | Donut | Exact used/available capacity with an optional warning threshold |
+| `saturation-scatter` | Scatter | Host CPU and latency against two explicit limits |
+| `trace-spans` | Range bar | Actual start/end offsets, preserving concurrent spans |
+
+Each chart accepts application data, provides keyboard inspection and supports
+scoped tokens and reduced motion. Missing data stays distinct from zero; partial
+response counts cannot produce a complete stack, and incomplete capacity cannot
+produce a share. Source, time window and freshness text come from the caller.
+Dense plots scroll within narrow containers. The index features four previews;
+the gallery and landing terminal discover all nine from the built manifest.
+
+Endpoint Latency pairs slim ranked bars with single-line route labels and an
+aligned P99 column. A dashed objective and red `!` markers make breaches explicit;
+hover or keyboard inspection shows the full route and its distance above the SLO.
+Rows retain their spacing as the route count grows, with local scrolling when
+the chart's width or height is constrained. Compact bands and a wide specimen
+keep its overview preview at a comparable scale to the other Signal Console charts.
+
+```bash
+nodex init signal-console
+nodex add signal-console/request-throughput signal-console/service-health
+```
 
 ## Develop the registry and gallery
 

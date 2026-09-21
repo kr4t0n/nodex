@@ -1,0 +1,102 @@
+{
+  "slug": "latency-trend",
+  "title": "Latency percentiles against an objective",
+  "description": "P50, P95 and P99 use distinct neutral line patterns. A stated SLO and critical P99 dots identify breaches without using hue for percentile identity.",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "LatencyTrend"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly LatencyTrendDatum[]",
+      "description": "Unique IDs, equal-duration window labels and nonnegative p50Ms, p95Ms and p99Ms values. Missing quantiles break their own lines; inconsistent ordering makes the entire window unavailable.",
+      "required": true
+    },
+    {
+      "name": "objectiveMs",
+      "type": "number",
+      "description": "Nonnegative P99 objective in milliseconds. Invalid objectives leave readings unclassified.",
+      "required": true
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "description": "Console header label; the surrounding gallery or application owns its page title.",
+      "required": false
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "description": "Caller-supplied source text in the footer.",
+      "required": false
+    },
+    {
+      "name": "window",
+      "type": "string",
+      "description": "Caller-supplied aggregation window or snapshot context in the footer.",
+      "required": false
+    },
+    {
+      "name": "updated",
+      "type": "string",
+      "description": "Caller-supplied freshness text; the component never invents live status.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plot content scrolls locally when constrained.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite entrance animation using scoped motion tokens and the current reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional Tailwind utilities for the outer frame.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of this chart instance.",
+      "required": false
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "signal-chart-frame.tsx",
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "tags": [
+    "operations",
+    "monitoring"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 370
+  }
+}
