@@ -1,7 +1,7 @@
 {
   "slug": "endpoint-latency",
   "title": "Ten endpoints, ranked by tail latency",
-  "description": "bar length = p99 in ms · red where the route breaches the objective · ranked slowest first, aggregated from a five-minute window",
+  "description": "Ranked p99 latency with single-line routes, aligned readings and a dashed SLO; red bars and ! marks identify breaches in the five-minute window.",
   "component": "bar",
   "tier": "expressive",
   "runtime": "react",
@@ -14,6 +14,7 @@
     "component.tsx"
   ],
   "shared": [
+    "signal-chart-frame.tsx",
     "use-chart-motion.ts",
     "use-reduced-motion.ts"
   ],
@@ -23,8 +24,8 @@
   "example": {
     "entry": "example.tsx",
     "export": "Example",
-    "width": 612,
-    "height": 456
+    "width": 680,
+    "height": 400
   },
   "tags": [
     "latency",
@@ -34,7 +35,7 @@
     {
       "name": "data",
       "type": "readonly EndpointDatum[]",
-      "description": "Application observations with route and p99Ms. Request-rate metadata is not required; samples are kept in the registry example.",
+      "description": "Application observations with route and p99Ms, ranked slowest first. Repeated route labels remain separate rows; invalid or negative readings are omitted and counted as unavailable. Request-rate metadata is not required.",
       "required": true
     },
     {
@@ -46,13 +47,19 @@
     {
       "name": "height",
       "type": "number",
-      "description": "Optional total component height in pixels; otherwise retains the original plot aspect ratio.",
+      "description": "Optional total height in pixels. By default the chart grows with the route count; constrained plots scroll locally to preserve readable rows.",
       "required": false
     },
     {
       "name": "width",
       "type": "number",
       "description": "Fixed width in pixels; otherwise fills the containing element.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional classes on the outer console frame.",
       "required": false
     },
     {
@@ -92,5 +99,5 @@
       "required": false
     }
   ],
-  "aspectRatio": "420/260"
+  "aspectRatio": "680/400"
 }
