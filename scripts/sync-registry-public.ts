@@ -14,9 +14,13 @@
  * Runs automatically before dev and before build. The destination is gitignored.
  */
 
-import { cp, mkdir, rm, stat } from 'node:fs/promises';
+import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+
+import { loadSource } from '../packages/core/src/load.ts';
+import type { GalleryRegistry } from '../packages/core/src/schema.ts';
+import { galleryExamples } from './lib/gallery-examples.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PUBLIC = path.join(ROOT, 'apps', 'web', 'public');
@@ -43,7 +47,7 @@ for (const [from, to] of SOURCES) {
     console.error(
       `\nMissing ${path.relative(ROOT, from)}.\n` +
         '  Run `npm run build:registry` first: the app reads the built manifest\n' +
-        '  and iframes the generated previews, neither of which is committed.\n',
+        '  and imports the matching React examples. Generated files are not committed.\n',
     );
     process.exit(1);
   }
@@ -53,4 +57,11 @@ for (const [from, to] of SOURCES) {
   copied += 1;
 }
 
-console.log(`synced ${copied} registry path(s) into apps/web/public`);
+const generated = path.join(ROOT, 'apps/web/src/generated');
+const source = await loadSource(path.join(ROOT, 'registry'));
+const catalog = JSON.parse(await readFile(path.join(ROOT, 'public/r/gallery.json'), 'utf8')) as GalleryRegistry;
+const examples = galleryExamples(source, catalog.items, generated);
+await mkdir(generated, { recursive: true });
+await writeFile(path.join(generated, 'registry-examples.ts'), examples);
+
+console.log(`synced ${copied} registry path(s) and generated ${catalog.items.length} lazy React example imports`);

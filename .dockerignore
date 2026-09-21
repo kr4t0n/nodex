@@ -19,6 +19,7 @@ dist
 public/r
 public/registry
 apps/web/public
+apps/web/src/generated
 
 # Secrets. The image takes configuration at run time, and a .env copied in here
 # would be baked into a layer and shipped to a registry.

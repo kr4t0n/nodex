@@ -1,59 +1,12 @@
 /** Browser regression for the landing's terminal, real themes and navigation. */
 import assert from 'node:assert/strict';
-import { spawn, type ChildProcess } from 'node:child_process';
-import { once } from 'node:events';
-import { createRequire } from 'node:module';
-import { createServer } from 'node:net';
-import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 import { chromium, expect, type Page } from '@playwright/test';
 
-const ROOT = path.resolve(import.meta.dirname, '..');
-const WEB = path.join(ROOT, 'apps/web');
-let server: ChildProcess | undefined;
+import { startSite } from './lib/site.ts';
 
-async function startSite(): Promise<string> {
-  const socket = createServer();
-  await new Promise<void>((resolve, reject) => {
-    socket.once('error', reject);
-    socket.listen(0, '127.0.0.1', resolve);
-  });
-  const address = socket.address();
-  assert(address && typeof address !== 'string');
-  await new Promise<void>((resolve) => socket.close(() => resolve()));
-  const origin = `http://127.0.0.1:${address.port}`;
-  const next = createRequire(path.join(WEB, 'package.json')).resolve('next/dist/bin/next');
-  server = spawn(process.execPath, [next, 'start', '--hostname', '127.0.0.1', '--port', String(address.port)], {
-    cwd: WEB, env: { ...process.env, NODE_ENV: 'production' }, stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  let output = '';
-  let startupError: Error | undefined;
-  server.on('error', (error) => { startupError = error; });
-  for (const stream of [server.stdout, server.stderr]) {
-    stream?.on('data', (chunk: Buffer) => { output = (output + chunk.toString()).slice(-8000); });
-  }
-  const deadline = Date.now() + 30_000;
-  while (Date.now() < deadline) {
-    if (startupError) throw startupError;
-    if (server.exitCode !== null) throw new Error(`Next exited before becoming ready:\n${output}`);
-    const response = await fetch(origin).catch(() => undefined);
-    if (response?.ok) return origin;
-    await delay(200);
-  }
-  throw new Error(`Next did not start. Build the web app before this check.\n${output}`);
-}
-
-async function stopSite() {
-  if (!server || server.exitCode !== null || server.signalCode !== null) return;
-  const exited = once(server, 'exit');
-  server.kill('SIGTERM');
-  await Promise.race([exited, delay(5000, undefined, { ref: false })]);
-  if (server.exitCode === null && server.signalCode === null) {
-    server.kill('SIGKILL');
-    await exited;
-  }
-}
+let site: Awaited<ReturnType<typeof startSite>> | undefined;
 
 async function openTerminal(page: Page) {
   const section = page.locator('[data-landing-terminal]');
@@ -113,7 +66,7 @@ async function assertScrollback(page: Page) {
 }
 
 async function main() {
-  const origin = process.argv[2] ?? await startSite();
+  const origin = process.argv[2] ?? (site = await startSite()).origin;
   const browser = await chromium.launch({ headless: true });
   const errors: string[] = [];
   try {
@@ -127,7 +80,7 @@ async function main() {
     await expect(page.locator('html')).toHaveAttribute('data-nx-language', 'mono-editorial');
     // Outlast Preview's observer fallback: the belt must own this deferral.
     await delay(1600);
-    await expect(page.locator('iframe')).toHaveCount(0);
+    await expect(page.locator('[data-nx-example]')).toHaveCount(0);
 
     const samples: string[][] = [[], []];
     await page.exposeFunction('recordTerminalCommand', (index: number, text: string) => { samples[index]!.push(text); });
@@ -157,7 +110,7 @@ async function main() {
     assert.deepEqual(await page.locator('[data-cli-command]').allTextContents(), pausedText, 'Scrolling must preserve a paused transcript');
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await assertTheme(page, 'neo-brutalism');
-    await expect(page.locator('iframe').first()).toHaveAttribute('src', /\/neo-brutalism\//);
+    await expect(page.locator('[data-nx-preview]').first()).toHaveAttribute('data-nx-preview', /^neo-brutalism\//);
     await expect(page.locator('[data-cli-command]').last()).toHaveText('$nodex init sketchbook --force', { timeout: 15_000 });
     const demoHeight = (await page.locator('[data-terminal-state] > div').last().boundingBox())!.height;
     await expect(page.locator('[data-cli-command]').last()).toBeInViewport();
@@ -179,7 +132,7 @@ async function main() {
     await assertScrollback(page);
     await assertFits(page);
 
-    await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/sketchbook/'))), { timeout: 15_000 }).toBe(true);
+    await expect.poll(() => page.locator('[data-nx-example]').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.closest('[data-nx-preview]')?.getAttribute('data-nx-preview')?.startsWith('sketchbook/'))), { timeout: 15_000 }).toBe(true);
     const completedText = await page.locator('[data-terminal-entry]').allTextContents();
     assert.equal(completedText.length, 4, 'The interactive history must retain all four demo commands');
     await expect(page.locator('[data-terminal-entry]').last()).toContainText('nodex init sketchbook --force');
@@ -212,14 +165,14 @@ async function main() {
     await page.getByRole('button', { name: 'nodex list', exact: true }).click();
     await page.locator('[data-terminal-entry]').last().getByRole('button', { name: 'Apply Signal Console' }).click();
     await assertTheme(page, 'signal-console');
-    await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/signal-console/'))), { timeout: 15_000 }).toBe(true);
+    await expect.poll(() => page.locator('[data-nx-example]').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.closest('[data-nx-preview]')?.getAttribute('data-nx-preview')?.startsWith('signal-console/'))), { timeout: 15_000 }).toBe(true);
     await command.fill('nodex init neo-brutalism --force');
     await page.getByRole('button', { name: 'Run command' }).click();
     await assertTheme(page, 'neo-brutalism');
     await command.fill('nodex init sketchbook');
     await command.press('Enter');
     await assertTheme(page, 'sketchbook');
-    await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/sketchbook/'))), { timeout: 15_000 }).toBe(true);
+    await expect.poll(() => page.locator('[data-nx-example]').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.closest('[data-nx-preview]')?.getAttribute('data-nx-preview')?.startsWith('sketchbook/'))), { timeout: 15_000 }).toBe(true);
     assert(await page.evaluate(() => [...document.fonts].some((face) => face.family.replace(/["']/g, '') === 'Gaegu' && face.status === 'loaded')), 'The heading face must preload before a language switch');
     await expect(page.locator('[data-cli-command]')).toHaveCount(0);
     await page.getByRole('link', { name: 'Sign in', exact: true }).click();
@@ -291,4 +244,4 @@ async function main() {
   }
 }
 
-try { await main(); } finally { await stopSite(); }
+try { await main(); } finally { await site?.close(); }

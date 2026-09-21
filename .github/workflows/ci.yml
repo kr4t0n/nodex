@@ -53,3 +53,6 @@ jobs:
 
       - name: Smoke-test landing animation and language switching
         run: npm run smoke:landing
+
+      - name: Smoke-test gallery loading and preview interaction
+        run: npm run smoke:gallery

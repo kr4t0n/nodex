@@ -8,6 +8,7 @@
     "prebuild": "node ../../scripts/sync-registry-public.ts",
     "build": "next build",
     "start": "next start --port 4180",
+    "pretypecheck": "node ../../scripts/sync-registry-public.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
@@ -25,7 +26,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
     "@types/pg": "8.23.1",
-    "@types/react": "19.2.18",
+    "@types/react": "19.2.8",
     "@types/react-dom": "19.2.5",
     "tailwindcss": "4.3.3"
   }

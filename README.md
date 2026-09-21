@@ -181,8 +181,11 @@ npm run dev
 
 The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
 `npm start`. Rebuild the registry after editing its source; the gallery reads
-built artifacts. `dev` and the web build copy those artifacts into the app's
-public directory automatically.
+built metadata. `dev` and the web build copy the artifacts into the app's public
+directory and generate lazy imports from each component's declared example entry
+and export. React components and example edits participate in Next's development
+reload; rebuild the registry and restart dev after changing catalogue metadata.
+The website and registry share the same pinned React types.
 
 The landing page folds its wordmark into the navbar, then demonstrates the CLI
 in a terminal above the chart belt, together in one scene with more generous
@@ -212,6 +215,29 @@ The language overview shows up to four previews from each language's `featured`
 list in `registry/languages/<slug>/meta.json`, in the authored order. Its component
 badge counts the full catalogue; adding charts does not automatically feature
 them. Rebuild the registry and restart dev after changing this list.
+
+The gallery reads `public/r/gallery.json`, a generated projection of the full
+registry that retains every component, preview and delivery address while omitting
+embedded source contents. The CLI continues to use `public/r/registry.json` and
+the complete per-item downloads. Publish both manifests with the website build;
+an external registry/CDN must include the matching `gallery.json`.
+
+Gallery, detail and landing previews render the actual React examples directly
+in the page, sharing React, Recharts and helper modules. Lazy imports keep example
+code out of the initial route bundle. Each preview inherits its language's scoped
+tokens; primitive CSS and registry Tailwind utilities also apply in the website.
+Standalone preview documents remain available at the manifest's preview URLs.
+Changing example code now requires a website rebuild for production, even when
+the registry's downloads are hosted on a CDN.
+
+Live previews start through one page-wide queue. Up to three nearby examples
+start at once, with visible cards taking priority over the 300px preload margin.
+Slots release after the lazy example commits and fonts/layout settle, or on an
+error. A 15-second timeout lets other previews proceed if an import stalls. The
+observer fallback rechecks actual bounds after 1.5 seconds, so background tabs
+can progress without starting the entire catalogue. Loaded previews stay mounted
+as you scroll, preserving keyboard inspection, tooltips and control state. Titles
+and labels link to detail pages; the previews themselves retain native interaction.
 
 ## Use components in a React app
 
@@ -541,11 +567,12 @@ Native mobile framework.
 
 The pinned Recharts version does not emit chart marks through React server
 rendering. The registry build renders the actual examples in Chromium, checks
-their resolved paint and stroke widths, and stores complete static previews.
-Local JavaScript bundles then mount the same examples for interaction. This is
-not React hydration. Downstream applications receive ordinary client charts;
-the gallery's pre-rendered snapshot is not a server-rendering guarantee for
-consumer apps.
+their resolved paint and stroke widths, and stores complete standalone static
+previews. Their local JavaScript bundles mount the same examples for interaction;
+this is not React hydration. The website uses native lazy React examples with
+reserved loading boxes, while the build-time snapshots remain in the standalone
+documents. Neither the website nor downstream consumers gain server-rendered
+Recharts marks from these snapshots.
 
 Gallery previews give chart compositions and primitive examples the same 28px
 top and left inset. Charts scale within that frame using build-measured outer
@@ -578,6 +605,7 @@ packages/cli/src/                  static registry access, delivery, install, au
 apps/web/src/                      Next gallery and account routes
 apps/web/migrations/               SQL account migrations
 scripts/build-registry.ts          validation, bundling, browser preview rendering
+scripts/sync-registry-public.ts    public assets and lazy website example imports
 scripts/lib/                       delivery, tokens and browser build utilities
 styles/                            shared website and preview scrollbar styling
 skills/nodex/                      consumer skill
@@ -607,6 +635,7 @@ npm run lint
 npm run typecheck
 npm run build --workspace @nodex/web
 npm run smoke:landing
+npm run smoke:gallery
 ```
 
 | Command | Coverage |
@@ -618,6 +647,7 @@ npm run smoke:landing
 | `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
 | `check:shell` | Gallery primitive classes have their curated stylesheets |
 | `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |
+| `smoke:gallery` | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout |
 | `lint` / `typecheck` | Application, registry, CLI and build source |
 
 The consumer smoke installs packages in a disposable directory and therefore
@@ -625,8 +655,8 @@ needs npm network access. Build previews bundle dependencies locally; rendered
 examples need no CDN chart scripts or external data fetches. Chromium belongs to
 the build and test environment, not the production server image.
 
-`smoke:landing` requires the web build above. To check an already running dev
-server instead, run `npm run smoke:landing -- http://localhost:4180`.
+`smoke:landing` and `smoke:gallery` require the web build above. Both also accept
+an existing server URL, such as `npm run smoke:gallery -- http://localhost:4180`.
 
 ## Accounts and configuration
 

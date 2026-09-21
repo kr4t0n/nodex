@@ -61,7 +61,7 @@ inspection. Rough.js is a pinned geometry dependency, not a second chart runtime
 Its generated paths are rendered declaratively by React. Native measurement
 bounds clip filled texture. Bar outlines render outside that fill clip: clipping
 the wobbled boundary stroke cuts away parts of it, which can disappear entirely
-when an iframe thumbnail scales below one pixel. Keep the original stroke token,
+when a thumbnail scales below one pixel. Keep the original stroke token,
 seeded geometry and native hit targets; do not thicken the language's marks or
 change gallery scale to compensate. Check actual rasterized thumbnail edges at
 fractional pixel positions as well as native-size geometry.
@@ -269,7 +269,7 @@ its types only so the published command stays independent of the monorepo.
 `scripts/build-registry.ts` builds into an OS temporary directory, completes
 validation and rendering, then publishes only:
 
-- `public/r/registry.json`, `languages.json` and per-item JSON;
+- `public/r/registry.json`, `gallery.json`, `languages.json` and per-item JSON;
 - `public/registry/` delivered sources, language assets and bundled previews.
 
 Authoring source is never mutated. `--check` performs the same work in temporary
@@ -318,11 +318,24 @@ not React hydration or a second chart renderer.
 Only build/test machines need Chromium. Dependencies are bundled locally;
 previews have no chart-library CDN imports or runtime data fetches. Consumer
 components remain client charts; their server-rendered HTML does not inherit
-the gallery's build-time snapshot. Do not claim general Recharts SSR support.
+the standalone build-time snapshot. Do not claim general Recharts SSR support.
 
-The gallery embeds static preview URLs declared by the manifest. It never imports
-registry source into its route bundle. Charts scale from each example's logical
-width in thumbnails and detail pages; primitives render fluidly at native size.
+The website renders actual React examples in its own component tree. Before
+dev/build, `sync-registry-public.ts` generates explicit lazy imports under
+`apps/web/src/generated/` from each authored example entry and export, checked
+against the built catalogue. The generated directory is ignored. Examples share
+the website's React/Recharts runtime and helper modules; there is no per-preview
+root or iframe. Keep the website and registry React types pinned to the same
+version: two versions disagree about ref cleanup types when source is shared.
+Next compiles imported primitive CSS and the app's Tailwind input scans registry
+source. Do not eagerly import every example or make a second gallery renderer.
+The production website must be rebuilt when example code changes. Standalone
+preview URLs still serve browser snapshots and local bundles for independent
+viewing and validation; the website uses reserved loading boxes until lazy
+examples mount, not snapshot HTML injection.
+
+Charts scale from each example's logical width in thumbnails and detail pages;
+primitives render fluidly at native size.
 Preserve each specimen's original proportions and standalone preview padding.
 The build records chart content insets from the rendered root's bounds and
 padding. The gallery uses those manifest insets to frame chart compositions with
@@ -336,13 +349,29 @@ status chrome belong to their components. There is no chart data disclosure.
 Load-bearing preview behavior:
 
 - Read an initial container width synchronously and keep the viewport-observer
-  timeout fallback. Background tabs may not deliver observers promptly.
-- Measure the example wrapper plus body padding, not document scrollHeight;
-  document height cannot shrink below the existing frame height.
-- Accept height messages only from the matching iframe window and only finite,
-  positive numbers. Grid previews keep fixed boxes for aligned labels.
+  timeout fallback. Background tabs may not deliver observers promptly. The
+  fallback must measure current bounds, including local clipping, instead of
+  admitting every distant preview after a fixed delay.
+- `preview-startup.ts` owns one page-wide queue with three concurrent startups.
+  Visible examples precede the 300px preload margin; queued examples are measured
+  again before admission so fast scrolling does not start stale candidates.
+  Native readiness runs after the lazy component commits, fonts finish and three
+  frames pass, with a timer fallback for background tabs. Only that readiness,
+  an error or the 15-second failure timeout releases a startup slot. A local error
+  boundary contains a failed example. Keep loaded examples mounted to retain
+  interaction state. Cancel queued work and release active slots on example or
+  language changes/unmount; dispose the shared
+  observer, viewport listeners and fallback timers when the last preview leaves.
+- Measure the native wrapper including preview padding in unscaled CSS pixels.
+  Transformed client bounds would feed thumbnail scale back into layout. Accept
+  only finite positive heights; grid previews keep fixed boxes for aligned labels.
 - Every grid ancestor holding a scaled frame needs `min-width: 0` or its wide
   logical content can force the grid open and cancel apparent scaling.
+- Native examples restate inherited font, color and text metrics within their
+  token scope. Preview controls must not be nested in gallery navigation anchors;
+  titles and labels own navigation. Specimen `href="#"` links stay local instead
+  of scrolling the host page. Inline dialogs use the preview's query-container
+  width for their former viewport sizing; they never open a page-wide modal.
 
 ## The gallery dogfoods language tokens
 
@@ -354,7 +383,7 @@ There is no independent gallery dark mode.
 
 `styles/scrollbars.css` owns native scrollbar presentation across the website.
 The app imports it into global CSS; the registry build compiles the same file into
-preview CSS so isolated iframe documents receive it too. Resolve muted/ink paint
+preview CSS so standalone documents receive it too. Resolve muted/ink paint
 on each element to honor descendant token scopes. Keep transparent tracks, both
 scroll axes, native interaction and forced-color defaults. Gutter reservation is
 local to the terminal; do not reserve scrollbar space on every element. This is
@@ -417,8 +446,8 @@ must fit at 320px after fonts load.
 Actual registry previews fill the belt. Each repeated pass owns its trailing gap;
 both passes must be identical width for seamless `xPercent: -50`. Repeat a small
 catalogue to fill the belt. Reserve each frame's dimensions but mount its preview
-only when the belt approaches the viewport; native iframe lazy loading alone
-starts chart bundles during the opening hero.
+only when the belt approaches the viewport, keeping lazy chart modules out of
+the opening hero.
 The terminal and belt share one scene, with a 200px chart strip below the terminal.
 Terminal padding and command spacing expand on tall viewports, and the gap above
 the belt grows with viewport height. The scene can grow on short screens so
@@ -444,7 +473,16 @@ Next guidance; this root file remains the project architecture authority.
 Public downloads bypass application handlers. The gallery copies built
 `public/r/` and `public/registry/` into `apps/web/public/` before dev/build;
 that directory is generated and must never be edited. CDN hosting exposes the
-same paths with no server runtime.
+same paths with no server runtime. The sync also generates the website's lazy
+example imports; catalogue, assets and website code must be deployed together.
+
+The build projects `r/gallery.json` from the validated, rendered registry, omitting
+only `files[].content`. Browser discovery and server route generation use this
+smaller manifest. `GalleryItem` excludes embedded source at the type boundary;
+all item metadata and explicit file addresses remain available, including shell
+stylesheets. The CLI still uses the full `r/registry.json` and per-item JSON.
+Never shrink those source-delivery artifacts to optimize the gallery. Publish
+the new gallery manifest with the corresponding app, including on external CDNs.
 
 CLI resolution is `--registry`, project `nodex.json`, `NODEX_REGISTRY`, then the
 hosted default. It does not guess a registry from the working directory. An
@@ -728,6 +766,8 @@ still cause the image job to skip successfully.
   texture. Glyph count changes with width; the old one-tree-per-10K comment was
   inaccurate. Caller targetK owns the shared track. Preserve labels after the
   full final glyph, partial clipping, zero tracks and unavailable rows.
+  Consumer checks wait for the native planting/target geometry after data
+  changes; an updated total label alone does not prove the Bar has recalculated.
 - The bar family uses Recharts Bar series, category indices and public scale
   hooks. Repeated labels do not merge categories. Chunky-bars keeps caller order
   while rank selects tone, and zero retains a label without a visible bar.

@@ -29,3 +29,5 @@ apps/web/next-env.d.ts
 # registry copied into the web app by scripts/sync-registry-public.ts so Next
 # can serve it from public/ — always regenerated, never a source of truth
 apps/web/public/
+# Lazy example imports generated alongside the public registry sync.
+apps/web/src/generated/

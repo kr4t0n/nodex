@@ -22,7 +22,7 @@ async function readManifest<T>(file: string): Promise<T> {
 /** Server components use the same published addresses as the browser catalog. */
 export async function readCatalog(): Promise<Catalog> {
   const [{ items }, languages] = await Promise.all([
-    readManifest<{ items: Item[] }>('registry.json'),
+    readManifest<{ items: Item[] }>('gallery.json'),
     readManifest<Language[]>('languages.json'),
   ]);
   return { items, languages };
@@ -41,7 +41,7 @@ export async function componentParams(): Promise<
   { slug: string; name: string }[]
 > {
   const [{ items }, slugs] = await Promise.all([
-    readManifest<{ items: Item[] }>('registry.json'),
+    readManifest<{ items: Item[] }>('gallery.json'),
     languageSlugs(),
   ]);
 
