@@ -109,7 +109,12 @@ export async function checkBarExtensionsConsumer(page: Page): Promise<void> {
   }
   await setMode(page, 'revised');
   await expect(pictorial.locator('[data-nx-total="0"]')).toHaveText('150k');
-  assert(await plantingWidth()>await targetWidth());
+  // Labels can commit before Recharts has recalculated its native Bar geometry.
+  await expect.poll(() => pictorial.evaluate((element) => {
+    const planted = Number(element.querySelector('[data-nx-planting-clip="0"]')?.getAttribute('width'));
+    const target = Number(element.querySelector('[data-nx-track="0"] clipPath rect')?.getAttribute('width'));
+    return planted - target;
+  })).toBeGreaterThan(0);
   assert(await pictorial.locator('[data-nx-observation="0"] [data-nx-tree]').count()>originalTrees);
   await expect(histogram.locator('rect[data-nx-rung]')).toHaveCount(10);
   await expect(tickRows.locator('[data-nx-tally]')).toHaveCount(10);

@@ -9,7 +9,6 @@ import { Preview } from '@/components/Preview.tsx';
 import { useLanguageTokens, useScopedLanguageTokens } from '@/lib/hooks.ts';
 import {
   loadCatalog,
-  previewUrl,
   type Catalog,
   type Item,
   type Language,
@@ -83,7 +82,7 @@ export function IndexView({
  * radius (slider), and mark weight (progress).
  *
  * These examples have compatible compositions for an unscaled tile. Their
- * authored dimensions reserve space until each document reports its height.
+ * authored dimensions reserve space until each example reports its height.
  */
 const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
 
@@ -95,7 +94,7 @@ const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
  * composite would read as misaligned rather than as varied.
  *
  * `min-w-0` on every level down to the Preview: a grid item's default minimum
- * is its content size, and a preview renders an iframe at a fixed wide logical
+ * is its content size, and a preview renders at a fixed wide logical
  * width, so without it the column is forced open and the inflated width is then
  * measured back as the one the scale is computed from.
  */
@@ -124,7 +123,7 @@ function TileCell<T>({
     >
       <Link
         href={href}
-        className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+        className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
         style={{ color: 'inherit', rowGap: 6 }}
       >
         <h3 className="m-0 self-start text-[12.5px] leading-[1.4] font-bold tracking-[-0.01em]">
@@ -136,8 +135,8 @@ function TileCell<T>({
         >
           {kind}
         </p>
-        <div className="mt-2 min-w-0 self-start">{children}</div>
       </Link>
+      <div className="mt-2 min-w-0 self-start">{children}</div>
     </article>
   );
 }
@@ -247,13 +246,9 @@ function LanguageTile({
             kind={item.meta.component}
           >
             <Preview
-              src={previewUrl(item, language.slug)}
-              title={item.title}
-              width={item.meta.preview.width}
-              height={item.meta.preview.height}
-              insets={item.meta.preview.insets}
+              item={item}
+              language={language.slug}
               boxHeight={TILE_HEIGHT}
-              fluid={item.meta.tier === 'primitive'}
             />
           </TileCell>
         ))}

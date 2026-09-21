@@ -118,6 +118,11 @@ export const publishedLanguageSchema = languageMetaSchema.extend({
 
 export type RegistryItem = z.infer<typeof registryItemSchema>;
 export type Registry = z.infer<typeof registrySchema>;
+/** Browsing retains the delivery addresses, without downloading runtime source. */
+export type GalleryItem = Omit<RegistryItem, 'files'> & {
+  files: Array<Omit<RegistryItem['files'][number], 'content'>>;
+};
+export type GalleryRegistry = Omit<Registry, 'items'> & { items: GalleryItem[] };
 export type LanguageMeta = z.infer<typeof languageMetaSchema>;
 export type PublishedLanguage = z.infer<typeof publishedLanguageSchema>;
 export type ComponentMeta = z.infer<typeof componentMetaSchema>;

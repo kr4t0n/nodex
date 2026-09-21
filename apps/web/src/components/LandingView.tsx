@@ -15,7 +15,6 @@ import { useLandingLanguage } from '@/lib/landing-language.ts';
 import {
   expressiveFor,
   loadCatalog,
-  previewUrl,
   type Catalog,
   type Item,
   type Language,
@@ -340,8 +339,8 @@ function ComponentBelt({
   useGSAP(
     () => {
       if (!mounted) {
-        // Native iframe lazy loading reaches far below the fold. Wait until
-        // the belt itself is near so chart bundles stay out of the opening hero.
+        // Wait until the belt itself is near so lazy example modules and their
+        // chart runtime stay out of the opening hero.
         const trigger = ScrollTrigger.create({
           trigger: wrap.current,
           start: 'top 120%',
@@ -397,11 +396,8 @@ function ComponentBelt({
                   style={{ width: RUN_CARD_WIDTH, height: RUN_CARD_HEIGHT }}
                 >
                   {mounted && <Preview
-                    src={previewUrl(item)}
-                    title={item.title}
-                    width={item.meta.preview.width}
-                    height={item.meta.preview.height}
-                    insets={item.meta.preview.insets}
+                    item={item}
+                    language={item.meta.language}
                     boxHeight={RUN_CARD_HEIGHT}
                   />}
                 </figure>

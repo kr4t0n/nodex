@@ -49,7 +49,7 @@ ENV NEXT_PUBLIC_REGISTRY_URL=$NEXT_PUBLIC_REGISTRY_URL
 # prerenders its routes from that manifest, so this has to come first.
 RUN npm run build:registry
 
-# `prebuild` copies the built public/registry/ and public/r/ into apps/web/public.
+# `prebuild` copies registry assets and generates lazy imports of React examples.
 RUN npm run build --workspace @nodex/web
 
 # --------------------------------------------------------------------- runtime

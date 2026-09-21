@@ -26,6 +26,7 @@
     "dev": "npm run dev --workspace @nodex/web",
     "smoke:cli": "node scripts/smoke-cli.ts",
     "smoke:landing": "node scripts/smoke-landing.ts",
+    "smoke:gallery": "node scripts/smoke-gallery.ts",
     "build": "npm run build:registry && npm run build --workspace @nodex/web",
     "start": "npm run start --workspace @nodex/web",
     "test": "node --test scripts/registry.test.ts"

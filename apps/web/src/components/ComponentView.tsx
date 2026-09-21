@@ -16,7 +16,6 @@ import {
   addCommand,
   findItem,
   loadCatalog,
-  previewUrl,
   type Catalog,
 } from '@/lib/registry.ts';
 
@@ -58,8 +57,6 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
   // Charts preserve the specimen's composition and scale to the available width.
   const isPrimitive = item.meta.tier === 'primitive';
 
-  const embedSrc = previewUrl(item, slug);
-
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
     ['Runtime', item.meta.runtime],
@@ -96,13 +93,8 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
 
             <div className="mt-9">
               <Preview
-                src={embedSrc}
-                title={item.title}
-                width={item.meta.preview.width}
-                height={item.meta.preview.height}
-                insets={item.meta.preview.insets}
-                aspectRatio={item.meta.aspectRatio}
-                fluid={isPrimitive}
+                item={item}
+                language={slug}
               />
             </div>
           </div>

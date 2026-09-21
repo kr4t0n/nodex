@@ -15,7 +15,6 @@ import {
   expressiveFor,
   facetValues,
   loadCatalog,
-  previewUrl,
   primitivesFor,
   tokensJsonUrl,
   type Catalog,
@@ -245,7 +244,7 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                   the drawing, so everything that names it is printed here from
                   the manifest. */}
               <Link href={`/l/${language}/${item.name}`}
-                className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+                className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
                 style={{ color: 'inherit', rowGap: 6 }}
               >
                 <h2 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
@@ -257,17 +256,13 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
                 >
                   {item.meta.component}
                 </p>
-                <Preview
-                  className="mt-3 self-start"
-                  src={previewUrl(item, language)}
-                  title={item.title}
-                  width={item.meta.preview.width}
-                  height={item.meta.preview.height}
-                  insets={item.meta.preview.insets}
-                  aspectRatio={item.meta.aspectRatio}
-                  boxHeight={THUMB_HEIGHT}
-                />
               </Link>
+              <Preview
+                className="mt-3 self-start"
+                item={item}
+                language={language}
+                boxHeight={THUMB_HEIGHT}
+              />
             </article>
           ))}
         </div>
@@ -302,7 +297,7 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
             style={{ rowGap: 6 }}
           >
             <Link href={`/l/${language}/${item.name}`}
-              className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+              className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
               style={{ color: 'inherit', rowGap: 6 }}
             >
               <h3 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
@@ -314,16 +309,13 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
               >
                 {item.description ?? ''}
               </p>
-              {/* Fluid: a primitive is shown at the size it actually is. */}
-              <Preview
-                className="mt-3 self-start"
-                src={previewUrl(item, language)}
-                title={item.title}
-                width={item.meta.preview.width}
-                height={item.meta.preview.height}
-                fluid
-              />
             </Link>
+            {/* Fluid: a primitive is shown at the size it actually is. */}
+            <Preview
+              className="mt-3 self-start"
+              item={item}
+              language={language}
+            />
           </article>
         ))}
       </div>

@@ -10,7 +10,7 @@ import { build } from 'esbuild';
 
 import { loadSource, registrySchema, publishedLanguageSchema } from '../packages/core/src/index.ts';
 import type { LoadedComponent } from '../packages/core/src/load.ts';
-import type { RegistryItem } from '../packages/core/src/schema.ts';
+import type { GalleryRegistry, RegistryItem } from '../packages/core/src/schema.ts';
 import { lintRendered, lintSource, rulesFromTokens } from '../packages/cli/src/lint.ts';
 import { renderedMarks, serveDirectory } from './lib/browser.ts';
 import { prepareDelivery } from './lib/delivery.ts';
@@ -62,7 +62,7 @@ flushSync(() => root.render(createElement(Example, { animate })));
 function reportSize() {
   const body = getComputedStyle(document.body);
   const height = Math.ceil(node.getBoundingClientRect().height + parseFloat(body.paddingTop) + parseFloat(body.paddingBottom));
-  parent.postMessage({ type: 'nx-preview-size', height }, '*');
+  parent.postMessage({ type: 'nx-preview-size', height, ready: document.documentElement.dataset.nxReady === 'true' }, '*');
 }
 new ResizeObserver(reportSize).observe(node);
 requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -273,7 +273,15 @@ async function main() {
     }
     // Validation and rendering are complete before publishing any output.
     const manifest = registrySchema.parse({ $schema: 'https://ui.shadcn.com/schema/registry.json', name: 'nodex', homepage: 'https://nodex.kubitnodes.com', items });
+    const gallery: GalleryRegistry = {
+      ...manifest,
+      items: manifest.items.map((item) => ({
+        ...item,
+        files: item.files.map(({ path, target, type }) => ({ path, target, type })),
+      })),
+    };
     await put(stage, 'r/registry.json', `${JSON.stringify(manifest, null, 2)}\n`);
+    await put(stage, 'r/gallery.json', `${JSON.stringify(gallery, null, 2)}\n`);
     await put(stage, 'r/languages.json', `${JSON.stringify(publishedLanguages, null, 2)}\n`);
     for (const item of items) await put(stage, `r/${item.meta.language}/${item.name}.json`, `${JSON.stringify({ $schema: 'https://ui.shadcn.com/schema/registry-item.json', ...item }, null, 2)}\n`);
     if (!CHECK) {
