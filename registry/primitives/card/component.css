@@ -5,6 +5,8 @@
    --nx-radius-card, interactive elements use --nx-radius-pill. Nothing mixes. */
 
 .nx-card {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   background: var(--nx-surfaceFill);
@@ -14,6 +16,33 @@
   font-family: var(--nx-font-sans);
   color: var(--nx-ink);
   box-shadow: var(--nx-shadow-surface) var(--nx-ink);
+}
+
+/* Decoration stays within the surface and behind content. Plain cards have
+   neither secondary outlines nor hatching. Keep this local for CSS delivery. */
+.nx-card:not(.nx-card--plain)::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: var(--nx-texture-outlineInset);
+  border: var(--nx-stroke-hairline) solid currentColor;
+  border-radius: var(--nx-texture-outlineRadius);
+  opacity: var(--nx-texture-outlineOpacity);
+}
+
+.nx-card:not(.nx-card--plain)::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  right: 3px;
+  bottom: 3px;
+  width: min(var(--nx-texture-hatchSize), 40%);
+  height: min(var(--nx-texture-hatchSize), 70%);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  background: repeating-linear-gradient(var(--nx-texture-hatchAngle), currentColor 0 var(--nx-stroke-hairline), transparent var(--nx-stroke-hairline) var(--nx-texture-hatchGap));
+  opacity: var(--nx-texture-hatchOpacity);
 }
 
 /* Inverted. Present because the source collection inverts roughly a fifth of
@@ -42,6 +71,7 @@
 /* Card anatomy, in the order DESIGN.md fixes: title, sub, body, caption. */
 .nx-card__title {
   margin: 0;
+  font-family: var(--nx-font-heading, var(--nx-font-sans));
   font-size: var(--nx-type-cardTitle-size);
   font-weight: var(--nx-type-cardTitle-weight);
   letter-spacing: var(--nx-type-cardTitle-tracking);

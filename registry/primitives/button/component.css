@@ -4,6 +4,8 @@
    when composing the same visual treatment with an existing headless control. */
 
 .nx-btn {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11,7 +13,7 @@
   padding: var(--nx-space-actionPadding);
   border: var(--nx-stroke-hairline) solid transparent;
   border-radius: var(--nx-radius-pill);
-  font-family: var(--nx-font-sans);
+  font-family: var(--nx-font-ui);
   font-size: var(--nx-type-action-size);
   font-weight: var(--nx-type-action-weight);
   letter-spacing: var(--nx-type-action-tracking);
@@ -70,6 +72,36 @@
 .nx-btn--solid,
 .nx-btn--outline {
   box-shadow: var(--nx-shadow-action) var(--nx-ink);
+}
+
+/* Static decoration, inside the native hit target and behind its label.
+   Kept local so class-only consumers and individually delivered primitives
+   receive the same treatment. Zero opacity leaves flat languages unchanged. */
+.nx-btn--solid::before,
+.nx-btn--outline::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: var(--nx-texture-outlineInset);
+  border: var(--nx-stroke-hairline) solid;
+  border-color: inherit;
+  border-radius: var(--nx-texture-outlineRadius);
+  opacity: var(--nx-texture-outlineOpacity);
+}
+
+.nx-btn--solid::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  right: 3px;
+  bottom: 3px;
+  width: min(var(--nx-texture-hatchSize), 40%);
+  height: min(var(--nx-texture-hatchSize), 70%);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  background: repeating-linear-gradient(var(--nx-texture-hatchAngle), currentColor 0 var(--nx-stroke-hairline), transparent var(--nx-stroke-hairline) var(--nx-texture-hatchGap));
+  opacity: var(--nx-texture-hatchOpacity);
 }
 
 /* The language owns press travel and the remaining shadow. */

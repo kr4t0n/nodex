@@ -68,6 +68,7 @@ async function assertTheme(page: Page, slug: string) {
   const tokens = await response.json() as { color: { bg: string }; radius: { card: string }; font: { faces: Array<{ family: string }> } };
   const rgb = tokens.color.bg.replace('#', '').match(/.{2}/g)!.map((part) => Number.parseInt(part, 16));
   await expect(page.locator('body')).toHaveCSS('background-color', `rgb(${rgb.join(', ')})`);
+  await expect(page.locator('html')).toHaveCSS('scrollbar-width', 'thin');
   await expect(page.locator('[data-terminal-state]')).toHaveCSS('border-radius', tokens.radius.card);
   assert((await page.locator('body').evaluate((element) => getComputedStyle(element).fontFamily)).includes(tokens.font.faces[0]!.family));
 }
@@ -97,6 +98,20 @@ async function returnToHero(page: Page, slug: string) {
   assert(action && action.x >= 0 && action.x + action.width <= viewport.width, 'The themed hero sign-in must fit');
 }
 
+async function assertScrollback(page: Page) {
+  const history = page.getByRole('region', { name: 'Terminal history' });
+  await expect(history).toHaveCSS('scrollbar-width', 'thin');
+  await expect(history).toHaveCSS('scrollbar-gutter', 'stable');
+  assert(await history.evaluate((element) => element.scrollHeight > element.clientHeight), 'Terminal history must remain scrollable');
+  const pageY = await page.evaluate(() => scrollY);
+  await history.focus();
+  await history.press('Home');
+  await expect.poll(() => history.evaluate((element) => element.scrollTop)).toBe(0);
+  await history.press('End');
+  await expect.poll(() => history.evaluate((element) => Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop))).toBeLessThanOrEqual(1);
+  assert.equal(await page.evaluate(() => scrollY), pageY, 'History keyboard scrolling must not move the page');
+}
+
 async function main() {
   const origin = process.argv[2] ?? await startSite();
   const browser = await chromium.launch({ headless: true });
@@ -114,11 +129,13 @@ async function main() {
     await delay(1600);
     await expect(page.locator('iframe')).toHaveCount(0);
 
-    const samples: string[] = [];
-    await page.exposeFunction('recordTerminalCommand', (text: string) => { samples.push(text); });
-    await page.locator('[data-cli-command]').last().evaluate((element) => {
-      const record = (window as typeof window & { recordTerminalCommand: (text: string) => Promise<void> }).recordTerminalCommand;
-      new MutationObserver(() => { void record(element.textContent ?? ''); }).observe(element, { subtree: true, childList: true, characterData: true });
+    const samples: string[][] = [[], []];
+    await page.exposeFunction('recordTerminalCommand', (index: number, text: string) => { samples[index]!.push(text); });
+    await page.locator('[data-cli-command]').evaluateAll((elements) => {
+      const record = (window as typeof window & { recordTerminalCommand: (index: number, text: string) => Promise<void> }).recordTerminalCommand;
+      elements.slice(2).forEach((element, index) => {
+        new MutationObserver(() => { void record(index, element.textContent ?? ''); }).observe(element, { subtree: true, childList: true, characterData: true });
+      });
     });
     await openTerminal(page);
     await expect(page.locator('[data-cli-command]').first()).toHaveText('$nodex list');
@@ -140,25 +157,38 @@ async function main() {
     assert.deepEqual(await page.locator('[data-cli-command]').allTextContents(), pausedText, 'Scrolling must preserve a paused transcript');
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await assertTheme(page, 'neo-brutalism');
+    await expect(page.locator('iframe').first()).toHaveAttribute('src', /\/neo-brutalism\//);
+    await expect(page.locator('[data-cli-command]').last()).toHaveText('$nodex init sketchbook --force', { timeout: 15_000 });
+    const demoHeight = (await page.locator('[data-terminal-state] > div').last().boundingBox())!.height;
+    await expect(page.locator('[data-cli-command]').last()).toBeInViewport();
+    await assertTheme(page, 'sketchbook');
     const command = page.getByRole('textbox', { name: 'Terminal command', exact: true });
     await expect(command).toBeEnabled();
     await expect(command).not.toBeFocused();
     await expect(page.getByRole('button', { name: /^(Replay|Play|Pause)$/ })).toHaveCount(0);
-    const recalled = samples.indexOf('$nodex init signal-console');
-    assert(recalled >= 0, 'The previous command must be recalled');
-    assert(samples.slice(recalled + 1).some((text) => text.startsWith('$nodex init ') && text.length < '$nodex init signal-console'.length), 'The language argument must visibly be deleted');
-    assert(samples.includes('$nodex init neo-brutalism --force'), 'The replacement command must include --force');
+    for (const [index, previous, replacement] of [
+      [0, '$nodex init signal-console', '$nodex init neo-brutalism --force'],
+      [1, '$nodex init neo-brutalism --force', '$nodex init sketchbook --force'],
+    ] as const) {
+      const recalled = samples[index]!.indexOf(previous);
+      assert(recalled >= 0, 'The previous command must be recalled');
+      assert(samples[index]!.slice(recalled + 1).some((text) => text.startsWith('$nodex init ') && text.length < previous.length), 'The language argument must visibly be deleted');
+      assert(samples[index]!.includes(replacement), 'The replacement command must include --force');
+    }
+    assert.equal((await page.locator('[data-terminal-state] > div').last().boundingBox())!.height, demoHeight, 'The terminal body must keep its height at handoff');
+    await assertScrollback(page);
     await assertFits(page);
 
-    await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/neo-brutalism/'))), { timeout: 15_000 }).toBe(true);
+    await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/sketchbook/'))), { timeout: 15_000 }).toBe(true);
     const completedText = await page.locator('[data-terminal-entry]').allTextContents();
-    assert.equal(completedText.length, 3, 'The interactive history must retain all three demo commands');
-    await returnToHero(page, 'neo-brutalism');
+    assert.equal(completedText.length, 4, 'The interactive history must retain all four demo commands');
+    await expect(page.locator('[data-terminal-entry]').last()).toContainText('nodex init sketchbook --force');
+    await returnToHero(page, 'sketchbook');
     await expect(page.locator('[data-terminal-state]')).toHaveAttribute('data-terminal-state', 'interactive');
     await openTerminal(page);
     assert.deepEqual(await page.locator('[data-terminal-entry]').allTextContents(), completedText, 'Scrolling must preserve the completed transcript');
     await command.fill('nodex init mono-editorial');
-    await returnToHero(page, 'neo-brutalism');
+    await returnToHero(page, 'sketchbook');
     await openTerminal(page);
     await expect(command).toHaveValue('nodex init mono-editorial');
     await command.press('Enter');
@@ -186,6 +216,11 @@ async function main() {
     await command.fill('nodex init neo-brutalism --force');
     await page.getByRole('button', { name: 'Run command' }).click();
     await assertTheme(page, 'neo-brutalism');
+    await command.fill('nodex init sketchbook');
+    await command.press('Enter');
+    await assertTheme(page, 'sketchbook');
+    await expect.poll(() => page.locator('iframe').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.getAttribute('src')?.includes('/sketchbook/'))), { timeout: 15_000 }).toBe(true);
+    assert(await page.evaluate(() => [...document.fonts].some((face) => face.family.replace(/["']/g, '') === 'Gaegu' && face.status === 'loaded')), 'The heading face must preload before a language switch');
     await expect(page.locator('[data-cli-command]')).toHaveCount(0);
     await page.getByRole('link', { name: 'Sign in', exact: true }).click();
     await page.waitForURL('**/login');
@@ -201,12 +236,13 @@ async function main() {
     small.on('pageerror', (error) => errors.push(error.message));
     await small.goto('/');
     await openTerminal(small);
-    await assertTheme(small, 'neo-brutalism');
+    await assertTheme(small, 'sketchbook');
     await assertFits(small);
     const input = small.getByRole('textbox', { name: 'Terminal command' });
     await expect(input).toBeEnabled();
     await expect(input).not.toBeFocused();
-    await expect(small.locator('[data-terminal-entry]').last()).toContainText('nodex init neo-brutalism --force');
+    await expect(small.locator('[data-terminal-entry]').last()).toContainText('nodex init sketchbook --force');
+    await assertScrollback(small);
     await input.fill('nodex init signal-console');
     await input.press('Enter');
     await assertTheme(small, 'signal-console');
@@ -229,12 +265,21 @@ async function main() {
     await small.locator('[data-terminal-entry]').last().getByRole('button', { name: 'Apply Neo-brutalism' }).click();
     await assertTheme(small, 'neo-brutalism');
     await assertFits(small);
+    for (const [language, name] of [['mono-editorial', 'Mono Editorial'], ['signal-console', 'Signal Console'], ['neo-brutalism', 'Neo-brutalism'], ['sketchbook', 'Sketchbook']]) {
+      await small.goto(`/l/${language}/button`);
+      await expect(small.getByRole('heading', { name: 'Button', exact: true })).toBeVisible();
+      await small.evaluate(() => document.fonts.ready);
+      await expect(small.locator('header').getByRole('link', { name, exact: true })).toBeVisible();
+      assert(await small.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${language}: component navigation must fit at 320px with loaded fonts`);
+      const signOut = await small.getByRole('button', { name: 'Sign out', exact: true }).boundingBox();
+      assert(signOut && signOut.x + signOut.width <= 320, `${language}: the account action must remain inside the viewport`);
+    }
     await mobile.close();
     console.log('Landing accessibility: narrow viewport, keyboard switching and live reduced-motion changes passed');
 
     const failure = await browser.newPage({ baseURL: origin });
     failure.on('pageerror', (error) => errors.push(error.message));
-    await failure.route('**/registry/languages/neo-brutalism/tokens.css', (route) => route.abort());
+    await failure.route('**/registry/languages/sketchbook/tokens.css', (route) => route.abort());
     await failure.goto('/');
     await expect(failure.getByText('The demo could not load. Try refreshing the page.')).toBeVisible();
     await expect(failure.locator('html')).toHaveAttribute('data-nx-language', 'mono-editorial');

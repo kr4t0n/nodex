@@ -35,10 +35,10 @@
   display: block;
 }
 
-/* Square, for a repository or an organisation rather than a person. Rounding
-   follows the container radius so it matches cards. */
+/* Square, for a repository or an organisation rather than a person. Its own
+   radius keeps compound surface corners out of small avatar geometry. */
 .nx-avatar--square {
-  border-radius: calc(var(--nx-radius-card) / 3);
+  border-radius: var(--nx-radius-avatar);
 }
 
 .nx-avatar--sm {

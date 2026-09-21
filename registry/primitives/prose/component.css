@@ -38,6 +38,7 @@
 .nx-prose h3,
 .nx-prose h4 {
   margin-bottom: 0;
+  font-family: var(--nx-font-heading, var(--nx-font-sans));
   letter-spacing: var(--nx-type-prose-headingTracking);
 }
 

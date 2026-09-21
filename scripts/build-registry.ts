@@ -206,7 +206,11 @@ async function main() {
       await put(stage, relative, output.contents);
     }
     const inputCss = path.join(stage, 'preview-input.css');
-    await writeFile(inputCss, `@import ${JSON.stringify(path.join(ROOT, 'node_modules/tailwindcss/index.css'))};\n@source ${JSON.stringify(path.join(ROOT, 'registry'))};\n`);
+    await writeFile(inputCss, [
+      `@import ${JSON.stringify(path.join(ROOT, 'node_modules/tailwindcss/index.css'))};`,
+      `@import ${JSON.stringify(path.join(ROOT, 'styles/scrollbars.css'))};`,
+      `@source ${JSON.stringify(path.join(ROOT, 'registry'))};`,
+    ].join('\n'));
     await run(path.join(ROOT, 'node_modules/.bin/tailwindcss'), ['-i', inputCss, '-o', path.join(stage, 'registry/_preview/styles.css'), '--minify'], { cwd: ROOT });
     for (const preview of previews) await put(stage, preview.item.meta.preview.path, previewDocument(preview, assets));
 

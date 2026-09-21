@@ -131,7 +131,7 @@ async function checkNewLanguage(): Promise<void> {
   await cli(temp, ['new-language', 'neutral-starter'], checkout);
   const starter = await json<{
     color: Record<string, string>;
-    font: { sans: string; mono: string; weight: Record<string, number>; faces?: unknown };
+    font: { sans: string; heading: string; ui: string; mono: string; weight: Record<string, number>; faces?: unknown };
     radius: Record<string, string>;
     space: Record<string, string>;
     type: Record<string, Record<string, unknown>>;
@@ -144,6 +144,8 @@ async function checkNewLanguage(): Promise<void> {
   assert.equal(starter.color.border, '#000000');
   assert(Object.values(starter.color).every((color) => color === '#FFFFFF' || color === '#000000'), 'Starter paint must stay neutral');
   assert.equal(starter.font.sans, 'system-ui, sans-serif');
+  assert.equal(starter.font.heading, 'system-ui, sans-serif');
+  assert.equal(starter.font.ui, 'system-ui, sans-serif');
   assert.equal(starter.font.mono, 'ui-monospace, monospace');
   assert.equal(starter.font.faces, undefined, 'The neutral starter must not inherit downloadable language fonts');
   assert.equal(starter.space.fieldGap, '13px', 'Shared roles must come from the selected source checkout');
@@ -240,6 +242,8 @@ try {
   assert.equal(report.added.length, chartNames.length + 1);
   assert.deepEqual(report.installed, []);
   assert.ok(report.dependencies.includes('recharts@3.10.1'));
+  assert.ok(report.dependencies.includes('d3-force@3.0.0'));
+  assert.ok(report.dependencies.includes('@types/d3-force@3.0.10'));
   assert.equal(new Set(report.files).size, report.files.length);
   assert.ok(report.files.some((file) => file.includes('/_shared/')));
   for (const file of report.files) {
@@ -278,7 +282,9 @@ try {
   assert.match(await cli(project, ['lint', ...signalCharts, '--design', 'signal-console']), /0 errors/);
   const neoCharts = charts.filter((item) => item.meta.language === 'neo-brutalism').map((item) => `${config.paths.components}/${item.name}`);
   assert.match(await cli(project, ['lint', ...neoCharts, '--design', 'neo-brutalism']), /0 errors/);
-  checks += 4;
+  const sketchCharts = charts.filter((item) => item.meta.language === 'sketchbook').map((item) => `${config.paths.components}/${item.name}`);
+  assert.match(await cli(project, ['lint', ...sketchCharts, '--design', 'sketchbook']), /0 errors/);
+  checks += 7;
 
   // Custom destinations must be checked explicitly, including from subdirectories.
   assert.match(await cli(path.join(project, 'src'), ['lint', 'src/charts']), /[1-9]\d* source files checked; 0 errors/);

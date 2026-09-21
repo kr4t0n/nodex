@@ -1,0 +1,85 @@
+{
+  "slug": "sketch-bars",
+  "title": "A week in the studio",
+  "description": "Handwritten labels and colored hatching compare studio hours from a shared zero baseline.",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "SketchBars"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "sketch/use-sketch-settings.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1",
+    "roughjs@4.6.6"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 420
+  },
+  "tags": [
+    "categorical",
+    "comparison",
+    "sketch",
+    "roughviz"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SketchBarsDatum[]",
+      "required": true,
+      "description": "Caller-ordered categories with unique nonempty id, label, nonnegative value or null, and optional tone a–i. Identity controls stable texture and default color. Invalid and missing values are unavailable; zero keeps a label without a bar. Empty or entirely unavailable data shows an explicit state. Dense categories scroll within the plot."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Measurement label for the heading and tooltips; defaults to Value."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct labels and tooltips; defaults to en-US numbers with at most two decimals. Axis ticks use compact numbers."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills its container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Total height in pixels; otherwise uses a responsive plot with a readable minimum height."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite Recharts drawing, using language timing and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title; defaults to Values by category."
+    }
+  ]
+}

@@ -203,7 +203,7 @@ function LanguageTile({
     >
       <div className="flex flex-wrap items-end justify-between gap-6 pb-9">
         <div>
-          <h2 className="m-0 text-[24px] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
+          <h2 className="m-0 text-[24px] [font-family:var(--nx-font-heading)] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
             {language.name}
           </h2>
           <p

@@ -1,0 +1,98 @@
+{
+  "slug": "sketch-scatter",
+  "title": "Exploration and clarity",
+  "description": "Equal-sized sketch circles preserve the supplied numeric coordinate pairs.",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "SketchScatter"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "sketch/use-sketch-settings.ts",
+    "sketch/identity.ts",
+    "sketch/frame.tsx",
+    "sketch/marks.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1",
+    "roughjs@4.6.6"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 440
+  },
+  "tags": [
+    "relationship",
+    "numeric",
+    "sketch",
+    "roughviz"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SketchScatterDatum[]",
+      "required": true,
+      "description": "Unique nonempty IDs, labels, signed numeric x and y coordinates and optional categorical tones a–i. A missing or non-finite coordinate omits the observation and increments the visible unavailable count. Zero is a valid coordinate."
+    },
+    {
+      "name": "xLabel",
+      "type": "string",
+      "description": "Horizontal measurement label; defaults to X."
+    },
+    {
+      "name": "yLabel",
+      "type": "string",
+      "description": "Vertical measurement label; defaults to Y."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label; defaults to Value (Total for pie/donut, Observations for scatter)."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats exact values in labels and tooltips; defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills its container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels; otherwise uses responsive plot proportions. Dense content scrolls locally."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native Recharts motion subject to token timing and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title."
+    }
+  ]
+}

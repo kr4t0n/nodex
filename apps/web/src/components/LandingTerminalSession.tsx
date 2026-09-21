@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowElbowDownLeft } from '@phosphor-icons/react';
-import { useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useLayoutEffect, useRef, useState, type ComponentProps, type FormEvent, type KeyboardEvent } from 'react';
 
 import type { Language } from '@/lib/registry.ts';
 
@@ -15,19 +15,21 @@ interface LandingTerminalSessionProps {
   languages: readonly Language[];
   first: Language;
   second: Language;
+  third: Language;
   onLanguageChange: (slug: string) => void;
 }
 
 /** A bounded, local command history; commands only select manifest languages. */
-export function LandingTerminalSession({ languages, first, second, onLanguageChange }: LandingTerminalSessionProps) {
+export function LandingTerminalSession({ languages, first, second, third, onLanguageChange }: LandingTerminalSessionProps) {
   const [entries, setEntries] = useState<Entry[]>(() => [
     { id: 0, command: 'nodex list', output: 'languages' },
     { id: 1, command: `nodex init ${first.slug}`, output: { message: `Initialised ${first.name}` } },
     { id: 2, command: `nodex init ${second.slug} --force`, output: { message: `Initialised ${second.name}` } },
+    { id: 3, command: `nodex init ${third.slug} --force`, output: { message: `Initialised ${third.name}` } },
   ]);
   const [command, setCommand] = useState('');
   const [feedback, setFeedback] = useState('');
-  const nextId = useRef(3);
+  const nextId = useRef(4);
   const scrollback = useRef<HTMLDivElement>(null);
   const historyIndex = useRef<number | null>(null);
   const draft = useRef('');
@@ -100,8 +102,7 @@ export function LandingTerminalSession({ languages, first, second, onLanguageCha
 
   return (
     <div className="flex h-72 flex-col p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:h-[348px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
-      <div ref={scrollback} role="region" aria-label="Terminal history" tabIndex={0}
-        className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--nx-ink)]">
+      <TerminalScrollback ref={scrollback} role="region" aria-label="Terminal history" tabIndex={0} className="space-y-5">
         {entries.map((entry) => <div key={entry.id} data-terminal-entry>
           <div className="flex items-start gap-3">
             <span aria-hidden>$</span><span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{entry.command}</span>
@@ -110,7 +111,7 @@ export function LandingTerminalSession({ languages, first, second, onLanguageCha
             {entry.output === 'languages' ? <TerminalLanguages languages={languages} onSelect={(slug) => runCommand(`nodex init ${slug} --force`)} /> : entry.output.message}
           </div>
         </div>)}
-      </div>
+      </TerminalScrollback>
       <form onSubmit={handleSubmit} className="mt-4 flex min-h-10 shrink-0 items-center gap-3 focus-within:outline-1 focus-within:outline-offset-4 focus-within:outline-[var(--nx-ink)]">
         <span aria-hidden>$</span>
         <input aria-label="Terminal command" aria-describedby="landing-terminal-hint" value={command}
@@ -128,6 +129,13 @@ export function LandingTerminalSession({ languages, first, second, onLanguageCha
       <p role="status" className="sr-only">{feedback}</p>
     </div>
   );
+}
+
+/** Native history scrolling uses the shared website scrollbar treatment. */
+export function TerminalScrollback({ className = '', ...props }: ComponentProps<'div'>) {
+  return <div {...props} className={`min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2
+    [scrollbar-gutter:stable]
+    focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--nx-ink)] ${className}`} />;
 }
 
 /** The same manifest-backed list is read-only during the demo and selectable afterwards. */

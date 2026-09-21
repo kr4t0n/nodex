@@ -33,12 +33,12 @@ export function TopBar<T extends string>({
         background: 'color-mix(in oklab, var(--nx-bg) 88%, transparent)',
       }}
     >
-      <div className="mx-auto flex h-[64px] max-w-[1400px] items-center gap-5 px-6 lg:px-10">
+      <div className="mx-auto flex h-[64px] max-w-[1400px] items-center gap-2 px-6 sm:gap-5 lg:px-10">
         {/* Inside the app the wordmark returns to the app index, not to the
             marketing page. `/` is the landing. */}
         <Link
           href="/languages"
-          className="text-[13px] font-extrabold tracking-[0.1em] uppercase no-underline"
+          className="shrink-0 text-[13px] font-extrabold tracking-[0.1em] uppercase no-underline"
           style={{ color: 'var(--nx-ink)' }}
         >
           nodex
@@ -50,11 +50,11 @@ export function TopBar<T extends string>({
           </span>
         ) : null}
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex min-w-0 items-center gap-1.5">
           {back ? (
-            <Link href={back.href} className="nx-btn nx-btn--quiet no-underline">
-              <ArrowLeft size={13} weight="bold" aria-hidden />
-              {back.label}
+            <Link href={back.href} className="nx-btn nx-btn--quiet min-w-0 no-underline">
+              <ArrowLeft size={13} weight="bold" aria-hidden className="shrink-0" />
+              <span className="truncate">{back.label}</span>
             </Link>
           ) : null}
 
@@ -88,7 +88,7 @@ export function TopBar<T extends string>({
               off the row's centre line. Next to a visually identical link that
               is centred, that reads as a wobble. Flex makes the button the flex
               item directly, so there is no line box to offset it. */}
-          <form action={signOut} className="flex">
+          <form action={signOut} className="flex shrink-0">
             <button type="submit" className="nx-btn nx-btn--quiet">
               Sign out
             </button>
