@@ -85,7 +85,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                 description is still in the manifest, where `nodex show` and
                 `nodex search` use it. */}
             <p
-              className="mt-3 text-[10.5px] tracking-[0.06em] uppercase"
+              className="mt-3 text-[length:var(--nx-type-body-supportingSize)] tracking-[0.06em] uppercase"
               style={{ color: 'var(--nx-faint)' }}
             >
               {item.meta.component}
@@ -115,7 +115,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                     {label}
                   </dt>
                   <dd
-                    className="m-0 py-2.5 text-[11.5px]"
+                    className="m-0 py-2.5 text-[length:var(--nx-type-body-detailSize)]"
                     style={{ borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)' }}
                   >
                     {value}

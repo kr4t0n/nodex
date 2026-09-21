@@ -1,6 +1,6 @@
 # Sketchbook
 
-An open notebook: warm paper, handwritten headings and UI labels, thin ink and restrained
+An open notebook: warm paper, handwritten text, thin ink and restrained
 colored hatching. The atmosphere is exploratory; the content and controls remain
 precise. This language applies to complete interfaces, including forms, prose,
 navigation and data displays. Tokens supply values; these rules explain their use.
@@ -44,19 +44,26 @@ marks. Do not use a light hatch color for small text or a focus indicator.
 
 ## Typography
 
-**Two complementary voices.** `font.heading` is Gaegu, for page headings, grouped
-titles and short handwritten annotations. `font.ui` is also Gaegu, for navigation,
-buttons, tabs, field labels, choice labels, badges and disclosure summaries.
-`font.sans` is Inter, for paragraphs, editable input/select values, supporting copy
-and dense tables. `font.mono` is the system monospace stack for commands and
-identifiers. Avoid cursive paragraphs and handwritten code.
+**One handwritten voice.** Gaegu supplies `font.heading` for page headings, grouped
+titles and short annotations; `font.ui` for navigation, buttons, tabs, field labels,
+choice labels, badges and disclosure summaries; and `font.sans` for paragraphs,
+editable input/select values, supporting copy and dense tables. The role name
+`font.sans` identifies reading text in the shared contract; its face is handwritten
+in this language. Keep the three font stacks independent so each role can be
+overridden within a scope. `font.mono` remains the system monospace stack for
+commands and identifiers.
 
-Gaegu is intentionally larger than adjacent interface text. Use its supplied
+**Comfortable reading.** Body text and editable values use 16px; prose uses 14.5px.
+Supporting copy stays smaller while retaining enough space for Gaegu's letterforms.
+Use the supplied body variants for descriptions, summaries, notes and supporting
+text. Keep the existing line-height ratios and surrounding spacing.
+
+Headings and short UI labels are larger than reading text. Use Gaegu's supplied
 regular and bold weights; avoid simulated medium or semibold handwritten type.
 Use `type.cardTitle`, `type.body`, `type.control`, `type.action`, `type.uiLabel`
 and `type.choice` to preserve hierarchy. UI labels use natural casing and larger
-handwriting; `type.label` retains compact sans-serif metrics for dense information.
-`type.meterLabel` styles slider and progress labels while their adjacent values stay sans-serif.
+handwriting; `type.label` retains compact metrics for dense information.
+`type.meterLabel` styles slider and progress labels independently of their adjacent values.
 Keep headings brief and naturally wrapped.
 Supporting labels must remain legible at the smallest intended container width.
 
@@ -106,7 +113,7 @@ apply while the interface is open.
 - Randomizing a shape on hover or each render.
 - Sketch effects that alter data positions, areas or zero baselines.
 - Pastel lettering, color-only states or illegible hatch density.
-- Cursive paragraphs, simulated Gaegu weights or handwriting on commands.
+- Cramped handwritten paragraphs, simulated Gaegu weights or handwriting on commands.
 - Rotated controls, thick offset shadows, tonal gradients, glass or distressed overlays.
 - Full-surface hatching behind reading text; use line patterns only for small accents.
 - Large pill corners, excessive boxes or repeated decorative doodles.

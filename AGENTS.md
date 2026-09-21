@@ -42,10 +42,14 @@ Sketchbook is the fourth language, with all 24 primitives and nine charts:
 The index features bars, line, donut and network; the gallery discovers all nine.
 Its roughViz reference is pinned in the language's `PROVENANCE.md`; extracted
 palette/drawing values and Nodex UI extensions are distinguished there.
-Gaegu regular/bold supplies headings, annotations and short UI text; Inter supplies
-paragraphs, editable values and dense tables. `font.ui`, `type.uiLabel` and
+Gaegu regular/bold supplies headings, annotations, short UI text, paragraphs,
+editable values and dense tables. `font.sans` uses Gaegu, with reading text enlarged
+by 2px for its smaller letterforms: body/form values are 16px and prose is 14.5px.
+Supporting text follows the same increase; heading/action/code sizes and spacing
+retain their prior values. Sketchbook embeds only Gaegu; commands use system
+monospace. `font.ui`, `type.uiLabel` and
 `type.choice` separate action/field/choice typography from dense labels and input
-metrics. `type.meterLabel` styles slider/progress labels while values stay sans-serif.
+metrics. `type.meterLabel` styles slider/progress labels independently of values.
 The shared `font.heading` role is consumed by Card, Dialog, Empty State
 and Prose headings. Font roles hold independent literal stacks, never root aliases.
 Existing languages retain their prior families and metrics. `texture.*` supplies
@@ -398,6 +402,12 @@ alone is incomplete: field, surface, interaction and inverse paints may be absen
 from the ramp. Keep those colors visible without requiring hover.
 UI swatches share one row and shrink to fit narrow screens; labels, values and
 usage remain available in the expandable list and to assistive technology.
+
+Gallery descriptions, summaries, supporting copy, notes, detail values and the
+landing tagline consume the corresponding `type.body.*Size` roles. These roles
+preserve the shell's previous sizes in the original languages and enlarge
+Sketchbook's reading text. Keep them scoped to copy so headings and commands do
+not grow with body text.
 
 The shell still consumes curated primitive CSS classes for its existing markup.
 `check:shell` checks those classes against `SHELL_PRIMITIVES` in RootLayout. Keep

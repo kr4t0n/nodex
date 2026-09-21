@@ -130,7 +130,7 @@ function TileCell<T>({
           {title}
         </h3>
         <p
-          className="m-0 self-start text-[10.5px] tracking-[0.06em] uppercase"
+          className="m-0 self-start text-[length:var(--nx-type-body-supportingSize)] tracking-[0.06em] uppercase"
           style={{ color: 'var(--nx-faint)' }}
         >
           {kind}
@@ -206,7 +206,7 @@ function LanguageTile({
             {language.name}
           </h2>
           <p
-            className="mt-2.5 mb-0 max-w-[58ch] text-[12px] leading-[1.7]"
+            className="mt-2.5 mb-0 max-w-[58ch] text-[length:var(--nx-type-body-summarySize)] leading-[1.7]"
             style={{ color: 'var(--nx-muted)' }}
           >
             {language.description}
@@ -256,7 +256,7 @@ function LanguageTile({
 
       {showing === 'primitives' ? (
         <p
-          className="mt-6 mb-0 text-[11.5px] leading-[1.7]"
+          className="mt-6 mb-0 text-[length:var(--nx-type-body-detailSize)] leading-[1.7]"
           style={{ color: 'var(--nx-muted)' }}
         >
           No charts yet. These are shared primitives wearing this language&apos;s

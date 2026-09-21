@@ -67,10 +67,12 @@ All use native Recharts geometry and inspection with seeded Rough.js decoration.
 | Force | `sketch-force` | Collision-positioned bubbles, area proportional to value |
 | Network | `sketch-network` | Area-scaled nodes with explicit undirected links |
 
-Gaegu supplies headings, chart annotations and short UI text: actions, navigation,
-field labels, choices, badges and disclosure summaries. Inter retains paragraphs,
-editable values and dense tables; commands remain monospace. Both fonts are embedded
-for offline delivery. Uneven corners, faint second outlines and small corner hatching
+Gaegu supplies headings, chart annotations, short UI text, paragraphs, editable
+values and dense tables; commands remain monospace. Its regular and bold faces
+are embedded for offline delivery. Reading text is enlarged by 2px: body text and
+form values use 16px, prose uses 14.5px, and gallery descriptions use 15px.
+Supporting copy follows the same increase. Headings, actions, code and spacing
+retain their existing values. Uneven corners, faint second outlines and small corner hatching
 on framed cards and primary actions extend the sketch treatment to the interface.
 Native hit targets, focus rings and keyboard behavior remain stable.
 
