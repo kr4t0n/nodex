@@ -6,7 +6,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef, useState, type ReactNode } from 'react';
 
-import { LandingTerminalSession, TerminalLanguages } from '@/components/LandingTerminalSession.tsx';
+import { LandingTerminalSession, TerminalLanguages, TerminalScrollback } from '@/components/LandingTerminalSession.tsx';
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
 import type { Language } from '@/lib/registry.ts';
 
@@ -28,35 +28,38 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
   const listCommand = useRef<HTMLSpanElement>(null);
   const firstCommand = useRef<HTMLSpanElement>(null);
   const nextCommand = useRef<HTMLSpanElement>(null);
+  const lastCommand = useRef<HTMLSpanElement>(null);
   const timeline = useRef<gsap.core.Timeline | null>(null);
   const pausedByUser = useRef(false);
   const [playback, setPlayback] = useState<'idle' | 'playing' | 'paused' | 'interactive'>('idle');
   const interactive = playback === 'interactive';
   const first = languages.find((language) => language.slug === 'signal-console');
   const second = languages.find((language) => language.slug === 'neo-brutalism');
+  const third = languages.find((language) => language.slug === 'sketchbook');
   const active = languages.find((language) => language.slug === activeLanguage);
-  const ready = status === 'ready' && first !== undefined && second !== undefined;
+  const ready = status === 'ready' && first !== undefined && second !== undefined && third !== undefined;
   const firstText = `nodex init ${first?.slug ?? 'signal-console'}`;
   // Switching an existing project's language requires this flag in the CLI.
   const nextText = `nodex init ${second?.slug ?? 'neo-brutalism'} --force`;
+  const lastText = `nodex init ${third?.slug ?? 'sketchbook'} --force`;
 
   useGSAP(() => {
     // The interactive session is a permanent handoff for this mounted page.
     // Revert the demo's timeline/listeners, and never recreate them on scroll,
     // theme changes or motion-preference changes.
     if (interactive) return;
-    if (!ready || !first || !second || !section.current || !transcript.current) return;
+    if (!ready || !first || !second || !third || !section.current || !transcript.current) return;
     const root = transcript.current;
     const cursors = root.querySelectorAll<HTMLElement>('[data-cli-cursor]');
     const outputs = root.querySelectorAll<HTMLElement>('[data-cli-output]');
-    const commands = [listCommand.current, firstCommand.current, nextCommand.current];
+    const commands = [listCommand.current, firstCommand.current, nextCommand.current, lastCommand.current];
     const commandRows = root.querySelectorAll<HTMLElement>('[data-cli-command]');
     pausedByUser.current = false;
 
     if (reduced) {
       gsap.set(cursors, { opacity: 0 });
       const finish = () => {
-        onLanguageChange(second.slug);
+        onLanguageChange(third.slug);
         setPlayback('interactive');
       };
       const trigger = ScrollTrigger.create({
@@ -70,6 +73,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
     }
 
     gsap.set(commands, { textContent: '' });
+    gsap.set(root, { scrollTop: 0 });
     gsap.set(outputs, { autoAlpha: 0 });
     gsap.set(commandRows, { autoAlpha: 0 });
     gsap.set(commandRows[0]!, { autoAlpha: 1 });
@@ -87,36 +91,48 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
       }
       return at + (text.length - from) * 0.055;
     };
+    const followCommand = (index: number) => {
+      // Scroll only the transcript, reserving room for this command's output.
+      // The page and the chart belt keep their position throughout the demo.
+      const bottom = outputs[index]!.getBoundingClientRect().bottom;
+      root.scrollTop += Math.max(0, bottom - root.getBoundingClientRect().bottom);
+    };
 
     let at = type(listCommand.current, 'nodex list', 0.35) + 0.3;
     tl.set(cursors[0]!, { opacity: 0 }, at)
       .to(outputs[0]!, { autoAlpha: 1, duration: 0.25 }, at);
     at += 1.2;
     tl.set(commandRows[1]!, { autoAlpha: 1 }, at)
-      .set(cursors[1]!, { opacity: 1 }, at);
+      .set(cursors[1]!, { opacity: 1 }, at)
+      .call(() => followCommand(1), [], at);
     at = type(firstCommand.current, firstText, at + 0.15) + 0.35;
     tl.set(cursors[1]!, { opacity: 0 }, at)
       .set(outputs[1]!, { autoAlpha: 1 }, at)
       .call(() => onLanguageChange(first.slug), [], at);
 
-    // Recall the previous command, then visibly backspace just its argument.
-    // The executed command above remains an honest terminal history entry.
-    at += 2.1;
-    tl.set(commandRows[2]!, { autoAlpha: 1 }, at)
-      .set(nextCommand.current, { textContent: firstText }, at)
-      .set(cursors[2]!, { opacity: 1 }, at)
-      .to(cursors[2]!, { opacity: 0, duration: 0.3, repeat: 1, yoyo: true, ease: 'steps(1)' }, at);
-    at += 0.8;
-    const prefixLength = 'nodex init '.length;
-    for (let length = firstText.length - 1; length >= prefixLength; length -= 1) {
-      tl.set(nextCommand.current, { textContent: firstText.slice(0, length) }, at);
-      at += 0.035;
+    // Recall and replace each previous command while keeping executed history.
+    for (const [index, node, previousText, text, language] of [
+      [2, nextCommand.current, firstText, nextText, second],
+      [3, lastCommand.current, nextText, lastText, third],
+    ] as const) {
+      at += 2.1;
+      tl.set(commandRows[index]!, { autoAlpha: 1 }, at)
+        .set(node, { textContent: previousText }, at)
+        .set(cursors[index]!, { opacity: 1 }, at)
+        .call(() => followCommand(index), [], at)
+        .to(cursors[index]!, { opacity: 0, duration: 0.3, repeat: 1, yoyo: true, ease: 'steps(1)' }, at);
+      at += 0.8;
+      const prefixLength = 'nodex init '.length;
+      for (let length = previousText.length - 1; length >= prefixLength; length -= 1) {
+        tl.set(node, { textContent: previousText.slice(0, length) }, at);
+        at += 0.035;
+      }
+      at = type(node, text, at + 0.2, prefixLength) + 0.35;
+      tl.set(cursors[index]!, { opacity: 0 }, at)
+        .set(outputs[index]!, { autoAlpha: 1 }, at)
+        .call(() => { followCommand(index); onLanguageChange(language.slug); }, [], at);
     }
-    at = type(nextCommand.current, nextText, at + 0.2, prefixLength) + 0.35;
-    tl.set(cursors[2]!, { opacity: 0 }, at)
-      .set(outputs[2]!, { autoAlpha: 1 }, at)
-      .call(() => onLanguageChange(second.slug), [], at)
-      .to({}, { duration: 0.8 });
+    tl.to({}, { duration: 0.8 });
 
     let visible = false;
     const pause = () => {
@@ -145,7 +161,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
       timeline.current = null;
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, { scope: section, dependencies: [interactive, ready, reduced, first, second, firstText, nextText, onLanguageChange], revertOnUpdate: true });
+  }, { scope: section, dependencies: [interactive, ready, reduced, first, second, third, firstText, nextText, lastText, onLanguageChange], revertOnUpdate: true });
 
   const control = playback === 'playing' ? 'Pause' : 'Play';
   const ControlIcon = playback === 'playing' ? Pause : Play;
@@ -183,16 +199,17 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
                 <ControlIcon size={14} aria-hidden />{control}
               </button>}
             </div>
-            {interactive && first && second ? <LandingTerminalSession
+            {interactive && first && second && third ? <LandingTerminalSession
               languages={languages}
               first={first}
               second={second}
+              third={third}
               onLanguageChange={onLanguageChange}
-            /> : <div className="relative min-h-72 p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:min-h-[348px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
+            /> : <div className="relative flex h-72 flex-col p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:h-[348px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
               {!ready && <p role="status" className="absolute inset-x-5 top-5 m-0 sm:inset-x-7 [@media(min-height:900px)]:top-7">
                 {status === 'error' || status === 'ready' ? 'The demo could not load. Try refreshing the page.' : 'Preparing the terminal…'}
               </p>}
-              <div ref={transcript} aria-hidden className={ready ? '' : 'invisible'}>
+              <TerminalScrollback ref={transcript} aria-hidden className={ready ? '' : 'invisible'}>
                 <div data-cli-command className="flex items-start gap-3">
                   <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={listCommand}>nodex list</span><Cursor /></div>
                 </div>
@@ -206,11 +223,15 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
                 <div data-cli-command className="flex items-start gap-3">
                   <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={nextCommand}>{nextText}</span><Cursor /></div>
                 </div>
-                <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {second?.name ?? 'Neo-brutalism'}</div>
-              </div>
+                <div data-cli-output className="mb-4 pl-[calc(1ch+0.75rem)] [@media(min-height:900px)]:mb-6">Initialised {second?.name ?? 'Neo-brutalism'}</div>
+                <div data-cli-command className="flex items-start gap-3">
+                  <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={lastCommand}>{lastText}</span><Cursor /></div>
+                </div>
+                <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {third?.name ?? 'Sketchbook'}</div>
+              </TerminalScrollback>
             </div>}
           </div>
-          <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism.</p>
+          <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism. Recall and edit it again to run {lastText} and switch to Sketchbook.</p>
           <p className="mt-3 mb-0 text-[13px]" role="status" aria-live="polite" aria-atomic="true">
             Page language: <span className="font-[number:var(--nx-font-weight-bold)]">{active?.name ?? 'Mono Editorial'}</span>
           </p>

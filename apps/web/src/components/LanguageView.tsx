@@ -8,6 +8,7 @@ import Link from 'next/link';
 
 import { CommandRow, EmptyState, Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
+import { TokenPanel, type LanguageTokens } from '@/components/TokenPanel.tsx';
 import { useLanguageTokens, usePrefersReducedMotion, useText } from '@/lib/hooks.ts';
 import {
   designUrl,
@@ -22,13 +23,6 @@ import {
 } from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP);
-
-interface Tokens {
-  color?: Record<string, string>;
-  ramp?: { steps?: string[] };
-  stroke?: { scale?: string[]; lineMax?: string };
-  type?: Record<string, { size?: string; weight?: number }>;
-}
 
 /** Fixed thumbnail height, so grid titles stay on a common baseline. */
 const THUMB_HEIGHT = 250;
@@ -68,8 +62,8 @@ export function LanguageView({ slug }: { slug: string }) {
 
   const expressive = expressiveFor(catalog, slug);
   const primitives = primitivesFor(catalog);
-  const tokens: Tokens | undefined = tokensRaw.text
-    ? (JSON.parse(tokensRaw.text) as Tokens)
+  const tokens: LanguageTokens | undefined = tokensRaw.text
+    ? (JSON.parse(tokensRaw.text) as LanguageTokens)
     : undefined;
 
   return (
@@ -78,7 +72,7 @@ export function LanguageView({ slug }: { slug: string }) {
       <PageShell>
         <section className="grid grid-cols-1 gap-10 pt-14 pb-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
           <div>
-            <h1 className="m-0 text-[34px] leading-[1.05] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
+            <h1 className="m-0 text-[34px] leading-[1.05] [font-family:var(--nx-font-heading)] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
               {language.name}
             </h1>
             <p
@@ -104,72 +98,6 @@ export function LanguageView({ slug }: { slug: string }) {
         {design.text ? <DesignDoc markdown={design.text} /> : null}
       </PageShell>
     </>
-  );
-}
-
-/** Values a reader can judge at a glance: palette, hairline scale, type scale. */
-function TokenPanel({ tokens }: { tokens: Tokens }) {
-  const ramp = tokens.ramp?.steps ?? [];
-  const strokes = tokens.stroke?.scale ?? [];
-
-  return (
-    <aside className="nx-card nx-card--plain gap-6 p-0">
-      <div>
-        <p className="nx-badge nx-badge--quiet m-0">Palette</p>
-        <div className="mt-2 flex flex-wrap gap-[3px]">
-          {ramp.map((hex) => (
-            <span
-              key={hex}
-              title={hex}
-              className="h-7 w-7 rounded-[3px]"
-              style={{
-                background: hex,
-                border: 'var(--nx-stroke-hairline) solid color-mix(in oklab, var(--nx-grid) 70%, transparent)',
-              }}
-            />
-          ))}
-        </div>
-        <p className="mt-2 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-          {ramp.length} palette colors. Semantic roles and usage are defined below.
-        </p>
-      </div>
-
-      <div>
-        <p className="nx-badge nx-badge--quiet m-0">Stroke scale</p>
-        <svg viewBox="0 0 300 46" className="mt-2 block w-full" aria-hidden>
-          {strokes.map((value, i) => {
-            const stroke = Number.parseFloat(value);
-            const x = 14 + i * (272 / Math.max(strokes.length - 1, 1));
-            return (
-              <g key={value}>
-                <line
-                  x1={x}
-                  y1={4}
-                  x2={x}
-                  y2={30}
-                  stroke="var(--nx-ink)"
-                  strokeWidth={stroke * 3}
-                />
-                <text
-                  x={x}
-                  y={42}
-                  fontSize={7}
-                  textAnchor="middle"
-                  fill="var(--nx-muted)"
-                  fontFamily="var(--nx-font-sans)"
-                >
-                  {value.replace('px', '')}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-        <p className="mt-1 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-          Drawn at 3x so sub-pixel widths are visible. Data marks never exceed the
-          line maximum.
-        </p>
-      </div>
-    </aside>
   );
 }
 

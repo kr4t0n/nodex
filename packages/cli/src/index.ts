@@ -297,10 +297,11 @@ async function cmdNewLanguage(slug: string, explicit?: string): Promise<void> {
       .map(([key, value]) => [key, value === colors.bg ? '#FFFFFF' : '#000000'])),
     ramp: { steps: ['#FFFFFF', '#000000'] },
     stroke: { hairline: '1px', mark: '1px', emphasis: '1.4px', lineMax: '1.4px' },
-    radius: { ...group(template.radius, 'radius'), card: '0px', pill: '0px' },
-    font: { sans: 'system-ui, sans-serif', mono: 'ui-monospace, monospace', weight: group(group(template.font, 'font').weight, 'font.weight') },
+    radius: { ...group(template.radius, 'radius'), card: '0px', pill: '0px', avatar: '0px' },
+    font: { sans: 'system-ui, sans-serif', heading: 'system-ui, sans-serif', ui: 'system-ui, sans-serif', mono: 'ui-monospace, monospace', weight: group(group(template.font, 'font').weight, 'font.weight') },
     space: { ...group(template.space, 'space'), cardPadding: '20px', gridGap: '20px', pagePadding: '32px' },
     shadow: group(template.shadow, 'shadow'),
+    texture: group(template.texture, 'texture'),
     type: {
       ...type,
       axis: { ...group(type.axis, 'type.axis'), size: '11px', weight: 400 },

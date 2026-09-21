@@ -1,0 +1,12 @@
+{
+  "slug": "sketchbook",
+  "name": "Sketchbook",
+  "description": "Handwritten UI, warm paper, thin ink and colored hatching. Nine roughViz-inspired charts pair sketch marks with precise native geometry.",
+  "visibility": "public",
+  "featured": [
+    "sketch-bars",
+    "sketch-line",
+    "sketch-donut",
+    "sketch-network"
+  ]
+}

@@ -11,12 +11,12 @@
   padding: var(--nx-space-badgePadding);
   border: var(--nx-stroke-hairline) solid transparent;
   border-radius: var(--nx-radius-pill);
-  font-family: var(--nx-font-sans);
-  font-size: var(--nx-type-label-size);
-  font-weight: var(--nx-type-label-weight);
-  letter-spacing: var(--nx-type-label-tracking);
+  font-family: var(--nx-font-ui);
+  font-size: var(--nx-type-uiLabel-size);
+  font-weight: var(--nx-type-uiLabel-weight);
+  letter-spacing: var(--nx-type-uiLabel-tracking);
   line-height: var(--nx-type-badge-lineHeight);
-  text-transform: uppercase;
+  text-transform: var(--nx-type-uiLabel-transform);
   white-space: nowrap;
   color: var(--nx-muted);
 }

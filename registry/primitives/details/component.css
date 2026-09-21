@@ -22,6 +22,7 @@
 }
 
 .nx-details__summary {
+  font-family: var(--nx-font-ui);
   display: flex;
   align-items: center;
   gap: var(--nx-space-disclosureGap);
@@ -76,10 +77,10 @@
 
 /* A short label sitting beside the summary text, for a count or a state. */
 .nx-details__meta {
-  font-size: var(--nx-type-label-size);
-  font-weight: var(--nx-type-label-weight);
-  letter-spacing: var(--nx-type-label-tracking);
-  text-transform: uppercase;
+  font-size: var(--nx-type-uiLabel-size);
+  font-weight: var(--nx-type-uiLabel-weight);
+  letter-spacing: var(--nx-type-uiLabel-tracking);
+  text-transform: var(--nx-type-uiLabel-transform);
   color: var(--nx-faint);
 }
 

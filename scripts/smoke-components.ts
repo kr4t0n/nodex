@@ -12,6 +12,9 @@ import type { Browser, Page } from '@playwright/test';
 
 import { renderedMarks, serveDirectory } from './lib/browser.ts';
 import { BAR_FAMILY_CONSUMER_SOURCE, BAR_FAMILY_PRIMARY_SELECTORS, checkBarFamilyConsumer } from './lib/bar-family-consumer.ts';
+import { SKETCHBOOK_CATALOGUE_SOURCE, checkSketchbookCatalogueConsumer } from './lib/sketchbook-catalogue-consumer.ts';
+import { SKETCHBOOK_CONSUMER_SOURCE, checkSketchbookConsumer } from './lib/sketchbook-consumer.ts';
+import { checkSketchbookBarOutlines } from './lib/sketchbook-outlines.ts';
 import { BLOCK_BARS_CONSUMER_SOURCE, checkBlockBarsConsumer } from './lib/block-bars-consumer.ts';
 import { NEO_CHARTS_CONSUMER_SOURCE, checkNeoChartsConsumer } from './lib/neo-charts-consumer.ts';
 import { NEO_EXTENDED_CONSUMER_SOURCE, checkNeoExtendedConsumer } from './lib/neo-extended-consumer.ts';
@@ -98,6 +101,7 @@ async function checkPreviews(browser: Browser): Promise<void> {
       }
     }
     console.log(`Validated ${manifest.items.length} built previews with JavaScript enabled and disabled.`);
+    await checkSketchbookBarOutlines(browser, server.origin);
   } finally {
     await server.close();
   }
@@ -115,6 +119,8 @@ import { PrimitiveConsumer } from './primitive-consumer';
 import { DualAreaConsumer } from './dual-area-consumer';
 import { PetalRoseConsumer } from './petal-rose-consumer';
 import { BarFamilyConsumer } from './bar-family-consumer';
+import { SketchbookConsumer } from './sketchbook-consumer';
+import { SketchbookCatalogueConsumer } from './sketchbook-catalogue-consumer';
 import { BlockBarsConsumer } from './block-bars-consumer';
 import { NeoChartsConsumer } from './neo-charts-consumer';
 import { NeoExtendedConsumer } from './neo-extended-consumer';
@@ -175,6 +181,7 @@ function Consumer() {
     <PetalRoseConsumer animate={animate} />
     <BarFamilyConsumer animate={animate} />
     <BlockBarsConsumer animate={animate} />
+    <SketchbookConsumer /><SketchbookCatalogueConsumer />
     <NeoChartsConsumer animate={animate} />
     <NeoExtendedConsumer animate={animate} />
     <SignalChartsConsumer animate={animate} />
@@ -221,7 +228,14 @@ async function consumerFixture(): Promise<string> {
     await writeFile(path.join(fixture, 'src/styles/signal-tokens.css'), signalTokens.replace(':root', '[data-signal]'));
     const neoTokens = await run(process.execPath, [cli, 'tokens', 'neo-brutalism'], fixture);
     await writeFile(path.join(fixture, 'src/styles/neo-tokens.css'), neoTokens.replace(':root', '[data-neo]'));
-    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@source "../";\n');
+    const sketchTokens = await run(process.execPath, [cli, 'tokens', 'sketchbook'], fixture);
+    await writeFile(path.join(fixture, 'src/styles/sketchbook-tokens.css'), sketchTokens.replace(':root', '[data-sketchbook]'));
+    assert.equal(installed.dependencies.roughjs, '4.6.6', 'CLI must install the exact sketch geometry dependency');
+    assert.equal(installed.dependencies['d3-force'], '3.0.0', 'CLI must install the exact force layout dependency');
+    assert.equal(installed.dependencies['@types/d3-force'], '3.0.10', 'Delivered force layout must include its TypeScript declarations');
+    await writeFile(path.join(fixture, 'src/sketchbook-consumer.tsx'), SKETCHBOOK_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/sketchbook-catalogue-consumer.tsx'), SKETCHBOOK_CATALOGUE_SOURCE);
+    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@source "../";\n');
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/primitive-consumer.tsx'), PRIMITIVE_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/dual-area-consumer.tsx'), DUAL_AREA_CONSUMER_SOURCE);
@@ -307,11 +321,11 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await page.goto(server.origin);
     await waitForCharts(page);
     const loadedFonts = await page.evaluate(async () => {
-      await Promise.all(['Inter', 'JetBrains Mono', 'Space Grotesk'].map((family) => document.fonts.load(`12px "${family}"`)));
+      await Promise.all(['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu'].map((family) => document.fonts.load(`12px "${family}"`)));
       await document.fonts.ready;
       return [...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replace(/["']/g, ''));
     });
-    assert(['Inter', 'JetBrains Mono', 'Space Grotesk'].every((family) => loadedFonts.includes(family)), 'All delivered design-language fonts must load without an external host');
+    assert(['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu'].every((family) => loadedFonts.includes(family)), 'All delivered design-language fonts must load without an external host');
     await checkPrimitiveConsumer(page);
     await expect(page.getByLabel('Find a route')).toBeVisible();
     await page.getByLabel('Find a route').fill('/catalog');
@@ -329,6 +343,8 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await checkPetalRoseConsumer(page);
     await checkBarFamilyConsumer(page);
     await checkBlockBarsConsumer(page);
+    await checkSketchbookConsumer(page);
+    await checkSketchbookCatalogueConsumer(page);
     await checkNeoChartsConsumer(page);
     await checkNeoExtendedConsumer(page);
     await checkSignalChartsConsumer(page);

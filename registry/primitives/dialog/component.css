@@ -37,6 +37,7 @@
 
 .nx-dialog__title {
   margin: 0;
+  font-family: var(--nx-font-heading, var(--nx-font-sans));
   font-size: var(--nx-type-cardTitle-size);
   font-weight: var(--nx-type-cardTitle-weight);
   letter-spacing: var(--nx-type-cardTitle-tracking);
@@ -73,7 +74,7 @@
   border-radius: var(--nx-radius-pill);
   background: transparent;
   color: var(--nx-ink);
-  font-family: var(--nx-font-sans);
+  font-family: var(--nx-font-ui);
   font-size: var(--nx-type-action-size);
   font-weight: var(--nx-type-action-weight);
   line-height: var(--nx-type-action-lineHeight);

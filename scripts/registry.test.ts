@@ -112,6 +112,13 @@ test('font metadata becomes licensed embedded assets, never invalid CSS declarat
   const face = fontFaces(tokens)[0]!;
   assert.throws(() => fontFaces({ font: { faces: [{ ...face, file: '../outside.woff2' }] } }), /Unsafe/);
   await assert.rejects(renderFontFaces({ font: { faces: [{ ...face, package: '@fontsource-variable/inter@0.0.0' }] } }, ROOT), /must be pinned/);
+  const sketchbook = JSON.parse(await readFile(path.join(ROOT, 'registry/languages/sketchbook/tokens.json'), 'utf8'));
+  const staticCss = await renderFontFaces(sketchbook, ROOT);
+  assert.match(staticCss, /font-family: "Gaegu";/);
+  for (const weight of [400, 700]) assert.match(staticCss, new RegExp(`font-weight: ${weight};`));
+  assert.match(staticCss, /SIL OPEN FONT LICENSE/);
+  assert.throws(() => fontFaces({ font: { faces: [{ ...face, package: '@other/inter@5.3.0' }] } }), /must come from/);
+  await assert.rejects(renderFontFaces({ font: { faces: [{ ...face, package: '@fontsource/gaegu@0.0.0' }] } }, ROOT), /must be pinned/);
 });
 
 test('rendered conformance resolves variables, inherited paint, gradients and scaled strokes', async () => {

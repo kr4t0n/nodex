@@ -40,9 +40,13 @@ The build generates tokens under `public/registry/languages/<slug>/`; never
 create generated styles or preview documents beside source.
 
 Declare downloadable fonts in a `font.faces` array. Each face names an exact
-`@fontsource-variable/<family>@<version>` package, package-relative WOFF2 file,
-CSS family, weight range and normal/italic style. Pin the same package in the
-repository's development dependencies. The build embeds the bytes and OFL
+`@fontsource-variable/<family>@<version>` or static `@fontsource/<family>@<version>`
+package, package-relative WOFF2 file, CSS family, weight or weight range and
+normal/italic style. Pin the same package in the
+repository's development dependencies. Declare each static weight separately.
+Use `font.heading` for headings, `font.ui` for short interface text, and `font.sans`
+for reading text and editable values. Give each an independent stack; root custom
+property aliases do not re-resolve descendant overrides. The build embeds the bytes and OFL
 license in generated tokens.css; CLI consumers need no additional font files or
 network host. Use existing languages as examples. Do not add `font.webfont` or
 emit asset metadata as custom properties.

@@ -37,9 +37,9 @@ export function useLandingLanguage(languages: readonly Language[]) {
       const fonts = new Set<string>();
       for (const language of languages) {
         probe.dataset.nxLandingLanguage = language.slug;
-        for (const role of ['sans', 'mono']) {
+        for (const role of ['sans', 'mono', 'heading', 'ui']) {
           probe.style.fontFamily = `var(--nx-font-${role})`;
-          fonts.add(`700 16px ${getComputedStyle(probe).fontFamily}`);
+          for (const weight of [400, 700]) fonts.add(`${weight} 16px ${getComputedStyle(probe).fontFamily}`);
         }
       }
       await Promise.all([...fonts].map((font) => document.fonts.load(font, 'nodex')));

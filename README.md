@@ -5,16 +5,16 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains **82 expressive charts** (64 Mono Editorial, nine Signal Console
-and nine Neo-brutalism) and **24 reusable primitives**, delivered as editable React source.
+The registry contains **91 expressive charts** (64 Mono Editorial, nine Signal Console,
+nine Neo-brutalism and nine Sketchbook) and **24 reusable primitives**, delivered as editable React source.
 This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
-Three design languages are available: Mono Editorial, Signal Console and
-**Neo-brutalism**. Neo-brutalism starts with all 24 shared primitives, a complete
+Four design languages are available: Mono Editorial, Signal Console,
+**Neo-brutalism** and **Sketchbook**. Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
 yellow actions, pink badges, mint selections, cream fields and blue value
@@ -48,6 +48,88 @@ previews; the language gallery contains all nine charts.
 The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex implements these through its own semantic tokens and React primitives.
+
+## Sketchbook
+
+Sketchbook is available at `/l/sketchbook`, with all 24 shared primitives and
+nine charts covering the [roughViz catalogue](https://www.jwilber.me/roughviz/).
+All use native Recharts geometry and inspection with seeded Rough.js decoration.
+
+| roughViz chart | Nodex component | Encoding |
+| --- | --- | --- |
+| Bar | `sketch-bars` | Vertical category bars from zero |
+| BarH | `sketch-bars-horizontal` | Horizontal category bars from zero |
+| StackedBar | `sketch-stacked-bars` | Absolute vertical stacks with complete totals |
+| Line | `sketch-line` | Multiple series on a numeric X axis |
+| Scatter | `sketch-scatter` | Equal-size marks on numeric X/Y axes |
+| Pie | `sketch-pie` | Exact sector shares of a complete total |
+| Donut | `sketch-donut` | Exact sector shares with a central total |
+| Force | `sketch-force` | Collision-positioned bubbles, area proportional to value |
+| Network | `sketch-network` | Area-scaled nodes with explicit undirected links |
+
+Gaegu supplies headings, chart annotations and short UI text: actions, navigation,
+field labels, choices, badges and disclosure summaries. Inter retains paragraphs,
+editable values and dense tables; commands remain monospace. Both fonts are embedded
+for offline delivery. Uneven corners, faint second outlines and small corner hatching
+on framed cards and primary actions extend the sketch treatment to the interface.
+Native hit targets, focus rings and keyboard behavior remain stable.
+
+The [design guide](registry/languages/sketchbook/DESIGN.md) defines the complete
+interface language. The [provenance record](registry/languages/sketchbook/PROVENANCE.md)
+pins the roughViz reference and separates extracted colors/drawing defaults from
+Nodex's surface, control, spacing and motion decisions.
+
+```bash
+nodex init sketchbook
+nodex add sketchbook/sketch-bars
+nodex add sketchbook/sketch-line sketchbook/sketch-network
+```
+
+`SketchBars` accepts caller-owned `{ id, label, value, tone? }` observations.
+IDs must be unique and nonempty; repeated labels are allowed. Values are
+nonnegative; null, negative and non-finite readings are unavailable. Zero keeps
+its label without a bar. Colors identify categories, and native bar height
+encodes magnitude. Hatching is clipped to those exact bounds; thin bar outlines
+render separately so scaled gallery previews retain all four edges. Category IDs seed
+the drawing, so reordering and interaction preserve each category's texture.
+Narrow containers scroll their plot locally. Tooltips support keyboard inspection.
+
+Horizontal bars, pie, donut, force and network accept the same observation shape.
+Stacks and lines accept `series: { id, label, tone? }[]` and observations with
+`values: Record<string, number | null>` keyed by series ID. Lines also require a
+finite, strictly increasing numeric `x`; signed Y values are supported and missing
+readings break each series independently. Scatter accepts `{ id, label, x, y, tone? }`
+and reports omitted coordinate pairs. An incomplete stack is unavailable as a whole;
+pie and donut require a complete, finite total before displaying shares.
+
+Force has no links. Network additionally requires
+`links: { id, source, target }[]` referencing node IDs, with no self-links or duplicate
+undirected pairs. Both use a stopped, deterministic `d3-force@3.0.0` solver on cloned
+data; node area encodes value relative to the current dataset. Zero and missing
+values retain text markers without implying positive area. Recharts owns rendering,
+keyboard inspection and finite transitions; the solver never runs an animation
+loop. The CLI installs the exact layout package and its TypeScript declarations.
+The language index features bars, line, donut and network; its gallery contains all nine.
+
+Override `--nx-sketch-roughness`, `--nx-sketch-axisRoughness`,
+`--nx-sketch-bowing`, `--nx-sketch-fillStyle`, `--nx-sketch-fillWeight`,
+`--nx-sketch-hachureAngle` and `--nx-sketch-hachureGap` in a chart scope to change
+the drawing. These numeric geometry tokens are unitless (gap and weight are
+interpreted as pixels); paint and rendered stroke widths remain CSS variables.
+Hachure, cross-hatch and solid fills are supported. Scope/style changes refresh
+geometry; CSSOM-only changes can dispatch `nodex:tokens-changed`. Invalid settings
+retain observations as plain token-painted marks. Drawing is finite and respects
+live reduced-motion changes.
+
+`font.heading` supplies Card, Dialog, Empty State and Prose headings. `font.ui`
+supplies short UI text, with `type.uiLabel` and `type.choice` sizing independent
+of dense labels and editable values. `texture.*` controls decorative outlines and
+corner hatching; set `texture.outlineOpacity` and `texture.hatchOpacity` to zero
+to remove them. Plain cards and quiet actions stay untextured. Other languages
+retain their existing fonts and have zero texture opacity. Override font roles
+separately from `font.sans` when changing a descendant scope's typography.
+Embedded font metadata accepts pinned static `@fontsource` and variable
+`@fontsource-variable` WOFF2 packages with their OFL notices.
 
 ## Signal Console charts
 
@@ -105,7 +187,8 @@ public directory automatically.
 The landing page folds its wordmark into the navbar, then demonstrates the CLI
 in a terminal above the chart belt, together in one scene with more generous
 spacing on taller screens. It types `nodex list`, runs `nodex init signal-console`,
-recalls the command and replaces the language with `neo-brutalism --force`. Each
+recalls the command and replaces the language with `neo-brutalism --force`, then
+recalls and edits it again to run `nodex init sketchbook --force`. Each
 completed command applies that language's actual tokens to the whole page and selects its
 charts for the belt. The demonstration plays once while visible, with pause and
 resume controls. Scrolling away preserves the selected language and pauses any
@@ -114,9 +197,16 @@ unfinished typing; returning resumes it.
 After that first run, the terminal becomes interactive. Run `nodex list` to see
 and select languages, or type `nodex init <language>` (with optional `--force`)
 to change the page and chart belt. Up/Down recalls commands, and history scrolls
-inside the terminal. Scrolling and motion-preference changes retain the session,
+inside the terminal. The demo follows its active command within the same fixed
+height; both modes use a thin, token-colored scrollbar with a transparent track
+and a reserved gutter. Scrolling and motion-preference changes retain the session,
 including unfinished input; the animation never replays during that page visit.
 Reduced motion opens the interactive terminal directly when the scene is reached.
+
+Thin native scrollbars follow the active language across pages, nested scroll
+areas, form controls and isolated previews. Tracks are transparent; thumbs use
+muted ink and strengthen on hover or focus. The app and preview build share
+`styles/scrollbars.css`; this website treatment is not copied into consumer components.
 
 The language overview shows up to four previews from each language's `featured`
 list in `registry/languages/<slug>/meta.json`, in the authored order. Its component
@@ -423,6 +513,12 @@ chart paint, text, strokes and motion refer to those properties. A scoped
 resolve the numeric values that the chart library needs and honor reduced motion.
 No parallel JavaScript palette or theme provider is required.
 
+The language gallery shows **Chart colors** and **UI colors** separately, including
+field, panel, action and selection paints. Swatches come from the language's
+canonical tokens; repeated values are grouped, and expandable role lists show
+every color variable, value and use. Chart colors retain the authored ramp order.
+UI swatches fit in one compact row, with labels and values in the expandable list.
+
 All 24 primitives consume language tokens for typography, spacing, radii and
 interaction timing as well as paint, fonts and strokes. Card and Dialog titles
 use `type.cardTitle`; Card padding uses `space.cardPadding`. These existing roles
@@ -483,6 +579,7 @@ apps/web/src/                      Next gallery and account routes
 apps/web/migrations/               SQL account migrations
 scripts/build-registry.ts          validation, bundling, browser preview rendering
 scripts/lib/                       delivery, tokens and browser build utilities
+styles/                            shared website and preview scrollbar styling
 skills/nodex/                      consumer skill
 .agents/skills/nodex-authoring/     repository authoring skill
 public/r/                          GENERATED manifests and per-item JSON
@@ -517,7 +614,7 @@ npm run smoke:landing
 | `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
 | `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
 | `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
-| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all three languages, native keyboard/form behavior, offset shadows, button presses and reduced motion |
+| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all four languages, stable sketch geometry, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
 | `check:shell` | Gallery primitive classes have their curated stylesheets |
 | `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |

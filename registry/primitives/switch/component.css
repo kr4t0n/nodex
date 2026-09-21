@@ -16,9 +16,10 @@
   display: inline-flex;
   align-items: center;
   gap: var(--nx-space-choiceGap);
-  font-family: var(--nx-font-sans);
-  font-size: var(--nx-type-control-size);
-  line-height: var(--nx-type-control-lineHeight);
+  font-family: var(--nx-font-ui);
+  font-size: var(--nx-type-choice-size);
+  font-weight: var(--nx-type-choice-weight);
+  line-height: var(--nx-type-choice-lineHeight);
   color: var(--nx-ink);
   cursor: pointer;
 }
