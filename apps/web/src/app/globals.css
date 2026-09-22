@@ -24,6 +24,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* The idle editor keeps the demo's block caret without taking keyboard focus. */
+@keyframes nx-terminal-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /*
   `.nx-rule`, `.nx-prose`, `.nx-code`, and `.nx-command` are NOT defined here.
   They are registry primitives, linked from each primitive's component.css under

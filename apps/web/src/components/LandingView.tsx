@@ -103,6 +103,7 @@ export function LandingView() {
 
       const markElement = mark.current;
       const rowElement = row.current;
+      const signInElement = signIn.current;
 
       /**
        * How far scene one is pushed before the bar is assembled. Shared by both
@@ -133,6 +134,13 @@ export function LandingView() {
       const markY = () => markTop() - NAV_TOP;
       const rowY = () =>
         markTop() + heroSize() * MARK_LEADING + HERO_ROW_GAP - NAV_TOP;
+      // Share a text baseline in the hero, then retain the action's original
+      // navbar center regardless of its language's padding and font metrics.
+      const barRowY = () => {
+        const rowBounds = rowElement.getBoundingClientRect();
+        const actionBounds = signInElement.getBoundingClientRect();
+        return rowBounds.top + rowBounds.height / 2 - actionBounds.top - actionBounds.height / 2;
+      };
 
       const toHero = () => {
         gsap.set(mark.current, { y: markY(), scale: heroScale() });
@@ -143,15 +151,16 @@ export function LandingView() {
       };
       const toBar = () => {
         gsap.set(mark.current, { y: 0, scale: 1 });
-        gsap.set(row.current, { y: 0 });
+        gsap.set(row.current, { y: barRowY() });
         gsap.set(signIn.current, { x: 0 });
         gsap.set(tagline.current, { x: NAV_FONT * MARK_LEFT_INSET, opacity: 0 });
         gsap.set(barBg.current, { opacity: 1 });
       };
 
-      // Font loading can change the wordmark's intrinsic width after mounting.
-      const markObserver = new ResizeObserver(() => ScrollTrigger.refresh());
-      markObserver.observe(markElement);
+      // Font loading changes both the wordmark width and the action's metrics.
+      const layoutObserver = new ResizeObserver(() => ScrollTrigger.refresh());
+      layoutObserver.observe(markElement);
+      layoutObserver.observe(signInElement);
 
       if (reduced) {
         // A jump cut rather than a scrub. The layout still has to change, or the
@@ -170,7 +179,7 @@ export function LandingView() {
             else toHero();
           },
         });
-        return () => markObserver.disconnect();
+        return () => layoutObserver.disconnect();
       }
 
       const tl = gsap.timeline({
@@ -193,7 +202,7 @@ export function LandingView() {
         { y: 0, scale: 1, ease: 'none' },
         0,
       )
-        .fromTo(row.current, { y: rowY }, { y: 0, ease: 'none' }, 0)
+        .fromTo(row.current, { y: rowY }, { y: barRowY, ease: 'none' }, 0)
         .fromTo(signIn.current, { x: signInX }, { x: 0, ease: 'none' }, 0)
         .fromTo(
           tagline.current,
@@ -214,7 +223,7 @@ export function LandingView() {
           0.55,
         );
 
-      return () => markObserver.disconnect();
+      return () => layoutObserver.disconnect();
     },
     { scope: root, dependencies: [reduced], revertOnUpdate: true },
   );
@@ -259,11 +268,11 @@ export function LandingView() {
           {/* Fixed height on purpose. Letting the tagline size this row would
               make the sign-in's resting position depend on whether the tagline
               wrapped to two lines, so the bar would sit differently at different
-              viewports. The tagline overflows the row instead, which is
-              invisible: nothing sits under it in the hero. */}
+              viewports. Their first text baselines align even when the tagline
+              wraps or the language gives the action different text metrics. */}
           <div
             ref={row}
-            className="absolute inset-x-6 flex h-8 items-center justify-between gap-8 lg:inset-x-10"
+            className="absolute inset-x-6 flex h-8 items-baseline justify-between gap-8 lg:inset-x-10"
             style={{ top: NAV_TOP - 3 }}
           >
             <p

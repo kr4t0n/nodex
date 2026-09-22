@@ -418,9 +418,11 @@ The landing is two scenes: the name, then the CLI and chart belt together. The
 terminal runs a finite typing sequence after the wordmark folds into the navbar:
 `nodex list`, then `nodex init signal-console`, then a recalled command whose
 language is backspaced and replaced with `neo-brutalism --force`, then another
-recall/edit to `nodex init sketchbook --force`. Mono Editorial is the initial
-language; Sketchbook is the fourth and final automatic design. Only completed
-commands switch the page, and all four commands carry into interactive history.
+edit of that same third prompt to `nodex init sketchbook --force`. Mono Editorial
+is the initial language; Sketchbook is the fourth and final automatic design. Only completed
+commands switch the page, and all four commands carry into keyboard recall.
+There are only three visible command rows. The third becomes the user editor
+with the completed Sketchbook command still present; it never appends a prompt.
 Its language list and chart counts come from the manifest. The selected language
 also determines the belt's expressive charts; never recolor another language's
 charts as a substitute.
@@ -437,13 +439,23 @@ There is no replay control. Reduced motion enters the interactive state directly
 when the scene is reached. Keep demo typing out of React's animation-frame render
 cycle and out of screen-reader live announcements.
 
-`LandingTerminalSession` owns the prompt, scrollback and command recall. Its parser
-only handles `nodex list` and `nodex init <manifest-language> [--force]`; it changes
+`LandingTerminalSession` owns the inline prompt, current output and command recall.
+Its parser only handles `nodex list` and `nodex init <manifest-language> [--force]`; it changes
 page tokens and never executes a shell. List output also offers language buttons.
-Retain the last 20 entries, preserve drafts across scrolling and theme changes,
-and scroll only the history container when commands append. The handoff must not
-steal focus or open a mobile keyboard. Keep the terminal's height stable so the
-history cannot push the chart belt down after every command.
+Retain the last 20 commands for Up/Down recall, preserve drafts across scrolling
+and theme changes, and replace the third prompt's output on submission. Executed
+commands remain in the editor for another edit; history never appends visible rows.
+The handoff must not steal focus or open a mobile keyboard.
+Clicking the terminal's header, transcript or padding focuses the final command
+at its end without moving the page. Exclude native controls and active text
+selections so language buttons, caret placement and transcript copying still work.
+A text mirror reserves the demo's exact wrapping for a native textarea and shows
+an idle block cursor; focus uses the native caret and selection. The idle cursor blinks only without
+reduced motion. Both modes use 16px text on narrow screens to avoid mobile input
+zoom. Keep the terminal's height and final command position stable at handoff so
+editing cannot push the chart belt down after every command.
+The fixed desktop body fits all three prompts and their initial outputs; narrow
+screens retain local scrolling as commands wrap.
 The animated transcript uses that same fixed height and scrolls only its own
 viewport to follow the current command. Both transcript and history share a thin
 native scrollbar, transparent track, token-colored thumb and stable gutter; the
@@ -469,7 +481,10 @@ The landing sign-in aligns to the scaled wordmark in the hero and returns to the
 page gutter in the navigation bar. Measure the wordmark's fractional intrinsic
 width instead of estimating it from its font size, and refresh after fonts load.
 Both motion paths must recompute alignment on resize; fit the wordmark inside
-the viewport gutters on small screens. The tagline aligns with the visible left
+the viewport gutters on small screens. The tagline and sign-in label share their
+first text baseline, including when the tagline wraps. The row's final transform
+keeps the action at its original navbar center; measure the action as well as the
+wordmark after fonts load or language metrics change. The tagline aligns with the visible left
 edge of Inter's leading n using its optical inset in em, tied to the wordmark's
 animated size; the text box alone includes the glyph's leading space.
 
