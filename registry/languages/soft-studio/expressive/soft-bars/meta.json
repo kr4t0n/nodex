@@ -1,0 +1,85 @@
+{
+  "slug": "soft-bars",
+  "title": "Time well spent",
+  "description": "Rounded category bars compare focused hours from one zero baseline.",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "SoftBars"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "studio-chart-frame.tsx",
+    "studio-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 420
+  },
+  "tags": [
+    "comparison",
+    "soft",
+    "studio",
+    "categorical"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SoftBarsDatum[]",
+      "required": true,
+      "description": "Caller-ordered { id, label, value, tone? } categories. IDs must be unique and nonempty; repeated labels are allowed. Values must be finite and nonnegative; invalid values and null are unavailable. Zero retains a label without a bar. Tone a–d selects a category color; otherwise identity selects it. More categories scroll locally."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label; defaults to Value (Total for SoftDonut)."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct values and tooltips; defaults to en-US numbers with at most two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and long keys scroll locally."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ]
+}

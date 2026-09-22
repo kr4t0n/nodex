@@ -5,16 +5,16 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains **91 expressive charts** (64 Mono Editorial, nine Signal Console,
-nine Neo-brutalism and nine Sketchbook) and **24 reusable primitives**, delivered as editable React source.
+The registry contains **100 expressive charts** (64 Mono Editorial, nine Signal Console,
+nine Neo-brutalism, nine Sketchbook and nine Soft Studio) and **24 reusable primitives**, delivered as editable React source.
 This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
-Four design languages are available: Mono Editorial, Signal Console,
-**Neo-brutalism** and **Sketchbook**. Neo-brutalism starts with all 24 shared primitives, a complete
+Five design languages are available: Mono Editorial, Signal Console,
+**Neo-brutalism**, **Sketchbook** and **Soft Studio**. Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
 yellow actions, pink badges, mint selections, cream fields and blue value
@@ -48,6 +48,72 @@ previews; the language gallery contains all nine charts.
 The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex implements these through its own semantic tokens and React primitives.
+
+## Soft Studio
+
+Soft Studio is available at `/l/soft-studio`, with all 24 shared primitives and
+nine expressive charts. Embedded Manrope, cool off-white pages, white surfaces,
+cobalt actions, tinted fields and contextual rounding create a calm product
+interface. Fields and badges stay flat; framed surfaces use subtle diffuse
+elevation. Body copy is 15px and editable values are 16px. The
+[design guide](registry/languages/soft-studio/DESIGN.md) covers the complete UI.
+
+| Chart | Type | Reading |
+| --- | --- | --- |
+| `soft-bars` | Bar | Rounded category bars with direct values and an exact zero baseline |
+| `soft-area` | Area | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps |
+| `soft-donut` | Donut | Exact shares of a complete total, a generous opening and a responsive key |
+| `soft-heatmap` | Heatmap | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
+| `soft-line` | Line | Independent monotone series on a numeric timeline, preserving each series' gaps |
+| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals |
+| `soft-scatter` | Scatter | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted |
+| `soft-dumbbell` | Dumbbell | Open and filled endpoints compare readings, including decreases, ties and missing partners |
+| `soft-gauge` | Gauge | Exact progress across a half-circle against an explicit positive target |
+
+```bash
+nodex init soft-studio
+nodex add soft-studio/soft-bars soft-studio/soft-area
+nodex add soft-studio/soft-donut soft-studio/soft-heatmap button card
+nodex add soft-studio/soft-line soft-studio/soft-stacked-bars
+nodex add soft-studio/soft-scatter soft-studio/soft-dumbbell soft-studio/soft-gauge
+```
+
+Bars and donut accept `{ id, label, value, tone? }` records. IDs must be unique
+and nonempty; repeated labels are allowed. Values are finite and nonnegative,
+with `null` or invalid readings unavailable. Explicit tones `a`–`d` or stable
+identity choose category colors. Zero never acquires a visible bar or sector.
+A missing part or overflowing total suppresses the entire donut allocation.
+
+Area observations also require a finite, strictly increasing numeric `x`. The
+headline always refers to the final supplied observation, even when missing.
+The heatmap takes explicit `{ id, label }` rows and columns, `{ rowId, columnId,
+value }` readings and a finite positive `maxValue`. Undeclared or duplicate
+pairs reject the dataset. Missing, negative and above-scale readings retain an
+inspectable cross; zero uses a dot. The categorical palette is never an intensity
+ramp.
+
+Lines and stacks accept ordered `series: { id, label, tone? }[]` and observations
+with `values` keyed by series ID. Lines also require strictly increasing numeric
+`x` and support signed readings; missing values break each curve independently.
+Stacks require nonnegative parts and complete finite totals. Scatter takes
+`{ id, label, x, y, tone? }`; dumbbell takes `{ id, label, before, after }` and
+preserves available endpoints when a partner is missing. Both support signed
+coordinates. The gauge requires `{ value, target }`, with a finite positive
+target and progress between zero and that target; invalid input is unavailable,
+never clamped. Zero and full progress keep their exact angles.
+The gauge measures its aspect ratio through Recharts and positions its reading
+inside the same SVG, keeping the arc and labels together as the container resizes.
+
+All nine charts support native keyboard inspection, scoped tokens and live
+reduced-motion changes. Their gallery specimens fit completely without scrollbars:
+logical dimensions include the full plot, key and padding before preview scaling.
+Dense caller data can still scroll locally in constrained consumer containers.
+
+The language index retains bars, area, donut and heatmap as its four curated
+previews; the gallery and selected landing belt discover all nine charts. The landing terminal lists Soft
+Studio and accepts `nodex init soft-studio`; its automatic sequence still ends
+with Sketchbook. Manrope's pinned Fontsource package and OFL notice are embedded
+in the delivered token stylesheet, so consumers need no font host or font package.
 
 ## Sketchbook
 
@@ -210,7 +276,8 @@ see selectable languages; Up/Down recalls the last 20 commands, including all
 four demo commands, without adding visible rows. The handoff does not take focus
 or open a mobile keyboard. The demo and editor share the same fixed height,
 wrapping and thin, token-colored scrollbar with a transparent track and reserved
-gutter. All three prompts fit on desktop; narrow screens scroll locally as commands
+gutter. The shared demo/editor body reserves another line for each language
+beyond the original four. All three prompts fit on desktop; narrow screens scroll locally as commands
 wrap. Scrolling and motion-preference changes retain the session and unfinished
 input; the animation never replays during that page visit. Reduced motion opens
 the editor directly when the scene is reached and keeps the idle cursor steady.
@@ -583,10 +650,11 @@ reserved loading boxes, while the build-time snapshots remain in the standalone
 documents. Neither the website nor downstream consumers gain server-rendered
 Recharts marks from these snapshots.
 
-Gallery previews give chart compositions and primitive examples the same 28px
-top and left inset. Charts scale within that frame using build-measured outer
-spacing; their internal layout and standalone preview proportions are preserved.
-Primitives continue to render at native size.
+Gallery chart surfaces align with the titles and type labels above them. Chart
+grids keep an 18px gap below type labels, including rows with wrapped titles.
+Previews remove the standalone page gutter using build-measured chart bounds, then scale
+the complete chart to fit. Internal padding, corner shapes and proportions are
+preserved. Primitives render at native size with a 28px surrounding inset.
 
 Within each language, charts are sorted alphabetically by chart type, then title.
 Search results and type filters retain this order.
@@ -652,7 +720,7 @@ npm run smoke:gallery
 | `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
 | `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
 | `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
-| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all four languages, stable sketch geometry, native keyboard/form behavior, offset shadows, button presses and reduced motion |
+| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all five languages, stable sketch geometry, Soft Studio geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
 | `check:shell` | Gallery primitive classes have their curated stylesheets |
 | `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |

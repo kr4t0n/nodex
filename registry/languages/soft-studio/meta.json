@@ -1,0 +1,12 @@
+{
+  "slug": "soft-studio",
+  "name": "Soft Studio",
+  "description": "Calm color, rounded geometry and comfortable typography for everyday product interfaces.",
+  "visibility": "public",
+  "featured": [
+    "soft-bars",
+    "soft-area",
+    "soft-donut",
+    "soft-heatmap"
+  ]
+}

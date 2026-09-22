@@ -284,6 +284,8 @@ try {
   assert.match(await cli(project, ['lint', ...neoCharts, '--design', 'neo-brutalism']), /0 errors/);
   const sketchCharts = charts.filter((item) => item.meta.language === 'sketchbook').map((item) => `${config.paths.components}/${item.name}`);
   assert.match(await cli(project, ['lint', ...sketchCharts, '--design', 'sketchbook']), /0 errors/);
+  const studioCharts = charts.filter((item) => item.meta.language === 'soft-studio').map((item) => `${config.paths.components}/${item.name}`);
+  assert.match(await cli(project, ['lint', ...studioCharts, '--design', 'soft-studio']), /0 errors/);
   checks += 7;
 
   // Custom destinations must be checked explicitly, including from subdirectories.

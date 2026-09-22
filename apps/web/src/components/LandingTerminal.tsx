@@ -6,7 +6,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef, useState, type MouseEvent, type ReactNode } from 'react';
 
-import { LandingTerminalSession, TerminalLanguages, TerminalScrollback } from '@/components/LandingTerminalSession.tsx';
+import { LandingTerminalSession, TerminalBody, TerminalLanguages, TerminalScrollback } from '@/components/LandingTerminalSession.tsx';
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
 import type { Language } from '@/lib/registry.ts';
 
@@ -219,7 +219,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
               second={second}
               third={third}
               onLanguageChange={onLanguageChange}
-            /> : <div className="relative flex h-72 flex-col p-5 text-[16px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:h-80 sm:px-7 sm:text-[14px] [@media(min-height:900px)]:h-[380px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
+            /> : <TerminalBody languageCount={languages.length}>
               {!ready && <p role="status" className="absolute inset-x-5 top-5 m-0 sm:inset-x-7 [@media(min-height:900px)]:top-7">
                 {status === 'error' || status === 'ready' ? 'The demo could not load. Try refreshing the page.' : 'Preparing the terminal…'}
               </p>}
@@ -239,7 +239,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
                 </div>
                 <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {second?.name ?? 'Neo-brutalism'}</div>
               </TerminalScrollback>
-            </div>}
+            </TerminalBody>}
           </div>
           <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism. Edit that same line to run {lastText} and switch to Sketchbook, then edit the command yourself.</p>
           <p className="mt-3 mb-0 text-[13px]" role="status" aria-live="polite" aria-atomic="true">

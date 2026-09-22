@@ -232,20 +232,20 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
           className="grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3"
         >
           {filtered.map((item) => (
-            // Same subgrid as the primitives above: a title that wraps to two
-            // lines must not push its preview out of line with its neighbours.
+            // Share header and preview rows. Keeping the header together avoids
+            // inflated gaps from three nested subgrid tracks and wide row spacing.
             <article
               key={item.name}
               data-grid-cell
-              className="grid min-w-0 grid-rows-subgrid row-span-3"
+              className="grid min-w-0 grid-rows-subgrid row-span-2"
               style={{ rowGap: 6 }}
             >
               {/* Title, then type, then the chart. The chart itself is only
                   the drawing, so everything that names it is printed here from
                   the manifest. */}
               <Link href={`/l/${language}/${item.name}`}
-                className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
-                style={{ color: 'inherit', rowGap: 6 }}
+                className="flex min-w-0 flex-col justify-between gap-1.5 no-underline"
+                style={{ color: 'inherit' }}
               >
                 <h2 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
                   {item.title}

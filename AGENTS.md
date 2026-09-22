@@ -36,6 +36,56 @@ chart descriptions, specimen dimensions, reconstruction history and runtime/buil
 procedures out of it. Component metadata, local source comments and this file's
 gotchas hold component-specific guidance; the authoring skill holds procedures.
 
+Soft Studio is the fifth language, with all 24 shared primitives and nine charts:
+`soft-bars`, `soft-area`, `soft-donut`, `soft-heatmap`, `soft-line`,
+`soft-stacked-bars`, `soft-scatter`, `soft-dumbbell` and `soft-gauge`.
+The original bars, area, donut and heatmap remain the four featured previews;
+the gallery and selected landing belt discover all nine.
+Manrope is embedded through pinned Fontsource metadata; code uses system monospace.
+Cool off-white pages, white surfaces, cobalt actions, tinted fields and contextual
+rounding define the UI. Its shadow roles use negative spread with scoped ink for
+subtle elevation, without changing shared primitive implementations. No texture
+is visible. Existing languages retain their values.
+
+Studio charts share presentation in `_shared/studio-chart-frame.tsx` and stable
+category-tone assignment in `studio-categorical.ts`. Language-specific paint
+references remain in the components. Bars use native bounds with CSS rounding,
+including scoped radius overrides; zero and unavailable values retain labels
+without marks. Area uses strictly increasing numeric X coordinates and native
+monotone interpolation; missing values break the curve and the final supplied
+reading owns the headline. Donut requires a complete finite total, preserves
+exact angles and keeps zero entries in its key. Heatmap declares both domains
+and a fixed positive ceiling; missing or invalid readings retain inspectable
+cells even when every cell is unavailable. Zero dots and missing crosses differ.
+Duplicate IDs/pairs and undeclared heatmap coordinates reject the input. Dense
+plots scroll locally and the donut key stacks below its plot in narrow scopes.
+Line uses independent native monotone curves on strictly increasing numeric X;
+signed values are supported and missing readings break only their own series.
+Horizontal stacks use native absolute bounds from a shared zero; any missing part
+or overflowing total leaves its row unavailable. Both accept explicit ordered
+series and preserve identity colors on reorder. Scatter uses equal-size circles
+on numeric axes, omitting and counting incomplete pairs. Dumbbell retains available
+signed endpoints, connects only complete pairs and shows ties as concentric open
+and filled circles. Gauge uses exact native 180-degree sectors against a finite,
+positive target; invalid or above-target values are unavailable, never clamped.
+Zero and full progress never acquire a decorative sliver.
+Gauge height comes from Recharts' numeric aspect ratio, rather than a percentage
+height that depends on a CSS aspect-ratio wrapper. Its percentage, reading and
+endpoints share the native SVG coordinate system with the sectors. Check visible
+arc bounds and centered, separated text after resizing and without a wrapper
+aspect ratio; a correctly sized card alone does not prove that the chart rendered.
+
+Gallery specimens must fit their complete content before the common preview
+transform scales them. The donut's 280px ring previously overflowed a 278px
+content area; its example now reserves 384px plus 56px of preview padding.
+Do not hide scrollbars or clip keys to compensate for undersized examples.
+Browser checks assert actual scroll extents and surface containment for all nine,
+including scaled desktop thumbnails and mobile thumbnails/detail pages.
+Consumer coverage includes all primitives in the new language and all nine
+charts' geometry, data updates, native inspection, scoped overrides and motion.
+The landing discovers Soft Studio in its list and interactive commands; the
+authored automatic sequence still finishes with Sketchbook.
+
 Sketchbook is the fourth language, with all 24 primitives and nine charts:
 `sketch-bars`, `sketch-bars-horizontal`, `sketch-stacked-bars`, `sketch-line`,
 `sketch-scatter`, `sketch-pie`, `sketch-donut`, `sketch-force` and `sketch-network`.
@@ -240,7 +290,7 @@ tokens and keeps neutral starter paint/system fonts; it must not maintain a seco
 hardcoded primitive-token list. The CLI smoke verifies the scaffold against all
 primitive CSS. Consumer smoke delivers all 24 primitives and tests descendant
 overrides, unaffected sibling scopes, retained form state, native keyboard/modal/
-picker behavior and reduced motion in all four languages.
+picker behavior and reduced motion in all five languages.
 
 Structural outlines use `color.border`, independently of quiet `color.grid`
 fills. Primary action fill, lettering, border and hover paint have `color.action*`
@@ -341,12 +391,19 @@ examples mount, not snapshot HTML injection.
 Charts scale from each example's logical width in thumbnails and detail pages;
 primitives render fluidly at native size.
 Preserve each specimen's original proportions and standalone preview padding.
-The build records chart content insets from the rendered root's bounds and
-padding. The gallery uses those manifest insets to frame chart compositions with
-the same unscaled 28px top/left gutter as primitive examples, fitting the content
-inside the remaining width/height. Keep internal axes, annotations and component
-geometry intact; do not remove chart padding in delivered source. Older manifests
-without measured insets retain their original framing. Gallery titles
+The build records preview insets outside the chart root's rendered bounds,
+excluding its internal padding. The gallery translates away that standalone page
+space and scales the complete root into the available width and height. Its outer
+edge aligns with the title and type label above; an extra gallery gutter would
+indent it again. Keep internal padding, axes, annotations and corner geometry
+intact; the preview wrapper must not clip chart corners to an unscaled radius.
+Primitives retain their native size and 28px preview inset. Browser checks compare
+actual chart and heading bounds across languages and desktop/mobile widths.
+Chart gallery cells share two subgrid rows: the title/type header and the preview.
+The header distributes its title and type label to keep both aligned when titles
+wrap. Three nested subgrid tracks allowed the 56px gap between cards to inflate
+the label-to-preview gap; the two-row structure keeps that gap at 18px.
+Older manifests without measured insets retain their original framing. Gallery titles
 are supplied by the gallery/caller; existing drawing annotations and console
 status chrome belong to their components. There is no chart data disclosure.
 
@@ -454,6 +511,11 @@ an idle block cursor; focus uses the native caret and selection. The idle cursor
 reduced motion. Both modes use 16px text on narrow screens to avoid mobile input
 zoom. Keep the terminal's height and final command position stable at handoff so
 editing cannot push the chart belt down after every command.
+`TerminalBody` supplies identical demo/editor dimensions and reserves an extra
+line per manifest language beyond the original four, keeping all three prompts
+visible after catalogue growth. Handoff checks capture the final demo geometry
+inside the browser when its theme applies; awaiting network-based assertions
+before measuring can race the demo's removal.
 The fixed desktop body fits all three prompts and their initial outputs; narrow
 screens retain local scrolling as commands wrap.
 The animated transcript uses that same fixed height and scrolls only its own
@@ -660,6 +722,9 @@ still cause the image job to skip successfully.
   even when unavailable. Null readings break both line and fill. Square points
   retain isolated and zero readings. Set Area stroke width through style because
   Recharts parses the numeric prop while computing its animation clip.
+  Pointer tests on a maximum target the lower interior of its square, within the
+  plot. Its center lies on the top plot boundary, where fractional screen rounding
+  can classify a centered pointer as outside the native inspection region.
 - Split Ring requires a complete, finite allocation before calculating shares.
   Zero values have key entries but no sectors; an all-zero allocation has no ring.
   Native Pie angles are exact, with no minimum angles or padding. Its shadow

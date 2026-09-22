@@ -60,7 +60,7 @@ export const nodexMetaSchema = z.object({
     path: relativePathSchema,
     width: z.number().positive(),
     height: z.number().positive(),
-    /** Measured space outside chart content; the gallery supplies its own inset. */
+    /** Measured space outside the chart root, excluding its internal padding. */
     insets: z.object({
       top: z.number().nonnegative(),
       right: z.number().nonnegative(),

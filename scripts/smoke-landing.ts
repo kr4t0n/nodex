@@ -7,6 +7,7 @@ import { chromium, expect, type Page } from '@playwright/test';
 import { startSite } from './lib/site.ts';
 
 let site: Awaited<ReturnType<typeof startSite>> | undefined;
+interface HandoffMeasurement { height: number; x: number; y: number; reused: boolean; prompts: number; visible: boolean }
 
 async function openTerminal(page: Page) {
   const section = page.locator('[data-landing-terminal]');
@@ -109,17 +110,35 @@ async function main() {
     assert.deepEqual(await page.locator('[data-cli-command]').allTextContents(), pausedText, 'Scrolling must preserve a paused transcript');
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await assertTheme(page, 'neo-brutalism');
-    const thirdPrompt = await page.locator('[data-cli-command]').last().elementHandle();
+    // Capture in the browser when the final theme applies. A network assertion
+    // can otherwise outlast the brief final frame and read a detached demo.
+    await page.locator('[data-cli-command]').last().evaluate(element => {
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.nxLanguage !== 'sketchbook') return;
+        const body = document.querySelector('[data-terminal-body]')!;
+        const bounds = element.querySelector('div')!.getBoundingClientRect();
+        const prompts = document.querySelectorAll('[data-cli-command]');
+        (window as typeof window & { terminalHandoff?: HandoffMeasurement }).terminalHandoff = {
+          height: body.getBoundingClientRect().height, x: bounds.x, y: bounds.y,
+          reused: element.isConnected && prompts[prompts.length - 1] === element,
+          prompts: prompts.length, visible: bounds.top >= 0 && bounds.bottom <= innerHeight,
+        };
+        observer.disconnect();
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-nx-language'] });
+    });
     await expect(page.locator('[data-nx-preview]').first()).toHaveAttribute('data-nx-preview', /^neo-brutalism\//);
     await expect(page.locator('[data-cli-command]').last()).toHaveText('$nodex init sketchbook --force', { timeout: 15_000 });
     // Measure after the command applies its theme: each language owns its
     // border widths and fonts. Only the later editor handoff must stay still.
     await assertTheme(page, 'sketchbook');
-    const demoHeight = (await page.locator('[data-terminal-state] > div').last().boundingBox())!.height;
-    const demoCommandBounds = (await page.locator('[data-cli-command]').last().locator('div').boundingBox())!;
-    assert(await thirdPrompt!.evaluate((element) => element.isConnected), 'Sketchbook must reuse the Neo-brutalism prompt');
-    await expect(page.locator('[data-cli-command]')).toHaveCount(3);
-    await expect(page.locator('[data-cli-command]').last()).toBeInViewport();
+    const measurement = await page.evaluate(() => (window as typeof window & { terminalHandoff?: HandoffMeasurement }).terminalHandoff);
+    assert(measurement, 'The final demo frame must be observed before handoff');
+    const demoHeight = measurement.height;
+    const demoCommandBounds = measurement;
+    assert(measurement.reused, 'Sketchbook must reuse the Neo-brutalism prompt');
+    assert.equal(measurement.prompts, 3, 'The demo must retain three prompts');
+    assert(measurement.visible, 'The final demo prompt must be visible');
     const command = page.getByRole('textbox', { name: 'Terminal command', exact: true });
     await expect(command).toBeEnabled();
     await expect(command).not.toBeFocused();
@@ -217,6 +236,11 @@ async function main() {
     await assertTheme(page, 'sketchbook');
     await expect.poll(() => page.locator('[data-nx-example]').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.closest('[data-nx-preview]')?.getAttribute('data-nx-preview')?.startsWith('sketchbook/'))), { timeout: 15_000 }).toBe(true);
     assert(await page.evaluate(() => [...document.fonts].some((face) => face.family.replace(/["']/g, '') === 'Gaegu' && face.status === 'loaded')), 'The heading face must preload before a language switch');
+    await command.fill('nodex init soft-studio');
+    await command.press('Enter');
+    await assertTheme(page, 'soft-studio');
+    await expect.poll(() => page.locator('[data-nx-example]').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.closest('[data-nx-preview]')?.getAttribute('data-nx-preview')?.startsWith('soft-studio/'))), { timeout: 15_000 }).toBe(true);
+    assert(await page.evaluate(() => [...document.fonts].some((face) => face.family.replace(/["']/g, '') === 'Manrope' && face.status === 'loaded')), 'Soft Studio typography must preload before switching');
     await expect(page.locator('[data-cli-command]')).toHaveCount(0);
     await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
     assert.deepEqual((await page.locator('[data-terminal-entry]').allTextContents()).slice(0, 2), completedText.slice(0, 2), 'Edits must preserve the first two command rows');
@@ -273,7 +297,7 @@ async function main() {
     await small.locator('[data-terminal-output]').getByRole('button', { name: 'Apply Neo-brutalism' }).click();
     await assertTheme(small, 'neo-brutalism');
     await assertFits(small);
-    for (const [language, name] of [['mono-editorial', 'Mono Editorial'], ['signal-console', 'Signal Console'], ['neo-brutalism', 'Neo-brutalism'], ['sketchbook', 'Sketchbook']]) {
+    for (const [language, name] of [['mono-editorial', 'Mono Editorial'], ['signal-console', 'Signal Console'], ['neo-brutalism', 'Neo-brutalism'], ['sketchbook', 'Sketchbook'], ['soft-studio', 'Soft Studio']]) {
       await small.goto(`/l/${language}/button`);
       await expect(small.getByRole('heading', { name: 'Button', exact: true })).toBeVisible();
       await small.evaluate(() => document.fonts.ready);

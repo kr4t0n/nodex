@@ -80,6 +80,7 @@ export function PrimitiveConsumer() {
     <div data-primitive-language="signal-console" data-signal className="grid grid-cols-2"><PrimitiveScope id="primitives-signal-console-original" /><PrimitiveScope id="primitives-signal-console-edited" /></div>
     <div data-primitive-language="neo-brutalism" data-neo className="grid grid-cols-2"><PrimitiveScope id="primitives-neo-brutalism-original" /><PrimitiveScope id="primitives-neo-brutalism-edited" /></div>
     <div data-primitive-language="sketchbook" data-sketchbook className="grid grid-cols-2"><PrimitiveScope id="primitives-sketchbook-original" /><PrimitiveScope id="primitives-sketchbook-edited" /></div>
+    <div data-primitive-language="soft-studio" data-studio className="grid grid-cols-2"><PrimitiveScope id="primitives-soft-studio-original" /><PrimitiveScope id="primitives-soft-studio-edited" /></div>
   </section>;
 }
 `;
@@ -406,7 +407,7 @@ async function checkNeoActions(page: Page): Promise<void> {
 export async function checkPrimitiveConsumer(page: Page): Promise<void> {
   await checkNeoActions(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism', 'sketchbook']) {
+  for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism', 'sketchbook', 'soft-studio']) {
     const original = page.locator(`#primitives-${language}-original`);
     const edited = page.locator(`#primitives-${language}-edited`);
     if (language === 'sketchbook') {
@@ -496,5 +497,5 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
       { selector: '.nx-tooltip', pseudo: '::after', property: 'transitionDuration', expected: '0s' },
     ]) assert.equal(await readStyle(edited, check), check.expected, `${language}: reduced motion must override duration tokens`);
   }
-  console.log('Validated all 24 CLI-delivered primitives in all four languages: scoped paint/type/UI fonts/texture/spacing/radius/shadows/motion, Sketchbook typography and stable targets, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.');
+  console.log('Validated all 24 CLI-delivered primitives in all five languages: scoped paint/type/UI fonts/texture/spacing/radius/shadows/motion, Sketchbook typography and stable targets, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.');
 }
