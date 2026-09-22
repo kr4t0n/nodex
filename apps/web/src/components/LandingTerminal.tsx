@@ -4,7 +4,7 @@ import { useGSAP } from '@gsap/react';
 import { Pause, Play, TerminalWindow } from '@phosphor-icons/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useRef, useState, type ReactNode } from 'react';
+import { useRef, useState, type MouseEvent, type ReactNode } from 'react';
 
 import { LandingTerminalSession, TerminalLanguages, TerminalScrollback } from '@/components/LandingTerminalSession.tsx';
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
@@ -28,7 +28,6 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
   const listCommand = useRef<HTMLSpanElement>(null);
   const firstCommand = useRef<HTMLSpanElement>(null);
   const nextCommand = useRef<HTMLSpanElement>(null);
-  const lastCommand = useRef<HTMLSpanElement>(null);
   const timeline = useRef<gsap.core.Timeline | null>(null);
   const pausedByUser = useRef(false);
   const [playback, setPlayback] = useState<'idle' | 'playing' | 'paused' | 'interactive'>('idle');
@@ -52,7 +51,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
     const root = transcript.current;
     const cursors = root.querySelectorAll<HTMLElement>('[data-cli-cursor]');
     const outputs = root.querySelectorAll<HTMLElement>('[data-cli-output]');
-    const commands = [listCommand.current, firstCommand.current, nextCommand.current, lastCommand.current];
+    const commands = [listCommand.current, firstCommand.current, nextCommand.current];
     const commandRows = root.querySelectorAll<HTMLElement>('[data-cli-command]');
     pausedByUser.current = false;
 
@@ -110,27 +109,28 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
       .set(outputs[1]!, { autoAlpha: 1 }, at)
       .call(() => onLanguageChange(first.slug), [], at);
 
-    // Recall and replace each previous command while keeping executed history.
-    for (const [index, node, previousText, text, language] of [
-      [2, nextCommand.current, firstText, nextText, second],
-      [3, lastCommand.current, nextText, lastText, third],
+    // The third prompt stays in place for both language replacements and the
+    // user's edit. Updating its output must not append another command row.
+    for (const [previousText, text, language] of [
+      [firstText, nextText, second],
+      [nextText, lastText, third],
     ] as const) {
       at += 2.1;
-      tl.set(commandRows[index]!, { autoAlpha: 1 }, at)
-        .set(node, { textContent: previousText }, at)
-        .set(cursors[index]!, { opacity: 1 }, at)
-        .call(() => followCommand(index), [], at)
-        .to(cursors[index]!, { opacity: 0, duration: 0.3, repeat: 1, yoyo: true, ease: 'steps(1)' }, at);
+      tl.set(commandRows[2]!, { autoAlpha: 1 }, at)
+        .set(nextCommand.current, { textContent: previousText }, at)
+        .set(cursors[2]!, { opacity: 1 }, at)
+        .call(() => followCommand(2), [], at)
+        .to(cursors[2]!, { opacity: 0, duration: 0.3, repeat: 1, yoyo: true, ease: 'steps(1)' }, at);
       at += 0.8;
       const prefixLength = 'nodex init '.length;
       for (let length = previousText.length - 1; length >= prefixLength; length -= 1) {
-        tl.set(node, { textContent: previousText.slice(0, length) }, at);
+        tl.set(nextCommand.current, { textContent: previousText.slice(0, length) }, at);
         at += 0.035;
       }
-      at = type(node, text, at + 0.2, prefixLength) + 0.35;
-      tl.set(cursors[index]!, { opacity: 0 }, at)
-        .set(outputs[index]!, { autoAlpha: 1 }, at)
-        .call(() => { followCommand(index); onLanguageChange(language.slug); }, [], at);
+      at = type(nextCommand.current, text, at + 0.2, prefixLength) + 0.35;
+      tl.set(cursors[2]!, { opacity: 0 }, at)
+        .set(outputs[2]!, { autoAlpha: 1, textContent: `Initialised ${language.name}` }, at)
+        .call(() => { followCommand(2); onLanguageChange(language.slug); }, [], at);
     }
     tl.to({}, { duration: 0.8 });
 
@@ -181,6 +181,19 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
     }
   }
 
+  function activateEditor(event: MouseEvent<HTMLDivElement>) {
+    if (event.defaultPrevented || event.button !== 0) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest('button, a, input, textarea, select, [contenteditable="true"]')) return;
+    // A drag through the transcript still selects text for copying. Direct
+    // editor clicks and language buttons keep their native behavior above.
+    if (window.getSelection()?.isCollapsed === false) return;
+    const editor = event.currentTarget.querySelector('textarea');
+    if (!editor) return;
+    editor.focus({ preventScroll: true });
+    editor.setSelectionRange(editor.value.length, editor.value.length);
+  }
+
   return (
     <section ref={section} aria-labelledby="landing-cli-title" data-landing-terminal
       className="relative -mt-[16dvh] flex min-h-[100dvh] flex-col justify-center gap-[clamp(2rem,6dvh,6rem)] pt-20 pb-4">
@@ -189,7 +202,8 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
           <h2 id="landing-cli-title" className="m-0 mb-4 text-[24px] leading-[1.15] font-[number:var(--nx-type-pageTitle-weight)] tracking-[var(--nx-type-pageTitle-tracking)] sm:text-[30px] [@media(min-height:900px)]:mb-6">
             One command changes the whole page.
           </h2>
-          <div className="nx-card overflow-hidden p-0" data-terminal-state={playback} data-terminal-ready={ready}>
+          <div className={`nx-card overflow-hidden p-0 ${interactive ? 'cursor-text' : ''}`} data-terminal-state={playback} data-terminal-ready={ready}
+            onClick={interactive ? activateEditor : undefined}>
             <div className="flex min-h-12 items-center justify-between gap-4 border-b-[length:var(--nx-stroke-hairline)] border-[var(--nx-border)] px-5 sm:px-7 [@media(min-height:900px)]:min-h-14">
               <div className="flex min-w-0 items-center gap-3 text-[12px] [font-family:var(--nx-font-mono)]">
                 <TerminalWindow size={18} className="shrink-0" aria-hidden />
@@ -205,7 +219,7 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
               second={second}
               third={third}
               onLanguageChange={onLanguageChange}
-            /> : <div className="relative flex h-72 flex-col p-5 text-[13px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:h-[348px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
+            /> : <div className="relative flex h-72 flex-col p-5 text-[16px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:h-80 sm:px-7 sm:text-[14px] [@media(min-height:900px)]:h-[380px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
               {!ready && <p role="status" className="absolute inset-x-5 top-5 m-0 sm:inset-x-7 [@media(min-height:900px)]:top-7">
                 {status === 'error' || status === 'ready' ? 'The demo could not load. Try refreshing the page.' : 'Preparing the terminal…'}
               </p>}
@@ -223,15 +237,11 @@ export function LandingTerminal({ languages, activeLanguage, status, onLanguageC
                 <div data-cli-command className="flex items-start gap-3">
                   <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={nextCommand}>{nextText}</span><Cursor /></div>
                 </div>
-                <div data-cli-output className="mb-4 pl-[calc(1ch+0.75rem)] [@media(min-height:900px)]:mb-6">Initialised {second?.name ?? 'Neo-brutalism'}</div>
-                <div data-cli-command className="flex items-start gap-3">
-                  <span>$</span><div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]"><span ref={lastCommand}>{lastText}</span><Cursor /></div>
-                </div>
-                <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {third?.name ?? 'Sketchbook'}</div>
+                <div data-cli-output className="pl-[calc(1ch+0.75rem)]">Initialised {second?.name ?? 'Neo-brutalism'}</div>
               </TerminalScrollback>
             </div>}
           </div>
-          <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism. Recall and edit it again to run {lastText} and switch to Sketchbook.</p>
+          <p className="sr-only">CLI example: run nodex list to discover design languages. Run {firstText} to initialise Signal Console. Recall that command, delete its language name, then run {nextText} to switch to Neo-brutalism. Edit that same line to run {lastText} and switch to Sketchbook, then edit the command yourself.</p>
           <p className="mt-3 mb-0 text-[13px]" role="status" aria-live="polite" aria-atomic="true">
             Page language: <span className="font-[number:var(--nx-font-weight-bold)]">{active?.name ?? 'Mono Editorial'}</span>
           </p>
