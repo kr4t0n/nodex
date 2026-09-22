@@ -248,16 +248,15 @@ async function main() {
             const body = getComputedStyle(document.body);
             const height = Math.ceil(root.getBoundingClientRect().height + Number.parseFloat(body.paddingTop) + Number.parseFloat(body.paddingBottom));
             // Keep the standalone document and chart geometry intact. The
-            // gallery can frame the content using these measured outer spaces
-            // instead of shrinking page and card padding into its thumbnails.
+            // gallery removes only the surrounding page space so the chart's
+            // outer edge aligns with its title. Card padding stays inside it.
             const chart = root.querySelector<HTMLElement>(':scope > [data-nx-chart]');
             const bounds = chart?.getBoundingClientRect();
-            const style = chart && getComputedStyle(chart);
-            const insets = bounds && style ? {
-              top: bounds.top + Number.parseFloat(style.paddingTop),
-              right: window.innerWidth - bounds.right + Number.parseFloat(style.paddingRight),
-              bottom: height - bounds.bottom + Number.parseFloat(style.paddingBottom),
-              left: bounds.left + Number.parseFloat(style.paddingLeft),
+            const insets = bounds ? {
+              top: bounds.top,
+              right: window.innerWidth - bounds.right,
+              bottom: height - bounds.bottom,
+              left: bounds.left,
             } : undefined;
             return { html: clone.innerHTML, height, insets };
           });

@@ -6,11 +6,26 @@ import { chromium, expect, type Locator, type Page } from '@playwright/test';
 import type { GalleryRegistry } from '../packages/core/src/schema.ts';
 import { nativePreviewFixture } from './lib/native-preview-fixture.ts';
 import { startSite } from './lib/site.ts';
+import { checkStudioPreviewFit } from './lib/studio-preview-fit.ts';
 
 const languagePath = '/l/mono-editorial';
 const preview = (page: Page, key: string) => page.locator(`[data-nx-preview="${key}"]`);
 const started = (page: Page) => page.locator('[data-nx-preview]:not([data-nx-preview-state="waiting"])');
 const waitForReady = (element: Locator) => expect(element.first()).toHaveAttribute('data-nx-preview-state', 'ready', { timeout: 20_000 });
+
+/** Check the visible chart surface, not just its already-aligned preview wrapper. */
+async function checkChartAlignment(example: Locator, heading: Locator) {
+  const title = await heading.boundingBox();
+  assert(title, 'The chart heading must have measurable bounds');
+  await expect.poll(() => example.evaluate((frame, titleLeft) => {
+    const chart = frame.querySelector('[data-nx-chart]')?.getBoundingClientRect();
+    const viewport = frame.getBoundingClientRect();
+    return chart !== undefined && chart.width > 0 && chart.height > 0
+      && Math.abs(chart.left - titleLeft) < 1
+      && Math.abs(chart.top - viewport.top) < 1
+      && chart.right <= viewport.right + 1 && chart.bottom <= viewport.bottom + 1;
+  }, title.x), { message: `${await example.getAttribute('data-nx-preview')}: align the whole chart with its heading and fit both axes` }).toBe(true);
+}
 
 /** Hold example modules while allowing the shell and route prefetches through. */
 async function blockExamples(page: Page) {
@@ -172,6 +187,8 @@ async function main() {
           const dimensions = await example.locator('[data-nx-example]').evaluate((element) => ({ width: (element as HTMLElement).offsetWidth, height: (element as HTMLElement).offsetHeight }));
           assert.equal(dimensions.width, item.meta.preview.width, `${item.name}: preserve the logical composition width`);
           assert(Math.abs(dimensions.height - item.meta.preview.height) <= 2, `${item.name}: expected height ${item.meta.preview.height}, received ${dimensions.height}`);
+          await checkChartAlignment(example, example.locator('xpath=ancestor::article').locator('h2'));
+          if (language === 'soft-studio') await checkStudioPreviewFit(example.locator('[data-nx-chart]'));
         }
       }
       await expect(all.locator('iframe')).toHaveCount(0);
@@ -181,8 +198,36 @@ async function main() {
       });
       assert.deepEqual(duplicateIds, [], `${language}: independent instances must not share document IDs`);
     }
+    // Resize mounted detail previews through narrow, tablet and native sizes.
+    for (const key of ['mono-editorial/hairline-line', 'signal-console/endpoint-latency', 'neo-brutalism/block-bars', 'sketchbook/sketch-bars', 'soft-studio/soft-area']) {
+      await all.goto(`/l/${key}`);
+      const example = preview(all, key);
+      await waitForReady(example);
+      for (const width of [320, 768, 1365]) {
+        await all.setViewportSize({ width, height: 900 });
+        await checkChartAlignment(example, all.locator('h1'));
+        assert(await all.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${key}: resized details must fit the page`);
+      }
+    }
     await all.setViewportSize({ width: 320, height: 740 });
-    for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism', 'sketchbook']) {
+    await all.goto('/l/soft-studio');
+    const studioCharts = catalog.items.filter(item => item.meta.language === 'soft-studio');
+    assert.equal(studioCharts.length, 9, 'Soft Studio must expose nine charts');
+    for (const item of studioCharts) {
+      const example = preview(all, `soft-studio/${item.name}`);
+      await example.scrollIntoViewIfNeeded(); await waitForReady(example);
+      await checkChartAlignment(example, example.locator('xpath=ancestor::article').locator('h2'));
+      await checkStudioPreviewFit(example.locator('[data-nx-chart]'));
+    }
+    assert(await all.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Soft Studio thumbnails must fit on mobile');
+    for (const item of studioCharts) {
+      await all.goto(`/l/soft-studio/${item.name}`);
+      const example = preview(all, `soft-studio/${item.name}`);
+      await waitForReady(example); await checkStudioPreviewFit(example.locator('[data-nx-chart]'));
+      await checkChartAlignment(example, all.locator('h1'));
+      assert(await all.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${item.name}: detail must fit on mobile`);
+    }
+    for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism', 'sketchbook', 'soft-studio']) {
       for (const name of ['dialog', 'input', 'textarea']) {
         await all.goto(`/l/${language}/${name}`);
         await waitForReady(preview(all, `shared/${name}`));
@@ -191,7 +236,7 @@ async function main() {
       }
     }
     await all.close();
-    console.log('Gallery: all chart and primitive examples, logical dimensions, unique IDs and mobile controls');
+    console.log('Gallery: all examples, chart/title alignment, logical dimensions, responsive fit, unique IDs and mobile controls');
 
     const fixture = await nativePreviewFixture(origin);
     const scoped = await newPage();

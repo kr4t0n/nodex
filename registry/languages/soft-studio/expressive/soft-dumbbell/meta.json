@@ -1,0 +1,94 @@
+{
+  "slug": "soft-dumbbell",
+  "title": "Room to grow",
+  "description": "Open and filled endpoints compare two readings, including decreases, ties and incomplete pairs.",
+  "component": "dumbbell",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "SoftDumbbell"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "studio-chart-frame.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 420
+  },
+  "tags": [
+    "comparison",
+    "soft",
+    "studio",
+    "change"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SoftDumbbellDatum[]",
+      "required": true,
+      "description": "Unique nonempty IDs, labels and signed before/after readings. Null and non-finite endpoints have no mark; available partners remain. A rail requires both endpoints. Ties show concentric circles; fully missing pairs keep a dash and inspection."
+    },
+    {
+      "name": "beforeLabel",
+      "type": "string",
+      "description": "Label for the small open endpoint; defaults to Before."
+    },
+    {
+      "name": "afterLabel",
+      "type": "string",
+      "description": "Label for the larger filled endpoint; defaults to After."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label; defaults to Value (Units for SoftGauge)."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats readings and tooltips; defaults to en-US numbers with at most two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense categorical plots scroll locally when the supplied size cannot hold their data."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ]
+}

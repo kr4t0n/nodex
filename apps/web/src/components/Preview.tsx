@@ -7,8 +7,8 @@ import { usePreviewStartup } from '@/lib/preview-startup.ts';
 import type { Item } from '@/lib/registry.ts';
 
 const FALLBACK_WIDTH = 660;
-/** The common, unscaled gallery gutter around each specimen. */
-const PREVIEW_INSET = 28;
+/** Primitives render at native size with room around their controls. */
+const PRIMITIVE_INSET = 28;
 
 interface PreviewProps {
   item: Item;
@@ -83,7 +83,7 @@ function LiveExample({ Example, fluid, style, onMeasure, onReady }: {
       ref={ref}
       data-nx-example
       className="min-w-0 bg-[var(--nx-bg)] text-left text-base leading-normal font-normal tracking-normal text-[var(--nx-ink)] normal-case not-italic [font-family:var(--nx-font-sans)] antialiased"
-      style={{ ...style, padding: fluid ? PREVIEW_INSET : 'var(--nx-space-pagePadding)' }}
+      style={{ ...style, padding: fluid ? PRIMITIVE_INSET : 'var(--nx-space-pagePadding)' }}
       // Specimen links have no destination. They previously targeted only their
       // own document and must not jump the enclosing gallery back to the top.
       onClick={(event) => {
@@ -150,12 +150,12 @@ export function Preview({ item, language, className, boxHeight }: PreviewProps) 
     insets.left + insets.right < logicalWidth && insets.top + insets.bottom < logicalHeight;
   const contentWidth = framed ? logicalWidth - insets.left - insets.right : logicalWidth;
   const framedHeight = framed ? logicalHeight - insets.top - insets.bottom : logicalHeight;
-  const inset = framed ? PREVIEW_INSET : 0;
-  // Preserve the specimen's original geometry, fitting both axes of grid boxes.
+  // Fit the complete chart root, including its own padding, to both axes.
+  // Standalone page space is translated away, aligning the surface with its title.
   const scale = fluid ? 1 : width === 0 ? 0 : Math.min(
     1,
-    Math.max(0, width - inset * 2) / contentWidth,
-    boxHeight ? Math.max(0, boxHeight - inset * 2) / framedHeight : Infinity,
+    width / contentWidth,
+    boxHeight ? boxHeight / framedHeight : Infinity,
   );
 
   return (
@@ -168,10 +168,10 @@ export function Preview({ item, language, className, boxHeight }: PreviewProps) 
         data-nx-scope={language}
         role="group"
         aria-label={item.title}
-        className="nx-frame relative w-full overflow-hidden rounded-[var(--nx-radius-card)] [container-type:inline-size]"
-        style={{ background: 'var(--nx-bg)', maxWidth: fluid ? undefined : contentWidth + inset * 2 }}
+        className={`nx-frame relative w-full overflow-hidden [container-type:inline-size] ${fluid ? 'rounded-[var(--nx-radius-card)]' : ''}`}
+        style={{ background: 'var(--nx-bg)', maxWidth: fluid ? undefined : contentWidth }}
       >
-        <div ref={boxRef} style={{ height: boxHeight ?? (fluid ? logicalHeight : framedHeight * scale + inset * 2) }}>
+        <div ref={boxRef} style={{ height: boxHeight ?? (fluid ? logicalHeight : framedHeight * scale) }}>
           {started && (fluid || scale > 0) ? (
             <PreviewBoundary key={request} onError={onError}>
               <Suspense fallback={null}>
@@ -182,7 +182,7 @@ export function Preview({ item, language, className, boxHeight }: PreviewProps) 
                   onReady={onReady}
                   style={fluid ? { width: '100%' } : {
                     width: logicalWidth,
-                    transform: `translate(${inset - (framed ? insets.left * scale : 0)}px, ${inset - (framed ? insets.top * scale : 0)}px) scale(${scale})`,
+                    transform: `translate(${framed ? -insets.left * scale : 0}px, ${framed ? -insets.top * scale : 0}px) scale(${scale})`,
                     transformOrigin: 'top left',
                   }}
                 />

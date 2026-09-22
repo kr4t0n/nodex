@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, type ComponentProps, type FormEvent, type KeyboardEvent } from 'react';
+import { useLayoutEffect, useRef, useState, type ComponentProps, type CSSProperties, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 
 import type { Language } from '@/lib/registry.ts';
 
@@ -104,7 +104,7 @@ export function LandingTerminalSession({ languages, first, second, third, onLang
   }
 
   return (
-    <div className="flex h-72 flex-col p-5 text-[16px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:h-80 sm:px-7 sm:text-[14px] [@media(min-height:900px)]:h-[380px] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
+    <TerminalBody languageCount={languages.length}>
       <TerminalScrollback ref={scrollback} role="region" aria-label="Terminal history" tabIndex={0}>
         <div data-terminal-entry className="flex items-start gap-3">
           <span aria-hidden>$</span><span>nodex list</span>
@@ -138,8 +138,17 @@ export function LandingTerminalSession({ languages, first, second, third, onLang
       </TerminalScrollback>
       <p id="landing-terminal-hint" className="sr-only">Edit the language in this command and press Enter to apply it. Up and Down recall previous commands. Run nodex list to see available languages.</p>
       <p role="status" className="sr-only">{feedback}</p>
-    </div>
+    </TerminalBody>
   );
+}
+
+/** Reserve a list line per additional language, identically before and after handoff. */
+export function TerminalBody({ languageCount, children }: { languageCount: number; children: ReactNode }) {
+  return <div data-terminal-body
+    style={{ '--terminal-language-space': `${Math.max(0, languageCount - 4) * 1.8}em` } as CSSProperties}
+    className="relative flex h-72 flex-col p-5 text-[16px] leading-[1.8] [font-family:var(--nx-font-mono)] sm:h-[calc(20rem+var(--terminal-language-space))] sm:px-7 sm:text-[14px] [@media(min-height:900px)]:h-[calc(380px+var(--terminal-language-space))] [@media(min-height:900px)]:py-7 sm:[@media(min-height:900px)]:text-[15px]">
+    {children}
+  </div>;
 }
 
 /** Native history scrolling uses the shared website scrollbar treatment. */

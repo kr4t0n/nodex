@@ -1,0 +1,94 @@
+{
+  "slug": "soft-scatter",
+  "title": "A good kind of busy",
+  "description": "Equal-size circles compare two measurements with clear spacing and stable identity colors.",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "SoftScatter"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "studio-chart-frame.tsx",
+    "studio-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 420
+  },
+  "tags": [
+    "relationship",
+    "soft",
+    "studio"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SoftScatterDatum[]",
+      "required": true,
+      "description": "Unique nonempty IDs, labels, signed numeric x/y coordinates and optional tones a–d. Incomplete or non-finite pairs are omitted and counted. Zero remains a complete observation; colors identify observations rather than quantity."
+    },
+    {
+      "name": "xLabel",
+      "type": "string",
+      "description": "Horizontal measurement label; defaults to X value."
+    },
+    {
+      "name": "yLabel",
+      "type": "string",
+      "description": "Vertical measurement label; defaults to Y value."
+    },
+    {
+      "name": "xFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats horizontal tooltip readings."
+    },
+    {
+      "name": "yFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats vertical tooltip readings."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense categorical plots scroll locally when the supplied size cannot hold their data."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ]
+}
