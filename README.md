@@ -5,15 +5,16 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains the complete original **65-chart catalogue**, **nine Neo-brutalism
-charts**, and **24 reusable primitives**, delivered as editable React source. Nine initial
+The registry contains **100 expressive charts** (64 Mono Editorial, nine Signal Console,
+nine Neo-brutalism, nine Sketchbook and nine Soft Studio) and **24 reusable primitives**, delivered as editable React source.
+This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
-Three design languages are available: Mono Editorial, Signal Console and
-**Neo-brutalism**. Neo-brutalism starts with all 24 shared primitives, a complete
+Five design languages are available: Mono Editorial, Signal Console,
+**Neo-brutalism**, **Sketchbook** and **Soft Studio**. Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
 yellow actions, pink badges, mint selections, cream fields and blue value
@@ -48,6 +49,192 @@ The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex implements these through its own semantic tokens and React primitives.
 
+## Soft Studio
+
+Soft Studio is available at `/l/soft-studio`, with all 24 shared primitives and
+nine expressive charts. Embedded Manrope, cool off-white pages, white surfaces,
+cobalt actions, tinted fields and contextual rounding create a calm product
+interface. Fields and badges stay flat; framed surfaces use subtle diffuse
+elevation. Body copy is 15px and editable values are 16px. The
+[design guide](registry/languages/soft-studio/DESIGN.md) covers the complete UI.
+
+| Chart | Type | Reading |
+| --- | --- | --- |
+| `soft-bars` | Bar | Rounded category bars with direct values and an exact zero baseline |
+| `soft-area` | Area | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps |
+| `soft-donut` | Donut | Exact shares of a complete total, a generous opening and a responsive key |
+| `soft-heatmap` | Heatmap | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
+| `soft-line` | Line | Independent monotone series on a numeric timeline, preserving each series' gaps |
+| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals |
+| `soft-scatter` | Scatter | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted |
+| `soft-dumbbell` | Dumbbell | Open and filled endpoints compare readings, including decreases, ties and missing partners |
+| `soft-gauge` | Gauge | Exact progress across a half-circle against an explicit positive target |
+
+```bash
+nodex init soft-studio
+nodex add soft-studio/soft-bars soft-studio/soft-area
+nodex add soft-studio/soft-donut soft-studio/soft-heatmap button card
+nodex add soft-studio/soft-line soft-studio/soft-stacked-bars
+nodex add soft-studio/soft-scatter soft-studio/soft-dumbbell soft-studio/soft-gauge
+```
+
+Bars and donut accept `{ id, label, value, tone? }` records. IDs must be unique
+and nonempty; repeated labels are allowed. Values are finite and nonnegative,
+with `null` or invalid readings unavailable. Explicit tones `a`–`d` or stable
+identity choose category colors. Zero never acquires a visible bar or sector.
+A missing part or overflowing total suppresses the entire donut allocation.
+
+Area observations also require a finite, strictly increasing numeric `x`. The
+headline always refers to the final supplied observation, even when missing.
+The heatmap takes explicit `{ id, label }` rows and columns, `{ rowId, columnId,
+value }` readings and a finite positive `maxValue`. Undeclared or duplicate
+pairs reject the dataset. Missing, negative and above-scale readings retain an
+inspectable cross; zero uses a dot. The categorical palette is never an intensity
+ramp.
+
+Lines and stacks accept ordered `series: { id, label, tone? }[]` and observations
+with `values` keyed by series ID. Lines also require strictly increasing numeric
+`x` and support signed readings; missing values break each curve independently.
+Stacks require nonnegative parts and complete finite totals. Scatter takes
+`{ id, label, x, y, tone? }`; dumbbell takes `{ id, label, before, after }` and
+preserves available endpoints when a partner is missing. Both support signed
+coordinates. The gauge requires `{ value, target }`, with a finite positive
+target and progress between zero and that target; invalid input is unavailable,
+never clamped. Zero and full progress keep their exact angles.
+The gauge measures its aspect ratio through Recharts and positions its reading
+inside the same SVG, keeping the arc and labels together as the container resizes.
+
+All nine charts support native keyboard inspection, scoped tokens and live
+reduced-motion changes. Their gallery specimens fit completely without scrollbars:
+logical dimensions include the full plot, key and padding before preview scaling.
+Dense caller data can still scroll locally in constrained consumer containers.
+
+The language index retains bars, area, donut and heatmap as its four curated
+previews; the gallery and selected landing belt discover all nine charts. The landing terminal lists Soft
+Studio and accepts `nodex init soft-studio`; its automatic sequence still ends
+with Sketchbook. Manrope's pinned Fontsource package and OFL notice are embedded
+in the delivered token stylesheet, so consumers need no font host or font package.
+
+## Sketchbook
+
+Sketchbook is available at `/l/sketchbook`, with all 24 shared primitives and
+nine charts covering the [roughViz catalogue](https://www.jwilber.me/roughviz/).
+All use native Recharts geometry and inspection with seeded Rough.js decoration.
+
+| roughViz chart | Nodex component | Encoding |
+| --- | --- | --- |
+| Bar | `sketch-bars` | Vertical category bars from zero |
+| BarH | `sketch-bars-horizontal` | Horizontal category bars from zero |
+| StackedBar | `sketch-stacked-bars` | Absolute vertical stacks with complete totals |
+| Line | `sketch-line` | Multiple series on a numeric X axis |
+| Scatter | `sketch-scatter` | Equal-size marks on numeric X/Y axes |
+| Pie | `sketch-pie` | Exact sector shares of a complete total |
+| Donut | `sketch-donut` | Exact sector shares with a central total |
+| Force | `sketch-force` | Collision-positioned bubbles, area proportional to value |
+| Network | `sketch-network` | Area-scaled nodes with explicit undirected links |
+
+Gaegu supplies headings, chart annotations, short UI text, paragraphs, editable
+values and dense tables; commands remain monospace. Its regular and bold faces
+are embedded for offline delivery. Reading text is enlarged by 2px: body text and
+form values use 16px, prose uses 14.5px, and gallery descriptions use 15px.
+Supporting copy follows the same increase. Headings, actions, code and spacing
+retain their existing values. Uneven corners, faint second outlines and small corner hatching
+on framed cards and primary actions extend the sketch treatment to the interface.
+Native hit targets, focus rings and keyboard behavior remain stable.
+
+The [design guide](registry/languages/sketchbook/DESIGN.md) defines the complete
+interface language. The [provenance record](registry/languages/sketchbook/PROVENANCE.md)
+pins the roughViz reference and separates extracted colors/drawing defaults from
+Nodex's surface, control, spacing and motion decisions.
+
+```bash
+nodex init sketchbook
+nodex add sketchbook/sketch-bars
+nodex add sketchbook/sketch-line sketchbook/sketch-network
+```
+
+`SketchBars` accepts caller-owned `{ id, label, value, tone? }` observations.
+IDs must be unique and nonempty; repeated labels are allowed. Values are
+nonnegative; null, negative and non-finite readings are unavailable. Zero keeps
+its label without a bar. Colors identify categories, and native bar height
+encodes magnitude. Hatching is clipped to those exact bounds; thin bar outlines
+render separately so scaled gallery previews retain all four edges. Category IDs seed
+the drawing, so reordering and interaction preserve each category's texture.
+Narrow containers scroll their plot locally. Tooltips support keyboard inspection.
+
+Horizontal bars, pie, donut, force and network accept the same observation shape.
+Stacks and lines accept `series: { id, label, tone? }[]` and observations with
+`values: Record<string, number | null>` keyed by series ID. Lines also require a
+finite, strictly increasing numeric `x`; signed Y values are supported and missing
+readings break each series independently. Scatter accepts `{ id, label, x, y, tone? }`
+and reports omitted coordinate pairs. An incomplete stack is unavailable as a whole;
+pie and donut require a complete, finite total before displaying shares.
+
+Force has no links. Network additionally requires
+`links: { id, source, target }[]` referencing node IDs, with no self-links or duplicate
+undirected pairs. Both use a stopped, deterministic `d3-force@3.0.0` solver on cloned
+data; node area encodes value relative to the current dataset. Zero and missing
+values retain text markers without implying positive area. Recharts owns rendering,
+keyboard inspection and finite transitions; the solver never runs an animation
+loop. The CLI installs the exact layout package and its TypeScript declarations.
+The language index features bars, line, donut and network; its gallery contains all nine.
+
+Override `--nx-sketch-roughness`, `--nx-sketch-axisRoughness`,
+`--nx-sketch-bowing`, `--nx-sketch-fillStyle`, `--nx-sketch-fillWeight`,
+`--nx-sketch-hachureAngle` and `--nx-sketch-hachureGap` in a chart scope to change
+the drawing. These numeric geometry tokens are unitless (gap and weight are
+interpreted as pixels); paint and rendered stroke widths remain CSS variables.
+Hachure, cross-hatch and solid fills are supported. Scope/style changes refresh
+geometry; CSSOM-only changes can dispatch `nodex:tokens-changed`. Invalid settings
+retain observations as plain token-painted marks. Drawing is finite and respects
+live reduced-motion changes.
+
+`font.heading` supplies Card, Dialog, Empty State and Prose headings. `font.ui`
+supplies short UI text, with `type.uiLabel` and `type.choice` sizing independent
+of dense labels and editable values. `texture.*` controls decorative outlines and
+corner hatching; set `texture.outlineOpacity` and `texture.hatchOpacity` to zero
+to remove them. Plain cards and quiet actions stay untextured. Other languages
+retain their existing fonts and have zero texture opacity. Override font roles
+separately from `font.sans` when changing a descendant scope's typography.
+Embedded font metadata accepts pinned static `@fontsource` and variable
+`@fontsource-variable` WOFF2 packages with their OFL notices.
+
+## Signal Console charts
+
+Signal Console has nine charts at `/l/signal-console`, using its existing dark
+surfaces, JetBrains Mono, compact instrument layout and semantic status colors.
+
+| Chart | Type | Reading |
+| --- | --- | --- |
+| `endpoint-latency` | Bar | Routes ranked by P99 latency against an objective |
+| `request-throughput` | Area | Request rate across equal-duration windows |
+| `latency-trend` | Line | P50/P95/P99 patterns and P99 objective breaches |
+| `response-codes` | Stacked bar | Complete HTTP response counts by status class |
+| `latency-histogram` | Histogram | Counts in equal-width latency buckets |
+| `service-health` | Heatmap | Healthy, degraded, down and unavailable service windows |
+| `capacity-ring` | Donut | Exact used/available capacity with an optional warning threshold |
+| `saturation-scatter` | Scatter | Host CPU and latency against two explicit limits |
+| `trace-spans` | Range bar | Actual start/end offsets, preserving concurrent spans |
+
+Each chart accepts application data, provides keyboard inspection and supports
+scoped tokens and reduced motion. Missing data stays distinct from zero; partial
+response counts cannot produce a complete stack, and incomplete capacity cannot
+produce a share. Source, time window and freshness text come from the caller.
+Dense plots scroll within narrow containers. The index features four previews;
+the gallery and landing terminal discover all nine from the built manifest.
+
+Endpoint Latency pairs slim ranked bars with single-line route labels and an
+aligned P99 column. A dashed objective and red `!` markers make breaches explicit;
+hover or keyboard inspection shows the full route and its distance above the SLO.
+Rows retain their spacing as the route count grows, with local scrolling when
+the chart's width or height is constrained. Compact bands and a wide specimen
+keep its overview preview at a comparable scale to the other Signal Console charts.
+
+```bash
+nodex init signal-console
+nodex add signal-console/request-throughput signal-console/service-health
+```
+
 ## Develop the registry and gallery
 
 Prerequisites: Node **22.22+** (CI and Docker use Node 24), npm 10+, and Chromium
@@ -62,13 +249,71 @@ npm run dev
 
 The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
 `npm start`. Rebuild the registry after editing its source; the gallery reads
-built artifacts. `dev` and the web build copy those artifacts into the app's
-public directory automatically.
+built metadata. `dev` and the web build copy the artifacts into the app's public
+directory and generate lazy imports from each component's declared example entry
+and export. React components and example edits participate in Next's development
+reload; rebuild the registry and restart dev after changing catalogue metadata.
+The website and registry share the same pinned React types.
+
+The hero tagline and sign-in label share a text baseline across languages and
+screen sizes. The landing page folds its wordmark into the navbar, then demonstrates the CLI
+in a terminal above the chart belt, together in one scene with more generous
+spacing on taller screens. It types `nodex list`, runs `nodex init signal-console`,
+recalls the command and replaces the language with `neo-brutalism --force`, then
+edits that same third prompt to run `nodex init sketchbook --force`. Each
+completed command applies that language's actual tokens to the whole page and selects its
+charts for the belt. The demonstration plays once while visible, with pause and
+resume controls. Scrolling away preserves the selected language and pauses any
+unfinished typing; returning resumes it.
+
+After that first run, the third prompt becomes editable with
+`nodex init sketchbook --force` still in place and an idle blinking cursor.
+Click anywhere in the terminal to focus the command, then edit the language and
+press Enter to change the page and chart belt. Language buttons and text selection
+retain their normal behavior. The command and its output update in place, keeping
+three command rows. Run `nodex list` to
+see selectable languages; Up/Down recalls the last 20 commands, including all
+four demo commands, without adding visible rows. The handoff does not take focus
+or open a mobile keyboard. The demo and editor share the same fixed height,
+wrapping and thin, token-colored scrollbar with a transparent track and reserved
+gutter. The shared demo/editor body reserves another line for each language
+beyond the original four. All three prompts fit on desktop; narrow screens scroll locally as commands
+wrap. Scrolling and motion-preference changes retain the session and unfinished
+input; the animation never replays during that page visit. Reduced motion opens
+the editor directly when the scene is reached and keeps the idle cursor steady.
+
+Thin native scrollbars follow the active language across pages, nested scroll
+areas, form controls and isolated previews. Tracks are transparent; thumbs use
+muted ink and strengthen on hover or focus. The app and preview build share
+`styles/scrollbars.css`; this website treatment is not copied into consumer components.
 
 The language overview shows up to four previews from each language's `featured`
 list in `registry/languages/<slug>/meta.json`, in the authored order. Its component
 badge counts the full catalogue; adding charts does not automatically feature
 them. Rebuild the registry and restart dev after changing this list.
+
+The gallery reads `public/r/gallery.json`, a generated projection of the full
+registry that retains every component, preview and delivery address while omitting
+embedded source contents. The CLI continues to use `public/r/registry.json` and
+the complete per-item downloads. Publish both manifests with the website build;
+an external registry/CDN must include the matching `gallery.json`.
+
+Gallery, detail and landing previews render the actual React examples directly
+in the page, sharing React, Recharts and helper modules. Lazy imports keep example
+code out of the initial route bundle. Each preview inherits its language's scoped
+tokens; primitive CSS and registry Tailwind utilities also apply in the website.
+Standalone preview documents remain available at the manifest's preview URLs.
+Changing example code now requires a website rebuild for production, even when
+the registry's downloads are hosted on a CDN.
+
+Live previews start through one page-wide queue. Up to three nearby examples
+start at once, with visible cards taking priority over the 300px preload margin.
+Slots release after the lazy example commits and fonts/layout settle, or on an
+error. A 15-second timeout lets other previews proceed if an import stalls. The
+observer fallback rechecks actual bounds after 1.5 seconds, so background tabs
+can progress without starting the entire catalogue. Loaded previews stay mounted
+as you scroll, preserving keyboard inspection, tooltips and control state. Titles
+and labels link to detail pages; the previews themselves retain native interaction.
 
 ## Use components in a React app
 
@@ -370,6 +615,12 @@ chart paint, text, strokes and motion refer to those properties. A scoped
 resolve the numeric values that the chart library needs and honor reduced motion.
 No parallel JavaScript palette or theme provider is required.
 
+The language gallery shows **Chart colors** and **UI colors** separately, including
+field, panel, action and selection paints. Swatches come from the language's
+canonical tokens; repeated values are grouped, and expandable role lists show
+every color variable, value and use. Chart colors retain the authored ramp order.
+UI swatches fit in one compact row, with labels and values in the expandable list.
+
 All 24 primitives consume language tokens for typography, spacing, radii and
 interaction timing as well as paint, fonts and strokes. Card and Dialog titles
 use `type.cardTitle`; Card padding uses `space.cardPadding`. These existing roles
@@ -392,16 +643,18 @@ Native mobile framework.
 
 The pinned Recharts version does not emit chart marks through React server
 rendering. The registry build renders the actual examples in Chromium, checks
-their resolved paint and stroke widths, and stores complete static previews.
-Local JavaScript bundles then mount the same examples for interaction. This is
-not React hydration. Downstream applications receive ordinary client charts;
-the gallery's pre-rendered snapshot is not a server-rendering guarantee for
-consumer apps.
+their resolved paint and stroke widths, and stores complete standalone static
+previews. Their local JavaScript bundles mount the same examples for interaction;
+this is not React hydration. The website uses native lazy React examples with
+reserved loading boxes, while the build-time snapshots remain in the standalone
+documents. Neither the website nor downstream consumers gain server-rendered
+Recharts marks from these snapshots.
 
-Gallery previews give chart compositions and primitive examples the same 28px
-top and left inset. Charts scale within that frame using build-measured outer
-spacing; their internal layout and standalone preview proportions are preserved.
-Primitives continue to render at native size.
+Gallery chart surfaces align with the titles and type labels above them. Chart
+grids keep an 18px gap below type labels, including rows with wrapped titles.
+Previews remove the standalone page gutter using build-measured chart bounds, then scale
+the complete chart to fit. Internal padding, corner shapes and proportions are
+preserved. Primitives render at native size with a 28px surrounding inset.
 
 Within each language, charts are sorted alphabetically by chart type, then title.
 Search results and type filters retain this order.
@@ -429,7 +682,9 @@ packages/cli/src/                  static registry access, delivery, install, au
 apps/web/src/                      Next gallery and account routes
 apps/web/migrations/               SQL account migrations
 scripts/build-registry.ts          validation, bundling, browser preview rendering
+scripts/sync-registry-public.ts    public assets and lazy website example imports
 scripts/lib/                       delivery, tokens and browser build utilities
+styles/                            shared website and preview scrollbar styling
 skills/nodex/                      consumer skill
 .agents/skills/nodex-authoring/     repository authoring skill
 public/r/                          GENERATED manifests and per-item JSON
@@ -456,6 +711,8 @@ npm run check:shell
 npm run lint
 npm run typecheck
 npm run build --workspace @nodex/web
+npm run smoke:landing
+npm run smoke:gallery
 ```
 
 | Command | Coverage |
@@ -463,15 +720,20 @@ npm run build --workspace @nodex/web
 | `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
 | `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
 | `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
-| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all three languages, native keyboard/form behavior, offset shadows, button presses and reduced motion |
+| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all five languages, stable sketch geometry, Soft Studio geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
 | `check:shell` | Gallery primitive classes have their curated stylesheets |
+| `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |
+| `smoke:gallery` | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout |
 | `lint` / `typecheck` | Application, registry, CLI and build source |
 
 The consumer smoke installs packages in a disposable directory and therefore
 needs npm network access. Build previews bundle dependencies locally; rendered
 examples need no CDN chart scripts or external data fetches. Chromium belongs to
 the build and test environment, not the production server image.
+
+`smoke:landing` and `smoke:gallery` require the web build above. Both also accept
+an existing server URL, such as `npm run smoke:gallery -- http://localhost:4180`.
 
 ## Accounts and configuration
 
@@ -534,10 +796,10 @@ and a migration Job. Its release workflow requires a chart-version bump:
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm repo update
-helm upgrade --install nodex nodex/nodex --version 0.2.2 --set siteUrl=https://nodex.example.com
+helm upgrade --install nodex nodex/nodex --version 0.2.3 --set siteUrl=https://nodex.example.com
 ```
 
-Chart `0.2.2` pins the app and migration Job to `kr4t0n/nodex:0.2.2` through
+Chart `0.2.3` pins the app and migration Job to `kr4t0n/nodex:0.2.3` through
 `appVersion`; `image.tag` is an explicit override.
 
 `npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
@@ -553,7 +815,7 @@ automatically; an OIDC configuration error fails the publish job.
 
 For a coordinated release, bump `packages/cli/package.json` and its lockfile
 entry, plus the Helm chart's `version` and `appVersion`. Commit those changes
-on `main` and push a matching annotated tag such as `v0.2.2`. The main push
+on `main` and push a matching annotated tag such as `v0.2.3`. The main push
 publishes the versioned Helm chart; the tag starts the npm and image workflows.
 Image version tags omit the `v` prefix. Confirm the registry artifacts after
 the workflows finish: missing Docker credentials still make the image job skip,

@@ -1,0 +1,96 @@
+{
+  "slug": "response-codes",
+  "title": "Response classes across the request window",
+  "description": "Stacked counts separate successful responses, redirects, client errors and server errors. Status color has a fixed meaning in every window.",
+  "component": "stacked-bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ResponseCodes"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ResponseCodesDatum[]",
+      "description": "Unique window IDs and labels with success, redirect, clientError and serverError counts. Counts must be safe nonnegative integers; one unknown class makes the whole stack unavailable. Windows retain caller order and equal spacing.",
+      "required": true
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "description": "Console header label; the surrounding gallery or application owns its page title.",
+      "required": false
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "description": "Caller-supplied source text in the footer.",
+      "required": false
+    },
+    {
+      "name": "window",
+      "type": "string",
+      "description": "Caller-supplied aggregation window or snapshot context in the footer.",
+      "required": false
+    },
+    {
+      "name": "updated",
+      "type": "string",
+      "description": "Caller-supplied freshness text; the component never invents live status.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plot content scrolls locally when constrained.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite entrance animation using scoped motion tokens and the current reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional Tailwind utilities for the outer frame.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of this chart instance.",
+      "required": false
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "signal-chart-frame.tsx",
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "tags": [
+    "operations",
+    "monitoring"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 370
+  }
+}

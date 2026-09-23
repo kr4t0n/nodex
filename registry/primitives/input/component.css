@@ -13,10 +13,11 @@
 }
 
 .nx-field__label {
-  font-size: var(--nx-type-label-size);
-  font-weight: var(--nx-type-label-weight);
-  letter-spacing: var(--nx-type-label-tracking);
-  text-transform: uppercase;
+  font-family: var(--nx-font-ui);
+  font-size: var(--nx-type-uiLabel-size);
+  font-weight: var(--nx-type-uiLabel-weight);
+  letter-spacing: var(--nx-type-uiLabel-tracking);
+  text-transform: var(--nx-type-uiLabel-transform);
   color: var(--nx-muted);
 }
 

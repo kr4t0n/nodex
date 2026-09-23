@@ -10,7 +10,7 @@ import { build } from 'esbuild';
 
 import { loadSource, registrySchema, publishedLanguageSchema } from '../packages/core/src/index.ts';
 import type { LoadedComponent } from '../packages/core/src/load.ts';
-import type { RegistryItem } from '../packages/core/src/schema.ts';
+import type { GalleryRegistry, RegistryItem } from '../packages/core/src/schema.ts';
 import { lintRendered, lintSource, rulesFromTokens } from '../packages/cli/src/lint.ts';
 import { renderedMarks, serveDirectory } from './lib/browser.ts';
 import { prepareDelivery } from './lib/delivery.ts';
@@ -62,7 +62,7 @@ flushSync(() => root.render(createElement(Example, { animate })));
 function reportSize() {
   const body = getComputedStyle(document.body);
   const height = Math.ceil(node.getBoundingClientRect().height + parseFloat(body.paddingTop) + parseFloat(body.paddingBottom));
-  parent.postMessage({ type: 'nx-preview-size', height }, '*');
+  parent.postMessage({ type: 'nx-preview-size', height, ready: document.documentElement.dataset.nxReady === 'true' }, '*');
 }
 new ResizeObserver(reportSize).observe(node);
 requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -206,7 +206,11 @@ async function main() {
       await put(stage, relative, output.contents);
     }
     const inputCss = path.join(stage, 'preview-input.css');
-    await writeFile(inputCss, `@import ${JSON.stringify(path.join(ROOT, 'node_modules/tailwindcss/index.css'))};\n@source ${JSON.stringify(path.join(ROOT, 'registry'))};\n`);
+    await writeFile(inputCss, [
+      `@import ${JSON.stringify(path.join(ROOT, 'node_modules/tailwindcss/index.css'))};`,
+      `@import ${JSON.stringify(path.join(ROOT, 'styles/scrollbars.css'))};`,
+      `@source ${JSON.stringify(path.join(ROOT, 'registry'))};`,
+    ].join('\n'));
     await run(path.join(ROOT, 'node_modules/.bin/tailwindcss'), ['-i', inputCss, '-o', path.join(stage, 'registry/_preview/styles.css'), '--minify'], { cwd: ROOT });
     for (const preview of previews) await put(stage, preview.item.meta.preview.path, previewDocument(preview, assets));
 
@@ -244,16 +248,15 @@ async function main() {
             const body = getComputedStyle(document.body);
             const height = Math.ceil(root.getBoundingClientRect().height + Number.parseFloat(body.paddingTop) + Number.parseFloat(body.paddingBottom));
             // Keep the standalone document and chart geometry intact. The
-            // gallery can frame the content using these measured outer spaces
-            // instead of shrinking page and card padding into its thumbnails.
+            // gallery removes only the surrounding page space so the chart's
+            // outer edge aligns with its title. Card padding stays inside it.
             const chart = root.querySelector<HTMLElement>(':scope > [data-nx-chart]');
             const bounds = chart?.getBoundingClientRect();
-            const style = chart && getComputedStyle(chart);
-            const insets = bounds && style ? {
-              top: bounds.top + Number.parseFloat(style.paddingTop),
-              right: window.innerWidth - bounds.right + Number.parseFloat(style.paddingRight),
-              bottom: height - bounds.bottom + Number.parseFloat(style.paddingBottom),
-              left: bounds.left + Number.parseFloat(style.paddingLeft),
+            const insets = bounds ? {
+              top: bounds.top,
+              right: window.innerWidth - bounds.right,
+              bottom: height - bounds.bottom,
+              left: bounds.left,
             } : undefined;
             return { html: clone.innerHTML, height, insets };
           });
@@ -269,7 +272,15 @@ async function main() {
     }
     // Validation and rendering are complete before publishing any output.
     const manifest = registrySchema.parse({ $schema: 'https://ui.shadcn.com/schema/registry.json', name: 'nodex', homepage: 'https://nodex.kubitnodes.com', items });
+    const gallery: GalleryRegistry = {
+      ...manifest,
+      items: manifest.items.map((item) => ({
+        ...item,
+        files: item.files.map(({ path, target, type }) => ({ path, target, type })),
+      })),
+    };
     await put(stage, 'r/registry.json', `${JSON.stringify(manifest, null, 2)}\n`);
+    await put(stage, 'r/gallery.json', `${JSON.stringify(gallery, null, 2)}\n`);
     await put(stage, 'r/languages.json', `${JSON.stringify(publishedLanguages, null, 2)}\n`);
     for (const item of items) await put(stage, `r/${item.meta.language}/${item.name}.json`, `${JSON.stringify({ $schema: 'https://ui.shadcn.com/schema/registry-item.json', ...item }, null, 2)}\n`);
     if (!CHECK) {

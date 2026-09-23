@@ -1,0 +1,85 @@
+{
+  "slug": "soft-donut",
+  "title": "Space for what matters",
+  "description": "Exact sector shares and a roomy center show how a complete total is allocated.",
+  "component": "donut",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "SoftDonut"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "studio-chart-frame.tsx",
+    "studio-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 440
+  },
+  "tags": [
+    "comparison",
+    "soft",
+    "studio",
+    "part-to-whole"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SoftDonutDatum[]",
+      "required": true,
+      "description": "Complete { id, label, value, tone? } allocation with unique nonempty IDs and finite nonnegative values. One missing reading or an overflowing total suppresses the whole ring. Zero keeps a key entry without a sector. Identity or explicit tone a–d determines color; caller order is preserved. The key stacks below the plot in narrow containers."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label; defaults to Value (Total for SoftDonut)."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct values and tooltips; defaults to en-US numbers with at most two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and long keys scroll locally."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ]
+}

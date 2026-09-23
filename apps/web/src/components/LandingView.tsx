@@ -8,23 +8,24 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { LanguageTheme } from '@/components/LanguageTheme.tsx';
+import { LandingTerminal } from '@/components/LandingTerminal.tsx';
 import { Preview } from '@/components/Preview.tsx';
 import { usePrefersReducedMotion } from '@/lib/hooks.ts';
+import { useLandingLanguage } from '@/lib/landing-language.ts';
 import {
   expressiveFor,
   loadCatalog,
-  OWN_LANGUAGE,
-  previewUrl,
   type Catalog,
   type Item,
+  type Language,
 } from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
- * The marketing surface. Two scenes, and deliberately nothing after them.
+ * The marketing surface: the name, then the CLI alongside its rendered work.
  *
- * The name, then the work. Anything further belongs behind the sign-in, where
+ * Anything further belongs behind the sign-in, where
  * someone has already decided they are interested.
  *
  * Scene one has no navigation. The wordmark and the sign-in ARE the navigation:
@@ -44,15 +45,18 @@ const MARK_LEFT_INSET = 0.056;
 const HERO_ROW_GAP = 44;
 
 /** One card in the run. Fixed, so the loop distance is exact. */
-const RUN_CARD_WIDTH = 380;
-const RUN_CARD_HEIGHT = 260;
+const RUN_CARD_WIDTH = 340;
+const RUN_CARD_HEIGHT = 200;
 const RUN_LENGTH = 8;
 /** Seconds per card. The whole belt takes this times the card count. */
 const RUN_SECONDS_PER_CARD = 6;
+const NO_LANGUAGES: Language[] = [];
 
 export function LandingView() {
   const [catalog, setCatalog] = useState<Catalog>();
+  const [catalogFailed, setCatalogFailed] = useState(false);
   const reduced = usePrefersReducedMotion();
+  const landingLanguage = useLandingLanguage(catalog?.languages ?? NO_LANGUAGES);
 
   const root = useRef<HTMLDivElement>(null);
   const hero = useRef<HTMLElement>(null);
@@ -62,10 +66,10 @@ export function LandingView() {
   const signIn = useRef<HTMLAnchorElement>(null);
   const barBg = useRef<HTMLDivElement>(null);
 
-  const language = catalog?.languages.find((entry) => entry.slug === OWN_LANGUAGE);
+  const language = catalog?.languages.find((entry) => entry.slug === landingLanguage.slug);
 
   useEffect(() => {
-    void loadCatalog().then(setCatalog);
+    void loadCatalog().then(setCatalog).catch(() => setCatalogFailed(true));
   }, []);
 
   // Spread a large catalog across the run; repeat a small catalog so each
@@ -99,6 +103,7 @@ export function LandingView() {
 
       const markElement = mark.current;
       const rowElement = row.current;
+      const signInElement = signIn.current;
 
       /**
        * How far scene one is pushed before the bar is assembled. Shared by both
@@ -129,6 +134,13 @@ export function LandingView() {
       const markY = () => markTop() - NAV_TOP;
       const rowY = () =>
         markTop() + heroSize() * MARK_LEADING + HERO_ROW_GAP - NAV_TOP;
+      // Share a text baseline in the hero, then retain the action's original
+      // navbar center regardless of its language's padding and font metrics.
+      const barRowY = () => {
+        const rowBounds = rowElement.getBoundingClientRect();
+        const actionBounds = signInElement.getBoundingClientRect();
+        return rowBounds.top + rowBounds.height / 2 - actionBounds.top - actionBounds.height / 2;
+      };
 
       const toHero = () => {
         gsap.set(mark.current, { y: markY(), scale: heroScale() });
@@ -139,15 +151,16 @@ export function LandingView() {
       };
       const toBar = () => {
         gsap.set(mark.current, { y: 0, scale: 1 });
-        gsap.set(row.current, { y: 0 });
+        gsap.set(row.current, { y: barRowY() });
         gsap.set(signIn.current, { x: 0 });
         gsap.set(tagline.current, { x: NAV_FONT * MARK_LEFT_INSET, opacity: 0 });
         gsap.set(barBg.current, { opacity: 1 });
       };
 
-      // Font loading can change the wordmark's intrinsic width after mounting.
-      const markObserver = new ResizeObserver(() => ScrollTrigger.refresh());
-      markObserver.observe(markElement);
+      // Font loading changes both the wordmark width and the action's metrics.
+      const layoutObserver = new ResizeObserver(() => ScrollTrigger.refresh());
+      layoutObserver.observe(markElement);
+      layoutObserver.observe(signInElement);
 
       if (reduced) {
         // A jump cut rather than a scrub. The layout still has to change, or the
@@ -166,7 +179,7 @@ export function LandingView() {
             else toHero();
           },
         });
-        return () => markObserver.disconnect();
+        return () => layoutObserver.disconnect();
       }
 
       const tl = gsap.timeline({
@@ -174,7 +187,7 @@ export function LandingView() {
           trigger: hero.current,
           start: 'top top',
           // Finishes well before scene one is fully gone, so the bar is
-          // assembled before the belt rises into view.
+          // assembled before the terminal comes into view.
           end: () => `+=${foldDistance()}`,
           scrub: 0.5,
           invalidateOnRefresh: true,
@@ -189,7 +202,7 @@ export function LandingView() {
         { y: 0, scale: 1, ease: 'none' },
         0,
       )
-        .fromTo(row.current, { y: rowY }, { y: 0, ease: 'none' }, 0)
+        .fromTo(row.current, { y: rowY }, { y: barRowY, ease: 'none' }, 0)
         .fromTo(signIn.current, { x: signInX }, { x: 0, ease: 'none' }, 0)
         .fromTo(
           tagline.current,
@@ -210,7 +223,7 @@ export function LandingView() {
           0.55,
         );
 
-      return () => markObserver.disconnect();
+      return () => layoutObserver.disconnect();
     },
     { scope: root, dependencies: [reduced], revertOnUpdate: true },
   );
@@ -234,7 +247,7 @@ export function LandingView() {
         />
 
         <div
-          className="relative mx-auto max-w-[1400px] px-6 lg:px-10"
+          className="relative mx-auto min-h-16 max-w-[1400px] px-6 lg:px-10"
           style={{ paddingTop: NAV_TOP }}
         >
           {/* Sized at rest and scaled up for the hero, so the travel is a pure
@@ -242,7 +255,7 @@ export function LandingView() {
               them would relayout on every frame. */}
           <h1
             ref={mark}
-            className="pointer-events-auto m-0 inline-block font-extrabold tracking-[-0.045em]"
+            className="pointer-events-auto m-0 inline-block font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.045em]"
             style={{
               fontSize: NAV_FONT,
               lineHeight: MARK_LEADING,
@@ -255,16 +268,16 @@ export function LandingView() {
           {/* Fixed height on purpose. Letting the tagline size this row would
               make the sign-in's resting position depend on whether the tagline
               wrapped to two lines, so the bar would sit differently at different
-              viewports. The tagline overflows the row instead, which is
-              invisible: nothing sits under it in the hero. */}
+              viewports. Their first text baselines align even when the tagline
+              wraps or the language gives the action different text metrics. */}
           <div
             ref={row}
-            className="absolute inset-x-6 flex h-8 items-center justify-between gap-8 lg:inset-x-10"
+            className="absolute inset-x-6 flex h-8 items-baseline justify-between gap-8 lg:inset-x-10"
             style={{ top: NAV_TOP - 3 }}
           >
             <p
               ref={tagline}
-              className="m-0 text-[14px] leading-[1.7] sm:whitespace-nowrap"
+              className="m-0 text-[length:var(--nx-type-body-taglineSize)] leading-[1.7] sm:whitespace-nowrap"
               style={{ color: 'var(--nx-muted)' }}
             >
               Components that belong to a design language.
@@ -281,18 +294,27 @@ export function LandingView() {
         </div>
       </header>
 
-      {/* Scene one is empty on purpose: the bar above is drawn over it, and this
-          is the scroll distance the fold happens across. */}
-      <section ref={hero} className="min-h-[100dvh]" />
+      <main>
+        {/* Scene one is empty on purpose: the bar above is drawn over it, and this
+            is the scroll distance the fold happens across. */}
+        <section ref={hero} className="min-h-[100dvh]" />
 
-      <ComponentBelt items={runItems} />
+        <LandingTerminal
+          languages={catalog?.languages ?? NO_LANGUAGES}
+          activeLanguage={landingLanguage.slug}
+          status={catalogFailed ? 'error' : landingLanguage.status}
+          onLanguageChange={landingLanguage.select}
+        >
+          <ComponentBelt items={runItems} />
+        </LandingTerminal>
+      </main>
 
       <footer
         className="mx-auto max-w-[1400px] px-6 pb-14 lg:px-10"
         style={{ color: 'var(--nx-muted)' }}
       >
         <hr className="nx-rule nx-rule--faint" />
-        <p className="mt-6 mb-0 text-[11.5px]">
+        <p className="mt-6 mb-0 text-[length:var(--nx-type-body-detailSize)]">
           nodex. A component registry organised by design language.
         </p>
       </footer>
@@ -301,7 +323,7 @@ export function LandingView() {
 }
 
 /**
- * Scene two: the collection travels right to left on its own.
+ * The selected language's collection travels beneath the terminal in scene two.
  *
  * This loops, which `DESIGN.md` forbids for components in the language. It is a
  * deliberate, owner-approved exception scoped to this page: the rule governs
@@ -319,11 +341,24 @@ function ComponentBelt({
   items: Item[];
 }) {
   const reduced = usePrefersReducedMotion();
+  const [mounted, setMounted] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
+      if (!mounted) {
+        // Wait until the belt itself is near so lazy example modules and their
+        // chart runtime stay out of the opening hero.
+        const trigger = ScrollTrigger.create({
+          trigger: wrap.current,
+          start: 'top 120%',
+          once: true,
+          onEnter: () => setMounted(true),
+        });
+        if (trigger.scroll() >= trigger.start) setMounted(true);
+        return;
+      }
       if (reduced || !track.current || items.length === 0) return;
       gsap.to(track.current, {
         xPercent: -50,
@@ -332,7 +367,7 @@ function ComponentBelt({
         repeat: -1,
       });
     },
-    { scope: wrap, dependencies: [reduced, items.length], revertOnUpdate: true },
+    { scope: wrap, dependencies: [reduced, items.length, mounted], revertOnUpdate: true },
   );
 
   /**
@@ -344,21 +379,14 @@ function ComponentBelt({
   const passes = [0, 1];
 
   return (
-    // A full scene, not a strip. It also guarantees the page is long enough for
-    // the fold above to reach its end state.
-    <section className="flex min-h-[100dvh] flex-col justify-center overflow-hidden py-24">
-      <div className="mx-auto w-full max-w-[1400px] px-6 lg:px-10">
-        <h2 className="m-0 text-[26px] leading-[1.15] font-extrabold tracking-[-0.03em] sm:text-[32px]">
-          One language, drawn all the way through.
-        </h2>
-      </div>
+    <section aria-label="Component previews" className="w-full min-w-0">
 
       {/* The fallback is a CSS variant, not a JS branch: choosing it in
           JavaScript would make the server and client markup differ and trip
           hydration. */}
       <div
         ref={wrap}
-        className="mt-12 overflow-hidden motion-reduce:overflow-x-auto"
+        className="overflow-hidden motion-reduce:overflow-x-auto"
       >
         <div ref={track} className="flex w-max">
           {passes.map((pass) => (
@@ -374,16 +402,13 @@ function ComponentBelt({
                 <figure
                   key={`${pass}-${index}-${item.name}`}
                   className="m-0 shrink-0"
-                  style={{ width: RUN_CARD_WIDTH }}
+                  style={{ width: RUN_CARD_WIDTH, height: RUN_CARD_HEIGHT }}
                 >
-                  <Preview
-                    src={previewUrl(item)}
-                    title={item.title}
-                    width={item.meta.preview.width}
-                    height={item.meta.preview.height}
-                    insets={item.meta.preview.insets}
+                  {mounted && <Preview
+                    item={item}
+                    language={item.meta.language}
                     boxHeight={RUN_CARD_HEIGHT}
-                  />
+                  />}
                 </figure>
               ))}
             </div>

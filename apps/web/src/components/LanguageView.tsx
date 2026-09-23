@@ -8,13 +8,13 @@ import Link from 'next/link';
 
 import { CommandRow, EmptyState, Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
+import { TokenPanel, type LanguageTokens } from '@/components/TokenPanel.tsx';
 import { useLanguageTokens, usePrefersReducedMotion, useText } from '@/lib/hooks.ts';
 import {
   designUrl,
   expressiveFor,
   facetValues,
   loadCatalog,
-  previewUrl,
   primitivesFor,
   tokensJsonUrl,
   type Catalog,
@@ -22,13 +22,6 @@ import {
 } from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP);
-
-interface Tokens {
-  color?: Record<string, string>;
-  ramp?: { steps?: string[] };
-  stroke?: { scale?: string[]; lineMax?: string };
-  type?: Record<string, { size?: string; weight?: number }>;
-}
 
 /** Fixed thumbnail height, so grid titles stay on a common baseline. */
 const THUMB_HEIGHT = 250;
@@ -68,8 +61,8 @@ export function LanguageView({ slug }: { slug: string }) {
 
   const expressive = expressiveFor(catalog, slug);
   const primitives = primitivesFor(catalog);
-  const tokens: Tokens | undefined = tokensRaw.text
-    ? (JSON.parse(tokensRaw.text) as Tokens)
+  const tokens: LanguageTokens | undefined = tokensRaw.text
+    ? (JSON.parse(tokensRaw.text) as LanguageTokens)
     : undefined;
 
   return (
@@ -78,11 +71,11 @@ export function LanguageView({ slug }: { slug: string }) {
       <PageShell>
         <section className="grid grid-cols-1 gap-10 pt-14 pb-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
           <div>
-            <h1 className="m-0 text-[34px] leading-[1.05] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
+            <h1 className="m-0 text-[34px] leading-[1.05] [font-family:var(--nx-font-heading)] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
               {language.name}
             </h1>
             <p
-              className="mt-4 max-w-[54ch] text-[13px] leading-[1.7]"
+              className="mt-4 max-w-[54ch] text-[length:var(--nx-type-body-descriptionSize)] leading-[1.7]"
               style={{ color: 'var(--nx-muted)' }}
             >
               {language.description}
@@ -104,72 +97,6 @@ export function LanguageView({ slug }: { slug: string }) {
         {design.text ? <DesignDoc markdown={design.text} /> : null}
       </PageShell>
     </>
-  );
-}
-
-/** Values a reader can judge at a glance: palette, hairline scale, type scale. */
-function TokenPanel({ tokens }: { tokens: Tokens }) {
-  const ramp = tokens.ramp?.steps ?? [];
-  const strokes = tokens.stroke?.scale ?? [];
-
-  return (
-    <aside className="nx-card nx-card--plain gap-6 p-0">
-      <div>
-        <p className="nx-badge nx-badge--quiet m-0">Palette</p>
-        <div className="mt-2 flex flex-wrap gap-[3px]">
-          {ramp.map((hex) => (
-            <span
-              key={hex}
-              title={hex}
-              className="h-7 w-7 rounded-[3px]"
-              style={{
-                background: hex,
-                border: 'var(--nx-stroke-hairline) solid color-mix(in oklab, var(--nx-grid) 70%, transparent)',
-              }}
-            />
-          ))}
-        </div>
-        <p className="mt-2 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-          {ramp.length} palette colors. Semantic roles and usage are defined below.
-        </p>
-      </div>
-
-      <div>
-        <p className="nx-badge nx-badge--quiet m-0">Stroke scale</p>
-        <svg viewBox="0 0 300 46" className="mt-2 block w-full" aria-hidden>
-          {strokes.map((value, i) => {
-            const stroke = Number.parseFloat(value);
-            const x = 14 + i * (272 / Math.max(strokes.length - 1, 1));
-            return (
-              <g key={value}>
-                <line
-                  x1={x}
-                  y1={4}
-                  x2={x}
-                  y2={30}
-                  stroke="var(--nx-ink)"
-                  strokeWidth={stroke * 3}
-                />
-                <text
-                  x={x}
-                  y={42}
-                  fontSize={7}
-                  textAnchor="middle"
-                  fill="var(--nx-muted)"
-                  fontFamily="var(--nx-font-sans)"
-                >
-                  {value.replace('px', '')}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-        <p className="mt-1 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
-          Drawn at 3x so sub-pixel widths are visible. Data marks never exceed the
-          line maximum.
-        </p>
-      </div>
-    </aside>
   );
 }
 
@@ -305,47 +232,43 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
           className="grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3"
         >
           {filtered.map((item) => (
-            // Same subgrid as the primitives above: a title that wraps to two
-            // lines must not push its preview out of line with its neighbours.
+            // Share header and preview rows. Keeping the header together avoids
+            // inflated gaps from three nested subgrid tracks and wide row spacing.
             <article
               key={item.name}
               data-grid-cell
-              className="grid min-w-0 grid-rows-subgrid row-span-3"
+              className="grid min-w-0 grid-rows-subgrid row-span-2"
               style={{ rowGap: 6 }}
             >
               {/* Title, then type, then the chart. The chart itself is only
                   the drawing, so everything that names it is printed here from
                   the manifest. */}
               <Link href={`/l/${language}/${item.name}`}
-                className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
-                style={{ color: 'inherit', rowGap: 6 }}
+                className="flex min-w-0 flex-col justify-between gap-1.5 no-underline"
+                style={{ color: 'inherit' }}
               >
                 <h2 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
                   {item.title}
                 </h2>
                 <p
-                  className="m-0 self-start text-[10.5px] tracking-[0.06em] uppercase"
+                  className="m-0 self-start text-[length:var(--nx-type-body-supportingSize)] tracking-[0.06em] uppercase"
                   style={{ color: 'var(--nx-faint)' }}
                 >
                   {item.meta.component}
                 </p>
-                <Preview
-                  className="mt-3 self-start"
-                  src={previewUrl(item, language)}
-                  title={item.title}
-                  width={item.meta.preview.width}
-                  height={item.meta.preview.height}
-                  insets={item.meta.preview.insets}
-                  aspectRatio={item.meta.aspectRatio}
-                  boxHeight={THUMB_HEIGHT}
-                />
               </Link>
+              <Preview
+                className="mt-3 self-start"
+                item={item}
+                language={language}
+                boxHeight={THUMB_HEIGHT}
+              />
             </article>
           ))}
         </div>
       )}
 
-      <p className="mt-10 text-[10.5px]" style={{ color: 'var(--nx-muted)' }}>
+      <p className="mt-10 text-[length:var(--nx-type-body-supportingSize)]" style={{ color: 'var(--nx-muted)' }}>
         {filtered.length} of {items.length}{' '}
         {items.length === 1 ? 'chart' : 'charts'}. Each preview draws when it
         scrolls into view.
@@ -374,28 +297,25 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
             style={{ rowGap: 6 }}
           >
             <Link href={`/l/${language}/${item.name}`}
-              className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+              className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
               style={{ color: 'inherit', rowGap: 6 }}
             >
               <h3 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
                 {item.title}
               </h3>
               <p
-                className="m-0 self-start text-[10.5px] leading-[1.6]"
+                className="m-0 self-start text-[length:var(--nx-type-body-supportingSize)] leading-[1.6]"
                 style={{ color: 'var(--nx-faint)' }}
               >
                 {item.description ?? ''}
               </p>
-              {/* Fluid: a primitive is shown at the size it actually is. */}
-              <Preview
-                className="mt-3 self-start"
-                src={previewUrl(item, language)}
-                title={item.title}
-                width={item.meta.preview.width}
-                height={item.meta.preview.height}
-                fluid
-              />
             </Link>
+            {/* Fluid: a primitive is shown at the size it actually is. */}
+            <Preview
+              className="mt-3 self-start"
+              item={item}
+              language={language}
+            />
           </article>
         ))}
       </div>
@@ -417,7 +337,7 @@ function DesignDoc({ markdown }: { markdown: string }) {
             The written language
           </h2>
           <p
-            className="mt-3 text-[11px] leading-[1.7]"
+            className="mt-3 text-[length:var(--nx-type-body-noteSize)] leading-[1.7]"
             style={{ color: 'var(--nx-muted)' }}
           >
             Tokens hold the values. This holds the reasoning they cannot carry,

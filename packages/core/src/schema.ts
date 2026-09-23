@@ -60,7 +60,7 @@ export const nodexMetaSchema = z.object({
     path: relativePathSchema,
     width: z.number().positive(),
     height: z.number().positive(),
-    /** Measured space outside chart content; the gallery supplies its own inset. */
+    /** Measured space outside the chart root, excluding its internal padding. */
     insets: z.object({
       top: z.number().nonnegative(),
       right: z.number().nonnegative(),
@@ -118,6 +118,11 @@ export const publishedLanguageSchema = languageMetaSchema.extend({
 
 export type RegistryItem = z.infer<typeof registryItemSchema>;
 export type Registry = z.infer<typeof registrySchema>;
+/** Browsing retains the delivery addresses, without downloading runtime source. */
+export type GalleryItem = Omit<RegistryItem, 'files'> & {
+  files: Array<Omit<RegistryItem['files'][number], 'content'>>;
+};
+export type GalleryRegistry = Omit<Registry, 'items'> & { items: GalleryItem[] };
 export type LanguageMeta = z.infer<typeof languageMetaSchema>;
 export type PublishedLanguage = z.infer<typeof publishedLanguageSchema>;
 export type ComponentMeta = z.infer<typeof componentMetaSchema>;

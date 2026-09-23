@@ -1,0 +1,91 @@
+{
+  "slug": "soft-stacked-bars",
+  "title": "A little of everything",
+  "description": "Soft horizontal stacks show absolute contributions and direct totals on a common zero baseline.",
+  "component": "stacked-bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "SoftStackedBars"
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "studio-chart-frame.tsx",
+    "studio-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 420
+  },
+  "tags": [
+    "comparison",
+    "soft",
+    "studio",
+    "part-to-whole"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly SoftStackedBarsDatum[]",
+      "required": true,
+      "description": "Unique nonempty IDs, labels and nonnegative values keyed by series ID. Any missing or invalid part, or overflowing total, makes the whole row unavailable. Zero retains a total without a mark."
+    },
+    {
+      "name": "series",
+      "type": "readonly SoftStackedBarsSeries[]",
+      "required": true,
+      "description": "Ordered series with unique nonempty IDs, labels and optional tones a–d. Reordering retains identity colors."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement label; defaults to Value (Units for SoftGauge)."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats readings and tooltips; defaults to en-US numbers with at most two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense categorical plots scroll locally when the supplied size cannot hold their data."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ]
+}

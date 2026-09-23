@@ -22,6 +22,7 @@
 
 .nx-empty__title {
   margin: 0;
+  font-family: var(--nx-font-heading, var(--nx-font-sans));
   font-size: var(--nx-type-emptyTitle-size);
   font-weight: var(--nx-font-weight-bold);
   letter-spacing: var(--nx-type-cardTitle-tracking);

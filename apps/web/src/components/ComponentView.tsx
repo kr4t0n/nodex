@@ -16,7 +16,6 @@ import {
   addCommand,
   findItem,
   loadCatalog,
-  previewUrl,
   type Catalog,
 } from '@/lib/registry.ts';
 
@@ -58,8 +57,6 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
   // Charts preserve the specimen's composition and scale to the available width.
   const isPrimitive = item.meta.tier === 'primitive';
 
-  const embedSrc = previewUrl(item, slug);
-
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
     ['Runtime', item.meta.runtime],
@@ -88,7 +85,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                 description is still in the manifest, where `nodex show` and
                 `nodex search` use it. */}
             <p
-              className="mt-3 text-[10.5px] tracking-[0.06em] uppercase"
+              className="mt-3 text-[length:var(--nx-type-body-supportingSize)] tracking-[0.06em] uppercase"
               style={{ color: 'var(--nx-faint)' }}
             >
               {item.meta.component}
@@ -96,13 +93,8 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
 
             <div className="mt-9">
               <Preview
-                src={embedSrc}
-                title={item.title}
-                width={item.meta.preview.width}
-                height={item.meta.preview.height}
-                insets={item.meta.preview.insets}
-                aspectRatio={item.meta.aspectRatio}
-                fluid={isPrimitive}
+                item={item}
+                language={slug}
               />
             </div>
           </div>
@@ -123,7 +115,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                     {label}
                   </dt>
                   <dd
-                    className="m-0 py-2.5 text-[11.5px]"
+                    className="m-0 py-2.5 text-[length:var(--nx-type-body-detailSize)]"
                     style={{ borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)' }}
                   >
                     {value}

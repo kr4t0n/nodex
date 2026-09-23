@@ -87,7 +87,14 @@ export async function checkNeoChartsConsumer(page: Page): Promise<void> {
     await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(next);
   }
   await expect(page.locator('#neo-secondary .recharts-tooltip-wrapper:visible')).toHaveCount(0);
-  await area.locator('[data-nx-area-point="a"]').hover();
+  // This maximum straddles the plot's top edge. Inspect its lower interior:
+  // rounding the exact boundary can put a center hover outside the native plot.
+  const peak = area.locator('[data-nx-area-point="a"]');
+  const interior = await peak.evaluate(element => {
+    const bounds = element.getBoundingClientRect();
+    return { x: bounds.width / 2, y: bounds.height * 0.75 };
+  });
+  await peak.hover({ position: interior });
   await expect(area.locator('.recharts-tooltip-wrapper:visible')).toHaveText('Same$40 Revenue');
   await stack.locator('[data-nx-stack="a"]').first().hover();
   await expect(stack.locator('.recharts-tooltip-wrapper:visible')).toHaveText('SameBuild$40Ship$20$60 Hours');

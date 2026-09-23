@@ -1,0 +1,46 @@
+/* Shared website chrome for the app and isolated preview documents.
+   Resolve paint on each element so descendant language scopes stay independent. */
+@layer base {
+  :where(*) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--nx-muted) transparent;
+  }
+
+  :where(*:hover, *:focus-within) {
+    scrollbar-color: var(--nx-ink) transparent;
+  }
+
+  /* Native fallback for engines without the standard scrollbar properties. */
+  :where(*)::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  :where(*)::-webkit-scrollbar-track,
+  :where(*)::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  :where(*)::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  :where(*)::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--nx-muted);
+  }
+
+  :where(*:hover, *:focus-within)::-webkit-scrollbar-thumb {
+    background: var(--nx-ink);
+  }
+
+  @media (forced-colors: active) {
+    :where(*) {
+      scrollbar-color: auto;
+    }
+
+    :where(*)::-webkit-scrollbar-thumb {
+      background: ButtonText;
+    }
+  }
+}

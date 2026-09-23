@@ -13,6 +13,7 @@ import { lintRendered, lintSource, rulesFromTokens } from '../packages/cli/src/l
 import { registryPath } from '../packages/cli/src/safety.ts';
 import { renderedMarks } from './lib/browser.ts';
 import { prepareDelivery } from './lib/delivery.ts';
+import { galleryExamples } from './lib/gallery-examples.ts';
 import { fontFaces, renderFontFaces, renderTokens, tokenVariables } from './lib/tokens.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -112,6 +113,13 @@ test('font metadata becomes licensed embedded assets, never invalid CSS declarat
   const face = fontFaces(tokens)[0]!;
   assert.throws(() => fontFaces({ font: { faces: [{ ...face, file: '../outside.woff2' }] } }), /Unsafe/);
   await assert.rejects(renderFontFaces({ font: { faces: [{ ...face, package: '@fontsource-variable/inter@0.0.0' }] } }, ROOT), /must be pinned/);
+  const sketchbook = JSON.parse(await readFile(path.join(ROOT, 'registry/languages/sketchbook/tokens.json'), 'utf8'));
+  const staticCss = await renderFontFaces(sketchbook, ROOT);
+  assert.match(staticCss, /font-family: "Gaegu";/);
+  for (const weight of [400, 700]) assert.match(staticCss, new RegExp(`font-weight: ${weight};`));
+  assert.match(staticCss, /SIL OPEN FONT LICENSE/);
+  assert.throws(() => fontFaces({ font: { faces: [{ ...face, package: '@other/inter@5.3.0' }] } }), /must come from/);
+  await assert.rejects(renderFontFaces({ font: { faces: [{ ...face, package: '@fontsource/gaegu@0.0.0' }] } }, ROOT), /must be pinned/);
 });
 
 test('rendered conformance resolves variables, inherited paint, gradients and scaled strokes', async () => {
@@ -148,6 +156,36 @@ test('every manifest address is published and runtime source is independent of e
   for (const language of languages) {
     for (const file of Object.values(language.files) as string[]) assert.ok((await stat(path.join(ROOT, 'public', file))).isFile());
   }
+});
+
+test('gallery discovery retains every item and address without embedded runtime source', async () => {
+  const manifest = JSON.parse(await readFile(path.join(ROOT, 'public/r/registry.json'), 'utf8'));
+  const gallery = JSON.parse(await readFile(path.join(ROOT, 'public/r/gallery.json'), 'utf8'));
+  registrySchema.parse(gallery);
+  assert.deepEqual(gallery, {
+    ...manifest,
+    items: manifest.items.map((item: { files: Array<{ content?: string }> }) => ({
+      ...item,
+      files: item.files.map(({ content: _content, ...file }) => file),
+    })),
+  });
+  assert.ok(manifest.items.every((item: { files: Array<{ content?: string }> }) =>
+    item.files.every((file) => typeof file.content === 'string')),
+  'The CLI manifest must retain the complete source-delivery contract');
+});
+
+test('native gallery imports follow authored example entries and require a matching catalogue', async () => {
+  const source = await loadSource(path.join(ROOT, 'registry'));
+  const gallery = JSON.parse(await readFile(path.join(ROOT, 'public/r/gallery.json'), 'utf8'));
+  const directory = path.join(ROOT, 'apps/web/src/generated');
+  const component = source.primitives.find((entry) => entry.meta.slug === 'alert')!;
+  component.meta.example = { ...component.meta.example, entry: 'specimen.tsx', export: 'CustomSpecimen' };
+  const code = galleryExamples(source, gallery.items, directory);
+  assert.match(code, /lazy\(\(\) => import\("\.\.\/\.\.\/\.\.\/\.\.\/registry\/primitives\/alert\/specimen\.tsx"\)/);
+  assert.match(code, /module\["CustomSpecimen"\]/);
+  assert.equal((code.match(/lazy\(\(\) => import\(/g) ?? []).length, gallery.items.length);
+  assert.throws(() => galleryExamples(source, gallery.items.slice(1), directory), /catalogue and authored examples differ/);
+  assert.throws(() => galleryExamples(source, [...gallery.items, gallery.items[0]], directory), /catalogue and authored examples differ/);
 });
 
 async function fingerprint(directory: string): Promise<Record<string, string>> {

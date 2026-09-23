@@ -82,6 +82,7 @@
 
 .nx-progress-label {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--nx-space-labelValueGap);
   font-size: var(--nx-type-caption-size);
@@ -89,6 +90,14 @@
   letter-spacing: var(--nx-type-caption-tracking);
   text-transform: uppercase;
   color: var(--nx-muted);
+}
+
+.nx-progress-label > label {
+  font-family: var(--nx-font-ui);
+  font-size: var(--nx-type-meterLabel-size);
+  font-weight: var(--nx-type-meterLabel-weight);
+  letter-spacing: var(--nx-type-meterLabel-tracking);
+  text-transform: var(--nx-type-meterLabel-transform);
 }
 
 /* Numerals align so a column of measures can be read down. */

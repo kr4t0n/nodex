@@ -1,0 +1,108 @@
+{
+  "slug": "service-health",
+  "title": "Service health across observation windows",
+  "description": "One status cell per service and window. Dot, exclamation, cross and question mark distinguish healthy, degraded, down and unavailable states alongside color.",
+  "component": "heatmap",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "ServiceHealth"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ServiceHealthDatum[]",
+      "description": "One observation per declared serviceId/windowId pair. Status is healthy, degraded, down or null. Missing/invalid states are unavailable. Duplicate pairs and undeclared IDs reject the input.",
+      "required": true
+    },
+    {
+      "name": "services",
+      "type": "readonly ServiceHealthAxis[]",
+      "description": "Ordered services with unique, nonempty IDs and display labels.",
+      "required": true
+    },
+    {
+      "name": "windows",
+      "type": "readonly ServiceHealthAxis[]",
+      "description": "Ordered, equally spaced observation windows with unique, nonempty IDs and display labels.",
+      "required": true
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "description": "Console header label; the surrounding gallery or application owns its page title.",
+      "required": false
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "description": "Caller-supplied source text in the footer.",
+      "required": false
+    },
+    {
+      "name": "window",
+      "type": "string",
+      "description": "Caller-supplied aggregation window or snapshot context in the footer.",
+      "required": false
+    },
+    {
+      "name": "updated",
+      "type": "string",
+      "description": "Caller-supplied freshness text; the component never invents live status.",
+      "required": false
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Optional total width in pixels; otherwise fills the container.",
+      "required": false
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plot content scrolls locally when constrained.",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite entrance animation using scoped motion tokens and the current reduced-motion preference.",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional Tailwind utilities for the outer frame.",
+      "required": false
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible description of this chart instance.",
+      "required": false
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "signal-chart-frame.tsx",
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "tags": [
+    "operations",
+    "monitoring"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 386
+  }
+}

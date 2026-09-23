@@ -50,3 +50,9 @@ jobs:
       # also catches a manifest the app can no longer make sense of.
       - name: Build the site
         run: npm run build --workspace @nodex/web
+
+      - name: Smoke-test landing animation and language switching
+        run: npm run smoke:landing
+
+      - name: Smoke-test gallery loading and preview interaction
+        run: npm run smoke:gallery

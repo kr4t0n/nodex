@@ -12,9 +12,16 @@ import type { Browser, Page } from '@playwright/test';
 
 import { renderedMarks, serveDirectory } from './lib/browser.ts';
 import { BAR_FAMILY_CONSUMER_SOURCE, BAR_FAMILY_PRIMARY_SELECTORS, checkBarFamilyConsumer } from './lib/bar-family-consumer.ts';
+import { SKETCHBOOK_CATALOGUE_SOURCE, checkSketchbookCatalogueConsumer } from './lib/sketchbook-catalogue-consumer.ts';
+import { SKETCHBOOK_CONSUMER_SOURCE, checkSketchbookConsumer } from './lib/sketchbook-consumer.ts';
+import { checkSketchbookBarOutlines } from './lib/sketchbook-outlines.ts';
 import { BLOCK_BARS_CONSUMER_SOURCE, checkBlockBarsConsumer } from './lib/block-bars-consumer.ts';
 import { NEO_CHARTS_CONSUMER_SOURCE, checkNeoChartsConsumer } from './lib/neo-charts-consumer.ts';
 import { NEO_EXTENDED_CONSUMER_SOURCE, checkNeoExtendedConsumer } from './lib/neo-extended-consumer.ts';
+import { SIGNAL_CHARTS_CONSUMER_SOURCE, checkSignalChartsConsumer } from './lib/signal-charts-consumer.ts';
+import { SOFT_STUDIO_CONSUMER_SOURCE, checkSoftStudioConsumer } from './lib/soft-studio-consumer.ts';
+import { STUDIO_EXTENDED_CONSUMER_SOURCE, checkStudioExtendedConsumer } from './lib/studio-extended-consumer.ts';
+import { checkStudioPreviewFit } from './lib/studio-preview-fit.ts';
 import { BAR_EXTENSION_SLUGS, BAR_EXTENSIONS_CONSUMER_SOURCE, checkBarExtensionsConsumer } from './lib/bar-extensions-consumer.ts';
 import { checkDualAreaConsumer, DUAL_AREA_CONSUMER_SOURCE } from './lib/dual-area-consumer.ts';
 import { HEATMAP_CONSUMER_SOURCE, HEATMAP_SLUGS, checkHeatmapConsumer } from './lib/heatmap-consumer.ts';
@@ -80,6 +87,7 @@ async function checkPreviews(browser: Browser): Promise<void> {
           assert.equal(response?.status(), 200, `${item.name}: preview must be served statically`);
           if (javaScriptEnabled) await page.waitForFunction(() => document.documentElement.dataset.nxReady === 'true');
           assert(await page.locator('#nx-preview').evaluate((element) => element.childElementCount > 0), `${item.name}: preview is empty`);
+          if (item.meta.language === 'soft-studio') await checkStudioPreviewFit(page.locator('[data-nx-chart]'));
           if (item.name === 'force-graph') await checkForceFit(page.locator('[data-nx-chart="force-graph"]'));
           if (item.name === 'ballot-tally') await checkBallotLayout(page.locator('[data-nx-chart="ballot-tally"]'));
           if (item.name === 'tick-donut' || item.name === 'tick-gauge') await checkRadialGeometry(page.locator(`[data-nx-chart="${item.name}"]`));
@@ -97,6 +105,7 @@ async function checkPreviews(browser: Browser): Promise<void> {
       }
     }
     console.log(`Validated ${manifest.items.length} built previews with JavaScript enabled and disabled.`);
+    await checkSketchbookBarOutlines(browser, server.origin);
   } finally {
     await server.close();
   }
@@ -114,9 +123,14 @@ import { PrimitiveConsumer } from './primitive-consumer';
 import { DualAreaConsumer } from './dual-area-consumer';
 import { PetalRoseConsumer } from './petal-rose-consumer';
 import { BarFamilyConsumer } from './bar-family-consumer';
+import { SketchbookConsumer } from './sketchbook-consumer';
+import { SketchbookCatalogueConsumer } from './sketchbook-catalogue-consumer';
+import { SoftStudioConsumer } from './soft-studio-consumer';
+import { StudioExtendedConsumer } from './studio-extended-consumer';
 import { BlockBarsConsumer } from './block-bars-consumer';
 import { NeoChartsConsumer } from './neo-charts-consumer';
 import { NeoExtendedConsumer } from './neo-extended-consumer';
+import { SignalChartsConsumer } from './signal-charts-consumer';
 import { BarExtensionsConsumer } from './bar-extensions-consumer';
 import { ScatterFamilyConsumer } from './scatter-family-consumer';
 import { HeatmapConsumer } from './heatmap-consumer';
@@ -173,11 +187,15 @@ function Consumer() {
     <PetalRoseConsumer animate={animate} />
     <BarFamilyConsumer animate={animate} />
     <BlockBarsConsumer animate={animate} />
+    <SketchbookConsumer /><SketchbookCatalogueConsumer />
     <NeoChartsConsumer animate={animate} />
     <NeoExtendedConsumer animate={animate} />
+    <SignalChartsConsumer animate={animate} />
     <BarExtensionsConsumer animate={animate} />
     <ScatterFamilyConsumer animate={animate} /><HeatmapConsumer animate={animate} /><ScatterLayoutConsumer animate={animate} /><SummaryConsumer animate={animate} /><TimelineConsumer animate={animate} /><ConnectionConsumer animate={animate} /><UnitConsumer animate={animate} /><ProgressConsumer animate={animate} /><RaceConsumer animate={animate} /><MarketConsumer animate={animate} /><RadialConsumer animate={animate} /><AlmanacConsumer animate={animate} /><PathConsumer animate={animate} /><PopulationConsumer animate={animate} /><FlowConsumer animate={animate} /><CircularConsumer animate={animate} /><HierarchyConsumer animate={animate} /><MapConsumer animate={animate} /><ForceConsumer animate={animate} /><MorphConsumer animate={animate} />
     <PrimitiveConsumer />
+    <SoftStudioConsumer />
+    <StudioExtendedConsumer />
   </main>;
 }
 
@@ -218,7 +236,18 @@ async function consumerFixture(): Promise<string> {
     await writeFile(path.join(fixture, 'src/styles/signal-tokens.css'), signalTokens.replace(':root', '[data-signal]'));
     const neoTokens = await run(process.execPath, [cli, 'tokens', 'neo-brutalism'], fixture);
     await writeFile(path.join(fixture, 'src/styles/neo-tokens.css'), neoTokens.replace(':root', '[data-neo]'));
-    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@source "../";\n');
+    const sketchTokens = await run(process.execPath, [cli, 'tokens', 'sketchbook'], fixture);
+    await writeFile(path.join(fixture, 'src/styles/sketchbook-tokens.css'), sketchTokens.replace(':root', '[data-sketchbook]'));
+    const studioTokens = await run(process.execPath, [cli, 'tokens', 'soft-studio'], fixture);
+    await writeFile(path.join(fixture, 'src/styles/studio-tokens.css'), studioTokens.replace(':root', '[data-studio]'));
+    await writeFile(path.join(fixture, 'src/soft-studio-consumer.tsx'), SOFT_STUDIO_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/studio-extended-consumer.tsx'), STUDIO_EXTENDED_CONSUMER_SOURCE);
+    assert.equal(installed.dependencies.roughjs, '4.6.6', 'CLI must install the exact sketch geometry dependency');
+    assert.equal(installed.dependencies['d3-force'], '3.0.0', 'CLI must install the exact force layout dependency');
+    assert.equal(installed.dependencies['@types/d3-force'], '3.0.10', 'Delivered force layout must include its TypeScript declarations');
+    await writeFile(path.join(fixture, 'src/sketchbook-consumer.tsx'), SKETCHBOOK_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/sketchbook-catalogue-consumer.tsx'), SKETCHBOOK_CATALOGUE_SOURCE);
+    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@source "../";\n');
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/primitive-consumer.tsx'), PRIMITIVE_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/dual-area-consumer.tsx'), DUAL_AREA_CONSUMER_SOURCE);
@@ -227,6 +256,7 @@ async function consumerFixture(): Promise<string> {
     await writeFile(path.join(fixture, 'src/block-bars-consumer.tsx'), BLOCK_BARS_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/neo-charts-consumer.tsx'), NEO_CHARTS_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/neo-extended-consumer.tsx'), NEO_EXTENDED_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/signal-charts-consumer.tsx'), SIGNAL_CHARTS_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/bar-extensions-consumer.tsx'), BAR_EXTENSIONS_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/scatter-family-consumer.tsx'), SCATTER_FAMILY_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/heatmap-consumer.tsx'), HEATMAP_CONSUMER_SOURCE);
@@ -303,11 +333,11 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await page.goto(server.origin);
     await waitForCharts(page);
     const loadedFonts = await page.evaluate(async () => {
-      await Promise.all(['Inter', 'JetBrains Mono', 'Space Grotesk'].map((family) => document.fonts.load(`12px "${family}"`)));
+      await Promise.all(['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu', 'Manrope'].map((family) => document.fonts.load(`12px "${family}"`)));
       await document.fonts.ready;
       return [...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replace(/["']/g, ''));
     });
-    assert(['Inter', 'JetBrains Mono', 'Space Grotesk'].every((family) => loadedFonts.includes(family)), 'All delivered design-language fonts must load without an external host');
+    assert(['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu', 'Manrope'].every((family) => loadedFonts.includes(family)), 'All delivered design-language fonts must load without an external host');
     await checkPrimitiveConsumer(page);
     await expect(page.getByLabel('Find a route')).toBeVisible();
     await page.getByLabel('Find a route').fill('/catalog');
@@ -325,8 +355,13 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await checkPetalRoseConsumer(page);
     await checkBarFamilyConsumer(page);
     await checkBlockBarsConsumer(page);
+    await checkSketchbookConsumer(page);
+    await checkSketchbookCatalogueConsumer(page);
+    await checkSoftStudioConsumer(page);
+    await checkStudioExtendedConsumer(page);
     await checkNeoChartsConsumer(page);
     await checkNeoExtendedConsumer(page);
+    await checkSignalChartsConsumer(page);
     await checkBarExtensionsConsumer(page);
     await checkScatterFamilyConsumer(page);
     await checkHeatmapConsumer(page);

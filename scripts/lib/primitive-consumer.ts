@@ -79,6 +79,8 @@ export function PrimitiveConsumer() {
     <div data-primitive-language="mono-editorial" className="grid grid-cols-2"><PrimitiveScope id="primitives-mono-editorial-original" /><PrimitiveScope id="primitives-mono-editorial-edited" /></div>
     <div data-primitive-language="signal-console" data-signal className="grid grid-cols-2"><PrimitiveScope id="primitives-signal-console-original" /><PrimitiveScope id="primitives-signal-console-edited" /></div>
     <div data-primitive-language="neo-brutalism" data-neo className="grid grid-cols-2"><PrimitiveScope id="primitives-neo-brutalism-original" /><PrimitiveScope id="primitives-neo-brutalism-edited" /></div>
+    <div data-primitive-language="sketchbook" data-sketchbook className="grid grid-cols-2"><PrimitiveScope id="primitives-sketchbook-original" /><PrimitiveScope id="primitives-sketchbook-edited" /></div>
+    <div data-primitive-language="soft-studio" data-studio className="grid grid-cols-2"><PrimitiveScope id="primitives-soft-studio-original" /><PrimitiveScope id="primitives-soft-studio-edited" /></div>
   </section>;
 }
 `;
@@ -111,9 +113,12 @@ const OVERRIDES: Record<string, string> = {
   '--nx-shadow-surface': '9px 7px 0px',
   '--nx-shadow-popover': '8px 6px 0px',
   '--nx-font-sans': 'Georgia, serif',
+  '--nx-font-heading': 'monospace',
+  '--nx-font-ui': 'Arial, sans-serif',
   '--nx-font-mono': 'monospace',
   '--nx-stroke-hairline': '2px',
   '--nx-radius-card': '13px',
+  '--nx-radius-avatar': '6px',
   '--nx-radius-pill': '8px',
   '--nx-radius-checkbox': '5px',
   '--nx-radius-code': '7px',
@@ -132,6 +137,15 @@ const OVERRIDES: Record<string, string> = {
   '--nx-type-label-size': '14px',
   '--nx-type-label-weight': '500',
   '--nx-type-label-tracking': '0.05em',
+  '--nx-type-uiLabel-size': '16px',
+  '--nx-type-uiLabel-weight': '500',
+  '--nx-type-uiLabel-tracking': '0.05em',
+  '--nx-type-uiLabel-transform': 'lowercase',
+  '--nx-type-choice-size': '21px',
+  '--nx-type-choice-weight': '700',
+  '--nx-type-choice-lineHeight': '1.5',
+  '--nx-texture-outlineOpacity': '0.7',
+  '--nx-texture-hatchOpacity': '0.3',
   '--nx-type-body-size': '16px',
   '--nx-type-body-lineHeight': '1.8',
   '--nx-type-avatar-size': '18px',
@@ -185,11 +199,29 @@ const STYLE_CHECKS: StyleCheck[] = [
   { selector: '.nx-badge', property: 'boxShadow', expected: 'rgb(18, 52, 86) 3px 1px 0px 0px' },
   { selector: '.nx-dialog', property: 'boxShadow', expected: 'rgb(18, 52, 86) 9px 7px 0px 0px' },
   { selector: '.nx-card', property: 'fontFamily', expected: 'Georgia, serif' },
+  { selector: '.nx-input', property: 'fontFamily', expected: 'Georgia, serif' },
+  { selector: '.nx-table', property: 'fontFamily', expected: 'Georgia, serif' },
+  { selector: '.nx-btn', property: 'fontFamily', expected: 'Arial, sans-serif' },
+  { selector: '.nx-field__label', property: 'fontFamily', expected: 'Arial, sans-serif' },
+  { selector: '.nx-choice', property: 'fontFamily', expected: 'Arial, sans-serif' },
+  { selector: '.nx-choice', property: 'fontSize', expected: '21px' },
+  { selector: '.nx-choice', property: 'fontWeight', expected: '700' },
+  { selector: '.nx-field__label', property: 'textTransform', expected: 'lowercase' },
+  { selector: '.nx-card', pseudo: '::before', property: 'opacity', expected: '0.7' },
+  { selector: '.nx-card', pseudo: '::before', property: 'borderTopColor', expected: 'rgb(18, 52, 86)' },
+  { selector: '.nx-card', pseudo: '::after', property: 'opacity', expected: '0.3' },
+  { selector: '[data-submit]', pseudo: '::before', property: 'opacity', expected: '0.7' },
+  { selector: '[data-submit]', pseudo: '::before', property: 'borderTopColor', expected: 'rgb(18, 52, 86)' },
   { selector: '.nx-card', property: 'paddingTop', expected: '31px' },
   { selector: '.nx-card', property: 'paddingRight', expected: '29px' },
   { selector: '.nx-card', property: 'paddingBottom', expected: '27px' },
   { selector: '.nx-card', property: 'borderTopLeftRadius', expected: '13px' },
+  { selector: '.nx-avatar--square', property: 'borderTopLeftRadius', expected: '6px' },
   { selector: '.nx-card__title', property: 'fontSize', expected: '23px' },
+  { selector: '.nx-card__title', property: 'fontFamily', expected: 'monospace' },
+  { selector: '.nx-dialog__title', property: 'fontFamily', expected: 'monospace' },
+  { selector: '.nx-empty__title', property: 'fontFamily', expected: 'monospace' },
+  { selector: '.nx-prose h2', property: 'fontFamily', expected: 'monospace' },
   { selector: '.nx-card__title', property: 'fontWeight', expected: '500' },
   { selector: '.nx-card__title', property: 'letterSpacing', expected: '0.92px' },
   { selector: '.nx-card__sub', property: 'fontSize', expected: '15px' },
@@ -202,9 +234,9 @@ const STYLE_CHECKS: StyleCheck[] = [
   { selector: '[data-primitive="button"] .nx-btn', property: 'paddingTop', expected: '12px' },
   { selector: '[data-primitive="button"] .nx-btn', property: 'paddingRight', expected: '20px' },
   { selector: '[data-primitive="input"] .nx-field', property: 'rowGap', expected: '11px' },
-  { selector: '[data-primitive="input"] .nx-field__label', property: 'fontSize', expected: '14px' },
+  { selector: '[data-primitive="input"] .nx-field__label', property: 'fontSize', expected: '16px' },
   { selector: '[data-primitive="input"] .nx-field__label', property: 'fontWeight', expected: '500' },
-  { selector: '[data-primitive="input"] .nx-field__label', property: 'letterSpacing', expected: '0.7px' },
+  { selector: '[data-primitive="input"] .nx-field__label', property: 'letterSpacing', expected: '0.8px' },
   { selector: '[data-primitive="input"] .nx-input', property: 'fontSize', expected: '17px' },
   { selector: '[data-primitive="input"] .nx-input', property: 'lineHeight', expected: '27.2px' },
   { selector: '[data-primitive="input"] .nx-input', property: 'paddingLeft', expected: '18px' },
@@ -213,7 +245,7 @@ const STYLE_CHECKS: StyleCheck[] = [
   { selector: '.nx-alert', property: 'fontSize', expected: '16px' },
   { selector: '.nx-alert', property: 'lineHeight', expected: '28.8px' },
   { selector: '.nx-avatar', property: 'fontSize', expected: '18px' },
-  { selector: '.nx-badge', property: 'fontSize', expected: '14px' },
+  { selector: '.nx-badge', property: 'fontSize', expected: '16px' },
   { selector: '.nx-checkbox', property: 'borderTopLeftRadius', expected: '5px' },
   { selector: '[data-primitive="code"] > .nx-code', property: 'borderTopLeftRadius', expected: '7px' },
   { selector: '.nx-details__summary', property: 'fontSize', expected: '19px' },
@@ -375,9 +407,38 @@ async function checkNeoActions(page: Page): Promise<void> {
 export async function checkPrimitiveConsumer(page: Page): Promise<void> {
   await checkNeoActions(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism']) {
+  for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism', 'sketchbook', 'soft-studio']) {
     const original = page.locator(`#primitives-${language}-original`);
     const edited = page.locator(`#primitives-${language}-edited`);
+    if (language === 'sketchbook') {
+      for (const selector of ['.nx-card__title', '.nx-btn', '.nx-field__label', '.nx-choice', '.nx-badge', '.nx-details__summary', '.nx-dialog__action', '.nx-slider-value > label', '.nx-progress-label > label']) {
+        assert.match(await readStyle(original, { selector, property: 'fontFamily', expected: '' }), /Gaegu/);
+      }
+      for (const selector of ['.nx-input', '.nx-select', '.nx-textarea', '.nx-card__body', '.nx-prose p', '.nx-table th', '.nx-table td', '.nx-slider-value > span', '.nx-progress-label > span']) {
+        assert.match(await readStyle(original, { selector, property: 'fontFamily', expected: '' }), /Gaegu/);
+      }
+      await expect(original.locator('.nx-table th').first()).toHaveCSS('font-size', '14px');
+      const action = original.locator('[data-submit]');
+      await action.scrollIntoViewIfNeeded();
+      const before = await action.boundingBox();
+      assert(before && before.height >= 44, 'Handwritten actions need a comfortable target height');
+      await action.hover();
+      assert.deepEqual(await action.boundingBox(), before, 'Decorative strokes must not move the hit target');
+      for (const selector of ['.nx-card', '[data-submit]']) {
+        for (const pseudo of ['::before', '::after']) {
+          assert.equal(await readStyle(original, { selector, pseudo, property: 'pointerEvents', expected: '' }), 'none');
+        }
+        assert.equal(await readStyle(original, { selector, pseudo: '::before', property: 'opacity', expected: '' }), '0.4');
+        assert.equal(await readStyle(original, { selector, pseudo: '::after', property: 'opacity', expected: '' }), '0.18');
+      }
+      await page.mouse.move(0, 0);
+    } else {
+      for (const selector of ['.nx-card', '[data-submit]']) {
+        for (const pseudo of ['::before', '::after']) {
+          assert.equal(await readStyle(original, { selector, pseudo, property: 'opacity', expected: '' }), '0', `${language}: texture must remain invisible`);
+        }
+      }
+    }
     for (const scope of [original, edited]) {
       const rendered = await scope.locator('[data-primitive]').evaluateAll((elements) => elements.map((element) => element.getAttribute('data-primitive')).sort());
       assert.deepEqual(rendered, [...PRIMITIVE_SLUGS].sort(), `${language}: all delivered primitive APIs must render`);
@@ -436,5 +497,5 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
       { selector: '.nx-tooltip', pseudo: '::after', property: 'transitionDuration', expected: '0s' },
     ]) assert.equal(await readStyle(edited, check), check.expected, `${language}: reduced motion must override duration tokens`);
   }
-  console.log('Validated all 24 CLI-delivered primitives in all three languages: scoped paint/type/spacing/radius/shadows/motion, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.');
+  console.log('Validated all 24 CLI-delivered primitives in all five languages: scoped paint/type/UI fonts/texture/spacing/radius/shadows/motion, Sketchbook typography and stable targets, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.');
 }

@@ -9,7 +9,6 @@ import { Preview } from '@/components/Preview.tsx';
 import { useLanguageTokens, useScopedLanguageTokens } from '@/lib/hooks.ts';
 import {
   loadCatalog,
-  previewUrl,
   type Catalog,
   type Item,
   type Language,
@@ -83,7 +82,7 @@ export function IndexView({
  * radius (slider), and mark weight (progress).
  *
  * These examples have compatible compositions for an unscaled tile. Their
- * authored dimensions reserve space until each document reports its height.
+ * authored dimensions reserve space until each example reports its height.
  */
 const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
 
@@ -95,7 +94,7 @@ const SAMPLE_PRIMITIVES = ['status', 'link', 'slider', 'progress'];
  * composite would read as misaligned rather than as varied.
  *
  * `min-w-0` on every level down to the Preview: a grid item's default minimum
- * is its content size, and a preview renders an iframe at a fixed wide logical
+ * is its content size, and a preview renders at a fixed wide logical
  * width, so without it the column is forced open and the inflated width is then
  * measured back as the one the scale is computed from.
  */
@@ -124,20 +123,20 @@ function TileCell<T>({
     >
       <Link
         href={href}
-        className="grid min-w-0 grid-rows-subgrid row-span-3 no-underline"
+        className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
         style={{ color: 'inherit', rowGap: 6 }}
       >
         <h3 className="m-0 self-start text-[12.5px] leading-[1.4] font-bold tracking-[-0.01em]">
           {title}
         </h3>
         <p
-          className="m-0 self-start text-[10.5px] tracking-[0.06em] uppercase"
+          className="m-0 self-start text-[length:var(--nx-type-body-supportingSize)] tracking-[0.06em] uppercase"
           style={{ color: 'var(--nx-faint)' }}
         >
           {kind}
         </p>
-        <div className="mt-2 min-w-0 self-start">{children}</div>
       </Link>
+      <div className="mt-2 min-w-0 self-start">{children}</div>
     </article>
   );
 }
@@ -203,11 +202,11 @@ function LanguageTile({
     >
       <div className="flex flex-wrap items-end justify-between gap-6 pb-9">
         <div>
-          <h2 className="m-0 text-[24px] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
+          <h2 className="m-0 text-[24px] [font-family:var(--nx-font-heading)] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
             {language.name}
           </h2>
           <p
-            className="mt-2.5 mb-0 max-w-[58ch] text-[12px] leading-[1.7]"
+            className="mt-2.5 mb-0 max-w-[58ch] text-[length:var(--nx-type-body-summarySize)] leading-[1.7]"
             style={{ color: 'var(--nx-muted)' }}
           >
             {language.description}
@@ -247,13 +246,9 @@ function LanguageTile({
             kind={item.meta.component}
           >
             <Preview
-              src={previewUrl(item, language.slug)}
-              title={item.title}
-              width={item.meta.preview.width}
-              height={item.meta.preview.height}
-              insets={item.meta.preview.insets}
+              item={item}
+              language={language.slug}
               boxHeight={TILE_HEIGHT}
-              fluid={item.meta.tier === 'primitive'}
             />
           </TileCell>
         ))}
@@ -261,7 +256,7 @@ function LanguageTile({
 
       {showing === 'primitives' ? (
         <p
-          className="mt-6 mb-0 text-[11.5px] leading-[1.7]"
+          className="mt-6 mb-0 text-[length:var(--nx-type-body-detailSize)] leading-[1.7]"
           style={{ color: 'var(--nx-muted)' }}
         >
           No charts yet. These are shared primitives wearing this language&apos;s

@@ -1,13 +1,13 @@
-import type { NodexMeta, PublishedLanguage, RegistryItem } from '@nodex/core/schema';
+import type { GalleryItem, GalleryRegistry, NodexMeta, PublishedLanguage } from '@nodex/core/schema';
 
 /**
- * The app reads the built manifest at runtime rather than importing the
- * registry source. Everything it needs is already in `public/r/`, which keeps
- * the app a static client with no build-time coupling to the registry tree, and
- * means the registry could later move to a CDN without touching the app.
+ * Discovery and downloads use the built manifest. The website also bundles
+ * lazy imports of the corresponding authored React examples at build time;
+ * examples share the app's runtime instead of starting separate documents.
+ * A CDN can serve the manifest and downloads, matched to that website build.
  */
 
-export type Item = RegistryItem;
+export type Item = GalleryItem;
 export type Language = PublishedLanguage;
 
 /** The landing, account pages, and initial document share this language. */
@@ -44,7 +44,7 @@ async function json<T>(url: string): Promise<T> {
 export function loadCatalog(): Promise<Catalog> {
   cache ??= (async () => {
     const [registry, languages] = await Promise.all([
-      json<{ items: Item[] }>(registryFileUrl('r/registry.json')),
+      json<GalleryRegistry>(registryFileUrl('r/gallery.json')),
       json<Language[]>(registryFileUrl('r/languages.json')),
     ]);
     return { languages, items: registry.items };
@@ -83,14 +83,6 @@ export function findItem(
       (item) => item.name === name && item.meta.language === 'shared',
     )
   );
-}
-
-/** The whole React example, with a language selection for a shared primitive. */
-export function previewUrl(item: Item, language?: string): string {
-  const url = registryFileUrl(item.meta.preview.path);
-  return item.meta.tier === 'primitive' && language
-    ? `${url}?lang=${encodeURIComponent(language)}`
-    : url;
 }
 
 export function designUrl(language: Language): string {

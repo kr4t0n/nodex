@@ -12,11 +12,11 @@ type: application
 # Chart version is independent of the app it ships. Bump on chart changes.
 # The publishing workflow preserves existing versioned tarballs, so changes
 # require a new version before they can be released.
-version: 0.2.2
+version: 0.2.3
 
 # Pin the default image to this release, including the migration Job.
 # image.tag remains available as an explicit deployment override.
-appVersion: "0.2.2"
+appVersion: "0.2.3"
 
 home: https://github.com/kr4t0n/nodex
 sources:

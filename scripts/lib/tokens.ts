@@ -28,7 +28,7 @@ export function fontFaces(tokens: Tokens): TokenFontFace[] {
       throw new Error('A font face must declare package, file, family and weight strings');
     }
     const { name } = dependencyPin(face.package);
-    if (!name.startsWith('@fontsource-variable/')) throw new Error(`Font package ${name} must come from @fontsource-variable`);
+    if (!/^@fontsource(?:-variable)?\//.test(name)) throw new Error(`Font package ${name} must come from @fontsource or @fontsource-variable`);
     registryPath(face.file, 'font file');
     if (!face.file.endsWith('.woff2')) throw new Error('Embedded font files must be WOFF2');
     if (!/^[A-Za-z0-9][A-Za-z0-9 -]*$/.test(face.family)) throw new Error(`Unsupported font family name: ${face.family}`);
