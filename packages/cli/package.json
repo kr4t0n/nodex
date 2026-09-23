@@ -1,6 +1,6 @@
 {
   "name": "@kubitnodes/nodex",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Fetch design languages and components from a nodex registry",
   "keywords": [
     "design-system",

@@ -815,7 +815,7 @@ automatically; an OIDC configuration error fails the publish job.
 
 For a coordinated release, bump `packages/cli/package.json` and its lockfile
 entry, plus the Helm chart's `version` and `appVersion`. Commit those changes
-on `main` and push a matching annotated tag such as `v0.2.2`. The main push
+on `main` and push a matching annotated tag such as `v0.2.3`. The main push
 publishes the versioned Helm chart; the tag starts the npm and image workflows.
 Image version tags omit the `v` prefix. Confirm the registry artifacts after
 the workflows finish: missing Docker credentials still make the image job skip,
