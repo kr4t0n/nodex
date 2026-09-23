@@ -69,13 +69,14 @@ jobs:
 
       # The CLI is the one artifact a stranger runs unsupervised, so it is worth
       # proving it works before shipping rather than after. smoke:cli drives a
-      # real init and add against a built registry.
+      # real init and add against a built registry. Typecheck follows the build
+      # because the web app's pretypecheck syncs from the built manifest.
       - if: steps.version.outputs.published == 'false'
         run: |
           npm run lint
-          npm run typecheck
           npx playwright install --with-deps chromium
           npm run build:registry
+          npm run typecheck
           npm run smoke:cli
 
       - if: steps.version.outputs.published == 'false'
