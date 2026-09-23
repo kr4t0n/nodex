@@ -796,10 +796,10 @@ and a migration Job. Its release workflow requires a chart-version bump:
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm repo update
-helm upgrade --install nodex nodex/nodex --version 0.2.2 --set siteUrl=https://nodex.example.com
+helm upgrade --install nodex nodex/nodex --version 0.2.3 --set siteUrl=https://nodex.example.com
 ```
 
-Chart `0.2.2` pins the app and migration Job to `kr4t0n/nodex:0.2.2` through
+Chart `0.2.3` pins the app and migration Job to `kr4t0n/nodex:0.2.3` through
 `appVersion`; `image.tag` is an explicit override.
 
 `npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
