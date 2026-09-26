@@ -241,6 +241,10 @@ async function main() {
     await assertTheme(page, 'soft-studio');
     await expect.poll(() => page.locator('[data-nx-example]').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.closest('[data-nx-preview]')?.getAttribute('data-nx-preview')?.startsWith('soft-studio/'))), { timeout: 15_000 }).toBe(true);
     assert(await page.evaluate(() => [...document.fonts].some((face) => face.family.replace(/["']/g, '') === 'Manrope' && face.status === 'loaded')), 'Soft Studio typography must preload before switching');
+    await command.fill('nodex init nocturne');
+    await command.press('Enter');
+    await assertTheme(page, 'nocturne');
+    await expect.poll(() => page.locator('[data-nx-example]').evaluateAll((frames) => frames.length > 0 && frames.every((frame) => frame.closest('[data-nx-preview]')?.getAttribute('data-nx-preview')?.startsWith('nocturne/'))), { timeout: 15_000 }).toBe(true);
     await expect(page.locator('[data-cli-command]')).toHaveCount(0);
     await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
     assert.deepEqual((await page.locator('[data-terminal-entry]').allTextContents()).slice(0, 2), completedText.slice(0, 2), 'Edits must preserve the first two command rows');
@@ -297,7 +301,7 @@ async function main() {
     await small.locator('[data-terminal-output]').getByRole('button', { name: 'Apply Neo-brutalism' }).click();
     await assertTheme(small, 'neo-brutalism');
     await assertFits(small);
-    for (const [language, name] of [['mono-editorial', 'Mono Editorial'], ['signal-console', 'Signal Console'], ['neo-brutalism', 'Neo-brutalism'], ['sketchbook', 'Sketchbook'], ['soft-studio', 'Soft Studio']]) {
+    for (const [language, name] of [['mono-editorial', 'Mono Editorial'], ['signal-console', 'Signal Console'], ['neo-brutalism', 'Neo-brutalism'], ['sketchbook', 'Sketchbook'], ['soft-studio', 'Soft Studio'], ['nocturne', 'Nocturne']]) {
       await small.goto(`/l/${language}/button`);
       await expect(small.getByRole('heading', { name: 'Button', exact: true })).toBeVisible();
       await small.evaluate(() => document.fonts.ready);

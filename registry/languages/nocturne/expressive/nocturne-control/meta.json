@@ -1,0 +1,97 @@
+{
+  "slug": "nocturne-control",
+  "title": "Signals beyond the usual range",
+  "description": "A measured process line with caller-supplied statistical limits, exact breach markers and optional event references.",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneControl"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneControlDatum[]",
+      "required": true,
+      "description": "Caller-owned { id, label, x, value } observations. IDs are unique and nonempty; numeric X coordinates are finite and strictly increasing. Signed finite values render; missing or invalid readings break the line and remain inspectable. Equality to either limit is not a breach."
+    },
+    {
+      "name": "limits",
+      "type": "NocturneControlLimits | null",
+      "required": true,
+      "description": "Caller-supplied finite ordered { lower, center, upper } statistical control limits, or null. Invalid limits are unavailable while measured observations remain visible. These are not business targets. No process model or run rules are inferred."
+    },
+    {
+      "name": "events",
+      "type": "readonly NocturneControlEvent[]",
+      "description": "Optional { id, x, label } events, with unique nonempty IDs and finite numeric X inside the observation window. Numbered native reference lines correspond to the event key."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading identifying the measured quantity or analytical question."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period, units or statistical context supplied by the application."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats absolute readings and tooltip values; axis ticks use compact numbers. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "numeric-domain.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 568
+  },
+  "tags": [
+    "control",
+    "process",
+    "limits",
+    "analysis",
+    "dark"
+  ]
+}

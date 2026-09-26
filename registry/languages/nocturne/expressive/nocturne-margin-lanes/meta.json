@@ -1,0 +1,90 @@
+{
+  "slug": "nocturne-margin-lanes",
+  "title": "Room around the target",
+  "description": "Current dots and expected intervals align around each row’s target, with a shared signed deviation scale.",
+  "component": "interval-dot",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneMarginLanes"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneMarginDatum[]",
+      "required": true,
+      "description": "Caller-owned { id, label, target, value, range } rows. All measurements must share one unit. Target and value are finite numbers or null; range is a complete finite ordered [low, high] pair or null. IDs must be unique and nonempty. Current value and expected range render independently after subtracting a valid target. Zero remains a true point or tick. No percentage normalization or confidence estimate is inferred."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading; defaults to Deviation from target."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting or expected-range context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats original targets, current values and expected bounds in tooltips. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "deltaFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats signed deviations on the axis and in direct readings. The default includes a plus sign for positive deviations; direction does not imply success or failure."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "scatter-fade.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 466
+  },
+  "tags": [
+    "targets",
+    "intervals",
+    "comparison",
+    "dark"
+  ]
+}

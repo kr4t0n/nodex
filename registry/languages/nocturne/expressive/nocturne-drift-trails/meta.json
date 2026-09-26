@@ -1,0 +1,102 @@
+{
+  "slug": "nocturne-drift-trails",
+  "title": "How the relationship changed",
+  "description": "Chronological trails connect real positions on two numeric axes, preserving reversals, gaps and the final supplied reading.",
+  "component": "trajectory",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneDriftTrails"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneDriftSeries[]",
+      "required": true,
+      "description": "Caller-owned { id, label, tone?, observations } series. Observations are { id, label, time, x, y }, with unique nonempty IDs within each series and finite strictly increasing times. Series IDs are unique and nonempty. Either coordinate may reverse, be signed or be zero. Missing/nonfinite coordinate pairs are omitted and counted, and break connections. Only a complete final supplied observation receives a filled latest dot. No interpolation across missing observations."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading; defaults to Trajectories."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned observation period or reporting context."
+    },
+    {
+      "name": "xLabel",
+      "type": "string",
+      "description": "Horizontal measure and unit, shared across series; defaults to X."
+    },
+    {
+      "name": "yLabel",
+      "type": "string",
+      "description": "Vertical measure and unit, shared across series; defaults to Y."
+    },
+    {
+      "name": "xFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats horizontal coordinates in ticks, inspection and final readings. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "yFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats vertical coordinates in ticks, inspection and final readings. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "scatter-fade.ts",
+    "numeric-domain.ts",
+    "nocturne-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 564
+  },
+  "tags": [
+    "movement",
+    "comparison",
+    "time",
+    "dark"
+  ]
+}
