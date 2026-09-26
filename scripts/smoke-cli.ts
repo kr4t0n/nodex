@@ -286,7 +286,18 @@ try {
   assert.match(await cli(project, ['lint', ...sketchCharts, '--design', 'sketchbook']), /0 errors/);
   const studioCharts = charts.filter((item) => item.meta.language === 'soft-studio').map((item) => `${config.paths.components}/${item.name}`);
   assert.match(await cli(project, ['lint', ...studioCharts, '--design', 'soft-studio']), /0 errors/);
-  checks += 7;
+  const nocturneCharts = charts.filter((item) => item.meta.language === 'nocturne').map((item) => config.paths.components + '/' + item.name);
+  assert.equal(nocturneCharts.length, 12, 'Nocturne must deliver all twelve charts');
+  assert.match(await cli(project, ['lint', ...nocturneCharts, '--design', 'nocturne']), /0 errors/);
+  for (const [type, name] of [['paired-range', 'nocturne-promise-lanes'], ['interval-dot', 'nocturne-margin-lanes'], ['trajectory', 'nocturne-drift-trails'], ['waterfall', 'nocturne-waterfall'], ['boxplot', 'nocturne-boxplot'], ['area', 'nocturne-forecast-fan'], ['scatter', 'nocturne-scatter-matrix']]) {
+    const matches = JSON.parse(await cli(project, ['search', '--design', 'nocturne', '--type', type!, '--json'])) as { name: string }[];
+    assert.deepEqual(matches.map(item => item.name), [name], type + ': native type discovery must find its chart');
+    checks++;
+  }
+  const nocturneLines = JSON.parse(await cli(project, ['search', '--design', 'nocturne', '--type', 'line', '--json'])) as { name: string }[];
+  assert.deepEqual(nocturneLines.map(item => item.name).sort(), ['nocturne-control', 'nocturne-ecdf', 'nocturne-line']);
+  assert.deepEqual(JSON.parse(await cli(project, ['search', '--design', 'nocturne', '--type', 'heatmap', '--json'])), [], 'The replaced heatmap must leave the catalogue');
+  checks += 9;
 
   // Custom destinations must be checked explicitly, including from subdirectories.
   assert.match(await cli(path.join(project, 'src'), ['lint', 'src/charts']), /[1-9]\d* source files checked; 0 errors/);

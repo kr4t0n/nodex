@@ -22,6 +22,12 @@ import { SIGNAL_CHARTS_CONSUMER_SOURCE, checkSignalChartsConsumer } from './lib/
 import { SOFT_STUDIO_CONSUMER_SOURCE, checkSoftStudioConsumer } from './lib/soft-studio-consumer.ts';
 import { STUDIO_EXTENDED_CONSUMER_SOURCE, checkStudioExtendedConsumer } from './lib/studio-extended-consumer.ts';
 import { checkStudioPreviewFit } from './lib/studio-preview-fit.ts';
+import { checkChartPreviewFit } from './lib/chart-preview-fit.ts';
+import { NOCTURNE_CONSUMER_SOURCE, checkNocturneConsumer } from './lib/nocturne-consumer.ts';
+import { NOCTURNE_EXTENDED_SOURCE, checkNocturneExtendedConsumer } from './lib/nocturne-extended-consumer.ts';
+import { NOCTURNE_DISTRIBUTION_SOURCE, checkNocturneDistributionConsumer } from './lib/nocturne-distribution-consumer.ts';
+import { NOCTURNE_ANALYTICAL_SOURCE, checkNocturneAnalyticalConsumer } from './lib/nocturne-analytical-consumer.ts';
+import { NOCTURNE_MATRIX_SOURCE, checkNocturneMatrixConsumer } from './lib/nocturne-matrix-consumer.ts';
 import { BAR_EXTENSION_SLUGS, BAR_EXTENSIONS_CONSUMER_SOURCE, checkBarExtensionsConsumer } from './lib/bar-extensions-consumer.ts';
 import { checkDualAreaConsumer, DUAL_AREA_CONSUMER_SOURCE } from './lib/dual-area-consumer.ts';
 import { HEATMAP_CONSUMER_SOURCE, HEATMAP_SLUGS, checkHeatmapConsumer } from './lib/heatmap-consumer.ts';
@@ -88,6 +94,7 @@ async function checkPreviews(browser: Browser): Promise<void> {
           if (javaScriptEnabled) await page.waitForFunction(() => document.documentElement.dataset.nxReady === 'true');
           assert(await page.locator('#nx-preview').evaluate((element) => element.childElementCount > 0), `${item.name}: preview is empty`);
           if (item.meta.language === 'soft-studio') await checkStudioPreviewFit(page.locator('[data-nx-chart]'));
+          if (item.meta.language === 'nocturne') await checkChartPreviewFit(page.locator('[data-nx-chart]'));
           if (item.name === 'force-graph') await checkForceFit(page.locator('[data-nx-chart="force-graph"]'));
           if (item.name === 'ballot-tally') await checkBallotLayout(page.locator('[data-nx-chart="ballot-tally"]'));
           if (item.name === 'tick-donut' || item.name === 'tick-gauge') await checkRadialGeometry(page.locator(`[data-nx-chart="${item.name}"]`));
@@ -127,6 +134,11 @@ import { SketchbookConsumer } from './sketchbook-consumer';
 import { SketchbookCatalogueConsumer } from './sketchbook-catalogue-consumer';
 import { SoftStudioConsumer } from './soft-studio-consumer';
 import { StudioExtendedConsumer } from './studio-extended-consumer';
+import { NocturneConsumer } from './nocturne-consumer';
+import { NocturneExtendedConsumer } from './nocturne-extended-consumer';
+import { NocturneDistributionConsumer } from './nocturne-distribution-consumer';
+import { NocturneAnalyticalConsumer } from './nocturne-analytical-consumer';
+import { NocturneMatrixConsumer } from './nocturne-matrix-consumer';
 import { BlockBarsConsumer } from './block-bars-consumer';
 import { NeoChartsConsumer } from './neo-charts-consumer';
 import { NeoExtendedConsumer } from './neo-extended-consumer';
@@ -196,6 +208,11 @@ function Consumer() {
     <PrimitiveConsumer />
     <SoftStudioConsumer />
     <StudioExtendedConsumer />
+    <NocturneConsumer />
+    <NocturneExtendedConsumer />
+    <NocturneDistributionConsumer />
+    <NocturneAnalyticalConsumer />
+    <NocturneMatrixConsumer />
   </main>;
 }
 
@@ -240,6 +257,13 @@ async function consumerFixture(): Promise<string> {
     await writeFile(path.join(fixture, 'src/styles/sketchbook-tokens.css'), sketchTokens.replace(':root', '[data-sketchbook]'));
     const studioTokens = await run(process.execPath, [cli, 'tokens', 'soft-studio'], fixture);
     await writeFile(path.join(fixture, 'src/styles/studio-tokens.css'), studioTokens.replace(':root', '[data-studio]'));
+    const nocturneTokens = await run(process.execPath, [cli, 'tokens', 'nocturne'], fixture);
+    await writeFile(path.join(fixture, 'src/styles/nocturne-tokens.css'), nocturneTokens.replace(':root', '[data-nocturne]'));
+    await writeFile(path.join(fixture, 'src/nocturne-consumer.tsx'), NOCTURNE_CONSUMER_SOURCE);
+    await writeFile(path.join(fixture, 'src/nocturne-extended-consumer.tsx'), NOCTURNE_EXTENDED_SOURCE);
+    await writeFile(path.join(fixture, 'src/nocturne-distribution-consumer.tsx'), NOCTURNE_DISTRIBUTION_SOURCE);
+    await writeFile(path.join(fixture, 'src/nocturne-analytical-consumer.tsx'), NOCTURNE_ANALYTICAL_SOURCE);
+    await writeFile(path.join(fixture, 'src/nocturne-matrix-consumer.tsx'), NOCTURNE_MATRIX_SOURCE);
     await writeFile(path.join(fixture, 'src/soft-studio-consumer.tsx'), SOFT_STUDIO_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/studio-extended-consumer.tsx'), STUDIO_EXTENDED_CONSUMER_SOURCE);
     assert.equal(installed.dependencies.roughjs, '4.6.6', 'CLI must install the exact sketch geometry dependency');
@@ -247,7 +271,7 @@ async function consumerFixture(): Promise<string> {
     assert.equal(installed.dependencies['@types/d3-force'], '3.0.10', 'Delivered force layout must include its TypeScript declarations');
     await writeFile(path.join(fixture, 'src/sketchbook-consumer.tsx'), SKETCHBOOK_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/sketchbook-catalogue-consumer.tsx'), SKETCHBOOK_CATALOGUE_SOURCE);
-    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@source "../";\n');
+    await writeFile(path.join(fixture, 'src/styles/main.css'), '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@import "./nocturne-tokens.css";\n@source "../";\n');
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/primitive-consumer.tsx'), PRIMITIVE_CONSUMER_SOURCE);
     await writeFile(path.join(fixture, 'src/dual-area-consumer.tsx'), DUAL_AREA_CONSUMER_SOURCE);
@@ -339,6 +363,11 @@ async function checkConsumer(browser: Browser): Promise<void> {
     });
     assert(['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu', 'Manrope'].every((family) => loadedFonts.includes(family)), 'All delivered design-language fonts must load without an external host');
     await checkPrimitiveConsumer(page);
+    await checkNocturneConsumer(page);
+    await checkNocturneExtendedConsumer(page);
+    await checkNocturneDistributionConsumer(page);
+    await checkNocturneAnalyticalConsumer(page);
+    await checkNocturneMatrixConsumer(page);
     await expect(page.getByLabel('Find a route')).toBeVisible();
     await page.getByLabel('Find a route').fill('/catalog');
     await expect(page.locator('output')).toHaveText('/catalog');

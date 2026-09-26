@@ -1,0 +1,90 @@
+{
+  "slug": "nocturne-waterfall",
+  "title": "Where the balance moved",
+  "description": "Floating changes bridge opening and closing balances, with exact zero-based totals and signed readings.",
+  "component": "waterfall",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneWaterfall"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneWaterfallDatum[]",
+      "required": true,
+      "description": "Caller-ordered { id, label, kind, value } steps. Start and change kinds accept a finite signed value or null; total steps have no value and read the derived running balance. IDs must be unique and nonempty. Missing or overflowing changes break the chain until an explicit start. Zero has a tick, never a minimum-height bar. Color encodes direction only."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading; defaults to Change in balance."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context, units or statistical policy."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats absolute readings and tooltip values; axis ticks use compact numbers. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "deltaFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats change readings separately from balances. The default includes a plus sign for positive changes."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "numeric-domain.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 488
+  },
+  "tags": [
+    "balance",
+    "changes",
+    "waterfall",
+    "dark"
+  ]
+}

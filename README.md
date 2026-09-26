@@ -5,16 +5,16 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains **100 expressive charts** (64 Mono Editorial, nine Signal Console,
-nine Neo-brutalism, nine Sketchbook and nine Soft Studio) and **24 reusable primitives**, delivered as editable React source.
+The registry contains **112 expressive charts** (64 Mono Editorial, nine Signal Console,
+nine Neo-brutalism, nine Sketchbook, nine Soft Studio and twelve Nocturne) and **24 reusable primitives**, delivered as editable React source.
 This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
-Five design languages are available: Mono Editorial, Signal Console,
-**Neo-brutalism**, **Sketchbook** and **Soft Studio**. Neo-brutalism starts with all 24 shared primitives, a complete
+Six design languages are available: Mono Editorial, Signal Console,
+**Neo-brutalism**, **Sketchbook**, **Soft Studio** and **Nocturne**. Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
 yellow actions, pink badges, mint selections, cream fields and blue value
@@ -48,6 +48,143 @@ previews; the language gallery contains all nine charts.
 The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex implements these through its own semantic tokens and React primitives.
+
+## Nocturne
+
+Nocturne is available at `/l/nocturne`, with all 24 shared primitives and twelve
+expressive charts. Graphite pages, layered charcoal surfaces, embedded Inter,
+compact corners and restrained iris, teal, amber and blue define its dark product
+interface. Body copy is 14px; editable values are 16px. Surfaces remain flat and
+opaque. The [design guide](registry/languages/nocturne/DESIGN.md) covers the
+complete language, including forms, navigation, prose, interaction and motion.
+
+| Chart | Type | Reading |
+| --- | --- | --- |
+| `nocturne-bars` | Bar | Slim horizontal bars rank categories, retaining stable ties, zero readings and unavailable rows |
+| `nocturne-line` | Line | Straight segments preserve numeric intervals and independent gaps; endpoint labels separate crowded series |
+| `nocturne-ring` | Donut | Thin, exact sectors allocate a complete total, with a responsive key |
+| `nocturne-scatter-matrix` | Scatter | Linked pairwise observations and diagonal histograms compare metrics and cohorts on shared numeric scales |
+| `nocturne-promise-lanes` | Paired range | Planned and actual intervals distinguish shifts in start, finish and duration |
+| `nocturne-margin-lanes` | Interval dot | Current values and expected ranges share a signed deviation scale around each row's target |
+| `nocturne-drift-trails` | Trajectory | Chronological paths across two numeric axes preserve reversals, gaps and final observations |
+| `nocturne-waterfall` | Waterfall | Signed changes bridge running balances; missing changes break the chain until an explicit start |
+| `nocturne-boxplot` | Boxplot | Horizontal quartile boxes, median ticks, supplied whiskers and independent outliers compare distributions |
+| `nocturne-forecast-fan` | Area | Observed history and point forecasts share explicitly labeled prediction intervals |
+| `nocturne-control` | Line | Supplied statistical control limits identify strict point breaches, with optional event references |
+| `nocturne-ecdf` | Line | Exact cumulative steps reveal inclusive threshold shares and empirical percentiles without bins |
+
+```bash
+nodex init nocturne
+nodex add nocturne/nocturne-bars nocturne/nocturne-line
+nodex add nocturne/nocturne-ring nocturne/nocturne-scatter-matrix button card
+nodex add nocturne/nocturne-promise-lanes nocturne/nocturne-margin-lanes nocturne/nocturne-drift-trails
+nodex add nocturne/nocturne-waterfall nocturne/nocturne-boxplot
+nodex add nocturne/nocturne-forecast-fan nocturne/nocturne-control nocturne/nocturne-ecdf
+```
+
+Bars accept `{ id, label, value }`; the ring also accepts an optional category
+`tone` from `a`–`d`. IDs must be unique and nonempty; repeated display labels are
+allowed. Bars rank finite nonnegative values descending, with stable ties and
+unavailable rows last. The ring requires a complete finite total before drawing
+shares. Zero never acquires a bar or sector.
+
+Lines accept ordered `{ id, label, tone? }` series and observations with
+`{ id, label, x, values }`. X coordinates are finite and strictly increasing;
+signed Y readings are supported. Missing values break only their own series.
+Endpoint labels and key readings refer to the final supplied observation, even
+when unavailable. Category colors and native animation matching retain identity
+through reordering.
+
+The scatterplot matrix replaces the former activity heatmap and its featured
+preview. It takes observations with `{ id, label, cohortId, values }`, at least
+two `{ id, label, unit?, valueFormatter? }` dimensions, and declared
+`{ id, label, tone? }` cohorts. Each metric shares one finite numeric extent across
+all panels. Missing coordinates are omitted and counted per pair; other measured
+coordinates still contribute to their marginal histograms. Diagonal histograms
+overlay cohort counts in shared equal-width bins (`binCount`, default 6, range
+2–24). Bins include their lower boundary; only the final bin includes its upper
+boundary. No density, model fit or correlation coefficient is inferred. Native
+pointer and keyboard inspection links the same observation across the matrix,
+including its histogram bins, without restarting chart animations. Narrow or
+short consumers scroll locally.
+
+Promise lanes takes `{ id, label, planned, actual }` rows. Each interval is a
+`[start, end]` pair or `null` on one common numeric scale. Planned and actual
+intervals render independently; incomplete, reversed or nonfinite intervals are
+unavailable, and zero duration is a tick. Start, finish and duration differences
+require both intervals and use actual minus planned. `valueFormatter` formats
+absolute coordinates; `deltaFormatter` formats differences, so dates and elapsed
+time can use different notation.
+
+Margin lanes takes `{ id, label, target, value, range }` rows. All rows share one
+measurement unit; the chart subtracts each row's target and uses a symmetric
+deviation scale. The current dot and caller-supplied expected `[low, high]` range
+remain independent. No confidence estimate, normalization or outcome classification
+is inferred. A missing target leaves the row inspectable without projected marks.
+
+Drift trails takes `{ id, label, tone?, observations }` series. Each observation
+has `{ id, label, time, x, y }`. Times must be finite and strictly increasing within
+each series; numeric X and Y may reverse, be signed or be zero. Incomplete pairs
+are omitted and counted, and break the trail. Only the final supplied observation
+can receive a filled latest marker. Missing final coordinates never promote an
+earlier reading. `xLabel`, `yLabel`, `xFormatter` and `yFormatter` identify both
+measures. Arrows indicate chronological direction, not speed or duration.
+
+These introduce the cross-language types `paired-range`, `interval-dot` and
+`trajectory`. Discover them through gallery filters or, for example,
+`nodex search --design nocturne --type paired-range`.
+
+Waterfall takes ordered `{ id, label, kind, value }` steps. `start` sets a balance,
+`change` adds a signed amount, and `total` reads the derived balance without taking
+a value. Missing or overflowing changes break the chain until the next explicit
+start. Zero remains a tick; signed changes retain their full length across zero.
+`valueFormatter` and `deltaFormatter` separate absolute and change readings.
+
+Boxplot takes `{ id, label, summary, outliers? }` rows. The summary is an ordered,
+finite `[lowerWhisker, q1, median, q3, upperWhisker]` tuple or `null`. Optional
+outliers contain `{ id, label?, value }`, with IDs unique within each row. Signed
+values are supported, equal quartiles collapse to a median tick, and outliers
+remain visible independently of summary availability. Invalid outlier readings
+are omitted and counted. The caller supplies the quartile method, whisker policy
+and outlier classification; the chart does not estimate them.
+
+Forecast fan takes `{ id, label, x, kind, value }` observations and explicit
+`{ id, coverage }` bands. Numeric X must increase strictly; observed rows precede
+forecast rows. Each forecast provides `intervals` keyed by band ID, containing
+ordered `[lower, upper]` bounds or `null`. Coverage probabilities are distinct and
+strictly between zero and one. Broader intervals must contain narrower ones;
+crossing intervals are unavailable at that observation while its point forecast
+remains visible. A point estimate need not lie inside every interval. Missing
+values and bounds remain independent gaps; isolated ranges remain visible as
+vertical strokes. The application supplies the model and prediction intervals.
+
+Control takes `{ id, label, x, value }` observations and caller-supplied
+`{ lower, center, upper }` statistical `limits`, or `null`. These limits must be
+finite and ordered; unavailable limits retain observations without classifying
+them. Only strict point breaches are marked: equality is within the limits.
+Optional `{ id, x, label }` events refer to positions inside the observation
+window. The chart does not estimate limits, evaluate sequence rules or infer an
+overall stability verdict. Statistical control limits are separate from business
+targets and specification limits.
+
+ECDF takes `{ id, label, tone?, samples }` series, with `{ id, value }` samples.
+It sorts finite signed values without mutating input, combines ties into exact
+inclusive jumps and divides by each series' measured sample count. Missing or
+nonfinite values are omitted and counted. `threshold` reports the share at or
+below a supplied value, including values outside the sample range. `percentiles`
+defaults to `[0.5, 0.9]`; each reading is the smallest observed value reaching its
+probability, without interpolation. Empty series retain unavailable readings.
+These three charts use the existing area and line taxonomy; analytical intent is
+documented in their metadata and tags.
+
+All twelve support native keyboard inspection, descendant token overrides,
+container resizing and live reduced motion. Dense consumer plots scroll locally;
+compact annotations use visible ellipses, with full readings retained in inspection.
+The gallery specimens fit completely before scaling. The language index features
+bars, line, ring and the scatterplot matrix; the gallery and selected landing belt discover
+all twelve. The landing terminal accepts `nodex init nocturne` and
+selects its actual chart belt. The automatic demonstration still ends with
+Sketchbook. Fonts and their license travel inside the token stylesheet.
 
 ## Soft Studio
 
@@ -720,7 +857,7 @@ npm run smoke:gallery
 | `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
 | `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
 | `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
-| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all five languages, stable sketch geometry, Soft Studio geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
+| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all six languages, stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
 | `check:shell` | Gallery primitive classes have their curated stylesheets |
 | `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |
