@@ -7,6 +7,7 @@ import type { GalleryRegistry } from '../packages/core/src/schema.ts';
 import { nativePreviewFixture } from './lib/native-preview-fixture.ts';
 import { startSite } from './lib/site.ts';
 import { checkStudioPreviewFit } from './lib/studio-preview-fit.ts';
+import { checkChartPreviewFit } from './lib/chart-preview-fit.ts';
 
 const languagePath = '/l/mono-editorial';
 const preview = (page: Page, key: string) => page.locator(`[data-nx-preview="${key}"]`);
@@ -189,6 +190,7 @@ async function main() {
           assert(Math.abs(dimensions.height - item.meta.preview.height) <= 2, `${item.name}: expected height ${item.meta.preview.height}, received ${dimensions.height}`);
           await checkChartAlignment(example, example.locator('xpath=ancestor::article').locator('h2'));
           if (language === 'soft-studio') await checkStudioPreviewFit(example.locator('[data-nx-chart]'));
+          if (language === 'nocturne') await checkChartPreviewFit(example.locator('[data-nx-chart]'));
         }
       }
       await expect(all.locator('iframe')).toHaveCount(0);
@@ -199,7 +201,7 @@ async function main() {
       assert.deepEqual(duplicateIds, [], `${language}: independent instances must not share document IDs`);
     }
     // Resize mounted detail previews through narrow, tablet and native sizes.
-    for (const key of ['mono-editorial/hairline-line', 'signal-console/endpoint-latency', 'neo-brutalism/block-bars', 'sketchbook/sketch-bars', 'soft-studio/soft-area']) {
+    for (const key of ['mono-editorial/hairline-line', 'signal-console/endpoint-latency', 'neo-brutalism/block-bars', 'sketchbook/sketch-bars', 'soft-studio/soft-area', 'nocturne/nocturne-line']) {
       await all.goto(`/l/${key}`);
       const example = preview(all, key);
       await waitForReady(example);
@@ -210,24 +212,27 @@ async function main() {
       }
     }
     await all.setViewportSize({ width: 320, height: 740 });
-    await all.goto('/l/soft-studio');
-    const studioCharts = catalog.items.filter(item => item.meta.language === 'soft-studio');
-    assert.equal(studioCharts.length, 9, 'Soft Studio must expose nine charts');
-    for (const item of studioCharts) {
-      const example = preview(all, `soft-studio/${item.name}`);
-      await example.scrollIntoViewIfNeeded(); await waitForReady(example);
-      await checkChartAlignment(example, example.locator('xpath=ancestor::article').locator('h2'));
-      await checkStudioPreviewFit(example.locator('[data-nx-chart]'));
+    for (const language of ['soft-studio', 'nocturne']) {
+      await all.goto('/l/' + language);
+      const charts = catalog.items.filter(item => item.meta.language === language);
+      assert.equal(charts.length, language === 'nocturne' ? 12 : 9, language + ': complete catalogue');
+      const checkFit = language === 'soft-studio' ? checkStudioPreviewFit : checkChartPreviewFit;
+      for (const item of charts) {
+        const example = preview(all, language + '/' + item.name);
+        await example.scrollIntoViewIfNeeded(); await waitForReady(example);
+        await checkChartAlignment(example, example.locator('xpath=ancestor::article').locator('h2'));
+        await checkFit(example.locator('[data-nx-chart]'));
+      }
+      assert(await all.evaluate(() => document.documentElement.scrollWidth <= innerWidth), language + ': thumbnails must fit on mobile');
+      for (const item of charts) {
+        await all.goto('/l/' + language + '/' + item.name);
+        const example = preview(all, language + '/' + item.name);
+        await waitForReady(example); await checkFit(example.locator('[data-nx-chart]'));
+        await checkChartAlignment(example, all.locator('h1'));
+        assert(await all.evaluate(() => document.documentElement.scrollWidth <= innerWidth), item.name + ': detail must fit on mobile');
+      }
     }
-    assert(await all.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Soft Studio thumbnails must fit on mobile');
-    for (const item of studioCharts) {
-      await all.goto(`/l/soft-studio/${item.name}`);
-      const example = preview(all, `soft-studio/${item.name}`);
-      await waitForReady(example); await checkStudioPreviewFit(example.locator('[data-nx-chart]'));
-      await checkChartAlignment(example, all.locator('h1'));
-      assert(await all.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${item.name}: detail must fit on mobile`);
-    }
-    for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism', 'sketchbook', 'soft-studio']) {
+    for (const language of ['mono-editorial', 'signal-console', 'neo-brutalism', 'sketchbook', 'soft-studio', 'nocturne']) {
       for (const name of ['dialog', 'input', 'textarea']) {
         await all.goto(`/l/${language}/${name}`);
         await waitForReady(preview(all, `shared/${name}`));

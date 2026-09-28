@@ -103,6 +103,34 @@ test('tokens and source checks reject literal paint, unknown roles and unguarded
   }
 });
 
+test('Nocturne text, controls and data retain contrast on dark and inverse surfaces', async () => {
+  const { color } = JSON.parse(await readFile(path.join(ROOT, 'registry/languages/nocturne/tokens.json'), 'utf8')) as { color: Record<string, string> };
+  const luminance = (hex: string) => {
+    const channels = [1, 3, 5].map(offset => {
+      const channel = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    });
+    return channels[0]! * 0.2126 + channels[1]! * 0.7152 + channels[2]! * 0.0722;
+  };
+  const contrast = (foreground: string, background: string) => {
+    const a = luminance(color[foreground]!); const b = luminance(color[background]!);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  };
+  for (const background of ['bg', 'surfaceFill', 'fieldFill']) {
+    for (const foreground of ['ink', 'muted', 'faint']) {
+      assert(contrast(foreground, background) >= 4.5, foreground + ' must remain readable on ' + background);
+    }
+    assert(contrast('border', background) >= 3, 'Control boundaries must remain visible on ' + background);
+  }
+  for (const [foreground, background] of [
+    ['actionText', 'actionFill'], ['actionText', 'actionHoverFill'], ['selectionText', 'selectionFill'],
+    ['badgeText', 'badgeFill'], ['bg', 'ink'], ['onDarkMuted', 'ink'], ['onDarkFaint', 'ink'],
+  ]) assert(contrast(foreground!, background!) >= 4.5, foreground + ' must remain readable on ' + background);
+  for (const foreground of ['seriesA', 'seriesB', 'seriesC', 'seriesD', 'heatFill']) {
+    assert(contrast(foreground, 'surfaceFill') >= 3, foreground + ' must remain distinct from its plot surface');
+  }
+});
+
 test('font metadata becomes licensed embedded assets, never invalid CSS declarations', async () => {
   const variables = tokenVariables(tokens);
   assert.equal(Object.keys(variables).some((name) => /faces|webfont/.test(name)), false);

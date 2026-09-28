@@ -1,0 +1,92 @@
+{
+  "slug": "nocturne-forecast-fan",
+  "title": "The range of what comes next",
+  "description": "Observed history meets a forecast with explicitly labeled, nested prediction intervals supplied by the caller.",
+  "component": "area",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneForecastFan"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneForecastDatum[]",
+      "required": true,
+      "description": "Ordered observations with unique nonempty id, label, finite strictly increasing x, value and kind. Observed rows precede forecast rows. Forecast rows provide intervals keyed by declared band IDs. Values are finite signed numbers or null. Each complete ordered finite [lower, upper] interval renders independently of the point forecast. Missing or invalid intervals leave gaps; non-nested intervals invalidate the bands at that observation. The forecast line anchors only to the final supplied observed value. No model, coverage or interval is estimated."
+    },
+    {
+      "name": "bands",
+      "type": "readonly NocturneForecastBand[]",
+      "required": true,
+      "description": "Unique nonempty band IDs and distinct coverage probabilities strictly between zero and one. Bands render from greatest to least coverage. An empty list permits point forecasts without intervals."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading identifying the measured quantity or analytical question."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period, units or statistical context supplied by the application."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats absolute readings and tooltip values; axis ticks use compact numbers. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "numeric-domain.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 508
+  },
+  "tags": [
+    "forecast",
+    "prediction-interval",
+    "uncertainty",
+    "analysis",
+    "dark"
+  ]
+}

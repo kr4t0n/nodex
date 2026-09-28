@@ -1,0 +1,29 @@
+{
+  "slug": "nocturne-scatter-matrix",
+  "title": "What moves together?",
+  "description": "Linked pairwise observations and marginal histograms compare metrics and cohorts on consistent numeric scales.",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": ["NocturneScatterMatrix"],
+  "props": [
+    { "name": "data", "type": "readonly NocturneMatrixDatum[]", "required": true, "description": "Observations with globally unique nonempty id, label, declared cohortId and values keyed by declared dimension IDs. Finite signed values retain exact numeric positions. Null, missing or non-finite coordinates are omitted and counted independently in each pair and marginal distribution. Repeated labels are allowed; unknown dimension keys and cohorts reject the input." },
+    { "name": "dimensions", "type": "readonly NocturneMatrixDimension[]", "required": true, "description": "At least two ordered dimensions with unique nonempty id, label, optional unit and optional valueFormatter. Each metric shares its finite extent across every panel and cohort; constant metrics receive a finite padded extent. Axis ticks use compact numbers; inspection retains the dimension formatter and unit." },
+    { "name": "cohorts", "type": "readonly NocturneMatrixCohort[]", "required": true, "description": "Ordered cohort declarations with unique nonempty id, label and optional categorical tone a, b, c or d. Colors remain stable by ID through reorder. Empty cohorts remain in the key with n=0." },
+    { "name": "binCount", "type": "number", "description": "Integer from 2 to 24, default 6. Diagonal histograms count finite coordinates in equal-width bins shared across cohorts. Bins are closed on the left and open on the right, except the final bin includes its upper boundary. Cohort counts overlay without stacking or density normalization; zero has no bar." },
+    { "name": "unitLabel", "type": "string", "description": "Caller-owned heading; defaults to Pairwise relationships." },
+    { "name": "contextLabel", "type": "string", "description": "Optional reporting context supplied by the application." },
+    { "name": "width", "type": "number", "description": "Total width in pixels; otherwise fills the container. The matrix scrolls horizontally in narrow scopes." },
+    { "name": "height", "type": "number", "description": "Optional total height in pixels. The matrix and complete key share a vertical scroll region when constrained." },
+    { "name": "animate", "type": "boolean", "description": "Native finite fading at final coordinates, with scoped timing and live reduced motion; defaults to true." },
+    { "name": "className", "type": "string", "description": "Additional container classes." },
+    { "name": "aria-label", "type": "string", "description": "Accessible title for the matrix. Each native panel also names its metrics and keyboard inspection behavior." }
+  ],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts", "numeric-domain.ts", "scatter-fade.ts", "nocturne-categorical.ts", "nocturne-chart-frame.tsx"],
+  "dependencies": ["recharts@3.10.1"],
+  "example": { "entry": "example.tsx", "export": "Example", "width": 800, "height": 942 },
+  "tags": ["matrix", "multivariate", "cohort", "histogram", "linked-inspection", "analysis", "dark"]
+}

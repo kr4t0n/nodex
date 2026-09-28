@@ -1,0 +1,83 @@
+{
+  "slug": "nocturne-bars",
+  "title": "Where work happens",
+  "description": "Slim horizontal bars rank categories from one zero, with aligned labels and exact readings.",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneBars"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneBarsDatum[]",
+      "required": true,
+      "description": "Caller-owned { id, label, value } categories. Unique, nonempty IDs; repeated labels are allowed. Finite nonnegative values rank descending, stable ties retain caller order, unavailable rows come last. Zero keeps a reading without a mark. Full labels remain in native inspection."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading and measurement unit. Defaults to Value (Total for NocturneRing)."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned time window or reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats exact readings and tooltips; defaults to en-US with at most two decimals. Compact plot annotations retain the full value in inspection."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 400
+  },
+  "tags": [
+    "ranking",
+    "comparison",
+    "dark"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "slug": "nocturne-line",
+  "title": "The week in motion",
+  "description": "Straight segments preserve numeric intervals; displaced endpoint labels keep series readable.",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneLine"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneLineDatum[]",
+      "required": true,
+      "description": "Caller-owned { id, label, x, values } observations with finite, strictly increasing numeric X. Values are keyed by series ID and may be signed; missing readings break each series. Unique, nonempty observation IDs are required. Endpoint labels and key values refer to the final supplied observation, including unavailable readings."
+    },
+    {
+      "name": "series",
+      "type": "readonly NocturneLineSeries[]",
+      "required": true,
+      "description": "Ordered { id, label, tone? } series with unique, nonempty IDs. Explicit tones a–d or stable identity determine category color. Reordering preserves color. Endpoint names truncate with an ellipsis to fit their gutter; the key and inspection retain full labels."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading and measurement unit. Defaults to Value (Total for NocturneRing)."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned time window or reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats exact readings and tooltips; defaults to en-US with at most two decimals. Compact plot annotations retain the full value in inspection."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "nocturne-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 440
+  },
+  "tags": [
+    "trend",
+    "comparison",
+    "dark"
+  ]
+}

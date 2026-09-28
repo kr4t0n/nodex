@@ -1,0 +1,91 @@
+{
+  "slug": "nocturne-promise-lanes",
+  "title": "Where the plan moved",
+  "description": "Paired planned and actual intervals separate changes in start, finish and duration on a shared time scale.",
+  "component": "paired-range",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturnePromiseLanes"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturnePromiseDatum[]",
+      "required": true,
+      "description": "Caller-owned { id, label, planned, actual } lanes. Each interval is a readonly [start, end] pair or null on one common numeric scale. IDs must be unique and nonempty. Complete finite ordered intervals render independently; reversed, overflowing or incomplete intervals are unavailable. Zero-duration intervals are ticks. Differences require both intervals."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading; defaults to Timeline."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats absolute axis coordinates and interval endpoints. Defaults to en-US with up to two decimals. Date formatting belongs to the caller."
+    },
+    {
+      "name": "deltaFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats signed actual-minus-planned changes in start, finish and duration, independently of absolute coordinate formatting. The default includes a plus sign for positive changes."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "scatter-fade.ts",
+    "numeric-domain.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 516
+  },
+  "tags": [
+    "planning",
+    "intervals",
+    "comparison",
+    "dark"
+  ]
+}

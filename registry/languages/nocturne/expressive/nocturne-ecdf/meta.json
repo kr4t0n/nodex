@@ -1,0 +1,98 @@
+{
+  "slug": "nocturne-ecdf",
+  "title": "Every sample, accumulated",
+  "description": "Exact empirical cumulative steps compare distributions, inclusive threshold shares and empirical percentiles without bins.",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneEcdf"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneEcdfSeries[]",
+      "required": true,
+      "description": "Caller-owned { id, label, tone?, samples } series. Samples contain { id, value }; IDs must be unique and nonempty within their series. Finite signed values are sorted without mutating input; equal values form one inclusive cumulative jump. Null and nonfinite values are omitted and counted. Each series normalizes by its own finite sample count. No smoothing, density estimation or weighting is applied."
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "description": "Optional finite horizontal threshold. Keys report the exact share of measured samples at or below it; the numeric domain includes it, including thresholds outside the sampled range."
+    },
+    {
+      "name": "percentiles",
+      "type": "readonly number[]",
+      "description": "Distinct empirical inverse-CDF probabilities in (0, 1], defaulting to [0.5, 0.9]. Each reading is the smallest observed value whose cumulative share reaches the requested probability; there is no interpolation. An empty list hides percentile guides and readings."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading identifying the measured quantity or analytical question."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional reporting period, units or statistical context supplied by the application."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats absolute readings and tooltip values; axis ticks use compact numbers. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "numeric-domain.ts",
+    "scatter-fade.ts",
+    "nocturne-categorical.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 568
+  },
+  "tags": [
+    "ecdf",
+    "percentiles",
+    "distribution",
+    "analysis",
+    "dark"
+  ]
+}

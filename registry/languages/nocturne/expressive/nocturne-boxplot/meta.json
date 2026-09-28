@@ -1,0 +1,86 @@
+{
+  "slug": "nocturne-boxplot",
+  "title": "The shape of the spread",
+  "description": "Horizontal quartile boxes, median ticks, capped whiskers and independent outliers share one numeric scale.",
+  "component": "boxplot",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "entry": "component.tsx",
+  "exports": [
+    "NocturneBoxplot"
+  ],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly NocturneBoxDatum[]",
+      "required": true,
+      "description": "Caller-owned { id, label, summary, outliers? } rows. Summary is an ordered finite [lowerWhisker, q1, median, q3, upperWhisker] tuple or null; signed values are supported. Outliers are independent caller-classified { id, label?, value } observations; nonfinite or null readings are omitted and counted. Row IDs must be unique and nonempty, as must outlier IDs within each row. Quartile method and whisker policy remain caller-owned. Equal quartiles use a median tick without manufacturing box width."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading; defaults to Distribution."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned reporting context, units or statistical policy."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats absolute readings and tooltip values; axis ticks use compact numbers. Defaults to en-US with up to two decimals."
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "description": "Total width in pixels; otherwise fills the container."
+    },
+    {
+      "name": "height",
+      "type": "number",
+      "description": "Optional total height in pixels. Dense plots and keys scroll inside the frame."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Finite native drawing using scoped motion tokens and live reduced-motion preference; defaults to true."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible title for the native chart."
+    }
+  ],
+  "files": [
+    "component.tsx"
+  ],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "nocturne-chart-frame.tsx",
+    "numeric-domain.ts",
+    "scatter-fade.ts"
+  ],
+  "dependencies": [
+    "recharts@3.10.1"
+  ],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 760,
+    "height": 488
+  },
+  "tags": [
+    "distribution",
+    "quartiles",
+    "outliers",
+    "dark"
+  ]
+}
