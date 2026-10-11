@@ -117,8 +117,6 @@ function LiveExample({
         ...style,
         padding: fluid ? PRIMITIVE_INSET : 'var(--nx-space-pagePadding)',
       }}
-      // Specimen links have no destination. They previously targeted only their
-      // own document and must not jump the enclosing gallery back to the top.
       onClick={(event) => {
         if (
           event.target instanceof Element &&
