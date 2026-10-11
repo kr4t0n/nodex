@@ -402,6 +402,10 @@ export async function checkNocturneExtendedConsumer(page: Page): Promise<void> {
     promise.locator('[data-nx-promise-lane="a"]'),
     margin.locator('[data-nx-margin-lane="a"]'),
   ]) {
+    // State updates may commit after page.evaluate returns under a busy browser.
+    await expect(node.locator('foreignObject span').first()).toHaveText(
+      'W'.repeat(28),
+    );
     assert(
       await node
         .locator('foreignObject span')
