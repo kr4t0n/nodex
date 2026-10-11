@@ -875,6 +875,7 @@ pnpm run smoke
 pnpm run smoke:cli
 pnpm run check:shell
 pnpm run lint
+pnpm run format:check
 pnpm run typecheck
 pnpm --filter @nodex/web run build
 pnpm run smoke:landing
@@ -892,6 +893,23 @@ pnpm run smoke:gallery
 | `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |
 | `smoke:gallery` | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout |
 | `lint` / `typecheck` | Application, registry, CLI and build source |
+| `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation |
+
+Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
+stylesheet to sort utilities, including in delivered registry source. Generated
+registry/web output, the pnpm lockfile, Helm templates and imported third-party
+skills are excluded in `.prettierignore`. Our authoring and consumer skills remain
+included. Formatting changes source layout and class order; the build still
+delivers editable source and rewrites imports through the same contract.
+
+ESLint checks TypeScript, React's automatic JSX runtime, hook order/dependencies
+and JSX accessibility across application and registry source. Next's recommended
+and Core Web Vitals rules apply only to `apps/web`. Warnings fail `lint`;
+`lint:fix` applies available fixes. `eslint-config-prettier` disables conflicting
+style rules. The JSX plugins use ESLint's official `@eslint/compat` adapter on
+ESLint 10, with version-specific peer allowances; React Compiler validation is
+not enabled. Keep any rule exception
+local, with the reason beside the code and browser coverage for the behavior.
 
 The consumer smoke installs packages in a disposable directory and therefore
 needs npm network access. Build previews bundle dependencies locally; rendered

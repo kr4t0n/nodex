@@ -1,0 +1,20 @@
+# Dependencies, caches and generated output
+node_modules/
+.pnpm-store/
+**/dist/
+**/build/
+**/.next/
+**/*.tsbuildinfo
+public/r/
+public/registry/
+apps/web/public/
+apps/web/src/generated/
+apps/web/next-env.d.ts
+pnpm-lock.yaml
+
+# Imported third-party skills; keep our authoring and consumer skills formatted.
+.agents/skills/*
+!.agents/skills/nodex-authoring/
+
+# Helm templates contain Go syntax rather than standalone YAML.
+helm/*/templates/
