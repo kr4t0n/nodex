@@ -1031,10 +1031,10 @@ An existing chart version is never repackaged; bump `helm/nodex/Chart.yaml`'s
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm repo update
-helm upgrade --install nodex nodex/nodex --version 0.2.3 --set siteUrl=https://nodex.example.com
+helm upgrade --install nodex nodex/nodex --version 0.3.0 --set siteUrl=https://nodex.example.com
 ```
 
-Chart `0.2.3` pins the app and migration Job to `kr4t0n/nodex:0.2.3` through
+Chart `0.3.0` pins the app and migration Job to `kr4t0n/nodex:0.3.0` through
 `appVersion`; `image.tag` is an explicit override.
 
 `pnpm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
@@ -1048,7 +1048,7 @@ references become ordinary versions, then publish that exact tarball with npm:
 pnpm run build:cli
 mkdir -p /tmp/nodex-pack
 pnpm --filter @kubitnodes/nodex pack --pack-destination /tmp/nodex-pack
-npm publish --dry-run --force /tmp/nodex-pack/kubitnodes-nodex-0.2.3.tgz
+npm publish --dry-run --force /tmp/nodex-pack/kubitnodes-nodex-0.3.0.tgz
 ```
 
 The dry run does not publish; `--force` skips the local already-published-version
