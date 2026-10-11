@@ -10,6 +10,20 @@ enablePrePostScripts: true
 # Reinstall hooks even when pnpm finds node_modules already up to date.
 optimisticRepeatInstall: false
 
+overrides:
+  # Next's image optimizer needs the patched libheif and librsvg binaries.
+  # https://github.com/advisories/GHSA-wq5f-xc86-pv6w
+  sharp: 0.35.5
+  # Bound indexed source-map offsets in PostCSS and Tailwind's source maps.
+  # https://github.com/advisories/GHSA-68fv-2mgg-jv7q
+  source-map-js: 1.2.2
+  # Bound recursion and rewrite work in minimatch's brace expansion.
+  # https://github.com/advisories/GHSA-q2hr-2g5m-vwhr
+  brace-expansion: 5.0.12
+  # The 2.5 patch line removes micromatch/braces; 2.5.6 fixes Windows ia32 builds.
+  # https://github.com/advisories/GHSA-vfj7-8cjw-p6xm
+  '@parcel/watcher': 2.5.6
+
 allowBuilds:
   # Use the published platform binaries; no source-build fallback is needed.
   '@parcel/watcher': false

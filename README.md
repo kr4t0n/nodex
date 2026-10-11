@@ -384,6 +384,11 @@ live in `pnpm-workspace.yaml`. Keep `pnpm-lock.yaml` as the sole project lockfil
 When switching an existing npm checkout, remove its root and workspace
 `node_modules` directories before installing.
 
+Security overrides in `pnpm-workspace.yaml` pin patched transitive dependencies;
+their comments link the relevant advisories. Before removing an override, verify
+the resolved version, run `pnpm audit` and repeat the verification suite below,
+including the Docker build check for changes to Next or its native dependencies.
+
 ```bash
 pnpm install --frozen-lockfile
 pnpm exec playwright install --with-deps chromium
