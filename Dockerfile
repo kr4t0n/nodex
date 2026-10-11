@@ -21,7 +21,7 @@ COPY apps/web/package.json apps/web/
 COPY packages/core/package.json packages/core/
 COPY packages/cli/package.json packages/cli/
 
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
+RUN corepack enable pnpm && HUSKY=0 pnpm install --frozen-lockfile
 
 # The registry build uses a real browser. Keep the browser and its OS libraries
 # in the dependency layer so editing component or app source does not download

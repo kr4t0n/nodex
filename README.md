@@ -374,8 +374,10 @@ nodex add signal-console/request-throughput signal-console/service-health
 
 ## Develop the registry and gallery
 
-Prerequisites: Node **22.22+** (CI and Docker use Node 24), pnpm **12.10.1**, and Chromium
-installed through Playwright. No database or credentials are needed to build.
+Prerequisites: Node **22.22+** (CI and Docker use Node 24), pnpm **12.10.1**, Chromium
+installed through Playwright, and [gitleaks **8.30.1**](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1)
+on `PATH` for commits. Install the standalone gitleaks binary for your platform;
+`gitleaks version` confirms it is available. No database or credentials are needed to build.
 Use the pnpm version pinned in `packageManager`; Corepack users can invoke
 `corepack pnpm` in place of `pnpm`. The workspace and install-script allowlist
 live in `pnpm-workspace.yaml`. Keep `pnpm-lock.yaml` as the sole project lockfile.
@@ -388,6 +390,14 @@ pnpm exec playwright install --with-deps chromium
 pnpm run build:registry
 pnpm run dev
 ```
+
+`pnpm install` runs `prepare` to install the Husky Git hooks. The pre-commit hook
+scans staged changes with gitleaks, redacts findings, and blocks the commit if it
+finds a secret or the gitleaks binary is missing. To run the same check manually:
+`gitleaks git --pre-commit --staged --redact --no-banner`. Remove any detected
+secret before committing; rotate exposed credentials if they were already shared.
+CI and Docker builds set `HUSKY=0` because they do not make commits; CI runs its
+own pinned gitleaks scan before installing dependencies.
 
 The gallery runs at `http://localhost:4180`. Production: `pnpm run build`, then
 `pnpm start`. Rebuild the registry after editing its source; the gallery reads
@@ -843,6 +853,15 @@ Store temporary logs, screenshots and scratch work in a unique task directory
 under system `/tmp`, and remove it when the work is complete.
 
 ## Verification
+
+The `ci` workflow runs `verify` on pull requests and pushes to `dev` and `main`,
+with read-only repository contents permission. Pull requests also run `docker-build`
+to build and check the production image without publishing it.
+
+CI scans the full Git history with gitleaks 8.30.1, downloaded from its official
+release and verified against a pinned SHA-256 checksum. Run the same history scan
+locally with `gitleaks git --redact --no-banner`. Keep findings redacted when
+sharing results; add an exception only after reviewing a confirmed false positive.
 
 ```bash
 pnpm run build:registry

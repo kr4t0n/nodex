@@ -8,6 +8,7 @@
     "node": ">=22.22.0"
   },
   "scripts": {
+    "prepare": "husky",
     "build:registry": "node scripts/build-registry.ts",
     "build:cli": "pnpm --filter @kubitnodes/nodex run build",
     "db:up": "docker compose up -d --wait postgres",
@@ -46,6 +47,7 @@
     "esbuild": "0.28.2",
     "eslint": "10.9.0",
     "globals": "17.11.0",
+    "husky": "9.1.7",
     "jiti": "2.7.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
