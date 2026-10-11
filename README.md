@@ -405,7 +405,9 @@ CI and Docker builds set `HUSKY=0` because they do not make commits; CI runs its
 own pinned gitleaks scan before installing dependencies.
 
 The gallery runs at `http://localhost:4180`. Production: `pnpm run build`, then
-`pnpm start`. Rebuild the registry after editing its source; the gallery reads
+`pnpm start`. The web build script sets `NODE_ENV=production`, including when the
+calling shell exports `NODE_ENV=development`.
+Rebuild the registry after editing its source; the gallery reads
 built metadata. `dev` and the web build copy the artifacts into the app's public
 directory and generate lazy imports from each component's declared example entry
 and export. React components and example edits participate in Next's development

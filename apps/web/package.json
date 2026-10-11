@@ -6,7 +6,7 @@
     "predev": "node ../../scripts/sync-registry-public.ts",
     "dev": "next dev --port 4180",
     "prebuild": "node ../../scripts/sync-registry-public.ts",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start --port 4180",
     "pretypecheck": "node ../../scripts/sync-registry-public.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
