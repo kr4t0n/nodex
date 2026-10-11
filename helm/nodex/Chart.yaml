@@ -16,7 +16,7 @@ version: 0.2.3
 
 # Pin the default image to this release, including the migration Job.
 # image.tag remains available as an explicit deployment override.
-appVersion: "0.2.3"
+appVersion: '0.2.3'
 
 home: https://github.com/kr4t0n/nodex
 sources:

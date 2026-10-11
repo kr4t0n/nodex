@@ -3,14 +3,8 @@
   "title": "Weekly focus hours",
   "description": "Outlined blue tiles show intensity on a fixed scale. Dots distinguish measured zero from unavailable cells marked with a cross.",
   "component": "heatmap",
-  "exports": [
-    "TileHeatmap"
-  ],
-  "tags": [
-    "matrix",
-    "intensity",
-    "weekly"
-  ],
+  "exports": ["TileHeatmap"],
+  "tags": ["matrix", "intensity", "weekly"],
   "props": [
     {
       "name": "data",
@@ -89,17 +83,13 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "neo-chart-frame.tsx"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

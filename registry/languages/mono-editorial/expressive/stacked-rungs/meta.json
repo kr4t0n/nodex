@@ -8,30 +8,17 @@
   "library": "recharts",
   "density": "glance",
   "entry": "component.tsx",
-  "exports": [
-    "StackedRungs"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts",
-    "rung-marks.tsx"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "exports": ["StackedRungs"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts", "rung-marks.tsx"],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 676,
     "height": 456
   },
-  "tags": [
-    "revenue",
-    "mix"
-  ],
+  "tags": ["revenue", "mix"],
   "props": [
     {
       "name": "data",

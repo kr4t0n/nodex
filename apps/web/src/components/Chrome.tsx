@@ -52,8 +52,16 @@ export function TopBar<T extends string>({
 
         <div className="ml-auto flex min-w-0 items-center gap-1.5">
           {back ? (
-            <Link href={back.href} className="nx-btn nx-btn--quiet min-w-0 no-underline">
-              <ArrowLeft size={13} weight="bold" aria-hidden className="shrink-0" />
+            <Link
+              href={back.href}
+              className="nx-btn nx-btn--quiet min-w-0 no-underline"
+            >
+              <ArrowLeft
+                size={13}
+                weight="bold"
+                aria-hidden
+                className="shrink-0"
+              />
               <span className="truncate">{back.label}</span>
             </Link>
           ) : null}

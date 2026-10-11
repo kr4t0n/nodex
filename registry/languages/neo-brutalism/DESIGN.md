@@ -25,26 +25,26 @@ as a small number of strong regions before its details become visible.
 
 ## Color and contrast
 
-| Semantic role | Intended use |
-| --- | --- |
-| `--nx-bg`, `--nx-paper` | Warm ivory page ground and plain surfaces |
-| `--nx-surfaceFill` | Lilac panels and dialogs |
-| `--nx-fieldFill` | Warm cream fields and their option pickers |
-| `--nx-ink` | Primary text, outlines and the color of hard shadows |
-| `--nx-border` | Dark structural outlines and dividers |
-| `--nx-grid` | Quiet blue tracks and supporting fills; never the main outline |
-| `--nx-muted`, `--nx-faint` | Readable secondary copy and captions on paper |
-| `--nx-actionFill`, `--nx-actionText` | Yellow primary action with ink lettering |
-| `--nx-actionBorder` | The independent outline around a primary action |
-| `--nx-actionHoverFill`, `--nx-actionHoverBorder` | A stronger yellow fill and a stable dark outline on hover |
-| `--nx-selectionFill`, `--nx-selectionText` | Mint checked or selected states with ink marks and lettering |
-| `--nx-badgeFill`, `--nx-badgeText` | Pink solid badges with ink lettering |
-| `--nx-valueFill`, `--nx-valueQuietFill` | Blue value marks and violet secondary progress |
-| `--nx-accent` | Yellow emphasis outside the action itself |
-| `--nx-accentSecondary` | Lilac for a supporting group or category |
-| `--nx-accentTertiary` | Mint for another supporting group or category |
-| `--nx-seriesA` through `--nx-seriesD` | Yellow, lilac, mint and pink categorical data marks; keep category assignments stable |
-| `--nx-onDarkMuted`, `--nx-onDarkFaint` | Supporting text on inverted ink surfaces |
+| Semantic role                                    | Intended use                                                                          |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `--nx-bg`, `--nx-paper`                          | Warm ivory page ground and plain surfaces                                             |
+| `--nx-surfaceFill`                               | Lilac panels and dialogs                                                              |
+| `--nx-fieldFill`                                 | Warm cream fields and their option pickers                                            |
+| `--nx-ink`                                       | Primary text, outlines and the color of hard shadows                                  |
+| `--nx-border`                                    | Dark structural outlines and dividers                                                 |
+| `--nx-grid`                                      | Quiet blue tracks and supporting fills; never the main outline                        |
+| `--nx-muted`, `--nx-faint`                       | Readable secondary copy and captions on paper                                         |
+| `--nx-actionFill`, `--nx-actionText`             | Yellow primary action with ink lettering                                              |
+| `--nx-actionBorder`                              | The independent outline around a primary action                                       |
+| `--nx-actionHoverFill`, `--nx-actionHoverBorder` | A stronger yellow fill and a stable dark outline on hover                             |
+| `--nx-selectionFill`, `--nx-selectionText`       | Mint checked or selected states with ink marks and lettering                          |
+| `--nx-badgeFill`, `--nx-badgeText`               | Pink solid badges with ink lettering                                                  |
+| `--nx-valueFill`, `--nx-valueQuietFill`          | Blue value marks and violet secondary progress                                        |
+| `--nx-accent`                                    | Yellow emphasis outside the action itself                                             |
+| `--nx-accentSecondary`                           | Lilac for a supporting group or category                                              |
+| `--nx-accentTertiary`                            | Mint for another supporting group or category                                         |
+| `--nx-seriesA` through `--nx-seriesD`            | Yellow, lilac, mint and pink categorical data marks; keep category assignments stable |
+| `--nx-onDarkMuted`, `--nx-onDarkFaint`           | Supporting text on inverted ink surfaces                                              |
 
 Yellow, lilac, mint and pink fills take ink text. Keep supporting text dark
 enough to read on both paper and lilac. Cream fields retain ink values and

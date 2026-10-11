@@ -7,12 +7,8 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SketchForce"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["SketchForce"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
@@ -34,12 +30,7 @@
     "width": 720,
     "height": 440
   },
-  "tags": [
-    "force-layout",
-    "bubble-area",
-    "sketch",
-    "roughviz"
-  ],
+  "tags": ["force-layout", "bubble-area", "sketch", "roughviz"],
   "props": [
     {
       "name": "data",

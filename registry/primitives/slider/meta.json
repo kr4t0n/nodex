@@ -5,19 +5,11 @@
   "component": "slider",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "form",
-    "interactive"
-  ],
+  "tags": ["form", "interactive"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Slider"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Slider"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

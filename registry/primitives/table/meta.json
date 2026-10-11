@@ -5,10 +5,7 @@
   "component": "table",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "data",
-    "container"
-  ],
+  "tags": ["data", "container"],
   "dependencies": [],
   "entry": "component.tsx",
   "exports": [
@@ -20,10 +17,7 @@
     "TableHead",
     "TableCell"
   ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

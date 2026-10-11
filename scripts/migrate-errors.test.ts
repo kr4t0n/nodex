@@ -19,10 +19,21 @@ test('migration failures never print connection strings or raw driver errors', a
   await writeFile(path.join(migrations, '001-test.sql'), 'select 1');
   const outfile = path.join(scripts, 'migrate.mjs');
   await build({
-    entryPoints: ['scripts/migrate.mjs'], bundle: true, platform: 'node', format: 'esm', outfile,
-    plugins: [{ name: 'driver-errors', setup(builder) {
-      builder.onResolve({ filter: /^pg$/ }, () => ({ path: 'pg', namespace: 'test' }));
-      builder.onLoad({ filter: /.*/, namespace: 'test' }, () => ({ contents: `
+    entryPoints: ['scripts/migrate.mjs'],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    outfile,
+    plugins: [
+      {
+        name: 'driver-errors',
+        setup(builder) {
+          builder.onResolve({ filter: /^pg$/ }, () => ({
+            path: 'pg',
+            namespace: 'test',
+          }));
+          builder.onLoad({ filter: /.*/, namespace: 'test' }, () => ({
+            contents: `
         import { EventEmitter } from 'node:events';
         function fail(phase) {
           if (process.env.TEST_PHASE === phase) throw new Error(process.env.TEST_SENTINEL);
@@ -43,16 +54,35 @@ test('migration failures never print connection strings or raw driver errors', a
           }
           async end() { fail('end'); }
         }};
-      ` }));
-    } }],
+      `,
+          }));
+        },
+      },
+    ],
   });
   const sentinel = randomBytes(32).toString('hex');
-  for (const phase of ['constructor', 'connect', 'bookkeeping', 'migration', 'end', 'event']) {
+  for (const phase of [
+    'constructor',
+    'connect',
+    'bookkeeping',
+    'migration',
+    'end',
+    'event',
+  ]) {
     const result = spawnSync(process.execPath, [outfile], {
-      encoding: 'utf8', env: { ...process.env, DATABASE_URL: `postgresql://user:${sentinel}@localhost/test?application_name=${sentinel}`, TEST_SENTINEL: sentinel, TEST_PHASE: phase },
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        DATABASE_URL: `postgresql://user:${sentinel}@localhost/test?application_name=${sentinel}`,
+        TEST_SENTINEL: sentinel,
+        TEST_PHASE: phase,
+      },
     });
     assert.equal(result.status, 1);
-    assert.equal(result.stderr.trim(), 'Could not apply database migrations. Check database configuration, availability and migration SQL.');
+    assert.equal(
+      result.stderr.trim(),
+      'Could not apply database migrations. Check database configuration, availability and migration SQL.',
+    );
     assert.equal(`${result.stdout}${result.stderr}`.includes(sentinel), false);
   }
 });

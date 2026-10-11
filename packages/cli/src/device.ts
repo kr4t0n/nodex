@@ -17,7 +17,9 @@ export interface DeviceStart {
 }
 
 export function apiBase(registryRoot: string): string {
-  return apiUrl(process.env.NODEX_API ?? registryRoot).toString().replace(/\/+$/, '');
+  return apiUrl(process.env.NODEX_API ?? registryRoot)
+    .toString()
+    .replace(/\/+$/, '');
 }
 
 export class DeviceError extends Error {}
@@ -28,21 +30,33 @@ function apiUrl(value: string): URL {
     const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
     if (
       (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) ||
-      url.username || url.password || url.search || url.hash ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash ||
       /[\s\\?#]/.test(value)
-    ) throw new Error();
+    )
+      throw new Error();
     return url;
   } catch {
-    throw new DeviceError('The API must use HTTPS (HTTP is allowed for loopback), without credentials, query or fragment.');
+    throw new DeviceError(
+      'The API must use HTTPS (HTTP is allowed for loopback), without credentials, query or fragment.',
+    );
   }
 }
 
-async function apiFetch(api: string, path: string, options: RequestInit = {}): Promise<Response> {
+async function apiFetch(
+  api: string,
+  path: string,
+  options: RequestInit = {},
+): Promise<Response> {
   const base = apiUrl(api).toString().replace(/\/+$/, '');
   try {
     return await fetch(`${base}${path}`, { ...options, redirect: 'error' });
   } catch {
-    throw new DeviceError('Could not reach the sign-in API. Redirects are not allowed.');
+    throw new DeviceError(
+      'Could not reach the sign-in API. Redirects are not allowed.',
+    );
   }
 }
 
@@ -51,7 +65,12 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 
 function text(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0 && value.length <= 4096 && !/[\p{Cc}\p{Cf}]/u.test(value);
+  return (
+    typeof value === 'string' &&
+    value.length > 0 &&
+    value.length <= 4096 &&
+    !/[\p{Cc}\p{Cf}]/u.test(value)
+  );
 }
 
 function token(value: unknown): value is string {
@@ -59,7 +78,12 @@ function token(value: unknown): value is string {
 }
 
 function seconds(value: unknown): value is number {
-  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 && value <= 86400;
+  return (
+    typeof value === 'number' &&
+    Number.isSafeInteger(value) &&
+    value > 0 &&
+    value <= 86400
+  );
 }
 
 async function responseJson(res: Response): Promise<unknown> {
@@ -73,15 +97,23 @@ async function responseJson(res: Response): Promise<unknown> {
 export async function startDevice(api: string): Promise<DeviceStart> {
   const res = await apiFetch(api, '/api/cli/device', { method: 'POST' });
   if (!res.ok) {
-    const detail = res.status === 503 ? 'accounts are not configured there' : `HTTP ${res.status}`;
+    const detail =
+      res.status === 503
+        ? 'accounts are not configured there'
+        : `HTTP ${res.status}`;
     throw new DeviceError(`Could not start a sign in (${detail}).`);
   }
   const body = await responseJson(res);
   if (
-    !record(body) || !token(body.device_code) || !text(body.user_code) ||
-    !text(body.verification_uri) || !seconds(body.expires_in) ||
-    !seconds(body.interval) || body.interval > body.expires_in
-  ) throw new DeviceError('The sign-in API returned an invalid response.');
+    !record(body) ||
+    !token(body.device_code) ||
+    !text(body.user_code) ||
+    !text(body.verification_uri) ||
+    !seconds(body.expires_in) ||
+    !seconds(body.interval) ||
+    body.interval > body.expires_in
+  )
+    throw new DeviceError('The sign-in API returned an invalid response.');
   const verificationUri = apiUrl(body.verification_uri).toString();
   return {
     deviceCode: body.device_code,
@@ -120,7 +152,9 @@ export async function awaitApproval(
       throw new DeviceError('The code expired. Run `nodex login` again.');
     }
 
-    await sleep(Math.min(interval, Math.max(0, (deadline - Date.now()) / 1000)));
+    await sleep(
+      Math.min(interval, Math.max(0, (deadline - Date.now()) / 1000)),
+    );
     onTick?.(Math.max(0, Math.round((deadline - Date.now()) / 1000)));
     if (Date.now() >= deadline) continue;
 
@@ -133,15 +167,20 @@ export async function awaitApproval(
     if (res.ok) {
       const body = await responseJson(res);
       if (
-        !record(body) || !token(body.access_token) ||
-        typeof body.token_type !== 'string' || body.token_type.toLowerCase() !== 'bearer' ||
+        !record(body) ||
+        !token(body.access_token) ||
+        typeof body.token_type !== 'string' ||
+        body.token_type.toLowerCase() !== 'bearer' ||
         !(body.login === null || text(body.login))
-      ) throw new DeviceError('The sign-in API returned an invalid response.');
+      )
+        throw new DeviceError('The sign-in API returned an invalid response.');
       return { token: body.access_token, login: body.login };
     }
 
     const body = await responseJson(res);
-    switch (record(body) && typeof body.error === 'string' ? body.error : undefined) {
+    switch (
+      record(body) && typeof body.error === 'string' ? body.error : undefined
+    ) {
       case 'authorization_pending':
         continue;
       case 'slow_down':

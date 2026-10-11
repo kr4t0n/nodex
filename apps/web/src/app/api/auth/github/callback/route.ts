@@ -25,7 +25,10 @@ function failed(reason: string): NextResponse {
   // The reason is a fixed token from this file, never the underlying error.
   // Upstream messages can carry a code or a URL, and neither belongs in a query
   // string that ends up in browser history and server logs.
-  return new NextResponse(null, { status: 307, headers: { location: `/login?error=${reason}` } });
+  return new NextResponse(null, {
+    status: 307,
+    headers: { location: `/login?error=${reason}` },
+  });
 }
 
 export async function GET(request: NextRequest) {
@@ -84,5 +87,8 @@ export async function GET(request: NextRequest) {
     return failed('storage');
   }
 
-  return new NextResponse(null, { status: 307, headers: { location: '/languages' } });
+  return new NextResponse(null, {
+    status: 307,
+    headers: { location: '/languages' },
+  });
 }

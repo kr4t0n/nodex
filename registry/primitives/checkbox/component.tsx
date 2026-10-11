@@ -3,16 +3,29 @@
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import './component.css';
 
-export type CheckboxProps = Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'> & {
+export type CheckboxProps = Omit<
+  ComponentPropsWithRef<'input'>,
+  'type' | 'children'
+> & {
   label: ReactNode;
   indeterminate?: boolean;
   wrapperClassName?: string;
 };
 
 /** Indeterminate is controlled by the caller; update it together with checked in onChange. */
-export function Checkbox({ label, indeterminate = false, disabled, ref, className = '', wrapperClassName = '', ...props }: CheckboxProps) {
+export function Checkbox({
+  label,
+  indeterminate = false,
+  disabled,
+  ref,
+  className = '',
+  wrapperClassName = '',
+  ...props
+}: CheckboxProps) {
   return (
-    <label className={`nx-choice${disabled ? ' nx-choice--disabled' : ''} ${wrapperClassName}`.trim()}>
+    <label
+      className={`nx-choice${disabled ? ' nx-choice--disabled' : ''} ${wrapperClassName}`.trim()}
+    >
       <input
         {...props}
         ref={(element) => {
@@ -31,6 +44,9 @@ export function Checkbox({ label, indeterminate = false, disabled, ref, classNam
   );
 }
 
-export function CheckboxGroup({ className = '', ...props }: ComponentPropsWithRef<'div'>) {
+export function CheckboxGroup({
+  className = '',
+  ...props
+}: ComponentPropsWithRef<'div'>) {
   return <div {...props} className={`nx-choice-group ${className}`.trim()} />;
 }

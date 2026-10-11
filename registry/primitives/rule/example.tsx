@@ -8,7 +8,11 @@ export function Example() {
       <Rule tone="faint" />
       <Rule dashed />
       <div className="flex h-[26px] items-center">
-        <span>Close read</span><Rule orientation="vertical" /><span>Glance</span><Rule orientation="vertical" /><span>All types</span>
+        <span>Close read</span>
+        <Rule orientation="vertical" />
+        <span>Glance</span>
+        <Rule orientation="vertical" />
+        <span>All types</span>
       </div>
     </div>
   );

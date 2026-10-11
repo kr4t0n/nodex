@@ -7,9 +7,7 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "NocturnePromiseLanes"
-  ],
+  "exports": ["NocturnePromiseLanes"],
   "props": [
     {
       "name": "data",
@@ -63,9 +61,7 @@
       "description": "Accessible title for the native chart."
     }
   ],
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
@@ -73,19 +69,12 @@
     "scatter-fade.ts",
     "numeric-domain.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 760,
     "height": 516
   },
-  "tags": [
-    "planning",
-    "intervals",
-    "comparison",
-    "dark"
-  ]
+  "tags": ["planning", "intervals", "comparison", "dark"]
 }

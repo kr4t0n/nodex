@@ -7,12 +7,8 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SketchNetwork"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["SketchNetwork"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
@@ -34,12 +30,7 @@
     "width": 720,
     "height": 440
   },
-  "tags": [
-    "relationships",
-    "force-layout",
-    "sketch",
-    "roughviz"
-  ],
+  "tags": ["relationships", "force-layout", "sketch", "roughviz"],
   "props": [
     {
       "name": "data",

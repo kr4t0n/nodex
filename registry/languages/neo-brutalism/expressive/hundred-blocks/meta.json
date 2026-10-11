@@ -3,14 +3,8 @@
   "title": "Team capacity allocation",
   "description": "One hundred outlined blocks make whole-percent shares countable. A bold categorical key names every allocation.",
   "component": "unit-chart",
-  "exports": [
-    "HundredBlocks"
-  ],
-  "tags": [
-    "share",
-    "waffle",
-    "allocation"
-  ],
+  "exports": ["HundredBlocks"],
+  "tags": ["share", "waffle", "allocation"],
   "props": [
     {
       "name": "data",
@@ -65,18 +59,14 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "neo-chart-frame.tsx",
     "neo-categorical.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

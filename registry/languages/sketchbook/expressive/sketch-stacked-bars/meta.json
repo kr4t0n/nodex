@@ -7,12 +7,8 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SketchStackedBars"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["SketchStackedBars"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
@@ -21,22 +17,14 @@
     "sketch/frame.tsx",
     "sketch/marks.tsx"
   ],
-  "dependencies": [
-    "recharts@3.10.1",
-    "roughjs@4.6.6"
-  ],
+  "dependencies": ["recharts@3.10.1", "roughjs@4.6.6"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 720,
     "height": 440
   },
-  "tags": [
-    "composition",
-    "comparison",
-    "sketch",
-    "roughviz"
-  ],
+  "tags": ["composition", "comparison", "sketch", "roughviz"],
   "props": [
     {
       "name": "data",

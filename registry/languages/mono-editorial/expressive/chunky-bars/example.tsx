@@ -8,5 +8,11 @@ const plans: readonly ChunkyBarsDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <ChunkyBars data={plans} animate={animate} aria-label="Q2 2026 monthly recurring revenue by plan in thousands of dollars" />;
+  return (
+    <ChunkyBars
+      data={plans}
+      animate={animate}
+      aria-label="Q2 2026 monthly recurring revenue by plan in thousands of dollars"
+    />
+  );
 }

@@ -5,20 +5,11 @@
   "component": "avatar",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "identity",
-    "media"
-  ],
+  "tags": ["identity", "media"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Avatar",
-    "AvatarGroup"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Avatar", "AvatarGroup"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

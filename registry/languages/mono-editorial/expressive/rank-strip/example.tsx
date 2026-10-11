@@ -7,5 +7,11 @@ const products: readonly RankStripDatum[] = [
   { name: 'Docs', ranks: [3, 4, 4, 5, 5, 5] },
 ];
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <RankStrip data={products} periods={['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6']} animate={animate} />;
+  return (
+    <RankStrip
+      data={products}
+      periods={['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6']}
+      animate={animate}
+    />
+  );
 }

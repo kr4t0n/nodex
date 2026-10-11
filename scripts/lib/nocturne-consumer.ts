@@ -45,83 +45,238 @@ export function NocturneConsumer() {
 }
 `;
 
-export const NOCTURNE_SLUGS = ['nocturne-bars', 'nocturne-line', 'nocturne-ring'];
-const chart = (page: Page, slug: string) => page.locator('#nocturne-primary [data-nx-chart="' + slug + '"]');
-const mode = (page: Page, value: string) => page.evaluate(value => (window as unknown as { nodexNocturne: { setMode: (mode: string) => void } }).nodexNocturne.setMode(value), value);
-const revision = (page: Page, value: boolean) => page.evaluate(value => (window as unknown as { nodexNocturne: { setRevision: (value: boolean) => void } }).nodexNocturne.setRevision(value), value);
+export const NOCTURNE_SLUGS = [
+  'nocturne-bars',
+  'nocturne-line',
+  'nocturne-ring',
+];
+const chart = (page: Page, slug: string) =>
+  page.locator('#nocturne-primary [data-nx-chart="' + slug + '"]');
+const mode = (page: Page, value: string) =>
+  page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexNocturne: { setMode: (mode: string) => void };
+        }
+      ).nodexNocturne.setMode(value),
+    value,
+  );
+const revision = (page: Page, value: boolean) =>
+  page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexNocturne: { setRevision: (value: boolean) => void };
+        }
+      ).nodexNocturne.setRevision(value),
+    value,
+  );
 
 async function paints(page: Page, scope = 'primary') {
-  return page.locator('#nocturne-' + scope + ' [data-nx-nocturne-slice]').evaluateAll(elements =>
-    Object.fromEntries(elements.map(element => [element.getAttribute('data-nx-nocturne-slice'), getComputedStyle(element).fill])));
+  return page
+    .locator('#nocturne-' + scope + ' [data-nx-nocturne-slice]')
+    .evaluateAll((elements) =>
+      Object.fromEntries(
+        elements.map((element) => [
+          element.getAttribute('data-nx-nocturne-slice'),
+          getComputedStyle(element).fill,
+        ]),
+      ),
+    );
 }
 
 export async function checkNocturneConsumer(page: Page): Promise<void> {
-  const bars = chart(page, 'nocturne-bars'); const line = chart(page, 'nocturne-line');
+  const bars = chart(page, 'nocturne-bars');
+  const line = chart(page, 'nocturne-line');
   const ring = chart(page, 'nocturne-ring');
   await expect(bars.locator('[data-nx-nocturne-bar]')).toHaveCount(4);
   await expect(line.locator('[data-nx-nocturne-point]')).toHaveCount(8);
-  await expect(line.locator('[data-nx-nocturne-latest="main"]')).toHaveText('$10');
-  await expect(line.locator('[data-nx-nocturne-latest="other"]')).toHaveText('$-5');
+  await expect(line.locator('[data-nx-nocturne-latest="main"]')).toHaveText(
+    '$10',
+  );
+  await expect(line.locator('[data-nx-nocturne-latest="other"]')).toHaveText(
+    '$-5',
+  );
   await expect(ring.locator('[data-nx-nocturne-total]')).toHaveText('$100');
-  const rectangles = await bars.locator('[data-nx-nocturne-bar]').evaluateAll(elements => elements.map(element => {
-    const bounds = (element as SVGGraphicsElement).getBBox(); return { width: bounds.width, x: bounds.x };
-  }));
-  assert(Math.abs(rectangles[0]!.width / rectangles[3]!.width - 4) < 0.001, 'Bar length must encode exact magnitude');
-  assert(rectangles.every(rect => Math.abs(rect.x - rectangles[0]!.x) < 0.001), 'Ranked bars must share zero');
-  const xs = await line.locator('[data-nx-nocturne-point][data-nx-series="main"]').evaluateAll(elements => elements.map(element => Number(element.getAttribute('cx'))));
-  assert(Math.abs((xs[2]! - xs[0]!) / (xs[1]! - xs[0]!) - 3) < 0.001, 'Numeric intervals must not become equal spacing');
-  const curves = await line.locator('.recharts-line-curve').evaluateAll(elements => elements.map(element => element.getAttribute('d')!));
-  assert(curves.every(d => d.includes('L') && !/[CQ]/.test(d)), 'Series must use straight native segments');
-  const angles = await ring.locator('[data-nx-nocturne-slice]').evaluateAll(elements => elements.map(element => Math.abs(Number(element.getAttribute('data-nx-start')) - Number(element.getAttribute('data-nx-end')))));
-  assert.deepEqual(angles.map(Math.round), [144, 108, 72, 36], 'Allocation angles must be exact');
+  const rectangles = await bars
+    .locator('[data-nx-nocturne-bar]')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const bounds = (element as SVGGraphicsElement).getBBox();
+        return { width: bounds.width, x: bounds.x };
+      }),
+    );
+  assert(
+    Math.abs(rectangles[0]!.width / rectangles[3]!.width - 4) < 0.001,
+    'Bar length must encode exact magnitude',
+  );
+  assert(
+    rectangles.every((rect) => Math.abs(rect.x - rectangles[0]!.x) < 0.001),
+    'Ranked bars must share zero',
+  );
+  const xs = await line
+    .locator('[data-nx-nocturne-point][data-nx-series="main"]')
+    .evaluateAll((elements) =>
+      elements.map((element) => Number(element.getAttribute('cx'))),
+    );
+  assert(
+    Math.abs((xs[2]! - xs[0]!) / (xs[1]! - xs[0]!) - 3) < 0.001,
+    'Numeric intervals must not become equal spacing',
+  );
+  const curves = await line
+    .locator('.recharts-line-curve')
+    .evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute('d')!),
+    );
+  assert(
+    curves.every((d) => d.includes('L') && !/[CQ]/.test(d)),
+    'Series must use straight native segments',
+  );
+  const angles = await ring
+    .locator('[data-nx-nocturne-slice]')
+    .evaluateAll((elements) =>
+      elements.map((element) =>
+        Math.abs(
+          Number(element.getAttribute('data-nx-start')) -
+            Number(element.getAttribute('data-nx-end')),
+        ),
+      ),
+    );
+  assert.deepEqual(
+    angles.map(Math.round),
+    [144, 108, 72, 36],
+    'Allocation angles must be exact',
+  );
 
   for (const [node, first, second, key] of [
     [bars, 'Same$40 Hours', 'Same$30 Hours', 'ArrowLeft'],
-    [line, 'SameMain: $40 SessionsOther: $10 Sessions', 'SameMain: $30 SessionsOther: $5 Sessions', 'ArrowRight'],
+    [
+      line,
+      'SameMain: $40 SessionsOther: $10 Sessions',
+      'SameMain: $30 SessionsOther: $5 Sessions',
+      'ArrowRight',
+    ],
     [ring, 'Same$40 · 40%', 'Same$30 · 30%', 'ArrowRight'],
   ] as const) {
-    await node.scrollIntoViewIfNeeded(); await page.mouse.move(880, 10);
+    await node.scrollIntoViewIfNeeded();
+    await page.mouse.move(880, 10);
     await node.locator('svg.recharts-surface').focus();
-    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(first);
+    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+      first,
+    );
     await page.keyboard.press(key);
-    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(second);
+    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+      second,
+    );
   }
-  await expect(page.locator('#nocturne-secondary .recharts-tooltip-wrapper:visible')).toHaveCount(0);
+  await expect(
+    page.locator('#nocturne-secondary .recharts-tooltip-wrapper:visible'),
+  ).toHaveCount(0);
   await bars.locator('[data-nx-nocturne-bar="a"]').hover();
-  await expect(bars.locator('.recharts-tooltip-wrapper:visible')).toHaveText('Same$40 Hours');
+  await expect(bars.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+    'Same$40 Hours',
+  );
 
   const sibling = await paints(page, 'secondary');
-  await page.locator('#nocturne-primary').evaluate(element => {
+  await page.locator('#nocturne-primary').evaluate((element) => {
     const style = (element as HTMLElement).style;
-    style.setProperty('--nx-seriesA', '#923b61'); style.setProperty('--nx-radius-bar', '5px');
+    style.setProperty('--nx-seriesA', '#923b61');
+    style.setProperty('--nx-radius-bar', '5px');
   });
-  for (const mark of [bars.locator('[data-nx-nocturne-bar="a"]'), ring.locator('[data-nx-nocturne-slice="a"]')]) {
+  for (const mark of [
+    bars.locator('[data-nx-nocturne-bar="a"]'),
+    ring.locator('[data-nx-nocturne-slice="a"]'),
+  ]) {
     await expect(mark).toHaveCSS('fill', 'rgb(146, 59, 97)');
   }
-  await expect(line.locator('.recharts-line-curve').first()).toHaveCSS('stroke', 'rgb(146, 59, 97)');
-  await expect(bars.locator('[data-nx-nocturne-bar="a"]')).toHaveCSS('rx', '5px');
-  assert.deepEqual(await paints(page, 'secondary'), sibling, 'Descendant paint overrides must stay local');
-  await page.locator('#nocturne-primary').evaluate(element => element.removeAttribute('style'));
+  await expect(line.locator('.recharts-line-curve').first()).toHaveCSS(
+    'stroke',
+    'rgb(146, 59, 97)',
+  );
+  await expect(bars.locator('[data-nx-nocturne-bar="a"]')).toHaveCSS(
+    'rx',
+    '5px',
+  );
+  assert.deepEqual(
+    await paints(page, 'secondary'),
+    sibling,
+    'Descendant paint overrides must stay local',
+  );
+  await page
+    .locator('#nocturne-primary')
+    .evaluate((element) => element.removeAttribute('style'));
   const identities = await paints(page);
   await revision(page, true);
   await expect(ring.locator('[data-nx-nocturne-total]')).toHaveText('$80');
-  await expect(line.locator('[data-nx-nocturne-latest="main"]')).toHaveText('$5');
-  assert.deepEqual(await paints(page), identities, 'Category identity must survive reorder and value changes');
-  assert.deepEqual(await bars.locator('[data-nx-nocturne-row]').evaluateAll(elements => elements.map(element => element.getAttribute('data-nx-nocturne-row'))), ['b', 'c', 'd', 'a'], 'Rank updates must follow values');
+  await expect(line.locator('[data-nx-nocturne-latest="main"]')).toHaveText(
+    '$5',
+  );
+  assert.deepEqual(
+    await paints(page),
+    identities,
+    'Category identity must survive reorder and value changes',
+  );
+  assert.deepEqual(
+    await bars
+      .locator('[data-nx-nocturne-row]')
+      .evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-nx-nocturne-row')),
+      ),
+    ['b', 'c', 'd', 'a'],
+    'Rank updates must follow values',
+  );
   await revision(page, false);
   await mode(page, 'partial');
-  await expect(bars.locator('[data-nx-nocturne-reading]')).toHaveText(['$40', '$10', '$0', '—']);
+  await expect(bars.locator('[data-nx-nocturne-reading]')).toHaveText([
+    '$40',
+    '$10',
+    '$0',
+    '—',
+  ]);
   await expect(bars.locator('[data-nx-nocturne-bar]')).toHaveCount(2);
-  await expect.poll(() => line.locator('.recharts-line-curve').first().getAttribute('d').then(d => (d?.match(/M/g) ?? []).length)).toBe(2);
-  await expect.poll(() => line.locator('.recharts-line-curve').last().getAttribute('d').then(d => (d?.match(/M/g) ?? []).length)).toBe(1);
+  await expect
+    .poll(() =>
+      line
+        .locator('.recharts-line-curve')
+        .first()
+        .getAttribute('d')
+        .then((d) => (d?.match(/M/g) ?? []).length),
+    )
+    .toBe(2);
+  await expect
+    .poll(() =>
+      line
+        .locator('.recharts-line-curve')
+        .last()
+        .getAttribute('d')
+        .then((d) => (d?.match(/M/g) ?? []).length),
+    )
+    .toBe(1);
   await expect(ring.locator('[data-nx-nocturne-slice]')).toHaveCount(0);
-  await expect(ring.getByRole('status')).toHaveText('A complete allocation is required.');
+  await expect(ring.getByRole('status')).toHaveText(
+    'A complete allocation is required.',
+  );
   await mode(page, 'last-missing');
-  await expect(line.locator('[data-nx-nocturne-latest="main"]')).toHaveText('—');
+  await expect(line.locator('[data-nx-nocturne-latest="main"]')).toHaveText(
+    '—',
+  );
   await expect(line.locator('[data-nx-nocturne-end="main"]')).toHaveCount(0);
   await mode(page, 'ties');
-  await expect(bars.locator('[data-nx-nocturne-reading]')).toHaveText(['$20', '$20', '—']);
-  assert.deepEqual(await bars.locator('[data-nx-nocturne-row]').evaluateAll(elements => elements.map(element => element.getAttribute('data-nx-nocturne-row'))), ['c', 'a', 'b'], 'Ties retain caller order, unavailable comes last');
+  await expect(bars.locator('[data-nx-nocturne-reading]')).toHaveText([
+    '$20',
+    '$20',
+    '—',
+  ]);
+  assert.deepEqual(
+    await bars
+      .locator('[data-nx-nocturne-row]')
+      .evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-nx-nocturne-row')),
+      ),
+    ['c', 'a', 'b'],
+    'Ties retain caller order, unavailable comes last',
+  );
   await mode(page, 'zero');
   await expect(bars.locator('[data-nx-nocturne-bar]')).toHaveCount(0);
   await expect(bars.locator('[data-nx-nocturne-reading]')).toHaveText('$0');
@@ -135,51 +290,145 @@ export async function checkNocturneConsumer(page: Page): Promise<void> {
 
   for (const value of ['empty', 'invalid', 'duplicates']) {
     await mode(page, value);
-    for (const slug of NOCTURNE_SLUGS) await expect(chart(page, slug).getByRole('status').first()).toBeAttached();
+    for (const slug of NOCTURNE_SLUGS)
+      await expect(
+        chart(page, slug).getByRole('status').first(),
+      ).toBeAttached();
     await expect(bars.locator('[data-nx-nocturne-bar]')).toHaveCount(0);
     await expect(line.locator('[data-nx-nocturne-point]')).toHaveCount(0);
     await expect(ring.locator('[data-nx-nocturne-slice]')).toHaveCount(0);
   }
   for (const [value, slug, message] of [
     ['overflow', 'nocturne-ring', 'A complete allocation is required.'],
-    ['bad-x', 'nocturne-line', 'X coordinates must be finite and strictly increasing.'],
+    [
+      'bad-x',
+      'nocturne-line',
+      'X coordinates must be finite and strictly increasing.',
+    ],
   ] as const) {
-    await mode(page, value); await expect(chart(page, slug).getByRole('status')).toHaveText(message);
+    await mode(page, value);
+    await expect(chart(page, slug).getByRole('status')).toHaveText(message);
   }
   await mode(page, 'long-readings');
-  for (const reading of [bars.locator('[data-nx-nocturne-reading="a"]'), ring.locator('[data-nx-nocturne-total]')]) {
+  for (const reading of [
+    bars.locator('[data-nx-nocturne-reading="a"]'),
+    ring.locator('[data-nx-nocturne-total]'),
+  ]) {
     await expect(reading).toContainText('extremely long formatted units');
-    assert(await reading.evaluate(element => getComputedStyle(element).textOverflow === 'ellipsis'
-      && element.scrollWidth > element.clientWidth && element.getAttribute('title') === element.textContent), 'Long numeric readings must show an ellipsis, never a clipped misleading suffix');
+    assert(
+      await reading.evaluate(
+        (element) =>
+          getComputedStyle(element).textOverflow === 'ellipsis' &&
+          element.scrollWidth > element.clientWidth &&
+          element.getAttribute('title') === element.textContent,
+      ),
+      'Long numeric readings must show an ellipsis, never a clipped misleading suffix',
+    );
   }
   await mode(page, 'many-series');
   await expect(line.locator('[data-nx-nocturne-end]')).toHaveCount(12);
-  const labels = await line.locator('[data-nx-nocturne-end-label]').evaluateAll(elements => elements.map(element => {
-    const bounds = element.getBoundingClientRect(); return { top: bounds.top, bottom: bounds.bottom };
-  }).sort((a, b) => a.top - b.top));
-  assert(labels.every((label, index) => index === 0 || label.top >= labels[index - 1]!.bottom), 'Endpoint labels must not overlap');
-  assert(await line.locator('[data-nx-nocturne-end-label]').evaluateAll(elements => elements.every(element =>
-    getComputedStyle(element).textOverflow === 'ellipsis' && element.scrollWidth > element.clientWidth && element.getAttribute('title') === element.textContent)), 'Long endpoint names must visibly truncate and retain their full label');
+  const labels = await line
+    .locator('[data-nx-nocturne-end-label]')
+    .evaluateAll((elements) =>
+      elements
+        .map((element) => {
+          const bounds = element.getBoundingClientRect();
+          return { top: bounds.top, bottom: bounds.bottom };
+        })
+        .sort((a, b) => a.top - b.top),
+    );
+  assert(
+    labels.every(
+      (label, index) => index === 0 || label.top >= labels[index - 1]!.bottom,
+    ),
+    'Endpoint labels must not overlap',
+  );
+  assert(
+    await line
+      .locator('[data-nx-nocturne-end-label]')
+      .evaluateAll((elements) =>
+        elements.every(
+          (element) =>
+            getComputedStyle(element).textOverflow === 'ellipsis' &&
+            element.scrollWidth > element.clientWidth &&
+            element.getAttribute('title') === element.textContent,
+        ),
+      ),
+    'Long endpoint names must visibly truncate and retain their full label',
+  );
   await mode(page, 'many');
-  await page.locator('#nocturne-primary').evaluate(element => (element as HTMLElement).style.width = '280px');
+  await page
+    .locator('#nocturne-primary')
+    .evaluate((element) => ((element as HTMLElement).style.width = '280px'));
   await expect(bars.locator('[data-nx-nocturne-bar]')).toHaveCount(18);
   for (const slug of NOCTURNE_SLUGS) {
-    assert(await chart(page, slug).evaluate(element => element.scrollWidth <= element.clientWidth + 1), slug + ': narrow overflow must remain inside the chart');
+    assert(
+      await chart(page, slug).evaluate(
+        (element) => element.scrollWidth <= element.clientWidth + 1,
+      ),
+      slug + ': narrow overflow must remain inside the chart',
+    );
   }
   for (const node of [bars, line]) {
-    assert(await node.evaluate(element => [...element.querySelectorAll('div')].some(child => ['auto', 'scroll'].includes(getComputedStyle(child).overflowX) && child.scrollWidth > child.clientWidth)), 'Dense plots must scroll locally');
+    assert(
+      await node.evaluate((element) =>
+        [...element.querySelectorAll('div')].some(
+          (child) =>
+            ['auto', 'scroll'].includes(getComputedStyle(child).overflowX) &&
+            child.scrollWidth > child.clientWidth,
+        ),
+      ),
+      'Dense plots must scroll locally',
+    );
   }
-  await page.locator('#nocturne-primary').evaluate(element => element.removeAttribute('style'));
+  await page
+    .locator('#nocturne-primary')
+    .evaluate((element) => element.removeAttribute('style'));
   await mode(page, 'normal');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.evaluate(() => (window as unknown as { nodexNocturne: { setAnimate: (value: boolean) => void } }).nodexNocturne.setAnimate(true));
-  for (const slug of NOCTURNE_SLUGS) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
-  await page.locator('#nocturne-primary').evaluate(element => (element as HTMLElement).style.setProperty('--nx-motion-draw-duration', '0s'));
-  for (const slug of NOCTURNE_SLUGS) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'false');
-  await page.locator('#nocturne-primary').evaluate(element => element.removeAttribute('style'));
-  for (const slug of NOCTURNE_SLUGS) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexNocturne: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexNocturne.setAnimate(true),
+  );
+  for (const slug of NOCTURNE_SLUGS)
+    await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
+  await page
+    .locator('#nocturne-primary')
+    .evaluate((element) =>
+      (element as HTMLElement).style.setProperty(
+        '--nx-motion-draw-duration',
+        '0s',
+      ),
+    );
+  for (const slug of NOCTURNE_SLUGS)
+    await expect(chart(page, slug)).toHaveAttribute(
+      'data-nx-animated',
+      'false',
+    );
+  await page
+    .locator('#nocturne-primary')
+    .evaluate((element) => element.removeAttribute('style'));
+  for (const slug of NOCTURNE_SLUGS)
+    await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const slug of NOCTURNE_SLUGS) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'false');
-  assert.equal(await page.locator('#nocturne-primary svg').evaluateAll(elements => elements.some(element => /(?:NaN|Infinity)/.test(element.innerHTML))), false, 'Native geometry must remain finite');
-  console.log('Validated Nocturne: ranking, signed numeric time, exact allocation, endpoint labels, native inspection, stable identity, scoped tokens, narrow layouts and reduced motion.');
+  for (const slug of NOCTURNE_SLUGS)
+    await expect(chart(page, slug)).toHaveAttribute(
+      'data-nx-animated',
+      'false',
+    );
+  assert.equal(
+    await page
+      .locator('#nocturne-primary svg')
+      .evaluateAll((elements) =>
+        elements.some((element) => /(?:NaN|Infinity)/.test(element.innerHTML)),
+      ),
+    false,
+    'Native geometry must remain finite',
+  );
+  console.log(
+    'Validated Nocturne: ranking, signed numeric time, exact allocation, endpoint labels, native inspection, stable identity, scoped tokens, narrow layouts and reduced motion.',
+  );
 }

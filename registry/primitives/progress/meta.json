@@ -5,19 +5,11 @@
   "component": "progress",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "feedback",
-    "data"
-  ],
+  "tags": ["feedback", "data"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Progress"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Progress"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

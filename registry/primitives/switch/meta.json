@@ -5,20 +5,11 @@
   "component": "switch",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "form",
-    "interactive"
-  ],
+  "tags": ["form", "interactive"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Switch",
-    "SwitchGroup"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Switch", "SwitchGroup"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

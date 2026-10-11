@@ -16,7 +16,10 @@ export const OAUTH_STATE_COOKIE = 'nx_oauth_state';
  */
 export async function GET() {
   if (!oauthConfigured()) {
-    return new NextResponse(null, { status: 307, headers: { location: '/login?error=unconfigured' } });
+    return new NextResponse(null, {
+      status: 307,
+      headers: { location: '/login?error=unconfigured' },
+    });
   }
 
   const state = randomBytes(16).toString('base64url');

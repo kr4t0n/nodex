@@ -7,26 +7,14 @@
   "runtime": "react",
   "density": "close-read",
   "aspectRatio": "1140/640",
-  "tags": [
-    "data",
-    "map"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["data", "map"],
+  "dependencies": ["recharts@3.10.1"],
   "strokeAsArea": true,
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "ThreadTriptych"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["ThreadTriptych"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

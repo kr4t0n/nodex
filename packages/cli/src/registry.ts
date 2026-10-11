@@ -52,7 +52,10 @@ function string(value: unknown, label: string): asserts value is string {
 }
 
 function strings(value: unknown, label: string): asserts value is string[] {
-  if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string')) {
+  if (
+    !Array.isArray(value) ||
+    value.some((entry) => typeof entry !== 'string')
+  ) {
     throw new Error(`Invalid registry: ${label} must be a string array.`);
   }
 }
@@ -60,40 +63,63 @@ function strings(value: unknown, label: string): asserts value is string[] {
 /** Validate the public wire contract without adding a runtime schema dependency. */
 function readItems(value: unknown): Item[] {
   const manifest = record(value, 'manifest');
-  if (!Array.isArray(manifest.items)) throw new Error('Invalid registry: items are required.');
+  if (!Array.isArray(manifest.items))
+    throw new Error('Invalid registry: items are required.');
   const refs = new Set<string>();
   for (const value of manifest.items) {
     const item = record(value, 'item');
     string(item.name, 'item.name');
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.name)) throw new Error('Invalid component slug.');
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.name))
+      throw new Error('Invalid component slug.');
     string(item.title, 'item.title');
     strings(item.dependencies, 'item.dependencies');
     const meta = record(item.meta, 'item.meta');
-    for (const key of ['language', 'component', 'entry']) string(meta[key], `meta.${key}`);
-    if (meta.runtime !== 'react' || !['primitive', 'expressive'].includes(String(meta.tier))) {
-      throw new Error('Invalid registry: components must declare the React contract.');
+    for (const key of ['language', 'component', 'entry'])
+      string(meta[key], `meta.${key}`);
+    if (
+      meta.runtime !== 'react' ||
+      !['primitive', 'expressive'].includes(String(meta.tier))
+    ) {
+      throw new Error(
+        'Invalid registry: components must declare the React contract.',
+      );
     }
     strings(meta.tags, 'meta.tags');
     strings(meta.exports, 'meta.exports');
     if (meta.externalData === undefined) meta.externalData = [];
     strings(meta.externalData, 'meta.externalData');
-    if (!meta.exports.length || meta.exports.some((name) => !/^[A-Za-z_$][\w$]*$/.test(name))) {
-      throw new Error('Invalid registry: explicit component exports are required.');
+    if (
+      !meta.exports.length ||
+      meta.exports.some((name) => !/^[A-Za-z_$][\w$]*$/.test(name))
+    ) {
+      throw new Error(
+        'Invalid registry: explicit component exports are required.',
+      );
     }
     registryPath(meta.entry as string, 'component entry');
     const preview = record(meta.preview, 'meta.preview');
     string(preview.path, 'meta.preview.path');
     registryPath(preview.path, 'preview path');
-    if (![preview.width, preview.height].every((v) => typeof v === 'number' && Number.isFinite(v) && v > 0)) {
-      throw new Error('Invalid registry: preview dimensions must be positive numbers.');
+    if (
+      ![preview.width, preview.height].every(
+        (v) => typeof v === 'number' && Number.isFinite(v) && v > 0,
+      )
+    ) {
+      throw new Error(
+        'Invalid registry: preview dimensions must be positive numbers.',
+      );
     }
     if (meta.props !== undefined) {
-      if (!Array.isArray(meta.props)) throw new Error('Invalid registry: props must be an array.');
+      if (!Array.isArray(meta.props))
+        throw new Error('Invalid registry: props must be an array.');
       for (const value of meta.props) {
         const prop = record(value, 'prop');
         string(prop.name, 'prop.name');
         string(prop.type, 'prop.type');
-        if (prop.description !== undefined && typeof prop.description !== 'string') {
+        if (
+          prop.description !== undefined &&
+          typeof prop.description !== 'string'
+        ) {
           throw new Error('Invalid registry: prop.description must be text.');
         }
         if (prop.required !== undefined && typeof prop.required !== 'boolean') {
@@ -101,7 +127,8 @@ function readItems(value: unknown): Item[] {
         }
       }
     }
-    if (!Array.isArray(item.files) || !item.files.length) throw new Error('Invalid registry: item files are required.');
+    if (!Array.isArray(item.files) || !item.files.length)
+      throw new Error('Invalid registry: item files are required.');
     const targets = new Set<string>();
     for (const value of item.files) {
       const file = record(value, 'file');
@@ -109,10 +136,12 @@ function readItems(value: unknown): Item[] {
       string(file.target, 'file.target');
       registryPath(file.path, 'source path');
       registryPath(file.target, 'target path');
-      if (targets.has(file.target)) throw new Error(`Duplicate target ${file.target}.`);
+      if (targets.has(file.target))
+        throw new Error(`Duplicate target ${file.target}.`);
       targets.add(file.target);
     }
-    if (!targets.has(meta.entry as string)) throw new Error('Invalid registry: entry must name a delivered target.');
+    if (!targets.has(meta.entry as string))
+      throw new Error('Invalid registry: entry must name a delivered target.');
     const ref = `${meta.language}/${item.name}`;
     if (refs.has(ref)) throw new Error(`Duplicate registry component ${ref}.`);
     refs.add(ref);
@@ -121,17 +150,24 @@ function readItems(value: unknown): Item[] {
 }
 
 function readLanguages(value: unknown): Language[] {
-  if (!Array.isArray(value)) throw new Error('Invalid registry: languages.json must be an array.');
+  if (!Array.isArray(value))
+    throw new Error('Invalid registry: languages.json must be an array.');
   const slugs = new Set<string>();
   for (const candidate of value) {
     const language = record(candidate, 'language');
     string(language.slug, 'language.slug');
     string(language.name, 'language.name');
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(language.slug) || slugs.has(language.slug)) {
+    if (
+      !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(language.slug) ||
+      slugs.has(language.slug)
+    ) {
       throw new Error('Invalid or duplicate language slug.');
     }
     slugs.add(language.slug);
-    if (typeof language.description !== 'string' || !['public', 'restricted'].includes(String(language.visibility))) {
+    if (
+      typeof language.description !== 'string' ||
+      !['public', 'restricted'].includes(String(language.visibility))
+    ) {
       throw new Error('Invalid language description or visibility.');
     }
     strings(language.featured, 'language.featured');
@@ -161,17 +197,30 @@ export async function resolveRegistry(explicit?: string): Promise<Registry> {
   if (remote) {
     const url = new URL(candidate);
     const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
-    if ((url.protocol !== 'https:' && !loopback) || url.username || url.password || url.search || url.hash) {
-      throw new Error('A registry must use HTTPS (HTTP is allowed for localhost), without credentials, query or fragment.');
+    if (
+      (url.protocol !== 'https:' && !loopback) ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash
+    ) {
+      throw new Error(
+        'A registry must use HTTPS (HTTP is allowed for localhost), without credentials, query or fragment.',
+      );
     }
     root = url.toString().replace(/\/+$/, '');
   } else {
     const local = path.resolve(candidate);
-    const built = await exists(path.join(local, 'r/registry.json')) ? local : path.join(local, 'public');
+    const built = (await exists(path.join(local, 'r/registry.json')))
+      ? local
+      : path.join(local, 'public');
     try {
       root = await realpath(built);
     } catch (cause) {
-      throw new Error(`Could not read the built registry under ${local}. Run pnpm run build:registry first.`, { cause });
+      throw new Error(
+        `Could not read the built registry under ${local}. Run pnpm run build:registry first.`,
+        { cause },
+      );
     }
   }
 
@@ -183,7 +232,8 @@ export async function resolveRegistry(explicit?: string): Promise<Registry> {
       return readFile(file, 'utf8');
     }
     const target = new URL(`${root}/${clean}`);
-    if (target.origin !== new URL(root).origin) throw new Error('Registry files must remain on their registry origin.');
+    if (target.origin !== new URL(root).origin)
+      throw new Error('Registry files must remain on their registry origin.');
     const token = clean.startsWith('api/') ? await tokenFor(root) : undefined;
     const response = await fetch(target, {
       headers: token ? { authorization: `Bearer ${token}` } : undefined,
@@ -191,7 +241,9 @@ export async function resolveRegistry(explicit?: string): Promise<Registry> {
       redirect: 'error',
     });
     if (response.status === 401 || response.status === 403) {
-      throw new Error(`${target} requires access. ${token ? 'Try nodex login again.' : 'Run nodex login first.'}`);
+      throw new Error(
+        `${target} requires access. ${token ? 'Try nodex login again.' : 'Run nodex login first.'}`,
+      );
     }
     if (!response.ok) throw new Error(`${target} returned ${response.status}.`);
     return response.text();
@@ -201,10 +253,19 @@ export async function resolveRegistry(explicit?: string): Promise<Registry> {
     read('r/registry.json'),
     read('r/languages.json'),
   ]);
-  return { root, isRemote: remote, items: readItems(JSON.parse(manifest)), languages: readLanguages(JSON.parse(languageList)), read };
+  return {
+    root,
+    isRemote: remote,
+    items: readItems(JSON.parse(manifest)),
+    languages: readLanguages(JSON.parse(languageList)),
+    read,
+  };
 }
 
-export function findLanguage(registry: Registry, slug: string): Language | undefined {
+export function findLanguage(
+  registry: Registry,
+  slug: string,
+): Language | undefined {
   return registry.languages.find((language) => language.slug === slug);
 }
 
@@ -216,10 +277,21 @@ export function findItem(
   const slash = ref.indexOf('/');
   const language = slash === -1 ? design : ref.slice(0, slash);
   const name = slash === -1 ? ref : ref.slice(slash + 1);
-  if (!language) return { error: `"${ref}" needs a design language. Use <language>/${name} or --design <language>.` };
-  if (!findLanguage(registry, language)) return { error: `No design language named "${language}".` };
-  const item = registry.items.find((item) => item.name === name && item.meta.language === language)
-    ?? registry.items.find((item) => item.name === name && item.meta.language === 'shared');
+  if (!language)
+    return {
+      error: `"${ref}" needs a design language. Use <language>/${name} or --design <language>.`,
+    };
+  if (!findLanguage(registry, language))
+    return { error: `No design language named "${language}".` };
+  const item =
+    registry.items.find(
+      (item) => item.name === name && item.meta.language === language,
+    ) ??
+    registry.items.find(
+      (item) => item.name === name && item.meta.language === 'shared',
+    );
   if (item) return { item, language };
-  return { error: `No component named "${name}" in "${language}". Use nodex search to see available components.` };
+  return {
+    error: `No component named "${name}" in "${language}". Use nodex search to see available components.`,
+  };
 }

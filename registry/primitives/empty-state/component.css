@@ -1,5 +1,5 @@
 @layer components {
-/* empty-state - shared primitive, themed by the active language's tokens.
+  /* empty-state - shared primitive, themed by the active language's tokens.
 
    For a region with nothing in it yet. The job is to say what would be here and
    how to put it there; an empty region with no explanation reads as a bug.
@@ -8,55 +8,55 @@
    way of marking something provisional: a boundary that is inferred rather than
    drawn. It is the same treatment progress uses for an unknown quantity. */
 
-.nx-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--nx-space-emptyGap);
-  padding: var(--nx-space-emptyPadding);
-  border: var(--nx-stroke-hairline) dashed var(--nx-border);
-  border-radius: var(--nx-radius-card);
-  font-family: var(--nx-font-sans);
-  color: var(--nx-ink);
-}
+  .nx-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--nx-space-emptyGap);
+    padding: var(--nx-space-emptyPadding);
+    border: var(--nx-stroke-hairline) dashed var(--nx-border);
+    border-radius: var(--nx-radius-card);
+    font-family: var(--nx-font-sans);
+    color: var(--nx-ink);
+  }
 
-.nx-empty__title {
-  margin: 0;
-  font-family: var(--nx-font-heading, var(--nx-font-sans));
-  font-size: var(--nx-type-emptyTitle-size);
-  font-weight: var(--nx-font-weight-bold);
-  letter-spacing: var(--nx-type-cardTitle-tracking);
-}
+  .nx-empty__title {
+    margin: 0;
+    font-family: var(--nx-font-heading, var(--nx-font-sans));
+    font-size: var(--nx-type-emptyTitle-size);
+    font-weight: var(--nx-font-weight-bold);
+    letter-spacing: var(--nx-type-cardTitle-tracking);
+  }
 
-/* Say what to do, not that something is missing. "Nothing matches" alone leaves
+  /* Say what to do, not that something is missing. "Nothing matches" alone leaves
    the reader stuck; the hint is the part that unsticks them. */
-.nx-empty__hint {
-  margin: 0;
-  max-width: 48ch;
-  font-size: var(--nx-type-body-size);
-  line-height: var(--nx-type-body-lineHeight);
-  color: var(--nx-muted);
-}
+  .nx-empty__hint {
+    margin: 0;
+    max-width: 48ch;
+    font-size: var(--nx-type-body-size);
+    line-height: var(--nx-type-body-lineHeight);
+    color: var(--nx-muted);
+  }
 
-.nx-empty__action {
-  margin-top: var(--nx-space-emptyActionGap);
-}
+  .nx-empty__action {
+    margin-top: var(--nx-space-emptyActionGap);
+  }
 
-/* Centred, for a full-width region rather than a panel in a grid. */
-.nx-empty--center {
-  align-items: center;
-  text-align: center;
-  padding: var(--nx-space-emptyCenteredPadding);
-}
+  /* Centred, for a full-width region rather than a panel in a grid. */
+  .nx-empty--center {
+    align-items: center;
+    text-align: center;
+    padding: var(--nx-space-emptyCenteredPadding);
+  }
 
-.nx-empty--center .nx-empty__hint {
-  max-width: 42ch;
-}
+  .nx-empty--center .nx-empty__hint {
+    max-width: 42ch;
+  }
 
-/* Quiet, for a small slot where a dashed box would be louder than the absence
+  /* Quiet, for a small slot where a dashed box would be louder than the absence
    it describes. */
-.nx-empty--quiet {
-  border: 0;
-  padding: var(--nx-space-emptyQuietPadding);
-}
+  .nx-empty--quiet {
+    border: 0;
+    padding: var(--nx-space-emptyQuietPadding);
+  }
 }

@@ -7,25 +7,13 @@
   "runtime": "react",
   "density": "close-read",
   "aspectRatio": "720/320",
-  "tags": [
-    "contributor",
-    "graph"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["contributor", "graph"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "ClusterField"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["ClusterField"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

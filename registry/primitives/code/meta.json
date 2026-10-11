@@ -5,22 +5,11 @@
   "component": "code",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "text",
-    "technical"
-  ],
+  "tags": ["text", "technical"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Code",
-    "Kbd",
-    "CodeBlock",
-    "Command"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Code", "Kbd", "CodeBlock", "Command"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

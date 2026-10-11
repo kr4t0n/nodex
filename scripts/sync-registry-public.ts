@@ -59,9 +59,13 @@ for (const [from, to] of SOURCES) {
 
 const generated = path.join(ROOT, 'apps/web/src/generated');
 const source = await loadSource(path.join(ROOT, 'registry'));
-const catalog = JSON.parse(await readFile(path.join(ROOT, 'public/r/gallery.json'), 'utf8')) as GalleryRegistry;
+const catalog = JSON.parse(
+  await readFile(path.join(ROOT, 'public/r/gallery.json'), 'utf8'),
+) as GalleryRegistry;
 const examples = galleryExamples(source, catalog.items, generated);
 await mkdir(generated, { recursive: true });
 await writeFile(path.join(generated, 'registry-examples.ts'), examples);
 
-console.log(`synced ${copied} registry path(s) and generated ${catalog.items.length} lazy React example imports`);
+console.log(
+  `synced ${copied} registry path(s) and generated ${catalog.items.length} lazy React example imports`,
+);

@@ -6,5 +6,12 @@ const allocation: readonly HundredBlocksDatum[] = [
   { id: 'operations', label: 'Operations', percent: 12, tone: 'd' },
 ];
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <HundredBlocks data={allocation} unitLabel="Team allocation" contextLabel="100% of capacity" animate={animate} />;
+  return (
+    <HundredBlocks
+      data={allocation}
+      unitLabel="Team allocation"
+      contextLabel="100% of capacity"
+      animate={animate}
+    />
+  );
 }

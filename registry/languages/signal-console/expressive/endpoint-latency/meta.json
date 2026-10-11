@@ -7,30 +7,21 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "EndpointLatency"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["EndpointLatency"],
+  "files": ["component.tsx"],
   "shared": [
     "signal-chart-frame.tsx",
     "use-chart-motion.ts",
     "use-reduced-motion.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 680,
     "height": 400
   },
-  "tags": [
-    "latency",
-    "live-ops"
-  ],
+  "tags": ["latency", "live-ops"],
   "props": [
     {
       "name": "data",

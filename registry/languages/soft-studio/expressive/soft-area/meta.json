@@ -7,32 +7,21 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SoftArea"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["SoftArea"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "studio-chart-frame.tsx"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 720,
     "height": 420
   },
-  "tags": [
-    "comparison",
-    "soft",
-    "studio",
-    "time-series"
-  ],
+  "tags": ["comparison", "soft", "studio", "time-series"],
   "props": [
     {
       "name": "data",

@@ -43,32 +43,66 @@ const SIGNUPS = `${PRIMARY} [data-nx-plot="sign-ups"]`;
 const TOOLTIP = `${PRIMARY} .recharts-tooltip-wrapper:visible`;
 
 async function setMode(page: Page, mode: string): Promise<void> {
-  await page.evaluate((value) => (window as unknown as { nodexDualAreaFixture: { setMode: (mode: string) => void } }).nodexDualAreaFixture.setMode(value), mode);
+  await page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexDualAreaFixture: { setMode: (mode: string) => void };
+        }
+      ).nodexDualAreaFixture.setMode(value),
+    mode,
+  );
 }
 
 async function checkTooltip(page: Page, text: string): Promise<void> {
   await expect(page.locator(TOOLTIP)).toHaveCount(1);
   await expect(page.locator(TOOLTIP)).toHaveText(text);
-  await expect(page.locator(`${SECONDARY} .recharts-tooltip-wrapper:visible`)).toHaveCount(0);
+  await expect(
+    page.locator(`${SECONDARY} .recharts-tooltip-wrapper:visible`),
+  ).toHaveCount(0);
 }
 
 async function checkCursorAlignment(page: Page): Promise<void> {
-  await expect.poll(() => page.locator(PRIMARY).evaluate((element) => {
-    const cursors = ['spend', 'sign-ups'].map((plot) => element.querySelector(`[data-nx-plot="${plot}"] .nx-dual-area-cursor`)?.getBoundingClientRect());
-    if (!cursors[0] || !cursors[1]) return Infinity;
-    return Math.abs((cursors[0].x + cursors[0].width / 2) - (cursors[1].x + cursors[1].width / 2));
-  }), { message: 'Both plots must point at the same day in screen coordinates' }).toBeLessThan(1);
+  await expect
+    .poll(
+      () =>
+        page.locator(PRIMARY).evaluate((element) => {
+          const cursors = ['spend', 'sign-ups'].map((plot) =>
+            element
+              .querySelector(`[data-nx-plot="${plot}"] .nx-dual-area-cursor`)
+              ?.getBoundingClientRect(),
+          );
+          if (!cursors[0] || !cursors[1]) return Infinity;
+          return Math.abs(
+            cursors[0].x +
+              cursors[0].width / 2 -
+              (cursors[1].x + cursors[1].width / 2),
+          );
+        }),
+      {
+        message: 'Both plots must point at the same day in screen coordinates',
+      },
+    )
+    .toBeLessThan(1);
 }
 
 async function hoverBar(page: Page, index: number): Promise<void> {
-  await page.locator(`${SPEND} .recharts-bar-rectangle path`).nth(index).hover();
+  await page
+    .locator(`${SPEND} .recharts-bar-rectangle path`)
+    .nth(index)
+    .hover();
 }
 
 async function chartPaint(page: Page, selector: string) {
   return page.locator(selector).evaluate((element) => ({
-    line: getComputedStyle(element.querySelector('.recharts-area-curve')!).stroke,
-    bar: getComputedStyle(element.querySelector('.recharts-bar-rectangle path')!).fill,
-    stops: [...element.querySelectorAll('linearGradient stop')].map((stop) => getComputedStyle(stop).stopColor),
+    line: getComputedStyle(element.querySelector('.recharts-area-curve')!)
+      .stroke,
+    bar: getComputedStyle(
+      element.querySelector('.recharts-bar-rectangle path')!,
+    ).fill,
+    stops: [...element.querySelectorAll('linearGradient stop')].map(
+      (stop) => getComputedStyle(stop).stopColor,
+    ),
   }));
 }
 
@@ -85,9 +119,14 @@ export async function checkDualAreaConsumer(page: Page): Promise<void> {
   await checkTooltip(page, 'Day 2 — spend $6K · 70 sign-ups');
   await checkCursorAlignment(page);
   const thirdBar = await bars.nth(2).boundingBox();
-  const lowerPlot = await page.locator(`${SIGNUPS} svg.recharts-surface`).boundingBox();
+  const lowerPlot = await page
+    .locator(`${SIGNUPS} svg.recharts-surface`)
+    .boundingBox();
   assert(thirdBar && lowerPlot, 'Both coordinated plots must have a layout');
-  await page.mouse.move(thirdBar.x + thirdBar.width / 2, lowerPlot.y + lowerPlot.height / 2);
+  await page.mouse.move(
+    thirdBar.x + thirdBar.width / 2,
+    lowerPlot.y + lowerPlot.height / 2,
+  );
   await checkTooltip(page, 'Day 3 — spend $12K · 110 sign-ups');
   await checkCursorAlignment(page);
 
@@ -102,7 +141,10 @@ export async function checkDualAreaConsumer(page: Page): Promise<void> {
   // Changing input without a new mouse-enter or focus event must hand ownership back.
   const firstBar = await bars.first().boundingBox();
   assert(firstBar, 'The first campaign observation must have a mark');
-  await page.mouse.move(firstBar.x + firstBar.width / 2, lowerPlot.y + lowerPlot.height / 2);
+  await page.mouse.move(
+    firstBar.x + firstBar.width / 2,
+    lowerPlot.y + lowerPlot.height / 2,
+  );
   await checkTooltip(page, 'Day 1 — spend $2K · 40 sign-ups');
   await checkCursorAlignment(page);
   await page.keyboard.press('ArrowRight');
@@ -117,55 +159,130 @@ export async function checkDualAreaConsumer(page: Page): Promise<void> {
   await checkCursorAlignment(page);
 
   const previousPath = await line.getAttribute('d');
-  const siblingPath = await page.locator(`${SECONDARY} .recharts-area-curve`).getAttribute('d');
-  await page.evaluate(() => (window as unknown as { nodexDualAreaFixture: { setRevision: (value: number) => void } }).nodexDualAreaFixture.setRevision(1));
+  const siblingPath = await page
+    .locator(`${SECONDARY} .recharts-area-curve`)
+    .getAttribute('d');
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexDualAreaFixture: { setRevision: (value: number) => void };
+      }
+    ).nodexDualAreaFixture.setRevision(1),
+  );
   await expect(line).not.toHaveAttribute('d', previousPath!);
-  await expect(page.locator(`${SECONDARY} .recharts-area-curve`)).toHaveAttribute('d', siblingPath!);
+  await expect(
+    page.locator(`${SECONDARY} .recharts-area-curve`),
+  ).toHaveAttribute('d', siblingPath!);
   await hoverBar(page, 2);
   await checkTooltip(page, 'Day 3 — spend $21K · 180 sign-ups');
   await checkCursorAlignment(page);
   const largestBar = await bars.nth(2).boundingBox();
-  const upperPlot = await page.locator(`${SPEND} svg.recharts-surface`).boundingBox();
-  assert(largestBar && upperPlot && largestBar.y >= upperPlot.y - 1 && largestBar.y + largestBar.height <= upperPlot.y + upperPlot.height + 1, 'Caller spend above the original $18K maximum must fit the chart');
+  const upperPlot = await page
+    .locator(`${SPEND} svg.recharts-surface`)
+    .boundingBox();
+  assert(
+    largestBar &&
+      upperPlot &&
+      largestBar.y >= upperPlot.y - 1 &&
+      largestBar.y + largestBar.height <= upperPlot.y + upperPlot.height + 1,
+    'Caller spend above the original $18K maximum must fit the chart',
+  );
 
   const siblingPaint = await chartPaint(page, SECONDARY);
-  assert(siblingPaint.stops.length >= 2, 'The delivered area must include its gradient stops');
+  assert(
+    siblingPaint.stops.length >= 2,
+    'The delivered area must include its gradient stops',
+  );
   await page.locator(PRIMARY).evaluate((element) => {
     const node = element as HTMLElement;
     node.style.setProperty('--nx-ink', '#123456');
     node.style.setProperty('--nx-markQuiet', '#987654');
   });
-  await expect.poll(() => chartPaint(page, PRIMARY)).toEqual({
-    line: 'rgb(18, 52, 86)', bar: 'rgb(152, 118, 84)',
-    stops: siblingPaint.stops.map(() => 'rgb(18, 52, 86)'),
-  });
-  assert.deepEqual(await chartPaint(page, SECONDARY), siblingPaint, 'Scoped line, bar and gradient paints must not affect another instance');
+  await expect
+    .poll(() => chartPaint(page, PRIMARY))
+    .toEqual({
+      line: 'rgb(18, 52, 86)',
+      bar: 'rgb(152, 118, 84)',
+      stops: siblingPaint.stops.map(() => 'rgb(18, 52, 86)'),
+    });
+  assert.deepEqual(
+    await chartPaint(page, SECONDARY),
+    siblingPaint,
+    'Scoped line, bar and gradient paints must not affect another instance',
+  );
 
-  const originalWidth = Number(await page.locator(`${SPEND} svg.recharts-surface`).getAttribute('width'));
-  await page.locator(PRIMARY).evaluate((element) => { (element as HTMLElement).style.width = '340px'; });
-  await expect.poll(async () => Number(await page.locator(`${SPEND} svg.recharts-surface`).getAttribute('width'))).toBeLessThan(originalWidth);
-  await expect.poll(async () => {
-    const widths = await page.locator(`${PRIMARY} svg.recharts-surface`).evaluateAll((elements) => elements.map((element) => Number(element.getAttribute('width'))));
-    return widths.length === 2 && widths[0] === widths[1];
-  }).toBe(true);
-  assert(Number(await page.locator(`${SECONDARY} svg.recharts-surface`).first().getAttribute('width')) > 340, 'Resizing one dual-area instance must not resize its sibling');
+  const originalWidth = Number(
+    await page.locator(`${SPEND} svg.recharts-surface`).getAttribute('width'),
+  );
+  await page.locator(PRIMARY).evaluate((element) => {
+    (element as HTMLElement).style.width = '340px';
+  });
+  await expect
+    .poll(async () =>
+      Number(
+        await page
+          .locator(`${SPEND} svg.recharts-surface`)
+          .getAttribute('width'),
+      ),
+    )
+    .toBeLessThan(originalWidth);
+  await expect
+    .poll(async () => {
+      const widths = await page
+        .locator(`${PRIMARY} svg.recharts-surface`)
+        .evaluateAll((elements) =>
+          elements.map((element) => Number(element.getAttribute('width'))),
+        );
+      return widths.length === 2 && widths[0] === widths[1];
+    })
+    .toBe(true);
+  assert(
+    Number(
+      await page
+        .locator(`${SECONDARY} svg.recharts-surface`)
+        .first()
+        .getAttribute('width'),
+    ) > 340,
+    'Resizing one dual-area instance must not resize its sibling',
+  );
   await hoverBar(page, 1);
   await checkTooltip(page, 'Day 2 — spend $4K · 35 sign-ups');
   await checkCursorAlignment(page);
 
-  for (const mode of ['empty', 'single', 'zero', 'invalid', 'negative'] as const) {
+  for (const mode of [
+    'empty',
+    'single',
+    'zero',
+    'invalid',
+    'negative',
+  ] as const) {
     await setMode(page, mode);
     if (mode === 'empty' || mode === 'invalid' || mode === 'negative') {
-      await expect(page.locator(`${PRIMARY} [role="status"]`)).toContainText('available');
+      await expect(page.locator(`${PRIMARY} [role="status"]`)).toContainText(
+        'available',
+      );
     } else {
-      await expect(page.locator(`${PRIMARY} svg.recharts-surface`)).toHaveCount(2);
+      await expect(page.locator(`${PRIMARY} svg.recharts-surface`)).toHaveCount(
+        2,
+      );
       await page.mouse.move(800, 10);
       await page.locator(`${SPEND} svg.recharts-surface`).focus();
       await page.keyboard.press('ArrowRight');
-      await checkTooltip(page, mode === 'zero' ? 'Day 7 — spend $0K · 0 sign-ups' : 'Day 7 — spend $3K · 6 sign-ups');
+      await checkTooltip(
+        page,
+        mode === 'zero'
+          ? 'Day 7 — spend $0K · 0 sign-ups'
+          : 'Day 7 — spend $3K · 6 sign-ups',
+      );
       await checkCursorAlignment(page);
     }
-    assert.equal(await page.locator(PRIMARY).evaluate((element) => /NaN|Infinity/.test(element.innerHTML)), false, `Dual-area ${mode} data generated invalid DOM`);
+    assert.equal(
+      await page
+        .locator(PRIMARY)
+        .evaluate((element) => /NaN|Infinity/.test(element.innerHTML)),
+      false,
+      `Dual-area ${mode} data generated invalid DOM`,
+    );
   }
 
   // Missing, negative and non-finite values remain unavailable independently;
@@ -175,18 +292,29 @@ export async function checkDualAreaConsumer(page: Page): Promise<void> {
   await page.mouse.move(800, 10);
   await page.locator(`${SPEND} svg.recharts-surface`).focus();
   const partialObservations = [
-    'Day 1 — spend Unavailable · 40 sign-ups', 'Day 2 — spend $6K · Unavailable sign-ups',
-    'Day 3 — spend Unavailable · 70 sign-ups', 'Day 4 — spend $8K · Unavailable sign-ups',
-    'Day 5 — spend Unavailable · 110 sign-ups', 'Day 6 — spend $12K · Unavailable sign-ups',
+    'Day 1 — spend Unavailable · 40 sign-ups',
+    'Day 2 — spend $6K · Unavailable sign-ups',
+    'Day 3 — spend Unavailable · 70 sign-ups',
+    'Day 4 — spend $8K · Unavailable sign-ups',
+    'Day 5 — spend Unavailable · 110 sign-ups',
+    'Day 6 — spend $12K · Unavailable sign-ups',
   ];
   for (const [index, observation] of partialObservations.entries()) {
     if (index) await page.keyboard.press('ArrowRight');
     await checkTooltip(page, observation);
     await checkCursorAlignment(page);
   }
-  assert.equal(await page.locator(PRIMARY).evaluate((element) => /NaN|Infinity/.test(element.innerHTML)), false, 'Partially missing dual-area data generated invalid DOM');
+  assert.equal(
+    await page
+      .locator(PRIMARY)
+      .evaluate((element) => /NaN|Infinity/.test(element.innerHTML)),
+    false,
+    'Partially missing dual-area data generated invalid DOM',
+  );
 
   await setMode(page, 'normal');
   await expect(page.locator(`${PRIMARY} svg.recharts-surface`)).toHaveCount(2);
-  console.log('Validated dual-area coordinated pointer/keyboard observations, scale expansion, scoped bar/line/gradient tokens, independent instances, resizing and missing/zero/invalid data.');
+  console.log(
+    'Validated dual-area coordinated pointer/keyboard observations, scale expansion, scoped bar/line/gradient tokens, independent instances, resizing and missing/zero/invalid data.',
+  );
 }

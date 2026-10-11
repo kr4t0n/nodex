@@ -5,19 +5,11 @@
   "component": "button",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "action",
-    "interactive"
-  ],
+  "tags": ["action", "interactive"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Button"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Button"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

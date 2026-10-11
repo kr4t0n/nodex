@@ -6,10 +6,20 @@ import { marked } from 'marked';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 
-import { CommandRow, EmptyState, Loading, PageShell, TopBar } from '@/components/Chrome.tsx';
+import {
+  CommandRow,
+  EmptyState,
+  Loading,
+  PageShell,
+  TopBar,
+} from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
 import { TokenPanel, type LanguageTokens } from '@/components/TokenPanel.tsx';
-import { useLanguageTokens, usePrefersReducedMotion, useText } from '@/lib/hooks.ts';
+import {
+  useLanguageTokens,
+  usePrefersReducedMotion,
+  useText,
+} from '@/lib/hooks.ts';
 import {
   designUrl,
   expressiveFor,
@@ -71,7 +81,7 @@ export function LanguageView({ slug }: { slug: string }) {
       <PageShell>
         <section className="grid grid-cols-1 gap-10 pt-14 pb-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
           <div>
-            <h1 className="m-0 text-[34px] leading-[1.05] [font-family:var(--nx-font-heading)] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
+            <h1 className="m-0 [font-family:var(--nx-font-heading)] text-[34px] leading-[1.05] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
               {language.name}
             </h1>
             <p
@@ -111,7 +121,13 @@ export function LanguageView({ slug }: { slug: string }) {
  * It remains in the manifest, in each component's meta.json, in `nodex search
  * --density`, and in DESIGN.md.
  */
-function ComponentGrid({ items, language }: { items: Item[]; language: string }) {
+function ComponentGrid({
+  items,
+  language,
+}: {
+  items: Item[];
+  language: string;
+}) {
   const [query, setQuery] = useState('');
   const [type, setType] = useState<string | null>(null);
   const reduced = usePrefersReducedMotion();
@@ -121,20 +137,23 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return items.filter((item) => {
-      if (type && item.meta.component !== type) return false;
-      if (!q) return true;
-      return (
-        item.title.toLowerCase().includes(q) ||
-        item.name.includes(q) ||
-        item.meta.component.includes(q) ||
-        item.meta.tags.some((tag) => tag.includes(q))
+    return items
+      .filter((item) => {
+        if (type && item.meta.component !== type) return false;
+        if (!q) return true;
+        return (
+          item.title.toLowerCase().includes(q) ||
+          item.name.includes(q) ||
+          item.meta.component.includes(q) ||
+          item.meta.tags.some((tag) => tag.includes(q))
+        );
+      })
+      .sort(
+        (a, b) =>
+          a.meta.component.localeCompare(b.meta.component, 'en') ||
+          a.title.localeCompare(b.title, 'en') ||
+          a.name.localeCompare(b.name, 'en'),
       );
-    }).sort((a, b) =>
-      a.meta.component.localeCompare(b.meta.component, 'en') ||
-      a.title.localeCompare(b.title, 'en') ||
-      a.name.localeCompare(b.name, 'en'),
-    );
   }, [items, query, type]);
 
   // Motivated motion: the set changed, so the new set announces itself. A
@@ -151,7 +170,11 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
         overwrite: true,
       });
     },
-    { scope: gridRef, dependencies: [filtered.length, type], revertOnUpdate: true },
+    {
+      scope: gridRef,
+      dependencies: [filtered.length, type],
+      revertOnUpdate: true,
+    },
   );
 
   const active = type !== null || query !== '';
@@ -237,13 +260,14 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
             <article
               key={item.name}
               data-grid-cell
-              className="grid min-w-0 grid-rows-subgrid row-span-2"
+              className="row-span-2 grid min-w-0 grid-rows-subgrid"
               style={{ rowGap: 6 }}
             >
               {/* Title, then type, then the chart. The chart itself is only
                   the drawing, so everything that names it is printed here from
                   the manifest. */}
-              <Link href={`/l/${language}/${item.name}`}
+              <Link
+                href={`/l/${language}/${item.name}`}
                 className="flex min-w-0 flex-col justify-between gap-1.5 no-underline"
                 style={{ color: 'inherit' }}
               >
@@ -268,7 +292,10 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
         </div>
       )}
 
-      <p className="mt-10 text-[length:var(--nx-type-body-supportingSize)]" style={{ color: 'var(--nx-muted)' }}>
+      <p
+        className="mt-10 text-[length:var(--nx-type-body-supportingSize)]"
+        style={{ color: 'var(--nx-muted)' }}
+      >
         {filtered.length} of {items.length}{' '}
         {items.length === 1 ? 'chart' : 'charts'}. Each preview draws when it
         scrolls into view.
@@ -278,7 +305,13 @@ function ComponentGrid({ items, language }: { items: Item[]; language: string })
 }
 
 /** Shared primitives preview at their natural size under the viewed language. */
-function PrimitiveStrip({ items, language }: { items: Item[]; language: string }) {
+function PrimitiveStrip({
+  items,
+  language,
+}: {
+  items: Item[];
+  language: string;
+}) {
   return (
     <section className="pt-4">
       <hr className="nx-rule" />
@@ -293,11 +326,12 @@ function PrimitiveStrip({ items, language }: { items: Item[]; language: string }
         {items.map((item) => (
           <article
             key={item.name}
-            className="grid min-w-0 grid-rows-subgrid row-span-3"
+            className="row-span-3 grid min-w-0 grid-rows-subgrid"
             style={{ rowGap: 6 }}
           >
-            <Link href={`/l/${language}/${item.name}`}
-              className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
+            <Link
+              href={`/l/${language}/${item.name}`}
+              className="row-span-2 grid min-w-0 grid-rows-subgrid no-underline"
               style={{ color: 'inherit', rowGap: 6 }}
             >
               <h3 className="m-0 self-start text-[14px] font-bold tracking-[-0.01em]">
@@ -345,7 +379,10 @@ function DesignDoc({ markdown }: { markdown: string }) {
           </p>
         </div>
         {/* Registry-authored markdown, not user input. */}
-        <div className="nx-prose min-w-0 max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
+        <div
+          className="nx-prose max-w-none min-w-0"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </div>
     </section>
   );

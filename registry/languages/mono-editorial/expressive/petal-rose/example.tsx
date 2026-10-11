@@ -13,5 +13,11 @@ const observations: readonly PetalRoseDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <PetalRose data={observations} animate={animate} aria-label="Reactions tagged in the H1 2026 retrospective" />;
+  return (
+    <PetalRose
+      data={observations}
+      animate={animate}
+      aria-label="Reactions tagged in the H1 2026 retrospective"
+    />
+  );
 }

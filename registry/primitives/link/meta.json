@@ -5,19 +5,11 @@
   "component": "link",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "text",
-    "interactive"
-  ],
+  "tags": ["text", "interactive"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Link"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Link"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

@@ -1,5 +1,5 @@
 @layer components {
-/* alert - shared primitive, themed by the active language's tokens.
+  /* alert - shared primitive, themed by the active language's tokens.
 
    A note that interrupts the reading, for a caveat, a limit, or a consequence.
 
@@ -9,70 +9,70 @@
    A language WITH an accent palette can override the modifiers to use colour
    without changing the markup. */
 
-.nx-alert {
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-alertGap);
-  padding: var(--nx-space-alertPadding);
-  border-left: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-border);
-  font-family: var(--nx-font-sans);
-  font-size: var(--nx-type-body-size);
-  line-height: var(--nx-type-body-lineHeight);
-  color: var(--nx-ink);
-}
+  .nx-alert {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-alertGap);
+    padding: var(--nx-space-alertPadding);
+    border-left: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-border);
+    font-family: var(--nx-font-sans);
+    font-size: var(--nx-type-body-size);
+    line-height: var(--nx-type-body-lineHeight);
+    color: var(--nx-ink);
+  }
 
-.nx-alert__title {
-  margin: 0;
-  font-size: var(--nx-type-label-size);
-  font-weight: var(--nx-type-label-weight);
-  letter-spacing: var(--nx-type-label-tracking);
-  text-transform: uppercase;
-  color: var(--nx-muted);
-}
+  .nx-alert__title {
+    margin: 0;
+    font-size: var(--nx-type-label-size);
+    font-weight: var(--nx-type-label-weight);
+    letter-spacing: var(--nx-type-label-tracking);
+    text-transform: uppercase;
+    color: var(--nx-muted);
+  }
 
-.nx-alert__body {
-  margin: 0;
-  max-width: 62ch;
-}
+  .nx-alert__body {
+    margin: 0;
+    max-width: 62ch;
+  }
 
-/* Note: the quietest. An aside the reader may skip. */
-.nx-alert--note {
-  border-left-color: var(--nx-faint);
-  color: var(--nx-muted);
-}
+  /* Note: the quietest. An aside the reader may skip. */
+  .nx-alert--note {
+    border-left-color: var(--nx-faint);
+    color: var(--nx-muted);
+  }
 
-/* Important: a thicker rule and ink title. The reader should not skip it. */
-.nx-alert--important {
-  border-left-color: var(--nx-ink);
-}
+  /* Important: a thicker rule and ink title. The reader should not skip it. */
+  .nx-alert--important {
+    border-left-color: var(--nx-ink);
+  }
 
-.nx-alert--important .nx-alert__title {
-  color: var(--nx-ink);
-}
+  .nx-alert--important .nx-alert__title {
+    color: var(--nx-ink);
+  }
 
-/* Critical: the rule becomes solid ink and the body takes weight. This is as
+  /* Critical: the rule becomes solid ink and the body takes weight. This is as
    loud as a language without colour can be, and it is loud enough because
    nothing else on the page looks like it. */
-.nx-alert--critical {
-  border-left-width: calc(var(--nx-stroke-hairline) * 5);
-  border-left-color: var(--nx-ink);
-}
+  .nx-alert--critical {
+    border-left-width: calc(var(--nx-stroke-hairline) * 5);
+    border-left-color: var(--nx-ink);
+  }
 
-.nx-alert--critical .nx-alert__title {
-  color: var(--nx-ink);
-}
+  .nx-alert--critical .nx-alert__title {
+    color: var(--nx-ink);
+  }
 
-.nx-alert--critical .nx-alert__body {
-  font-weight: var(--nx-font-weight-semibold);
-}
+  .nx-alert--critical .nx-alert__body {
+    font-weight: var(--nx-font-weight-semibold);
+  }
 
-/* Inverted, for an alert on an inverted card. */
-.nx-alert--invert {
-  border-left-color: var(--nx-bg);
-  color: var(--nx-bg);
-}
+  /* Inverted, for an alert on an inverted card. */
+  .nx-alert--invert {
+    border-left-color: var(--nx-bg);
+    color: var(--nx-bg);
+  }
 
-.nx-alert--invert .nx-alert__title {
-  color: var(--nx-onDarkMuted);
-}
+  .nx-alert--invert .nx-alert__title {
+    color: var(--nx-onDarkMuted);
+  }
 }

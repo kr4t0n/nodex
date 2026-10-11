@@ -1,5 +1,5 @@
 @layer components {
-/* radio - shared primitive, themed by the active language's tokens.
+  /* radio - shared primitive, themed by the active language's tokens.
 
    Built on a real <input type="radio">, so arrow-key navigation within a group,
    the roving tab stop, and form semantics come from the browser.
@@ -8,90 +8,92 @@
    primitives are copied individually, so each must stand alone. Identical
    definitions collapse harmlessly if both are installed. */
 
-.nx-choice {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--nx-space-choiceGap);
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-choice-size);
-  font-weight: var(--nx-type-choice-weight);
-  line-height: var(--nx-type-choice-lineHeight);
-  color: var(--nx-ink);
-  cursor: pointer;
-}
-
-.nx-choice--disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.nx-radio {
-  appearance: none;
-  flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
-  margin: 0;
-  display: inline-grid;
-  place-content: center;
-  border: var(--nx-stroke-hairline) solid var(--nx-muted);
-  border-radius: 50%;
-  background: var(--nx-bg);
-  cursor: inherit;
-  transition: border-color var(--nx-motion-toggle-duration) var(--nx-motion-toggle-easing);
-}
-
-/* A filled dot rather than a ring, matching how the charts mark a selected
-   point: solid for chosen, hollow for not. */
-.nx-radio::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--nx-ink);
-  transform: scale(0);
-  transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
-}
-
-.nx-radio:hover {
-  border-color: var(--nx-ink);
-}
-
-.nx-radio:checked {
-  border-color: var(--nx-ink);
-}
-
-.nx-radio:checked::before {
-  transform: scale(1);
-}
-
-.nx-radio:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 2px;
-}
-
-.nx-radio:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.nx-choice-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-choiceGroupGap);
-  width: 100%;
-}
-
-/* Horizontal, for two or three short options that read as one decision. */
-.nx-choice-group--row {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--nx-space-choiceRowGap);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-radio,
-  .nx-radio::before {
-    transition: none;
+  .nx-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nx-space-choiceGap);
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-choice-size);
+    font-weight: var(--nx-type-choice-weight);
+    line-height: var(--nx-type-choice-lineHeight);
+    color: var(--nx-ink);
+    cursor: pointer;
   }
-}
+
+  .nx-choice--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .nx-radio {
+    appearance: none;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    display: inline-grid;
+    place-content: center;
+    border: var(--nx-stroke-hairline) solid var(--nx-muted);
+    border-radius: 50%;
+    background: var(--nx-bg);
+    cursor: inherit;
+    transition: border-color var(--nx-motion-toggle-duration)
+      var(--nx-motion-toggle-easing);
+  }
+
+  /* A filled dot rather than a ring, matching how the charts mark a selected
+   point: solid for chosen, hollow for not. */
+  .nx-radio::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--nx-ink);
+    transform: scale(0);
+    transition: transform var(--nx-motion-mark-duration)
+      var(--nx-motion-mark-easing);
+  }
+
+  .nx-radio:hover {
+    border-color: var(--nx-ink);
+  }
+
+  .nx-radio:checked {
+    border-color: var(--nx-ink);
+  }
+
+  .nx-radio:checked::before {
+    transform: scale(1);
+  }
+
+  .nx-radio:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 2px;
+  }
+
+  .nx-radio:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .nx-choice-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-choiceGroupGap);
+    width: 100%;
+  }
+
+  /* Horizontal, for two or three short options that read as one decision. */
+  .nx-choice-group--row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--nx-space-choiceRowGap);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-radio,
+    .nx-radio::before {
+      transition: none;
+    }
+  }
 }

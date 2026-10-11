@@ -5,19 +5,11 @@
   "component": "empty-state",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "feedback",
-    "structure"
-  ],
+  "tags": ["feedback", "structure"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "EmptyState"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["EmptyState"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

@@ -7,25 +7,13 @@
   "runtime": "react",
   "density": "close-read",
   "aspectRatio": "560/340",
-  "tags": [
-    "incident",
-    "log"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["incident", "log"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "DotCascade"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["DotCascade"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

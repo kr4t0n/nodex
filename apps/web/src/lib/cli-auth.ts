@@ -102,7 +102,9 @@ export async function findByUserCode(
     [normalizeUserCode(code)],
   );
   const row = rows[0];
-  return row ? { userCode: row.user_code, expiresAt: row.expires_at } : undefined;
+  return row
+    ? { userCode: row.user_code, expiresAt: row.expires_at }
+    : undefined;
 }
 
 /** Typed by hand, so accept lower case and a missing separator. */

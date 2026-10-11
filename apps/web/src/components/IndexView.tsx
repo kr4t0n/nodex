@@ -42,7 +42,8 @@ export function IndexView({
     void loadCatalog().then(setCatalog);
   }, []);
 
-  if (!catalog || !themed || !scoped) return <Loading label="Loading languages" />;
+  if (!catalog || !themed || !scoped)
+    return <Loading label="Loading languages" />;
 
   return (
     <>
@@ -54,7 +55,10 @@ export function IndexView({
           <h1 className="m-0 text-[38px] leading-[1.05] font-extrabold tracking-[-0.035em] sm:text-[52px]">
             Design languages
           </h1>
-          <p className="mt-6 text-[14px] leading-[1.7]" style={{ color: 'var(--nx-muted)' }}>
+          <p
+            className="mt-6 text-[14px] leading-[1.7]"
+            style={{ color: 'var(--nx-muted)' }}
+          >
             Each one brings its own tokens, its own written rules, and the
             components built for it. Open one to read it.
           </p>
@@ -118,12 +122,12 @@ function TileCell<T>({
     // left alone, that 20px would also open up between a title, its description
     // and its chart, so each cell would read as three loose parts.
     <article
-      className="grid min-w-0 grid-rows-subgrid row-span-3"
+      className="row-span-3 grid min-w-0 grid-rows-subgrid"
       style={{ rowGap: 6 }}
     >
       <Link
         href={href}
-        className="grid min-w-0 grid-rows-subgrid row-span-2 no-underline"
+        className="row-span-2 grid min-w-0 grid-rows-subgrid no-underline"
         style={{ color: 'inherit', rowGap: 6 }}
       >
         <h3 className="m-0 self-start text-[12.5px] leading-[1.4] font-bold tracking-[-0.01em]">
@@ -159,17 +163,27 @@ function LanguageTile({
   language: Language;
   items: Item[];
 }) {
-  const featured = language.featured.slice(0, 4).map((name) => items.find(
-    (item) => item.name === name && item.meta.language === language.slug,
-  )).filter((item): item is Item => item !== undefined);
+  const featured = language.featured
+    .slice(0, 4)
+    .map((name) =>
+      items.find(
+        (item) => item.name === name && item.meta.language === language.slug,
+      ),
+    )
+    .filter((item): item is Item => item !== undefined);
 
   // A language under construction has tokens and primitives before it has a
   // single chart. Rendering nothing there makes a real language look broken.
   const showing = featured.length > 0 ? 'expressive' : 'primitives';
 
-  const visibleItems = showing === 'expressive' ? featured : SAMPLE_PRIMITIVES.map(
-    (name) => items.find((item) => item.name === name && item.meta.tier === 'primitive'),
-  ).filter((item): item is Item => item !== undefined);
+  const visibleItems =
+    showing === 'expressive'
+      ? featured
+      : SAMPLE_PRIMITIVES.map((name) =>
+          items.find(
+            (item) => item.name === name && item.meta.tier === 'primitive',
+          ),
+        ).filter((item): item is Item => item !== undefined);
 
   return (
     /**
@@ -202,7 +216,7 @@ function LanguageTile({
     >
       <div className="flex flex-wrap items-end justify-between gap-6 pb-9">
         <div>
-          <h2 className="m-0 text-[24px] [font-family:var(--nx-font-heading)] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
+          <h2 className="m-0 [font-family:var(--nx-font-heading)] text-[24px] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
             {language.name}
           </h2>
           <p
@@ -226,7 +240,10 @@ function LanguageTile({
           </div>
         </div>
 
-        <Link href={`/l/${language.slug}`} className="nx-btn nx-btn--solid no-underline">
+        <Link
+          href={`/l/${language.slug}`}
+          className="nx-btn nx-btn--solid no-underline"
+        >
           Open {language.name}
           <ArrowRight size={13} weight="bold" aria-hidden />
         </Link>
@@ -259,8 +276,9 @@ function LanguageTile({
           className="mt-6 mb-0 text-[length:var(--nx-type-body-detailSize)] leading-[1.7]"
           style={{ color: 'var(--nx-muted)' }}
         >
-          No charts yet. These are shared primitives wearing this language&apos;s
-          tokens, which is what it looks like before a chart is drawn.
+          No charts yet. These are shared primitives wearing this
+          language&apos;s tokens, which is what it looks like before a chart is
+          drawn.
         </p>
       ) : null}
     </section>

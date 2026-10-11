@@ -38,14 +38,34 @@ const PRIMARY = '#block-primary';
 const SECONDARY = '#block-secondary';
 
 async function setMode(page: Page, mode: string) {
-  await page.evaluate((value) => (window as unknown as { nodexBlockFixture: { setMode: (mode: string) => void } }).nodexBlockFixture.setMode(value), mode);
+  await page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexBlockFixture: { setMode: (mode: string) => void };
+        }
+      ).nodexBlockFixture.setMode(value),
+    mode,
+  );
 }
 
 async function paint(page: Page, selector: string) {
-  return page.locator(`${selector} [data-nx-block]`).evaluateAll((elements) => Object.fromEntries(elements.map((element) => {
-    const style = getComputedStyle(element);
-    return [element.getAttribute('data-nx-block'), { fill: style.fill, stroke: style.stroke, width: style.strokeWidth, shadow: style.filter }];
-  })));
+  return page.locator(`${selector} [data-nx-block]`).evaluateAll((elements) =>
+    Object.fromEntries(
+      elements.map((element) => {
+        const style = getComputedStyle(element);
+        return [
+          element.getAttribute('data-nx-block'),
+          {
+            fill: style.fill,
+            stroke: style.stroke,
+            width: style.strokeWidth,
+            shadow: style.filter,
+          },
+        ];
+      }),
+    ),
+  );
 }
 
 export async function checkBlockBarsConsumer(page: Page): Promise<void> {
@@ -57,24 +77,43 @@ export async function checkBlockBarsConsumer(page: Page): Promise<void> {
   await primary.scrollIntoViewIfNeeded();
   await expect(marks).toHaveCount(4);
   await expect(labels).toHaveText(['$100', '$75', '$50', '$25']);
-  await expect(primary.locator('.recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value')).toHaveText(['Same', 'Same', 'Gamma', 'Delta']);
-  const boxes = await marks.evaluateAll((elements) => elements.map((element) => {
-    const box = (element as SVGGraphicsElement).getBBox();
-    return { height: box.height, baseline: box.y + box.height };
-  }));
+  await expect(
+    primary.locator(
+      '.recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value',
+    ),
+  ).toHaveText(['Same', 'Same', 'Gamma', 'Delta']);
+  const boxes = await marks.evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = (element as SVGGraphicsElement).getBBox();
+      return { height: box.height, baseline: box.y + box.height };
+    }),
+  );
   for (const [index, box] of boxes.entries()) {
-    assert(Math.abs(box.height / boxes[0]!.height - [1, 0.75, 0.5, 0.25][index]!) < 0.001, 'Front faces must preserve magnitude ratios');
-    assert(Math.abs(box.baseline - boxes[0]!.baseline) < 0.01, 'All bars must start at zero');
+    assert(
+      Math.abs(box.height / boxes[0]!.height - [1, 0.75, 0.5, 0.25][index]!) <
+        0.001,
+      'Front faces must preserve magnitude ratios',
+    );
+    assert(
+      Math.abs(box.baseline - boxes[0]!.baseline) < 0.01,
+      'All bars must start at zero',
+    );
   }
 
   await page.mouse.move(850, 10);
   await surface.focus();
   await expect(tooltip).toHaveText('Same$100 Revenue');
-  for (const text of ['Same$75 Revenue', 'Gamma$50 Revenue', 'Delta$25 Revenue']) {
+  for (const text of [
+    'Same$75 Revenue',
+    'Gamma$50 Revenue',
+    'Delta$25 Revenue',
+  ]) {
     await page.keyboard.press('ArrowRight');
     await expect(tooltip).toHaveText(text);
   }
-  await expect(page.locator(`${SECONDARY} .recharts-tooltip-wrapper:visible`)).toHaveCount(0);
+  await expect(
+    page.locator(`${SECONDARY} .recharts-tooltip-wrapper:visible`),
+  ).toHaveCount(0);
   await marks.first().hover();
   await expect(tooltip).toHaveText('Same$100 Revenue');
 
@@ -86,38 +125,87 @@ export async function checkBlockBarsConsumer(page: Page): Promise<void> {
     node.style.setProperty('--nx-ink', '#24395a');
     node.style.setProperty('--nx-stroke-mark', '4px');
   });
-  await expect.poll(async () => (await paint(page, PRIMARY)).alpha).toEqual({
-    fill: 'rgb(213, 161, 235)', stroke: 'rgb(36, 57, 90)', width: '4px', shadow: 'drop-shadow(rgb(36, 57, 90) 6px 6px 0px)',
-  });
-  assert.deepEqual(await paint(page, SECONDARY), sibling, 'Descendant paint must not affect sibling charts');
-  await primary.evaluate((element) => (element as HTMLElement).removeAttribute('style'));
-  await page.evaluate(() => (window as unknown as { nodexBlockFixture: { setRevision: (value: number) => void } }).nodexBlockFixture.setRevision(1));
+  await expect
+    .poll(async () => (await paint(page, PRIMARY)).alpha)
+    .toEqual({
+      fill: 'rgb(213, 161, 235)',
+      stroke: 'rgb(36, 57, 90)',
+      width: '4px',
+      shadow: 'drop-shadow(rgb(36, 57, 90) 6px 6px 0px)',
+    });
+  assert.deepEqual(
+    await paint(page, SECONDARY),
+    sibling,
+    'Descendant paint must not affect sibling charts',
+  );
+  await primary.evaluate((element) =>
+    (element as HTMLElement).removeAttribute('style'),
+  );
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexBlockFixture: { setRevision: (value: number) => void };
+      }
+    ).nodexBlockFixture.setRevision(1),
+  );
   await expect(labels).toHaveText(['$25', '$50', '$75', '$40']);
-  assert.deepEqual(await paint(page, PRIMARY), original, 'Explicit and default ID-based colors must survive reordering and value updates');
-  await expect(page.locator(`${SECONDARY} [data-nx-block-value]`)).toHaveText(['80', '40']);
+  assert.deepEqual(
+    await paint(page, PRIMARY),
+    original,
+    'Explicit and default ID-based colors must survive reordering and value updates',
+  );
+  await expect(page.locator(`${SECONDARY} [data-nx-block-value]`)).toHaveText([
+    '80',
+    '40',
+  ]);
 
   for (const width of [375, 320]) {
-    await primary.evaluate((element, value) => { (element as HTMLElement).style.width = value + 'px'; }, width);
-    await expect.poll(() => surface.evaluate((element) => element.getBoundingClientRect().width)).toBeLessThan(width);
-    assert(await primary.evaluate((element) => element.scrollWidth <= element.clientWidth), 'The plot must fit its narrow container');
+    await primary.evaluate((element, value) => {
+      (element as HTMLElement).style.width = value + 'px';
+    }, width);
+    await expect
+      .poll(() =>
+        surface.evaluate((element) => element.getBoundingClientRect().width),
+      )
+      .toBeLessThan(width);
+    assert(
+      await primary.evaluate(
+        (element) => element.scrollWidth <= element.clientWidth,
+      ),
+      'The plot must fit its narrow container',
+    );
     await expect(labels).toHaveCount(4);
   }
   await setMode(page, 'many');
   await expect(marks).toHaveCount(10);
-  assert(await primary.evaluate((element) => {
-    const plot = element.querySelector('.overflow-x-auto')!;
-    return plot.scrollWidth > plot.clientWidth && element.scrollWidth <= element.clientWidth;
-  }), 'Many categories must scroll inside the chart');
+  assert(
+    await primary.evaluate((element) => {
+      const plot = element.querySelector('.overflow-x-auto')!;
+      return (
+        plot.scrollWidth > plot.clientWidth &&
+        element.scrollWidth <= element.clientWidth
+      );
+    }),
+    'Many categories must scroll inside the chart',
+  );
 
-  await primary.evaluate((element) => (element as HTMLElement).removeAttribute('style'));
+  await primary.evaluate((element) =>
+    (element as HTMLElement).removeAttribute('style'),
+  );
   await setMode(page, 'empty');
   await expect(surface).toHaveCount(0);
   await setMode(page, 'partial');
   await expect(marks).toHaveCount(1);
   await expect(labels).toHaveCount(3);
-  await expect(primary.locator('[data-nx-block-value="present"]')).toHaveText('$20');
-  await expect(primary.locator('[data-nx-block-value="missing"]')).toHaveText('—');
-  await expect(primary.locator('[data-nx-block-value="zero"]')).toHaveText('$0');
+  await expect(primary.locator('[data-nx-block-value="present"]')).toHaveText(
+    '$20',
+  );
+  await expect(primary.locator('[data-nx-block-value="missing"]')).toHaveText(
+    '—',
+  );
+  await expect(primary.locator('[data-nx-block-value="zero"]')).toHaveText(
+    '$0',
+  );
   await page.mouse.move(850, 10);
   await surface.focus();
   await expect(tooltip).toHaveText('Present$20 Revenue');
@@ -126,35 +214,67 @@ export async function checkBlockBarsConsumer(page: Page): Promise<void> {
   await page.keyboard.press('ArrowRight');
   await expect(tooltip).toHaveText('Zero$0 Revenue');
   for (const [mode, expected] of [
-    ['single', ['$3']], ['zero', ['$0']],
+    ['single', ['$3']],
+    ['zero', ['$0']],
   ] as const) {
     await setMode(page, mode);
     await expect(labels).toHaveText([...expected]);
     await expect(marks).toHaveCount(mode === 'single' ? 1 : 0);
   }
   await setMode(page, 'invalid');
-  await expect(primary.getByRole('status')).toHaveText('No observations available.');
+  await expect(primary.getByRole('status')).toHaveText(
+    'No observations available.',
+  );
   await expect(surface).toHaveCount(0);
   await setMode(page, 'empty');
-  await expect(primary.getByRole('status')).toHaveText('No categories to compare.');
+  await expect(primary.getByRole('status')).toHaveText(
+    'No categories to compare.',
+  );
   await expect(surface).toHaveCount(0);
   await setMode(page, 'duplicates');
-  await expect(primary.getByRole('status')).toHaveText('Each category needs a unique, nonempty ID.');
+  await expect(primary.getByRole('status')).toHaveText(
+    'Each category needs a unique, nonempty ID.',
+  );
   await expect(surface).toHaveCount(0);
 
   await setMode(page, 'normal');
-  await page.evaluate(() => (window as unknown as { nodexBlockFixture: { setAnimate: (value: boolean) => void } }).nodexBlockFixture.setAnimate(true));
-  await expect(primary.locator('[data-nx-chart]')).toHaveAttribute('data-nx-animated', 'false');
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexBlockFixture: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexBlockFixture.setAnimate(true),
+  );
+  await expect(primary.locator('[data-nx-chart]')).toHaveAttribute(
+    'data-nx-animated',
+    'false',
+  );
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await expect(primary.locator('[data-nx-chart]')).toHaveAttribute('data-nx-animated', 'true');
+  await expect(primary.locator('[data-nx-chart]')).toHaveAttribute(
+    'data-nx-animated',
+    'true',
+  );
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect(primary.locator('[data-nx-chart]')).toHaveAttribute('data-nx-animated', 'false');
-  await page.evaluate(() => (window as unknown as { nodexBlockFixture: { setAnimate: (value: boolean) => void } }).nodexBlockFixture.setAnimate(false));
+  await expect(primary.locator('[data-nx-chart]')).toHaveAttribute(
+    'data-nx-animated',
+    'false',
+  );
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexBlockFixture: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexBlockFixture.setAnimate(false),
+  );
   await expect(labels).toHaveText(['$25', '$50', '$75', '$40']);
   await setMode(page, 'partial');
   await expect(labels).toHaveCount(3);
-  await expect(primary.locator('[data-nx-block-value="zero"]')).toHaveText('$0');
+  await expect(primary.locator('[data-nx-block-value="zero"]')).toHaveText(
+    '$0',
+  );
   await setMode(page, 'normal');
   await expect(labels).toHaveCount(4);
-  console.log('Validated Block Bars geometry, categorical color identity, pointer/keyboard inspection, scoped paints/shadows, resizing, reduced motion and missing/zero/invalid data.');
+  console.log(
+    'Validated Block Bars geometry, categorical color identity, pointer/keyboard inspection, scoped paints/shadows, resizing, reduced motion and missing/zero/invalid data.',
+  );
 }

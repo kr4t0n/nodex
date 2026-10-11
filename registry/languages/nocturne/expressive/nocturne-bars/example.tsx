@@ -9,5 +9,13 @@ const data: NocturneBarsDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <NocturneBars data={data} unitLabel="Active workspaces" contextLabel="Last 7 days" height={344} animate={animate} />;
+  return (
+    <NocturneBars
+      data={data}
+      unitLabel="Active workspaces"
+      contextLabel="Last 7 days"
+      height={344}
+      animate={animate}
+    />
+  );
 }

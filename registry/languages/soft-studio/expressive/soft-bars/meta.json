@@ -7,33 +7,22 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SoftBars"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["SoftBars"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "studio-chart-frame.tsx",
     "studio-categorical.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 720,
     "height": 420
   },
-  "tags": [
-    "comparison",
-    "soft",
-    "studio",
-    "categorical"
-  ],
+  "tags": ["comparison", "soft", "studio", "categorical"],
   "props": [
     {
       "name": "data",

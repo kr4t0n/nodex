@@ -5,20 +5,11 @@
   "component": "dialog",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "overlay",
-    "interactive"
-  ],
+  "tags": ["overlay", "interactive"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Dialog",
-    "DialogAction"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Dialog", "DialogAction"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

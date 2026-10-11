@@ -1,5 +1,5 @@
 @layer components {
-/* tooltip - shared primitive, themed by the active language's tokens.
+  /* tooltip - shared primitive, themed by the active language's tokens.
 
    Presentational only, and this one carries a real caveat. The label lives in a
    data attribute and is drawn with generated content, which means assistive
@@ -13,72 +13,72 @@
    Use this for UI chrome where the label is a convenience and the same
    information is already available elsewhere. */
 
-.nx-tooltip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
+  .nx-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
 
-.nx-tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + var(--nx-space-tooltipOffset));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
-  padding: var(--nx-space-tooltipPadding);
-  border-radius: var(--nx-radius-tooltip);
-  background: var(--nx-ink);
-  color: var(--nx-bg);
-  font-family: var(--nx-font-sans);
-  font-size: var(--nx-type-tooltip-size);
-  font-weight: var(--nx-type-tooltip-weight);
-  line-height: var(--nx-type-tooltip-lineHeight);
-  letter-spacing: var(--nx-type-tooltip-tracking);
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity var(--nx-motion-tooltip-duration) var(--nx-motion-tooltip-easing),
-    visibility var(--nx-motion-tooltip-duration);
-}
+  .nx-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + var(--nx-space-tooltipOffset));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    padding: var(--nx-space-tooltipPadding);
+    border-radius: var(--nx-radius-tooltip);
+    background: var(--nx-ink);
+    color: var(--nx-bg);
+    font-family: var(--nx-font-sans);
+    font-size: var(--nx-type-tooltip-size);
+    font-weight: var(--nx-type-tooltip-weight);
+    line-height: var(--nx-type-tooltip-lineHeight);
+    letter-spacing: var(--nx-type-tooltip-tracking);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity var(--nx-motion-tooltip-duration) var(--nx-motion-tooltip-easing),
+      visibility var(--nx-motion-tooltip-duration);
+  }
 
-/* Focus-within as well as hover, so a keyboard user reaches it too. */
-.nx-tooltip:hover::after,
-.nx-tooltip:focus-within::after {
-  opacity: 1;
-  visibility: visible;
-}
+  /* Focus-within as well as hover, so a keyboard user reaches it too. */
+  .nx-tooltip:hover::after,
+  .nx-tooltip:focus-within::after {
+    opacity: 1;
+    visibility: visible;
+  }
 
-/* Below, for anything near the top of a viewport where an upward tooltip would
+  /* Below, for anything near the top of a viewport where an upward tooltip would
    be clipped. */
-.nx-tooltip--below::after {
-  bottom: auto;
-  top: calc(100% + var(--nx-space-tooltipOffset));
-}
+  .nx-tooltip--below::after {
+    bottom: auto;
+    top: calc(100% + var(--nx-space-tooltipOffset));
+  }
 
-/* Wrapping variant, for a sentence rather than a label. A tooltip long enough to
+  /* Wrapping variant, for a sentence rather than a label. A tooltip long enough to
    need this is usually better as body text. */
-.nx-tooltip--wrap::after {
-  white-space: normal;
-  width: max-content;
-  max-width: 210px;
-  text-align: left;
-}
+  .nx-tooltip--wrap::after {
+    white-space: normal;
+    width: max-content;
+    max-width: 210px;
+    text-align: left;
+  }
 
-.nx-tooltip--start::after {
-  left: 0;
-  transform: none;
-}
+  .nx-tooltip--start::after {
+    left: 0;
+    transform: none;
+  }
 
-.nx-tooltip--end::after {
-  left: auto;
-  right: 0;
-  transform: none;
-}
+  .nx-tooltip--end::after {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
 
-/* Escape the clipping, and flip when there is no room.
+  /* Escape the clipping, and flip when there is no room.
 
    The rules above position the label absolutely inside the trigger, which means
    any ancestor with overflow hidden, a scroll container, or a card with a
@@ -94,41 +94,44 @@
    `anchor-scope` confines the anchor name to each trigger's own subtree.
    Without it, every tooltip on the page would share one name and later ones
    could capture earlier labels. */
-@supports (position-try-fallbacks: flip-block) {
-  .nx-tooltip {
-    anchor-name: --nx-tooltip;
-    anchor-scope: --nx-tooltip;
+  @supports (position-try-fallbacks: flip-block) {
+    .nx-tooltip {
+      anchor-name: --nx-tooltip;
+      anchor-scope: --nx-tooltip;
+    }
+
+    .nx-tooltip::after {
+      position: fixed;
+      position-anchor: --nx-tooltip;
+      position-area: block-start;
+      position-try-fallbacks:
+        flip-block,
+        flip-inline,
+        flip-block flip-inline;
+      /* Reset the manual placement the fallback above relies on. */
+      bottom: auto;
+      top: auto;
+      left: auto;
+      right: auto;
+      transform: none;
+      margin: 0 0 var(--nx-space-tooltipOffset);
+    }
+
+    .nx-tooltip--below::after {
+      position-area: block-end;
+      margin: var(--nx-space-tooltipOffset) 0 0;
+    }
+
+    .nx-tooltip--start::after {
+      position-area: block-start span-inline-end;
+    }
+
+    .nx-tooltip--end::after {
+      position-area: block-start span-inline-start;
+    }
   }
 
-  .nx-tooltip::after {
-    position: fixed;
-    position-anchor: --nx-tooltip;
-    position-area: block-start;
-    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
-    /* Reset the manual placement the fallback above relies on. */
-    bottom: auto;
-    top: auto;
-    left: auto;
-    right: auto;
-    transform: none;
-    margin: 0 0 var(--nx-space-tooltipOffset);
-  }
-
-  .nx-tooltip--below::after {
-    position-area: block-end;
-    margin: var(--nx-space-tooltipOffset) 0 0;
-  }
-
-  .nx-tooltip--start::after {
-    position-area: block-start span-inline-end;
-  }
-
-  .nx-tooltip--end::after {
-    position-area: block-start span-inline-start;
-  }
-}
-
-/* A dotted underline marks the trigger as explainable, which is the one honest
+  /* A dotted underline marks the trigger as explainable, which is the one honest
    affordance available: without it, nothing signals that hovering does
    anything.
 
@@ -136,20 +139,20 @@
    tabindex="0". Without that, :focus-within above can never match and the
    tooltip is reachable by mouse only, which is exactly the failure this pattern
    is notorious for. */
-.nx-tooltip__trigger {
-  border-bottom: var(--nx-stroke-hairline) dashed var(--nx-muted);
-  cursor: help;
-}
-
-.nx-tooltip__trigger:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 3px;
-  border-radius: var(--nx-radius-focus);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-tooltip::after {
-    transition: none;
+  .nx-tooltip__trigger {
+    border-bottom: var(--nx-stroke-hairline) dashed var(--nx-muted);
+    cursor: help;
   }
-}
+
+  .nx-tooltip__trigger:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 3px;
+    border-radius: var(--nx-radius-focus);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-tooltip::after {
+      transition: none;
+    }
+  }
 }

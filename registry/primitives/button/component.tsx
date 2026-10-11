@@ -6,6 +6,17 @@ export type ButtonProps = ComponentPropsWithRef<'button'> & {
 };
 
 /** A native button. Pass aria-pressed for a toggle and type="submit" for a form action. */
-export function Button({ variant = 'solid', type = 'button', className = '', ...props }: ButtonProps) {
-  return <button {...props} type={type} className={`nx-btn nx-btn--${variant} ${className}`.trim()} />;
+export function Button({
+  variant = 'solid',
+  type = 'button',
+  className = '',
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      {...props}
+      type={type}
+      className={`nx-btn nx-btn--${variant} ${className}`.trim()}
+    />
+  );
 }

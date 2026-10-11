@@ -1,5 +1,5 @@
-import{NestedTreemap}from'./component';
-const areas=[
+import { NestedTreemap } from './component';
+const areas = [
   {
     name: 'PRODUCT',
     teams: [
@@ -26,5 +26,13 @@ const areas=[
     ],
   },
 ];
-const data=areas.map(area=>({name:area.name,teams:area.teams.map(([name,hours])=>({name:name as string,hours:hours as number}))}));
-export function Example(){return <NestedTreemap data={data}/>;}
+const data = areas.map((area) => ({
+  name: area.name,
+  teams: area.teams.map(([name, hours]) => ({
+    name: name as string,
+    hours: hours as number,
+  })),
+}));
+export function Example() {
+  return <NestedTreemap data={data} />;
+}

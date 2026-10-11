@@ -6,21 +6,13 @@
   "tier": "expressive",
   "runtime": "react",
   "density": "glance",
-  "tags": [
-    "finance"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["finance"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "580/320",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "DrawInCounter"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["DrawInCounter"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

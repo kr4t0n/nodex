@@ -3,14 +3,8 @@
   "title": "Team effort breakdown",
   "description": "Yellow, lilac and mint segments stack from zero. Direct labels and row totals make each contribution readable.",
   "component": "stacked-bar",
-  "exports": [
-    "StackedBlocks"
-  ],
-  "tags": [
-    "comparison",
-    "composition",
-    "categorical"
-  ],
+  "exports": ["StackedBlocks"],
+  "tags": ["comparison", "composition", "categorical"],
   "props": [
     {
       "name": "data",
@@ -77,17 +71,13 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "neo-categorical.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

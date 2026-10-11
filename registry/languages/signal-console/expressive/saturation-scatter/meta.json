@@ -7,9 +7,7 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SaturationScatter"
-  ],
+  "exports": ["SaturationScatter"],
   "props": [
     {
       "name": "data",
@@ -84,21 +82,14 @@
       "required": false
     }
   ],
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "signal-chart-frame.tsx",
     "use-chart-motion.ts",
     "use-reduced-motion.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
-  "tags": [
-    "operations",
-    "monitoring"
-  ],
+  "dependencies": ["recharts@3.10.1"],
+  "tags": ["operations", "monitoring"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

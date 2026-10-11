@@ -3,14 +3,8 @@
   "title": "Weekly active users",
   "description": "An angular mint area, ink outline and square markers. A large final reading anchors the trend.",
   "component": "area",
-  "exports": [
-    "PunchArea"
-  ],
-  "tags": [
-    "trend",
-    "time-series",
-    "activity"
-  ],
+  "exports": ["PunchArea"],
+  "tags": ["trend", "time-series", "activity"],
   "props": [
     {
       "name": "data",
@@ -71,16 +65,9 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

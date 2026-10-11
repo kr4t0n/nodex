@@ -12,6 +12,13 @@ const weeks: readonly PunchAreaDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <PunchArea data={weeks} unitLabel="Active users" contextLabel="8 weeks"
-    animate={animate} aria-label="Weekly active users over eight weeks" />;
+  return (
+    <PunchArea
+      data={weeks}
+      unitLabel="Active users"
+      contextLabel="8 weeks"
+      animate={animate}
+      aria-label="Weekly active users over eight weeks"
+    />
+  );
 }

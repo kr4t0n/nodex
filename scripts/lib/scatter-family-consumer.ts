@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { expect, type Page } from '@playwright/test';
 
-export const SCATTER_FAMILY_SLUGS = ['plumb-scatter', 'single-axis', 'brand-spectrum', 'jitter-strip'];
+export const SCATTER_FAMILY_SLUGS = [
+  'plumb-scatter',
+  'single-axis',
+  'brand-spectrum',
+  'jitter-strip',
+];
 export const SCATTER_FAMILY_CONSUMER_SOURCE = `import { useEffect, useState } from 'react';
 import { PlumbScatter } from './components/nodex/plumb-scatter/component';
 import { SingleAxis } from './components/nodex/single-axis/component';
@@ -54,11 +59,20 @@ export function ScatterFamilyConsumer({ animate }: { animate: boolean }) {
 `;
 
 async function setMode(page: Page, mode: string) {
-  await page.evaluate((value) => (window as unknown as { nodexScatterFixture: { setMode: (mode: string) => void } }).nodexScatterFixture.setMode(value), mode);
+  await page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexScatterFixture: { setMode: (mode: string) => void };
+        }
+      ).nodexScatterFixture.setMode(value),
+    mode,
+  );
 }
 
 export async function checkScatterFamilyConsumer(page: Page): Promise<void> {
-  const chart = (slug: string, scope = 'primary') => page.locator(`#scatter-${scope} [data-nx-chart="${slug}"]`);
+  const chart = (slug: string, scope = 'primary') =>
+    page.locator(`#scatter-${scope} [data-nx-chart="${slug}"]`);
   const plumb = chart('plumb-scatter');
   const single = chart('single-axis');
   const brand = chart('brand-spectrum');
@@ -68,45 +82,125 @@ export async function checkScatterFamilyConsumer(page: Page): Promise<void> {
   await expect(single.locator('[data-nx-hour]')).toHaveCount(3);
   await expect(brand.locator('[data-nx-brand]')).toHaveCount(6);
   await expect(jitter.locator('[data-nx-ticket]')).toHaveCount(3);
-  assert.notEqual(await jitter.locator('[data-nx-ticket="0"]').getAttribute('cy'), await jitter.locator('[data-nx-ticket="1"]').getAttribute('cy'), 'Fractional band positions must retain caller jitter');
-  const radii = await single.locator('[data-nx-hour]').evaluateAll((nodes) => nodes.map((node) => Number(node.getAttribute('r'))));
-  for (const [index, expected] of [2.6, 3.9, 1.3].entries()) expect(radii[index], 'Single-axis must retain diameter proportional to count').toBeCloseTo(expected);
+  assert.notEqual(
+    await jitter.locator('[data-nx-ticket="0"]').getAttribute('cy'),
+    await jitter.locator('[data-nx-ticket="1"]').getAttribute('cy'),
+    'Fractional band positions must retain caller jitter',
+  );
+  const radii = await single
+    .locator('[data-nx-hour]')
+    .evaluateAll((nodes) =>
+      nodes.map((node) => Number(node.getAttribute('r'))),
+    );
+  for (const [index, expected] of [2.6, 3.9, 1.3].entries())
+    expect(
+      radii[index],
+      'Single-axis must retain diameter proportional to count',
+    ).toBeCloseTo(expected);
   for (const slug of SCATTER_FAMILY_SLUGS) {
     const node = chart(slug);
     await node.scrollIntoViewIfNeeded();
-    const firstMark = slug === 'plumb-scatter' ? '[data-nx-product="0"]' : slug === 'single-axis' ? '[data-nx-hour="0"]' : slug === 'jitter-strip' ? '[data-nx-ticket="0"]' : '[data-nx-observation="0:competitor:0"] circle';
+    const firstMark =
+      slug === 'plumb-scatter'
+        ? '[data-nx-product="0"]'
+        : slug === 'single-axis'
+          ? '[data-nx-hour="0"]'
+          : slug === 'jitter-strip'
+            ? '[data-nx-ticket="0"]'
+            : '[data-nx-observation="0:competitor:0"] circle';
     await node.locator(firstMark).hover();
     const tooltip = node.locator('.recharts-tooltip-wrapper:visible');
-    await expect(tooltip).toContainText(slug === 'plumb-scatter' ? 'price' : slug === 'single-axis' ? 'tickets' : slug === 'jitter-strip' ? 'h to resolve' : 'toward');
+    await expect(tooltip).toContainText(
+      slug === 'plumb-scatter'
+        ? 'price'
+        : slug === 'single-axis'
+          ? 'tickets'
+          : slug === 'jitter-strip'
+            ? 'h to resolve'
+            : 'toward',
+    );
     await page.mouse.move(880, 10);
-    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+    );
     await node.locator('svg.recharts-surface').focus();
     await page.keyboard.press('ArrowRight');
-    await expect(tooltip).toContainText(slug === 'plumb-scatter' ? 'satisfaction' : slug === 'single-axis' ? 'tickets' : slug === 'jitter-strip' ? 'h to resolve' : 'toward');
-    await expect(chart(slug, 'secondary').locator('.recharts-tooltip-wrapper:visible')).toHaveCount(0);
-    const siblingPaint = await chart(slug, 'secondary').locator('[data-nx-observation] circle').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+    await expect(tooltip).toContainText(
+      slug === 'plumb-scatter'
+        ? 'satisfaction'
+        : slug === 'single-axis'
+          ? 'tickets'
+          : slug === 'jitter-strip'
+            ? 'h to resolve'
+            : 'toward',
+    );
+    await expect(
+      chart(slug, 'secondary').locator('.recharts-tooltip-wrapper:visible'),
+    ).toHaveCount(0);
+    const siblingPaint = await chart(slug, 'secondary')
+      .locator('[data-nx-observation] circle')
+      .evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
     await node.evaluate((element) => {
       const style = (element as HTMLElement).style;
       style.setProperty('--nx-ink', '#123456');
       style.setProperty('--nx-muted', '#987654');
       style.setProperty('--nx-markDeep', '#567890');
     });
-    const ink = node.locator(slug === 'brand-spectrum' ? '[data-nx-brand="us"]' : firstMark).first();
-    await expect.poll(() => ink.evaluate((element) => getComputedStyle(element).fill)).toBe('rgb(18, 52, 86)');
-    assert.deepEqual(await chart(slug, 'secondary').locator('[data-nx-observation] circle').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill)), siblingPaint);
+    const ink = node
+      .locator(slug === 'brand-spectrum' ? '[data-nx-brand="us"]' : firstMark)
+      .first();
+    await expect
+      .poll(() => ink.evaluate((element) => getComputedStyle(element).fill))
+      .toBe('rgb(18, 52, 86)');
+    assert.deepEqual(
+      await chart(slug, 'secondary')
+        .locator('[data-nx-observation] circle')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => getComputedStyle(node).fill),
+        ),
+      siblingPaint,
+    );
     const width = Number(await node.locator('svg').getAttribute('width'));
-    await node.evaluate((element) => { (element as HTMLElement).style.width = '340px'; });
-    await expect.poll(async () => Number(await node.locator('svg').getAttribute('width'))).toBeLessThan(width);
-    await node.evaluate((element) => { (element as HTMLElement).style.width = ''; });
-    await expect.poll(async () => Number(await node.locator('svg').getAttribute('width'))).toBe(width);
+    await node.evaluate((element) => {
+      (element as HTMLElement).style.width = '340px';
+    });
+    await expect
+      .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+      .toBeLessThan(width);
+    await node.evaluate((element) => {
+      (element as HTMLElement).style.width = '';
+    });
+    await expect
+      .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+      .toBe(width);
   }
-  await expect.poll(() => plumb.locator('[data-nx-product="1"]').evaluate((element) => getComputedStyle(element).fill)).toBe('rgb(86, 120, 144)');
-  const originalTicketX = await jitter.locator('[data-nx-ticket="0"]').getAttribute('cx');
-  const original = await plumb.locator('[data-nx-product="0"]').getAttribute('cy');
+  await expect
+    .poll(() =>
+      plumb
+        .locator('[data-nx-product="1"]')
+        .evaluate((element) => getComputedStyle(element).fill),
+    )
+    .toBe('rgb(86, 120, 144)');
+  const originalTicketX = await jitter
+    .locator('[data-nx-ticket="0"]')
+    .getAttribute('cx');
+  const original = await plumb
+    .locator('[data-nx-product="0"]')
+    .getAttribute('cy');
   await setMode(page, 'revised');
-  await expect(plumb.locator('[data-nx-product="0"]')).not.toHaveAttribute('cy', original!);
-  await expect(single.locator('[data-nx-hour="0"]')).toHaveAttribute('r', '5.2');
-  await expect(jitter.locator('[data-nx-ticket="0"]')).not.toHaveAttribute('cx', originalTicketX!);
+  await expect(plumb.locator('[data-nx-product="0"]')).not.toHaveAttribute(
+    'cy',
+    original!,
+  );
+  await expect(single.locator('[data-nx-hour="0"]')).toHaveAttribute(
+    'r',
+    '5.2',
+  );
+  await expect(jitter.locator('[data-nx-ticket="0"]')).not.toHaveAttribute(
+    'cx',
+    originalTicketX!,
+  );
   await setMode(page, 'partial');
   await expect(plumb.locator('[data-nx-product]')).toHaveCount(1);
   await expect(single.locator('[data-nx-hour]')).toHaveCount(1);
@@ -116,12 +210,30 @@ export async function checkScatterFamilyConsumer(page: Page): Promise<void> {
     await setMode(page, mode);
     for (const slug of SCATTER_FAMILY_SLUGS) {
       const node = chart(slug);
-      if (mode === 'invalid' || mode === 'empty') await expect(node.getByRole('status')).toContainText('available');
+      if (mode === 'invalid' || mode === 'empty')
+        await expect(node.getByRole('status')).toContainText('available');
       else await expect(node.locator('svg.recharts-surface')).toHaveCount(1);
-      assert.equal(await node.evaluate((element) => /NaN|Infinity/.test(element.innerHTML)), false, `${slug}: ${mode} produced invalid DOM`);
+      assert.equal(
+        await node.evaluate((element) =>
+          /NaN|Infinity/.test(element.innerHTML),
+        ),
+        false,
+        `${slug}: ${mode} produced invalid DOM`,
+      );
     }
-    if (mode === 'zero') await expect.poll(() => single.locator('[data-nx-hour]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('r')))).toEqual(['0', '0', '0']);
+    if (mode === 'zero')
+      await expect
+        .poll(() =>
+          single
+            .locator('[data-nx-hour]')
+            .evaluateAll((nodes) =>
+              nodes.map((node) => node.getAttribute('r')),
+            ),
+        )
+        .toEqual(['0', '0', '0']);
   }
   await setMode(page, 'normal');
-  console.log('Validated scatter-family delivery, data-driven positions and radii, observation-only tooltips, keyboard access, token scopes, resizing and unavailable/zero data.');
+  console.log(
+    'Validated scatter-family delivery, data-driven positions and radii, observation-only tooltips, keyboard access, token scopes, resizing and unavailable/zero data.',
+  );
 }

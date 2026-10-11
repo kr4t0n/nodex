@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 
 // One gallery row can start together; the rest waits for actual React readiness.
 const STARTUP_LIMIT = 3;
@@ -18,23 +25,48 @@ interface Job {
 /** Measure current geometry, including local scrollers and the moving belt. */
 function priority(element: HTMLElement): number {
   const rect = element.getBoundingClientRect();
-  if (!element.isConnected || rect.width <= 0 || rect.height <= 0) return Infinity;
+  if (!element.isConnected || rect.width <= 0 || rect.height <= 0)
+    return Infinity;
   let left = -NEAR_MARGIN;
   let right = window.innerWidth + NEAR_MARGIN;
   let top = -NEAR_MARGIN;
   let bottom = window.innerHeight + NEAR_MARGIN;
-  if (rect.right <= left || rect.left >= right || rect.bottom <= top || rect.top >= bottom) return Infinity;
+  if (
+    rect.right <= left ||
+    rect.left >= right ||
+    rect.bottom <= top ||
+    rect.top >= bottom
+  )
+    return Infinity;
 
-  for (let parent = element.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+  for (
+    let parent = element.parentElement;
+    parent && parent !== document.body;
+    parent = parent.parentElement
+  ) {
     const style = getComputedStyle(parent);
     const clipsX = /^(auto|scroll|hidden|clip)$/.test(style.overflowX);
     const clipsY = /^(auto|scroll|hidden|clip)$/.test(style.overflowY);
     if (!clipsX && !clipsY) continue;
     const bounds = parent.getBoundingClientRect();
-    if (clipsX) { left = Math.max(left, bounds.left); right = Math.min(right, bounds.right); }
-    if (clipsY) { top = Math.max(top, bounds.top); bottom = Math.min(bottom, bounds.bottom); }
+    if (clipsX) {
+      left = Math.max(left, bounds.left);
+      right = Math.min(right, bounds.right);
+    }
+    if (clipsY) {
+      top = Math.max(top, bounds.top);
+      bottom = Math.min(bottom, bounds.bottom);
+    }
   }
-  if (rect.right <= left || rect.left >= right || rect.bottom <= top || rect.top >= bottom || left >= right || top >= bottom) return Infinity;
+  if (
+    rect.right <= left ||
+    rect.left >= right ||
+    rect.bottom <= top ||
+    rect.top >= bottom ||
+    left >= right ||
+    top >= bottom
+  )
+    return Infinity;
   // Visible previews precede preloading candidates, even after a fast scroll.
   return Math.hypot(
     Math.max(0, -rect.right, rect.left - window.innerWidth),
@@ -48,9 +80,10 @@ function createStartupQueue() {
   let active = 0;
   let frame = 0;
   let fallback = 0;
-  const observer = typeof IntersectionObserver === 'undefined'
-    ? undefined
-    : new IntersectionObserver(schedule, { rootMargin: `${NEAR_MARGIN}px` });
+  const observer =
+    typeof IntersectionObserver === 'undefined'
+      ? undefined
+      : new IntersectionObserver(schedule, { rootMargin: `${NEAR_MARGIN}px` });
 
   function clearScheduled() {
     window.cancelAnimationFrame(frame);
@@ -61,7 +94,8 @@ function createStartupQueue() {
   function pump() {
     clearScheduled();
     if (active >= STARTUP_LIMIT) return;
-    const candidates = [...jobs].filter((job) => !job.started)
+    const candidates = [...jobs]
+      .filter((job) => !job.started)
       .map((job) => ({ job, priority: priority(job.element) }))
       .filter((entry) => Number.isFinite(entry.priority))
       .sort((a, b) => a.priority - b.priority);
@@ -70,7 +104,10 @@ function createStartupQueue() {
       job.started = true;
       active += 1;
       observer?.unobserve(job.element);
-      const timer = window.setTimeout(() => job.release?.(), STARTUP_TIMEOUT_MS);
+      const timer = window.setTimeout(
+        () => job.release?.(),
+        STARTUP_TIMEOUT_MS,
+      );
       job.release = () => {
         window.clearTimeout(timer);
         job.release = undefined;
@@ -122,10 +159,16 @@ function createStartupQueue() {
 let queue: ReturnType<typeof createStartupQueue> | undefined;
 
 /** Keep admitted examples mounted so scrolling never loses their live state. */
-export function usePreviewStartup(key: string, element: RefObject<HTMLDivElement | null>, enabled: boolean) {
+export function usePreviewStartup(
+  key: string,
+  element: RefObject<HTMLDivElement | null>,
+  enabled: boolean,
+) {
   const request = useMemo(() => ({ key }), [key]);
   const [started, setStarted] = useState<typeof request>();
-  const lease = useRef<{ complete: () => void; cancel: () => void } | null>(null);
+  const lease = useRef<{ complete: () => void; cancel: () => void } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!enabled || !element.current) return;

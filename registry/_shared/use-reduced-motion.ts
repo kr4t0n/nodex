@@ -12,5 +12,9 @@ function subscribe(callback: () => void) {
 
 /** Disable animation during SSR and hydration, then read the system preference. */
 export function useReducedMotion(): boolean {
-  return useSyncExternalStore(subscribe, () => window.matchMedia(query).matches, () => true);
+  return useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(query).matches,
+    () => true,
+  );
 }

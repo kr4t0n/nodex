@@ -7,4 +7,6 @@ const data: TickBoxDatum[] = [
   { plan: 'FREE', summary: [2.2, 6, 9.4, 13.8, 19.6], outliers: [22.1, 23.5] },
 ];
 
-export function Example() { return <TickBox data={data} />; }
+export function Example() {
+  return <TickBox data={data} />;
+}

@@ -6,26 +6,14 @@
   "tier": "expressive",
   "runtime": "react",
   "density": "glance",
-  "tags": [
-    "product",
-    "analytics"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["product", "analytics"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "560/340",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "CustomPie"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["CustomPie"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

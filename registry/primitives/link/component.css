@@ -1,67 +1,68 @@
 @layer components {
-/* link - shared primitive, themed by the active language's tokens.
+  /* link - shared primitive, themed by the active language's tokens.
 
    The underline is drawn at the language's hairline weight and offset clear of
    the descenders, so it reads as typography rather than as a browser default.
    In a language with no accent colour, a link cannot announce itself with hue;
    it announces itself with the line. */
 
-.nx-link {
-  color: var(--nx-ink);
-  text-decoration-line: underline;
-  text-decoration-thickness: var(--nx-stroke-hairline);
-  text-decoration-color: var(--nx-faint);
-  text-underline-offset: var(--nx-space-linkUnderlineOffset);
-  /* Let descenders interrupt the rule rather than striking through them. */
-  text-decoration-skip-ink: auto;
-  transition: text-decoration-color var(--nx-motion-control-duration) var(--nx-motion-control-easing);
-}
-
-.nx-link:hover {
-  text-decoration-color: var(--nx-ink);
-}
-
-.nx-link:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 2px;
-  border-radius: var(--nx-radius-focus);
-}
-
-/* Quiet: for links in dense metadata where a permanent underline would turn a
-   row into a fence. The underline arrives on hover instead. */
-.nx-link--quiet {
-  color: var(--nx-muted);
-  text-decoration-line: none;
-}
-
-.nx-link--quiet:hover {
-  color: var(--nx-ink);
-  text-decoration-line: underline;
-}
-
-/* Strong: for a link that is the point of its sentence. */
-.nx-link--strong {
-  font-weight: var(--nx-font-weight-bold);
-  text-decoration-color: var(--nx-ink);
-}
-
-/* External links carry a mark rather than an icon, so the primitive stays a
-   single CSS file with no asset dependency. */
-.nx-link--external::after {
-  content: '';
-  display: inline-block;
-  width: 0.32em;
-  height: 0.32em;
-  margin-left: var(--nx-space-linkIconGap);
-  vertical-align: 0.32em;
-  border-top: var(--nx-stroke-hairline) solid currentColor;
-  border-right: var(--nx-stroke-hairline) solid currentColor;
-  transform: rotate(-45deg);
-}
-
-@media (prefers-reduced-motion: reduce) {
   .nx-link {
-    transition: none;
+    color: var(--nx-ink);
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--nx-stroke-hairline);
+    text-decoration-color: var(--nx-faint);
+    text-underline-offset: var(--nx-space-linkUnderlineOffset);
+    /* Let descenders interrupt the rule rather than striking through them. */
+    text-decoration-skip-ink: auto;
+    transition: text-decoration-color var(--nx-motion-control-duration)
+      var(--nx-motion-control-easing);
   }
-}
+
+  .nx-link:hover {
+    text-decoration-color: var(--nx-ink);
+  }
+
+  .nx-link:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 2px;
+    border-radius: var(--nx-radius-focus);
+  }
+
+  /* Quiet: for links in dense metadata where a permanent underline would turn a
+   row into a fence. The underline arrives on hover instead. */
+  .nx-link--quiet {
+    color: var(--nx-muted);
+    text-decoration-line: none;
+  }
+
+  .nx-link--quiet:hover {
+    color: var(--nx-ink);
+    text-decoration-line: underline;
+  }
+
+  /* Strong: for a link that is the point of its sentence. */
+  .nx-link--strong {
+    font-weight: var(--nx-font-weight-bold);
+    text-decoration-color: var(--nx-ink);
+  }
+
+  /* External links carry a mark rather than an icon, so the primitive stays a
+   single CSS file with no asset dependency. */
+  .nx-link--external::after {
+    content: '';
+    display: inline-block;
+    width: 0.32em;
+    height: 0.32em;
+    margin-left: var(--nx-space-linkIconGap);
+    vertical-align: 0.32em;
+    border-top: var(--nx-stroke-hairline) solid currentColor;
+    border-right: var(--nx-stroke-hairline) solid currentColor;
+    transform: rotate(-45deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-link {
+      transition: none;
+    }
+  }
 }

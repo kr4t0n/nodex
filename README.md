@@ -58,20 +58,20 @@ interface. Body copy is 14px; editable values are 16px. Surfaces remain flat and
 opaque. The [design guide](registry/languages/nocturne/DESIGN.md) covers the
 complete language, including forms, navigation, prose, interaction and motion.
 
-| Chart | Type | Reading |
-| --- | --- | --- |
-| `nocturne-bars` | Bar | Slim horizontal bars rank categories, retaining stable ties, zero readings and unavailable rows |
-| `nocturne-line` | Line | Straight segments preserve numeric intervals and independent gaps; endpoint labels separate crowded series |
-| `nocturne-ring` | Donut | Thin, exact sectors allocate a complete total, with a responsive key |
-| `nocturne-scatter-matrix` | Scatter | Linked pairwise observations and diagonal histograms compare metrics and cohorts on shared numeric scales |
-| `nocturne-promise-lanes` | Paired range | Planned and actual intervals distinguish shifts in start, finish and duration |
-| `nocturne-margin-lanes` | Interval dot | Current values and expected ranges share a signed deviation scale around each row's target |
-| `nocturne-drift-trails` | Trajectory | Chronological paths across two numeric axes preserve reversals, gaps and final observations |
-| `nocturne-waterfall` | Waterfall | Signed changes bridge running balances; missing changes break the chain until an explicit start |
-| `nocturne-boxplot` | Boxplot | Horizontal quartile boxes, median ticks, supplied whiskers and independent outliers compare distributions |
-| `nocturne-forecast-fan` | Area | Observed history and point forecasts share explicitly labeled prediction intervals |
-| `nocturne-control` | Line | Supplied statistical control limits identify strict point breaches, with optional event references |
-| `nocturne-ecdf` | Line | Exact cumulative steps reveal inclusive threshold shares and empirical percentiles without bins |
+| Chart                     | Type         | Reading                                                                                                    |
+| ------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| `nocturne-bars`           | Bar          | Slim horizontal bars rank categories, retaining stable ties, zero readings and unavailable rows            |
+| `nocturne-line`           | Line         | Straight segments preserve numeric intervals and independent gaps; endpoint labels separate crowded series |
+| `nocturne-ring`           | Donut        | Thin, exact sectors allocate a complete total, with a responsive key                                       |
+| `nocturne-scatter-matrix` | Scatter      | Linked pairwise observations and diagonal histograms compare metrics and cohorts on shared numeric scales  |
+| `nocturne-promise-lanes`  | Paired range | Planned and actual intervals distinguish shifts in start, finish and duration                              |
+| `nocturne-margin-lanes`   | Interval dot | Current values and expected ranges share a signed deviation scale around each row's target                 |
+| `nocturne-drift-trails`   | Trajectory   | Chronological paths across two numeric axes preserve reversals, gaps and final observations                |
+| `nocturne-waterfall`      | Waterfall    | Signed changes bridge running balances; missing changes break the chain until an explicit start            |
+| `nocturne-boxplot`        | Boxplot      | Horizontal quartile boxes, median ticks, supplied whiskers and independent outliers compare distributions  |
+| `nocturne-forecast-fan`   | Area         | Observed history and point forecasts share explicitly labeled prediction intervals                         |
+| `nocturne-control`        | Line         | Supplied statistical control limits identify strict point breaches, with optional event references         |
+| `nocturne-ecdf`           | Line         | Exact cumulative steps reveal inclusive threshold shares and empirical percentiles without bins            |
 
 ```bash
 nodex init nocturne
@@ -195,17 +195,17 @@ interface. Fields and badges stay flat; framed surfaces use subtle diffuse
 elevation. Body copy is 15px and editable values are 16px. The
 [design guide](registry/languages/soft-studio/DESIGN.md) covers the complete UI.
 
-| Chart | Type | Reading |
-| --- | --- | --- |
-| `soft-bars` | Bar | Rounded category bars with direct values and an exact zero baseline |
-| `soft-area` | Area | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps |
-| `soft-donut` | Donut | Exact shares of a complete total, a generous opening and a responsive key |
-| `soft-heatmap` | Heatmap | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
-| `soft-line` | Line | Independent monotone series on a numeric timeline, preserving each series' gaps |
-| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals |
-| `soft-scatter` | Scatter | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted |
-| `soft-dumbbell` | Dumbbell | Open and filled endpoints compare readings, including decreases, ties and missing partners |
-| `soft-gauge` | Gauge | Exact progress across a half-circle against an explicit positive target |
+| Chart               | Type        | Reading                                                                                         |
+| ------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| `soft-bars`         | Bar         | Rounded category bars with direct values and an exact zero baseline                             |
+| `soft-area`         | Area        | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps   |
+| `soft-donut`        | Donut       | Exact shares of a complete total, a generous opening and a responsive key                       |
+| `soft-heatmap`      | Heatmap     | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
+| `soft-line`         | Line        | Independent monotone series on a numeric timeline, preserving each series' gaps                 |
+| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals                   |
+| `soft-scatter`      | Scatter     | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted               |
+| `soft-dumbbell`     | Dumbbell    | Open and filled endpoints compare readings, including decreases, ties and missing partners      |
+| `soft-gauge`        | Gauge       | Exact progress across a half-circle against an explicit positive target                         |
 
 ```bash
 nodex init soft-studio
@@ -258,17 +258,17 @@ Sketchbook is available at `/l/sketchbook`, with all 24 shared primitives and
 nine charts covering the [roughViz catalogue](https://www.jwilber.me/roughviz/).
 All use native Recharts geometry and inspection with seeded Rough.js decoration.
 
-| roughViz chart | Nodex component | Encoding |
-| --- | --- | --- |
-| Bar | `sketch-bars` | Vertical category bars from zero |
-| BarH | `sketch-bars-horizontal` | Horizontal category bars from zero |
-| StackedBar | `sketch-stacked-bars` | Absolute vertical stacks with complete totals |
-| Line | `sketch-line` | Multiple series on a numeric X axis |
-| Scatter | `sketch-scatter` | Equal-size marks on numeric X/Y axes |
-| Pie | `sketch-pie` | Exact sector shares of a complete total |
-| Donut | `sketch-donut` | Exact sector shares with a central total |
-| Force | `sketch-force` | Collision-positioned bubbles, area proportional to value |
-| Network | `sketch-network` | Area-scaled nodes with explicit undirected links |
+| roughViz chart | Nodex component          | Encoding                                                 |
+| -------------- | ------------------------ | -------------------------------------------------------- |
+| Bar            | `sketch-bars`            | Vertical category bars from zero                         |
+| BarH           | `sketch-bars-horizontal` | Horizontal category bars from zero                       |
+| StackedBar     | `sketch-stacked-bars`    | Absolute vertical stacks with complete totals            |
+| Line           | `sketch-line`            | Multiple series on a numeric X axis                      |
+| Scatter        | `sketch-scatter`         | Equal-size marks on numeric X/Y axes                     |
+| Pie            | `sketch-pie`             | Exact sector shares of a complete total                  |
+| Donut          | `sketch-donut`           | Exact sector shares with a central total                 |
+| Force          | `sketch-force`           | Collision-positioned bubbles, area proportional to value |
+| Network        | `sketch-network`         | Area-scaled nodes with explicit undirected links         |
 
 Gaegu supplies headings, chart annotations, short UI text, paragraphs, editable
 values and dense tables; commands remain monospace. Its regular and bold faces
@@ -341,17 +341,17 @@ Embedded font metadata accepts pinned static `@fontsource` and variable
 Signal Console has nine charts at `/l/signal-console`, using its existing dark
 surfaces, JetBrains Mono, compact instrument layout and semantic status colors.
 
-| Chart | Type | Reading |
-| --- | --- | --- |
-| `endpoint-latency` | Bar | Routes ranked by P99 latency against an objective |
-| `request-throughput` | Area | Request rate across equal-duration windows |
-| `latency-trend` | Line | P50/P95/P99 patterns and P99 objective breaches |
-| `response-codes` | Stacked bar | Complete HTTP response counts by status class |
-| `latency-histogram` | Histogram | Counts in equal-width latency buckets |
-| `service-health` | Heatmap | Healthy, degraded, down and unavailable service windows |
-| `capacity-ring` | Donut | Exact used/available capacity with an optional warning threshold |
-| `saturation-scatter` | Scatter | Host CPU and latency against two explicit limits |
-| `trace-spans` | Range bar | Actual start/end offsets, preserving concurrent spans |
+| Chart                | Type        | Reading                                                          |
+| -------------------- | ----------- | ---------------------------------------------------------------- |
+| `endpoint-latency`   | Bar         | Routes ranked by P99 latency against an objective                |
+| `request-throughput` | Area        | Request rate across equal-duration windows                       |
+| `latency-trend`      | Line        | P50/P95/P99 patterns and P99 objective breaches                  |
+| `response-codes`     | Stacked bar | Complete HTTP response counts by status class                    |
+| `latency-histogram`  | Histogram   | Counts in equal-width latency buckets                            |
+| `service-health`     | Heatmap     | Healthy, degraded, down and unavailable service windows          |
+| `capacity-ring`      | Donut       | Exact used/available capacity with an optional warning threshold |
+| `saturation-scatter` | Scatter     | Host CPU and latency against two explicit limits                 |
+| `trace-spans`        | Range bar   | Actual start/end offsets, preserving concurrent spans            |
 
 Each chart accepts application data, provides keyboard inspection and supports
 scoped tokens and reduced motion. Missing data stays distinct from zero; partial
@@ -520,8 +520,8 @@ retains the resting position and shadow.
 Import the token stylesheet once after Tailwind in your application stylesheet:
 
 ```css
-@import "tailwindcss";
-@import "./nodex-tokens.css";
+@import 'tailwindcss';
+@import './nodex-tokens.css';
 ```
 
 Ensure Tailwind scans the configured component destination. Its default
@@ -646,12 +646,12 @@ intermediate petal paints as language tokens.
 
 The bar family preserves each specimen's original marks and labels:
 
-| Component | Required observation fields | Encoding |
-| --- | --- | --- |
-| `chunky-bars` | `plan`, `mrrK` | Rounded bars; tone ranks revenue without changing plan order |
-| `rung-bars` | `plan`, `mrrK` | One rung per $1K, with a counting dot every fifth rung |
-| `paired-rungs` | `plan`, `beforeK`, `afterK` | Grey and ink rung stacks compare both measures for a plan |
-| `stacked-rungs` | `region`, `coreK`, `addOnsK`, `servicesK` | Three revenue segments separated by empty rung positions |
+| Component       | Required observation fields               | Encoding                                                     |
+| --------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| `chunky-bars`   | `plan`, `mrrK`                            | Rounded bars; tone ranks revenue without changing plan order |
+| `rung-bars`     | `plan`, `mrrK`                            | One rung per $1K, with a counting dot every fifth rung       |
+| `paired-rungs`  | `plan`, `beforeK`, `afterK`               | Grey and ink rung stacks compare both measures for a plan    |
+| `stacked-rungs` | `region`, `coreK`, `addOnsK`, `servicesK` | Three revenue segments separated by empty rung positions     |
 
 Each component takes a required `data` array and the same optional dimensions,
 `animate`, `className` and `aria-label` props as the other charts. Zero is measured;
@@ -668,11 +668,11 @@ nodex add chunky-bars rung-bars paired-rungs stacked-rungs
 
 The next bar variants extend that composition:
 
-| Component | Required observation fields | Encoding |
-| --- | --- | --- |
-| `rung-histogram` | `fromHours`, `toHours`, `tickets` | One rung per integer ticket; interval ticks and a median flag |
-| `diverging-bar` | `segment`, `netAccounts` | Signed bars extend from zero; tone and caps reinforce direction |
-| `range-capsules` | `day`, `lowK`, `highK` | Each capsule spans an observed minimum and maximum |
+| Component        | Required observation fields                      | Encoding                                                             |
+| ---------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
+| `rung-histogram` | `fromHours`, `toHours`, `tickets`                | One rung per integer ticket; interval ticks and a median flag        |
+| `diverging-bar`  | `segment`, `netAccounts`                         | Signed bars extend from zero; tone and caps reinforce direction      |
+| `range-capsules` | `day`, `lowK`, `highK`                           | Each capsule spans an observed minimum and maximum                   |
 | `rung-waterfall` | `label`, `kind`, and `valueK` for starts/changes | Integer changes update a running total; broken rungs mark deductions |
 
 Waterfall `kind` is `start`, `change` or `total`. A start sets the running value,
@@ -687,59 +687,59 @@ nodex add rung-histogram diverging-bar range-capsules rung-waterfall
 
 The scatter and heatmap components also require caller observations:
 
-| Component | Data contract |
-| --- | --- |
-| `plumb-scatter` | Product, price percentile and satisfaction; both measures range from 0 to 100 |
-| `single-axis` / `dot-heat` | Day, hour and ticket count; the former uses linear diameter, the latter the original square-root size curve |
-| `brand-spectrum` | Opposing traits, our position and competitor positions, all on a 0–1 scale |
-| `matrix-heat` | Feature labels and a square matrix of co-usage percentages; self-pairs are inapplicable |
-| `matrix-heat-glance` | Feature labels and ordered releases with adoption percentages |
-| `calendar-heat` | Ordered week labels and Monday–Sunday deploy counts; optional period and peak labels come from the caller |
-| `dotty-matrix` | Ordered squads with task matrices indexed by lane and week |
-| `beeswarm` | Deal values in thousands and enterprise flags; one dot per deal, piled into calibrated lanes |
-| `violin` | Plan labels, observed reply times and positive density bandwidths in hours |
-| `tick-box` | Plan labels, ordered five-number summaries and individual outliers in hours |
-| `hairline-area` | Ordered days and values in thousands, with caller-supplied sparse axis labels |
-| `jitter-strip` | Nonnegative hours with caller-supplied fractional band positions; ordered band labels |
-| `trend-lineage` | Feature events, survival state and an explicit year window; incomplete timelines are unavailable |
-| `type-colonnade` | Ordered repository ownership indices and team labels, with derived team counts |
-| `dumbbell-queue` | Before/after whole-minute times; one bead per saved minute, with independently available endpoints |
-| `rank-strip` | Positive integer product ranks and ordered periods; rows sort by the final period, with unavailable finishes last |
-| `force-graph` | Caller hub and service IDs, monthly syncs and side roads; preserved force layout, dragging and adjacency |
-| `force-graph-dense` | Service domains, daily calls and explicit weighted links; preserved mesh physics, dragging, pan and zoom |
-| `scatter-morph` | Stable product IDs, price, satisfaction and revenue; reader-controlled scatter/bar/donut outline transitions |
-| `choropleth-states` | State sign-ups, preserved geographic insets and five-band controls; optional caller annotations |
-| `choropleth-world` | Country monthly actives, the original latitude window and five-band controls; offline geography |
-| `tree` | Caller root, product areas and feature membership; tidy hierarchy layout with all branches expanded |
-| `nested-treemap` | Complete team effort hours grouped by area; native nested layouts, header bands and derived shares |
-| `circular-graph` | Ordered teams and indexed ties; headcount diameters, weighted threads and adjacency inspection |
-| `circular-graph-dense` | Repositories, organizations and shared-contributor ties; diameter-aware ring spacing and selective rotated labels |
-| `aggregate-sankey` | Complete channel-to-plan counts; ranked source tones, native weighted layout and node/link inspection |
-| `parallel-coords` | Caller dimensions and scored ranges; complete product paths, axis brushing and derived best-all-round highlight |
-| `thread-triptych` | Ordered route endpoints and volume; one continuous weighted path through three caller-owned columns |
-| `cluster-field` | Whole core and island contributor counts, caller layout positions and explicit cross-contribution flags |
-| `hourglass-stream` | Whole stage populations, nearest-40-person ticks and exact adjacent conversion rates |
-| `stream-ribbon` | Ordered surfaces and weeks in a regular stacked area, preserving the original renderer’s actual encoding |
-| `bubble-almanac` | Indexed product/year ticket counts and beta flags, with caller event shelf and marginal notes |
-| `candlestick` | Ordered open/close/low/high quotes; hollow up bodies, ink down bodies and unchanged-price marks |
-| `radial-patchwork` | Deployment hour, angular window, files touched and incident status; overlapping independent sectors |
-| `radial-convergence` | Explicit request-to-theme assignments; hub area counts actual assignments |
-| `bar-race` | Period revenue frames with stable product IDs; one playback, replay, and final-frame reduced motion |
-| `stagger-delay` | Caller-ordered market values, magnitude tones and a token-timed bar stagger |
-| `dynamic-data` | Caller samples and static source status; last sample owns the current value |
-| `draw-in-counter` | Daily bookings and period label; cumulative area and exact headline share the library animation |
-| `dot-cascade` | Whole incident counts above a sloping baseline; odd totals round the final two-incident dot up |
-| `launch-fan` | Feature launch weeks and caller week guides, projected through the original fan |
-| `donut-redesigned` | Complete whole-percent source shares in a ten-by-ten dot grid |
-| `custom-pie` | User shares determine angle; minutes determine radius, with caller reference scale and rings |
-| `tick-donut` | Ordered whole-percent channel shares totaling 100; one tick per percent |
-| `tick-gauge` | Whole-percent progress and caller goal label; 100 reached or remaining ticks |
-| `pictorial-bar` | Yearly trees in thousands and a caller target; continuous bars clip a repeated tree texture |
-| `tick-rows` | Whole release counts by team; one tick per release and one counting dot per five |
-| `barcode-lollipop` | Day labels, peak users and weekend flags; unavailable readings retain their calendar hairlines |
-| `hundred-field` | Up to four whole-percent disposition shares; each dot is one person in a hundred, with no invented unallocated people |
-| `ballot-tally` | Each option has a whole picked count out of 100; repeated choices permit row totals above 100. Automatic height reserves readable spacing for each option's heading and ticks |
-| `ridgeline` | Ordered pipeline density profiles with unique nonnegative hours and nullable density weights |
+| Component                  | Data contract                                                                                                                                                                 |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plumb-scatter`            | Product, price percentile and satisfaction; both measures range from 0 to 100                                                                                                 |
+| `single-axis` / `dot-heat` | Day, hour and ticket count; the former uses linear diameter, the latter the original square-root size curve                                                                   |
+| `brand-spectrum`           | Opposing traits, our position and competitor positions, all on a 0–1 scale                                                                                                    |
+| `matrix-heat`              | Feature labels and a square matrix of co-usage percentages; self-pairs are inapplicable                                                                                       |
+| `matrix-heat-glance`       | Feature labels and ordered releases with adoption percentages                                                                                                                 |
+| `calendar-heat`            | Ordered week labels and Monday–Sunday deploy counts; optional period and peak labels come from the caller                                                                     |
+| `dotty-matrix`             | Ordered squads with task matrices indexed by lane and week                                                                                                                    |
+| `beeswarm`                 | Deal values in thousands and enterprise flags; one dot per deal, piled into calibrated lanes                                                                                  |
+| `violin`                   | Plan labels, observed reply times and positive density bandwidths in hours                                                                                                    |
+| `tick-box`                 | Plan labels, ordered five-number summaries and individual outliers in hours                                                                                                   |
+| `hairline-area`            | Ordered days and values in thousands, with caller-supplied sparse axis labels                                                                                                 |
+| `jitter-strip`             | Nonnegative hours with caller-supplied fractional band positions; ordered band labels                                                                                         |
+| `trend-lineage`            | Feature events, survival state and an explicit year window; incomplete timelines are unavailable                                                                              |
+| `type-colonnade`           | Ordered repository ownership indices and team labels, with derived team counts                                                                                                |
+| `dumbbell-queue`           | Before/after whole-minute times; one bead per saved minute, with independently available endpoints                                                                            |
+| `rank-strip`               | Positive integer product ranks and ordered periods; rows sort by the final period, with unavailable finishes last                                                             |
+| `force-graph`              | Caller hub and service IDs, monthly syncs and side roads; preserved force layout, dragging and adjacency                                                                      |
+| `force-graph-dense`        | Service domains, daily calls and explicit weighted links; preserved mesh physics, dragging, pan and zoom                                                                      |
+| `scatter-morph`            | Stable product IDs, price, satisfaction and revenue; reader-controlled scatter/bar/donut outline transitions                                                                  |
+| `choropleth-states`        | State sign-ups, preserved geographic insets and five-band controls; optional caller annotations                                                                               |
+| `choropleth-world`         | Country monthly actives, the original latitude window and five-band controls; offline geography                                                                               |
+| `tree`                     | Caller root, product areas and feature membership; tidy hierarchy layout with all branches expanded                                                                           |
+| `nested-treemap`           | Complete team effort hours grouped by area; native nested layouts, header bands and derived shares                                                                            |
+| `circular-graph`           | Ordered teams and indexed ties; headcount diameters, weighted threads and adjacency inspection                                                                                |
+| `circular-graph-dense`     | Repositories, organizations and shared-contributor ties; diameter-aware ring spacing and selective rotated labels                                                             |
+| `aggregate-sankey`         | Complete channel-to-plan counts; ranked source tones, native weighted layout and node/link inspection                                                                         |
+| `parallel-coords`          | Caller dimensions and scored ranges; complete product paths, axis brushing and derived best-all-round highlight                                                               |
+| `thread-triptych`          | Ordered route endpoints and volume; one continuous weighted path through three caller-owned columns                                                                           |
+| `cluster-field`            | Whole core and island contributor counts, caller layout positions and explicit cross-contribution flags                                                                       |
+| `hourglass-stream`         | Whole stage populations, nearest-40-person ticks and exact adjacent conversion rates                                                                                          |
+| `stream-ribbon`            | Ordered surfaces and weeks in a regular stacked area, preserving the original renderer’s actual encoding                                                                      |
+| `bubble-almanac`           | Indexed product/year ticket counts and beta flags, with caller event shelf and marginal notes                                                                                 |
+| `candlestick`              | Ordered open/close/low/high quotes; hollow up bodies, ink down bodies and unchanged-price marks                                                                               |
+| `radial-patchwork`         | Deployment hour, angular window, files touched and incident status; overlapping independent sectors                                                                           |
+| `radial-convergence`       | Explicit request-to-theme assignments; hub area counts actual assignments                                                                                                     |
+| `bar-race`                 | Period revenue frames with stable product IDs; one playback, replay, and final-frame reduced motion                                                                           |
+| `stagger-delay`            | Caller-ordered market values, magnitude tones and a token-timed bar stagger                                                                                                   |
+| `dynamic-data`             | Caller samples and static source status; last sample owns the current value                                                                                                   |
+| `draw-in-counter`          | Daily bookings and period label; cumulative area and exact headline share the library animation                                                                               |
+| `dot-cascade`              | Whole incident counts above a sloping baseline; odd totals round the final two-incident dot up                                                                                |
+| `launch-fan`               | Feature launch weeks and caller week guides, projected through the original fan                                                                                               |
+| `donut-redesigned`         | Complete whole-percent source shares in a ten-by-ten dot grid                                                                                                                 |
+| `custom-pie`               | User shares determine angle; minutes determine radius, with caller reference scale and rings                                                                                  |
+| `tick-donut`               | Ordered whole-percent channel shares totaling 100; one tick per percent                                                                                                       |
+| `tick-gauge`               | Whole-percent progress and caller goal label; 100 reached or remaining ticks                                                                                                  |
+| `pictorial-bar`            | Yearly trees in thousands and a caller target; continuous bars clip a repeated tree texture                                                                                   |
+| `tick-rows`                | Whole release counts by team; one tick per release and one counting dot per five                                                                                              |
+| `barcode-lollipop`         | Day labels, peak users and weekend flags; unavailable readings retain their calendar hairlines                                                                                |
+| `hundred-field`            | Up to four whole-percent disposition shares; each dot is one person in a hundred, with no invented unallocated people                                                         |
+| `ballot-tally`             | Each option has a whole picked count out of 100; repeated choices permit row totals above 100. Automatic height reserves readable spacing for each option's heading and ticks |
+| `ridgeline`                | Ordered pipeline density profiles with unique nonnegative hours and nullable density weights                                                                                  |
 
 Tick-donut and tick-gauge keep circular geometry at responsive and explicit
 dimensions. Their ticks and counting guides share equal axis scales, and the
@@ -882,18 +882,18 @@ pnpm run smoke:landing
 pnpm run smoke:gallery
 ```
 
-| Command | Coverage |
-| --- | --- |
-| `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
-| `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
-| `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
-| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all six languages, stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
-| `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
-| `check:shell` | Gallery primitive classes have their curated stylesheets |
-| `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |
-| `smoke:gallery` | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout |
-| `lint` / `typecheck` | Application, registry, CLI and build source |
-| `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation |
+| Command                   | Coverage                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build:registry`          | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance                                                                                                                                                                                                     |
+| `check:registry`          | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched                                                                                                                                                                                                                        |
+| `test`                    | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation                                                                                                                                                                                                               |
+| `smoke`                   | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all six languages, stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
+| `smoke:cli`               | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds                                                                                                                                                                  |
+| `check:shell`             | Gallery primitive classes have their curated stylesheets                                                                                                                                                                                                                                                                   |
+| `smoke:landing`           | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets                                                               |
+| `smoke:gallery`           | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout                                   |
+| `lint` / `typecheck`      | Application, registry, CLI and build source                                                                                                                                                                                                                                                                                |
+| `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation                                                                                                                                                                                                                           |
 
 Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
 stylesheet to sort utilities, including in delivered registry source. Generated
@@ -938,16 +938,16 @@ Register a GitHub OAuth app with homepage `http://localhost:4180` and callback
 `http://localhost:4180/api/auth/github/callback`. Fill the credentials in the
 root `.env` and restart the site. `pnpm run db:down` stops local Postgres.
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Runtime account database connection |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration |
-| `NEXT_PUBLIC_SITE_URL` | Runtime public origin used by server-side OAuth |
-| `NEXT_PUBLIC_REGISTRY_URL` | Registry CDN root, baked into the browser bundle at build time |
-| `NODEX_REGISTRY` | CLI registry override; flag and project config take precedence |
-| `NODEX_API` | Optional CLI account API base when it differs from the registry root |
-| `NODEX_TOKEN` | CLI session token for unattended use |
-| `NODEX_CONFIG_DIR` | Optional CLI credential-directory override |
+| Variable                                   | Purpose                                                              |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| `DATABASE_URL`                             | Runtime account database connection                                  |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration                                   |
+| `NEXT_PUBLIC_SITE_URL`                     | Runtime public origin used by server-side OAuth                      |
+| `NEXT_PUBLIC_REGISTRY_URL`                 | Registry CDN root, baked into the browser bundle at build time       |
+| `NODEX_REGISTRY`                           | CLI registry override; flag and project config take precedence       |
+| `NODEX_API`                                | Optional CLI account API base when it differs from the registry root |
+| `NODEX_TOKEN`                              | CLI session token for unattended use                                 |
+| `NODEX_CONFIG_DIR`                         | Optional CLI credential-directory override                           |
 
 `.env` is gitignored. Next explicitly loads the root file. CLI credentials live
 separately in `~/.nodex/auth.json` with mode `0600`; project config never holds

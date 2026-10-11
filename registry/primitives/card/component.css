@@ -1,121 +1,126 @@
 @layer components {
-/* card - shared primitive, themed by the active language's tokens.
+  /* card - shared primitive, themed by the active language's tokens.
 
    Radius rule for this system, stated so it stays consistent: containers use
    --nx-radius-card, interactive elements use --nx-radius-pill. Nothing mixes. */
 
-.nx-card {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  flex-direction: column;
-  background: var(--nx-surfaceFill);
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-radius: var(--nx-radius-card);
-  padding: var(--nx-space-cardPadding);
-  font-family: var(--nx-font-sans);
-  color: var(--nx-ink);
-  box-shadow: var(--nx-shadow-surface) var(--nx-ink);
-}
-
-/* Decoration stays within the surface and behind content. Plain cards have
-   neither secondary outlines nor hatching. Keep this local for CSS delivery. */
-.nx-card:not(.nx-card--plain)::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  inset: var(--nx-texture-outlineInset);
-  border: var(--nx-stroke-hairline) solid currentColor;
-  border-radius: var(--nx-texture-outlineRadius);
-  opacity: var(--nx-texture-outlineOpacity);
-}
-
-.nx-card:not(.nx-card--plain)::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  right: 3px;
-  bottom: 3px;
-  width: min(var(--nx-texture-hatchSize), 40%);
-  height: min(var(--nx-texture-hatchSize), 70%);
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  background: repeating-linear-gradient(var(--nx-texture-hatchAngle), currentColor 0 var(--nx-stroke-hairline), transparent var(--nx-stroke-hairline) var(--nx-texture-hatchGap));
-  opacity: var(--nx-texture-hatchOpacity);
-}
-
-/* Inverted. Present because the source collection inverts roughly a fifth of
-   its cards, and that contrast is part of the language rather than a theme. */
-.nx-card--invert {
-  background: var(--nx-ink);
-  border-color: var(--nx-ink);
-  color: var(--nx-bg);
-}
-
-.nx-card--invert .nx-card__sub {
-  color: var(--nx-onDarkMuted);
-}
-
-.nx-card--invert .nx-card__caption {
-  color: var(--nx-onDarkFaint, var(--nx-muted));
-}
-
-/* Borderless, for grids that separate by space rather than by line. */
-.nx-card--plain {
-  background: var(--nx-bg);
-  border-color: transparent;
-  box-shadow: none;
-}
-
-/* Card anatomy, in the order DESIGN.md fixes: title, sub, body, caption. */
-.nx-card__title {
-  margin: 0;
-  font-family: var(--nx-font-heading, var(--nx-font-sans));
-  font-size: var(--nx-type-cardTitle-size);
-  font-weight: var(--nx-type-cardTitle-weight);
-  letter-spacing: var(--nx-type-cardTitle-tracking);
-}
-
-.nx-card__sub {
-  margin: var(--nx-space-subtitleGap) 0 0;
-  font-size: var(--nx-type-subtitle-size);
-  font-weight: var(--nx-type-subtitle-weight);
-  line-height: var(--nx-type-subtitle-lineHeight);
-  color: var(--nx-muted);
-}
-
-.nx-card__body {
-  margin-top: var(--nx-space-cardBodyGap);
-}
-
-.nx-card__caption {
-  margin-top: var(--nx-space-captionGap);
-  font-size: var(--nx-type-caption-size);
-  font-weight: var(--nx-type-caption-weight);
-  letter-spacing: var(--nx-type-caption-tracking);
-  text-transform: uppercase;
-  color: var(--nx-faint);
-}
-
-/* Interactive cards strengthen the border; shadow geometry stays stable. */
-.nx-card--link {
-  text-decoration: none;
-  transition: border-color var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
-}
-
-.nx-card--link:hover {
-  border-color: var(--nx-muted);
-}
-
-.nx-card--link:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-card--link {
-    transition: none;
+  .nx-card {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    background: var(--nx-surfaceFill);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-radius: var(--nx-radius-card);
+    padding: var(--nx-space-cardPadding);
+    font-family: var(--nx-font-sans);
+    color: var(--nx-ink);
+    box-shadow: var(--nx-shadow-surface) var(--nx-ink);
   }
-}
+
+  /* Decoration stays within the surface and behind content. Plain cards have
+   neither secondary outlines nor hatching. Keep this local for CSS delivery. */
+  .nx-card:not(.nx-card--plain)::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    inset: var(--nx-texture-outlineInset);
+    border: var(--nx-stroke-hairline) solid currentColor;
+    border-radius: var(--nx-texture-outlineRadius);
+    opacity: var(--nx-texture-outlineOpacity);
+  }
+
+  .nx-card:not(.nx-card--plain)::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    right: 3px;
+    bottom: 3px;
+    width: min(var(--nx-texture-hatchSize), 40%);
+    height: min(var(--nx-texture-hatchSize), 70%);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    background: repeating-linear-gradient(
+      var(--nx-texture-hatchAngle),
+      currentColor 0 var(--nx-stroke-hairline),
+      transparent var(--nx-stroke-hairline) var(--nx-texture-hatchGap)
+    );
+    opacity: var(--nx-texture-hatchOpacity);
+  }
+
+  /* Inverted. Present because the source collection inverts roughly a fifth of
+   its cards, and that contrast is part of the language rather than a theme. */
+  .nx-card--invert {
+    background: var(--nx-ink);
+    border-color: var(--nx-ink);
+    color: var(--nx-bg);
+  }
+
+  .nx-card--invert .nx-card__sub {
+    color: var(--nx-onDarkMuted);
+  }
+
+  .nx-card--invert .nx-card__caption {
+    color: var(--nx-onDarkFaint, var(--nx-muted));
+  }
+
+  /* Borderless, for grids that separate by space rather than by line. */
+  .nx-card--plain {
+    background: var(--nx-bg);
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  /* Card anatomy, in the order DESIGN.md fixes: title, sub, body, caption. */
+  .nx-card__title {
+    margin: 0;
+    font-family: var(--nx-font-heading, var(--nx-font-sans));
+    font-size: var(--nx-type-cardTitle-size);
+    font-weight: var(--nx-type-cardTitle-weight);
+    letter-spacing: var(--nx-type-cardTitle-tracking);
+  }
+
+  .nx-card__sub {
+    margin: var(--nx-space-subtitleGap) 0 0;
+    font-size: var(--nx-type-subtitle-size);
+    font-weight: var(--nx-type-subtitle-weight);
+    line-height: var(--nx-type-subtitle-lineHeight);
+    color: var(--nx-muted);
+  }
+
+  .nx-card__body {
+    margin-top: var(--nx-space-cardBodyGap);
+  }
+
+  .nx-card__caption {
+    margin-top: var(--nx-space-captionGap);
+    font-size: var(--nx-type-caption-size);
+    font-weight: var(--nx-type-caption-weight);
+    letter-spacing: var(--nx-type-caption-tracking);
+    text-transform: uppercase;
+    color: var(--nx-faint);
+  }
+
+  /* Interactive cards strengthen the border; shadow geometry stays stable. */
+  .nx-card--link {
+    text-decoration: none;
+    transition: border-color var(--nx-motion-surface-duration)
+      var(--nx-motion-surface-easing);
+  }
+
+  .nx-card--link:hover {
+    border-color: var(--nx-muted);
+  }
+
+  .nx-card--link:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-card--link {
+      transition: none;
+    }
+  }
 }

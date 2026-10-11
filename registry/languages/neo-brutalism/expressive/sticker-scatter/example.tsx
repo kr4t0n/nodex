@@ -10,5 +10,13 @@ const campaigns: readonly StickerScatterDatum[] = [
   { id: 'release', label: 'Major release', x: 92, y: 12.2, tone: 'd' },
 ];
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <StickerScatter data={campaigns} xLabel="Reach · thousands" yLabel="Engagement · %" contextLabel="Campaign performance" animate={animate} />;
+  return (
+    <StickerScatter
+      data={campaigns}
+      xLabel="Reach · thousands"
+      yLabel="Engagement · %"
+      contextLabel="Campaign performance"
+      animate={animate}
+    />
+  );
 }

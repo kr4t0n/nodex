@@ -5,19 +5,11 @@
   "component": "rule",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "structure",
-    "separator"
-  ],
+  "tags": ["structure", "separator"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Rule"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Rule"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

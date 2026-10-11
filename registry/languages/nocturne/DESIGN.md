@@ -22,23 +22,23 @@ A screen should present a clear hierarchy before its details are inspected.
 
 ## Color and contrast
 
-| Role | Meaning |
-| --- | --- |
-| `bg`, `paper` | Graphite page ground and plain surfaces |
-| `surfaceFill` | Grouped surfaces and dialogs, distinguished by a lighter ground |
-| `fieldFill` | Editable regions, native options and quiet measurement tracks |
-| `ink` | Soft white primary text, focus indicators and important readings |
-| `muted`, `faint` | Supporting and secondary copy on dark surfaces |
-| `border` | Visible control boundaries, independent of plot guides |
-| `grid` | Low-emphasis separators and measurement guides |
-| `actionFill`, `actionText`, `actionBorder` | Iris primary actions with dark lettering |
-| `actionHoverFill`, `actionHoverBorder` | Lighter iris feedback without changing geometry |
-| `selectionFill`, `selectionText` | Selected controls with a contrasting dark mark |
-| `badgeFill`, `badgeText` | Quiet violet ground with readable iris lettering |
-| `valueFill`, `valueQuietFill` | Teal progress and blue supporting values |
-| `seriesA`–`seriesD` | Iris, teal, amber and blue category identities |
-| `heatFill` | Teal intensity against a fixed, explicitly declared scale |
-| `onDarkMuted`, `onDarkFaint` | Dark supporting text on an inverted light surface |
+| Role                                       | Meaning                                                          |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `bg`, `paper`                              | Graphite page ground and plain surfaces                          |
+| `surfaceFill`                              | Grouped surfaces and dialogs, distinguished by a lighter ground  |
+| `fieldFill`                                | Editable regions, native options and quiet measurement tracks    |
+| `ink`                                      | Soft white primary text, focus indicators and important readings |
+| `muted`, `faint`                           | Supporting and secondary copy on dark surfaces                   |
+| `border`                                   | Visible control boundaries, independent of plot guides           |
+| `grid`                                     | Low-emphasis separators and measurement guides                   |
+| `actionFill`, `actionText`, `actionBorder` | Iris primary actions with dark lettering                         |
+| `actionHoverFill`, `actionHoverBorder`     | Lighter iris feedback without changing geometry                  |
+| `selectionFill`, `selectionText`           | Selected controls with a contrasting dark mark                   |
+| `badgeFill`, `badgeText`                   | Quiet violet ground with readable iris lettering                 |
+| `valueFill`, `valueQuietFill`              | Teal progress and blue supporting values                         |
+| `seriesA`–`seriesD`                        | Iris, teal, amber and blue category identities                   |
+| `heatFill`                                 | Teal intensity against a fixed, explicitly declared scale        |
+| `onDarkMuted`, `onDarkFaint`               | Dark supporting text on an inverted light surface                |
 
 **Meaning precedes hue.** Category colors identify series; their order does not
 imply rank, health or urgency. Increasing lightness carries increasing intensity

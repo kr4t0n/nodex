@@ -5,10 +5,7 @@
   "component": "card",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "container",
-    "surface"
-  ],
+  "tags": ["container", "surface"],
   "dependencies": [],
   "entry": "component.tsx",
   "exports": [
@@ -19,10 +16,7 @@
     "CardBody",
     "CardCaption"
   ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

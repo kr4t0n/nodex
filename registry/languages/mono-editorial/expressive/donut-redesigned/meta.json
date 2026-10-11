@@ -7,24 +7,13 @@
   "runtime": "react",
   "density": "glance",
   "aspectRatio": "620/300",
-  "tags": [
-    "attribution"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["attribution"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "DonutRedesigned"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["DonutRedesigned"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

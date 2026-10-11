@@ -67,9 +67,13 @@ export async function exchangeCode(code: string): Promise<string> {
 
   const payload: unknown = await res.json().catch(() => null);
   if (
-    !res.ok || !record(payload) || 'error' in payload ||
-    !nonemptyText(payload.access_token) || !/^[A-Za-z0-9._~+/-]+=*$/.test(payload.access_token) ||
-    typeof payload.token_type !== 'string' || payload.token_type.toLowerCase() !== 'bearer'
+    !res.ok ||
+    !record(payload) ||
+    'error' in payload ||
+    !nonemptyText(payload.access_token) ||
+    !/^[A-Za-z0-9._~+/-]+=*$/.test(payload.access_token) ||
+    typeof payload.token_type !== 'string' ||
+    payload.token_type.toLowerCase() !== 'bearer'
   ) {
     throw new Error('GitHub token exchange failed.');
   }
@@ -90,13 +94,21 @@ export async function fetchUser(accessToken: string): Promise<GitHubUser> {
   }
   const payload: unknown = await res.json().catch(() => null);
   if (
-    !record(payload) || typeof payload.id !== 'number' ||
-    !Number.isSafeInteger(payload.id) || payload.id <= 0 ||
+    !record(payload) ||
+    typeof payload.id !== 'number' ||
+    !Number.isSafeInteger(payload.id) ||
+    payload.id <= 0 ||
     !nonemptyText(payload.login) ||
     !(payload.name === null || typeof payload.name === 'string') ||
     !(payload.avatar_url === null || secureAvatar(payload.avatar_url))
-  ) throw new Error('GitHub returned an invalid profile.');
-  return { id: payload.id, login: payload.login, name: payload.name, avatar_url: payload.avatar_url };
+  )
+    throw new Error('GitHub returned an invalid profile.');
+  return {
+    id: payload.id,
+    login: payload.login,
+    name: payload.name,
+    avatar_url: payload.avatar_url,
+  };
 }
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -104,7 +116,11 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 
 function nonemptyText(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0 && !/[\p{Cc}\p{Cf}]/u.test(value);
+  return (
+    typeof value === 'string' &&
+    value.length > 0 &&
+    !/[\p{Cc}\p{Cf}]/u.test(value)
+  );
 }
 
 function secureAvatar(value: unknown): value is string {

@@ -11,5 +11,13 @@ const data: SoftBarsDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <SoftBars data={data} unitLabel="Focused hours" contextLabel="This week" height={364} animate={animate} />;
+  return (
+    <SoftBars
+      data={data}
+      unitLabel="Focused hours"
+      contextLabel="This week"
+      height={364}
+      animate={animate}
+    />
+  );
 }

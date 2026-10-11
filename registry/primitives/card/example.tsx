@@ -1,4 +1,10 @@
-import { Card, CardBody, CardCaption, CardSubtitle, CardTitle } from './component';
+import {
+  Card,
+  CardBody,
+  CardCaption,
+  CardSubtitle,
+  CardTitle,
+} from './component';
 
 export function Example() {
   return (

@@ -13,7 +13,9 @@ export interface SketchSettings {
 }
 
 /** Rough.js needs numeric geometry. Paint and rendered stroke widths stay in CSS. */
-export function useSketchSettings(ref: RefObject<HTMLDivElement | null>): SketchSettings | null {
+export function useSketchSettings(
+  ref: RefObject<HTMLDivElement | null>,
+): SketchSettings | null {
   const [settings, setSettings] = useState<SketchSettings | null>(null);
   useEffect(() => {
     const node = ref.current;
@@ -33,19 +35,60 @@ export function useSketchSettings(ref: RefObject<HTMLDivElement | null>): Sketch
       const hachureGap = numeric('--nx-sketch-hachureGap');
       const fillStyle = style.getPropertyValue('--nx-sketch-fillStyle').trim();
       // Reject malformed geometry instead of inheriting invisible library defaults.
-      const valid = [roughness, axisRoughness, bowing, fillWeight, hachureAngle, hachureGap].every(Number.isFinite)
-        && roughness >= 0 && roughness <= 10 && axisRoughness >= 0 && axisRoughness <= 10
-        && bowing >= 0 && bowing <= 10 && fillWeight > 0 && hachureGap >= 1;
-      const next = valid && (fillStyle === 'hachure' || fillStyle === 'cross-hatch' || fillStyle === 'solid')
-        ? { roughness, axisRoughness, bowing, fillWeight, hachureAngle, hachureGap, fillStyle } as SketchSettings : null;
-      setSettings((previous) => JSON.stringify(previous) === JSON.stringify(next) ? previous : next);
+      const valid =
+        [
+          roughness,
+          axisRoughness,
+          bowing,
+          fillWeight,
+          hachureAngle,
+          hachureGap,
+        ].every(Number.isFinite) &&
+        roughness >= 0 &&
+        roughness <= 10 &&
+        axisRoughness >= 0 &&
+        axisRoughness <= 10 &&
+        bowing >= 0 &&
+        bowing <= 10 &&
+        fillWeight > 0 &&
+        hachureGap >= 1;
+      const next =
+        valid &&
+        (fillStyle === 'hachure' ||
+          fillStyle === 'cross-hatch' ||
+          fillStyle === 'solid')
+          ? ({
+              roughness,
+              axisRoughness,
+              bowing,
+              fillWeight,
+              hachureAngle,
+              hachureGap,
+              fillStyle,
+            } as SketchSettings)
+          : null;
+      setSettings((previous) =>
+        JSON.stringify(previous) === JSON.stringify(next) ? previous : next,
+      );
     };
-    const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(read); };
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(read);
+    };
     const observer = new MutationObserver(schedule);
-    for (let ancestor: HTMLElement | null = node; ancestor; ancestor = ancestor.parentElement) {
+    for (
+      let ancestor: HTMLElement | null = node;
+      ancestor;
+      ancestor = ancestor.parentElement
+    ) {
       observer.observe(ancestor, { attributes: true });
     }
-    observer.observe(document.head, { attributes: true, childList: true, subtree: true, characterData: true });
+    observer.observe(document.head, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
     const scheme = window.matchMedia('(prefers-color-scheme: dark)');
     scheme.addEventListener('change', schedule);
     window.addEventListener('resize', schedule);

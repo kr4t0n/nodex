@@ -7,7 +7,12 @@ export type LinkProps = ComponentPropsWithRef<'a'> & {
 };
 
 /** The external treatment adds a visual mark; target remains the caller's choice. */
-export function Link({ variant = 'default', external = false, className = '', ...props }: LinkProps) {
+export function Link({
+  variant = 'default',
+  external = false,
+  className = '',
+  ...props
+}: LinkProps) {
   return (
     <a
       {...props}

@@ -8,5 +8,15 @@ const data: SoftDumbbellDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <SoftDumbbell data={data} unitLabel="Days each week" contextLabel="A month of small shifts" beforeLabel="Last month" afterLabel="This month" height={364} animate={animate} />;
+  return (
+    <SoftDumbbell
+      data={data}
+      unitLabel="Days each week"
+      contextLabel="A month of small shifts"
+      beforeLabel="Last month"
+      afterLabel="This month"
+      height={364}
+      animate={animate}
+    />
+  );
 }
