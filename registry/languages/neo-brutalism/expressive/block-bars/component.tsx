@@ -92,7 +92,7 @@ function Block({
           data-nx-value={point.value}
         />
       )}
-      {/* Keep labels with the native mark, including when drawing is interrupted. */}
+      {/* LabelList can stay hidden after reduced motion interrupts drawing; keep labels with the mark. */}
       <ValueText point={point} x={x + width / 2} y={y} format={formatValue} />
     </g>
   );

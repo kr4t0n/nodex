@@ -30,9 +30,9 @@ language; keep the role names consumed by primitives.
   motion and anti-patterns. It is a language foundation, not a component catalogue.
 - Keep named chart descriptions, specimen dimensions, reconstruction notes and
   runtime/build procedures out of `DESIGN.md`. Put component-specific guidance
-  in its metadata/source comments or `docs/reference/chart-contracts/`, and procedures in
-  this skill. Adding a chart does not require appending its description to the
-  language document.
+  in its public types, metadata and brief rationale comments; consumer tests own
+  regression cases. Keep procedures in this skill. Adding a chart does not require
+  appending its description to the language document or a separate contract guide.
 - Declare optional density values only if the reading distinction matters.
   `featured` lists actual expressive slugs and may be empty during scaffolding.
 

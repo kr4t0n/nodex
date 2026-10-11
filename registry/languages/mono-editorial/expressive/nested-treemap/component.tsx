@@ -183,7 +183,8 @@ function AreaCell(node: TreemapNode) {
   );
 }
 
-/** Two native treemap levels preserve the original asymmetric heading space and nested gaps. */
+/** Two native treemap levels preserve asymmetric heading space and nested gaps.
+ * A single layout's uniform nodeInset cannot reserve a separate area-heading band. */
 export function NestedTreemap({
   data,
   height,

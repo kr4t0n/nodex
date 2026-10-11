@@ -159,6 +159,7 @@ export function DynamicData({
                   ) : null;
                 }}
               />
+              {/* Area parses the strokeWidth prop for clipping; CSS variables must use style to avoid NaN. */}
               <Area
                 id={`${id}-samples`}
                 className="nx-user-area"

@@ -487,9 +487,9 @@ prepare version changes through a PR to `dev`, then open a release PR from `dev`
 to `main`. See [Deploy and publish](#deploy-and-publish) for the publishing effects
 and tag/version requirements.
 
-Read [AGENTS.md](AGENTS.md) for architecture and the
-[developer documentation index](docs/README.md) for chart contracts, gallery
-runtime and reconstruction context. Registry changes follow the
+Read [AGENTS.md](AGENTS.md) for architecture and gallery runtime boundaries.
+Component types, metadata and local comments document their contracts;
+consumer tests cover regressions. Registry changes follow the
 [authoring skill](.agents/skills/nodex-authoring/SKILL.md); the
 [consumer skill](skills/nodex/SKILL.md) is for downstream apps. The 13 imported
 design skills in `.agents/skills/` are opt-in references, subordinate to the task

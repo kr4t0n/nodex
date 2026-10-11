@@ -3,8 +3,7 @@
 Architecture and reasoning for nodex. This root document is the project's high
 level source of truth. Procedures live in the [authoring skill](.agents/skills/nodex-authoring/SKILL.md);
 setup, commands and contribution flow live in [README.md](README.md). Update them
-alongside architectural or usage changes. [Developer docs](docs/README.md) index
-the focused references; read the relevant one before changing its subsystem.
+alongside architectural or usage changes.
 
 ## Design languages determine form
 
@@ -18,22 +17,19 @@ also encode identity through geometry, annotation and information density.
   shared token roles. Their React APIs wrap native elements and retain editable CSS.
 
 Preserve established specimen data, titles, copy, encoding, proportions and
-language values unless the task explicitly changes them. Reconstruction is not a
-redesign or authorization for new controls, annotations, demo variants or unrelated
-dependency upgrades. Never restore legacy runtime artifacts; see the
-[reconstruction context](docs/explanation/catalogue-reconstruction.md).
+language values unless the task explicitly changes them. Maintenance does not
+authorize new controls, annotations, demo variants or unrelated dependency upgrades.
 
 Each language's `DESIGN.md` is a downstream foundation for all UI, including
 projects with no charts. It covers visual atmosphere, semantic token roles,
 typography, spacing, geometry, interaction, motion and anti-patterns. Keep named
 chart descriptions, specimen dimensions, reconstruction history and runtime/build
-procedures out of it. Component metadata, local source comments and the chart
-contract references hold component-specific guidance; the authoring skill holds procedures.
-
-Read the relevant [chart contract reference](docs/reference/chart-contracts/README.md)
-before changing a language's components or consumer coverage. It preserves
-per-chart data rules, shared helpers, geometry and rendering gotchas for all six
-languages. The language's `DESIGN.md` and `tokens.json` remain its visual authority.
+procedures out of it. Public types and `meta.json` own component data contracts;
+local comments explain non-obvious implementation choices, and consumer tests
+exercise regressions. Read those alongside the relevant component before changing
+it. Avoid maintaining a second description of its implementation in separate docs.
+The authoring skill holds procedures; `DESIGN.md` and `tokens.json` remain the
+language's visual authority.
 
 The manifest is the catalogue, not the folder layout. A slug names the item;
 `component` names its cross-language type. Types describe marks and encoding,
@@ -248,32 +244,42 @@ formatting baseline separate from behavioral fixes so review can distinguish the
 
 ## Gallery and preview runtime
 
-The build mounts actual React examples in Chromium because Recharts does not emit
-chart marks through server rendering. Standalone documents contain browser
-snapshots and a local bundle that mounts the example; this is not React hydration.
+[The registry build](scripts/build-registry.ts) mounts actual React examples in
+Chromium because Recharts does not emit chart marks through server rendering.
+Standalone previews contain browser snapshots and a local bundle that mounts the
+example; this is not React hydration. Dependencies are bundled for offline use.
 Only build/test machines need Chromium. Consumers still receive client charts.
 
-The website shares React/Recharts and renders explicit lazy example imports
-created by `sync-registry-public.ts`. It uses loading boxes, not iframes or snapshot
-HTML injection. Keep website and registry React types pinned together; ref cleanup
-types differ across versions. Example changes require a production website rebuild.
+[The public sync](scripts/sync-registry-public.ts) copies the built artifacts and
+generates explicit lazy imports for the website from each example's metadata.
+The website renders those examples in its own React/Recharts tree, with loading
+boxes instead of iframes or snapshot HTML injection. Keep website and registry
+React types pinned together; ref cleanup types differ across versions. Deploy
+the catalogue, public assets and rebuilt website together when examples change.
 
-Read [Gallery runtime](docs/explanation/gallery-runtime.md) for the startup queue,
-framing, token panel and landing state contracts. Key constraints:
+[Preview](apps/web/src/components/Preview.tsx) owns framing and measurement;
+[preview-startup](apps/web/src/lib/preview-startup.ts) owns the page-wide startup
+queue. Read their local comments and [gallery checks](scripts/smoke-gallery.ts)
+before changing loading behavior. Preserve these boundaries:
 
-- Keep one page-wide queue with three concurrent startups, viewport-aware fallback
-  and cleanup on navigation. Preserve mounted examples and their interaction state.
-- Measure preview height in unscaled CSS pixels. Transformed bounds feed thumbnail
-  scale back into layout. Scaled grid ancestors need `min-width: 0`.
+- Startup is bounded and viewport-aware, with a fallback for delayed observers.
+  Cancel queued work and release active slots on navigation. Retain mounted
+  examples so scrolling preserves their interaction state.
+- Measure height in unscaled CSS pixels. Transformed bounds feed thumbnail scale
+  back into layout. Scaled grid ancestors need `min-width: 0`.
 - Scale the complete chart after removing only measured standalone page insets.
   Keep internal padding, corners and original proportions; primitives stay native-size.
+  Examples must fit their content before scaling; clipping is not a sizing fix.
 - Preview controls must not sit inside navigation anchors. Titles own navigation;
   placeholder specimen links must not scroll the host. Inline dialogs stay local.
 - The shell owns layout and behavior; scoped language tokens own visual treatment.
   There is no independent gallery dark mode. Keep `SHELL_PRIMITIVES` synchronized.
-- The landing demo plays once and hands off to its third prompt without stealing
-  focus. Its parser changes page tokens; it never executes a shell. GSAP is app-only.
-  Background/offscreen playback pauses; reduced motion enters the interactive state.
+  The token panel reads canonical tokens; its labels must not define a second palette.
+- The landing demo plays once and hands off to its existing prompt without stealing
+  focus or reopening on scroll/theme changes. Its parser changes page tokens;
+  it never executes a shell. GSAP is app-only. Background/offscreen playback pauses;
+  reduced motion enters the interactive state. [Landing checks](scripts/smoke-landing.ts)
+  own the detailed handoff, keyboard and responsive regression cases.
 - `/` reads no cookie and stays static. `/languages` and `/login` read sessions;
   `/l/*` parameters come from the built manifest. Route files await params.
   `apps/web/AGENTS.md` holds generated Next guidance; this root is the architecture authority.
