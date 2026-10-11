@@ -12,7 +12,7 @@ export function galleryExamples(source: LoadedSource, items: GalleryItem[], dire
   ]);
   const keys = new Set(items.map((item) => `${item.meta.language}/${item.name}`));
   if (keys.size !== items.length || keys.size !== components.size || [...keys].some((key) => !components.has(key))) {
-    throw new Error('Gallery catalogue and authored examples differ. Run npm run build:registry before preparing the website.');
+    throw new Error('Gallery catalogue and authored examples differ. Run pnpm run build:registry before preparing the website.');
   }
   const entries = [...keys].sort().map((key) => {
     const component = components.get(key)!;

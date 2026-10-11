@@ -374,18 +374,23 @@ nodex add signal-console/request-throughput signal-console/service-health
 
 ## Develop the registry and gallery
 
-Prerequisites: Node **22.22+** (CI and Docker use Node 24), npm 10+, and Chromium
+Prerequisites: Node **22.22+** (CI and Docker use Node 24), pnpm **12.10.1**, and Chromium
 installed through Playwright. No database or credentials are needed to build.
+Use the pnpm version pinned in `packageManager`; Corepack users can invoke
+`corepack pnpm` in place of `pnpm`. The workspace and install-script allowlist
+live in `pnpm-workspace.yaml`. Keep `pnpm-lock.yaml` as the sole project lockfile.
+When switching an existing npm checkout, remove its root and workspace
+`node_modules` directories before installing.
 
 ```bash
-npm ci
-npx playwright install --with-deps chromium
-npm run build:registry
-npm run dev
+pnpm install --frozen-lockfile
+pnpm exec playwright install --with-deps chromium
+pnpm run build:registry
+pnpm run dev
 ```
 
-The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
-`npm start`. Rebuild the registry after editing its source; the gallery reads
+The gallery runs at `http://localhost:4180`. Production: `pnpm run build`, then
+`pnpm start`. Rebuild the registry after editing its source; the gallery reads
 built metadata. `dev` and the web build copy the artifacts into the app's public
 directory and generate lazy imports from each component's declared example entry
 and export. React components and example edits participate in Next's development
@@ -840,16 +845,16 @@ under system `/tmp`, and remove it when the work is complete.
 ## Verification
 
 ```bash
-npm run build:registry
-npm test
-npm run smoke
-npm run smoke:cli
-npm run check:shell
-npm run lint
-npm run typecheck
-npm run build --workspace @nodex/web
-npm run smoke:landing
-npm run smoke:gallery
+pnpm run build:registry
+pnpm test
+pnpm run smoke
+pnpm run smoke:cli
+pnpm run check:shell
+pnpm run lint
+pnpm run typecheck
+pnpm --filter @nodex/web run build
+pnpm run smoke:landing
+pnpm run smoke:gallery
 ```
 
 | Command | Coverage |
@@ -870,7 +875,7 @@ examples need no CDN chart scripts or external data fetches. Chromium belongs to
 the build and test environment, not the production server image.
 
 `smoke:landing` and `smoke:gallery` require the web build above. Both also accept
-an existing server URL, such as `npm run smoke:gallery -- http://localhost:4180`.
+an existing server URL, such as `pnpm run smoke:gallery http://localhost:4180`.
 
 ## Accounts and configuration
 
@@ -883,13 +888,13 @@ For optional local accounts:
 
 ```bash
 cp .env.example .env
-npm run db:up
-npm run db:migrate
+pnpm run db:up
+pnpm run db:migrate
 ```
 
 Register a GitHub OAuth app with homepage `http://localhost:4180` and callback
 `http://localhost:4180/api/auth/github/callback`. Fill the credentials in the
-root `.env` and restart the site. `npm run db:down` stops local Postgres.
+root `.env` and restart the site. `pnpm run db:down` stops local Postgres.
 
 | Variable | Purpose |
 | --- | --- |
@@ -939,19 +944,31 @@ helm upgrade --install nodex nodex/nodex --version 0.2.3 --set siteUrl=https://n
 Chart `0.2.3` pins the app and migration Job to `kr4t0n/nodex:0.2.3` through
 `appVersion`; `image.tag` is an explicit override.
 
-`npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
+`pnpm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
 `@kubitnodes/nodex`, has no runtime dependencies on the monorepo. The npm workflow
 publishes on version tags or manual runs through
 [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/), and verifies
-the packed artifact before publishing. In the npm package settings, authorize
+the packed artifact before publishing. Build and pack with pnpm so workspace
+references become ordinary versions, then publish that exact tarball with npm:
+
+```bash
+pnpm run build:cli
+mkdir -p /tmp/nodex-pack
+pnpm --filter @kubitnodes/nodex pack --pack-destination /tmp/nodex-pack
+npm publish --dry-run --force /tmp/nodex-pack/kubitnodes-nodex-0.2.3.tgz
+```
+
+The dry run does not publish; `--force` skips the local already-published-version
+check for this rehearsal. The release workflow uses neither flag.
+In the npm package settings, authorize
 GitHub owner `kr4t0n`, repository `nodex`, and workflow filename
 `npm-publish.yml` for direct publishing. No npm token secret is required.
 The workflow uses a GitHub-hosted runner, Node 24 with npm 11.5.1 or newer,
 `id-token: write`, and no package-manager cache. npm generates provenance
 automatically; an OIDC configuration error fails the publish job.
 
-For a coordinated release, bump `packages/cli/package.json` and its lockfile
-entry, plus the Helm chart's `version` and `appVersion`. Commit those changes
+For a coordinated release, bump `packages/cli/package.json`, plus the Helm
+chart's `version` and `appVersion`. Commit those changes
 on `main` and push a matching annotated tag such as `v0.2.3`. The main push
 publishes the versioned Helm chart; the tag starts the npm and image workflows.
 Image version tags omit the `v` prefix. Confirm the registry artifacts after

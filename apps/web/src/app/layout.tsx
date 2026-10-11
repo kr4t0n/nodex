@@ -25,7 +25,7 @@ export const metadata: Metadata = {
  * primitive to apply to.
  *
  * Curation is the hazard, so it is enforced rather than remembered:
- * `npm run check:shell` fails if any view writes a class this list does not
+ * `pnpm run check:shell` fails if any view writes a class this list does not
  * cover. Add the name here when that fires; do not delete the class.
  */
 const SHELL_PRIMITIVES = [

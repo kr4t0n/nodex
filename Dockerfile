@@ -16,21 +16,17 @@ WORKDIR /app
 
 # Manifests only, so this layer is cached until a dependency actually changes.
 # Copying the whole tree first would rebuild the install on every source edit.
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/
 COPY packages/core/package.json packages/core/
 COPY packages/cli/package.json packages/cli/
 
-# `npm ci` needs the lockfile to carry a resolved entry for this platform's
-# native binaries. See optionalDependencies in the root package.json: without
-# them lightningcss and friends install their JavaScript wrapper and no binding,
-# and the build fails looking for a `.node` file.
-RUN npm ci
+RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
 # The registry build uses a real browser. Keep the browser and its OS libraries
 # in the dependency layer so editing component or app source does not download
 # them again. The independent runtime stage never inherits this toolchain.
-RUN npx playwright install --with-deps chromium
+RUN pnpm exec playwright install --with-deps chromium
 
 # ----------------------------------------------------------------------- build
 
@@ -47,10 +43,10 @@ ENV NEXT_PUBLIC_REGISTRY_URL=$NEXT_PUBLIC_REGISTRY_URL
 
 # Generates tokens.css, the standalone previews, and the manifest. The app
 # prerenders its routes from that manifest, so this has to come first.
-RUN npm run build:registry
+RUN pnpm run build:registry
 
 # `prebuild` copies registry assets and generates lazy imports of React examples.
-RUN npm run build --workspace @nodex/web
+RUN NODE_ENV=production pnpm --filter @nodex/web run build
 
 # --------------------------------------------------------------------- runtime
 

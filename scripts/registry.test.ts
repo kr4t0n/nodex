@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -148,6 +148,40 @@ test('font metadata becomes licensed embedded assets, never invalid CSS declarat
   assert.match(staticCss, /SIL OPEN FONT LICENSE/);
   assert.throws(() => fontFaces({ font: { faces: [{ ...face, package: '@other/inter@5.3.0' }] } }), /must come from/);
   await assert.rejects(renderFontFaces({ font: { faces: [{ ...face, package: '@fontsource/gaegu@0.0.0' }] } }, ROOT), /must be pinned/);
+});
+
+test('font symlinks support a local pnpm store without allowing package or asset escapes', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'nodex-font-links-'));
+  try {
+    const face = fontFaces(tokens)[0]!;
+    const name = face.package.slice(0, face.package.lastIndexOf('@'));
+    const version = face.package.slice(face.package.lastIndexOf('@') + 1);
+    const project = path.join(root, 'project');
+    const link = path.join(project, 'node_modules', name);
+    const installed = path.join(project, 'node_modules/.pnpm/font/node_modules', name);
+    const outside = path.join(root, 'outside');
+    await mkdir(path.dirname(link), { recursive: true });
+    await mkdir(path.dirname(path.join(installed, face.file)), { recursive: true });
+    await mkdir(outside);
+    await writeFile(path.join(project, 'package.json'), JSON.stringify({ devDependencies: { [name]: version } }));
+    await writeFile(path.join(installed, 'package.json'), JSON.stringify({ name, version }));
+    await writeFile(path.join(installed, 'LICENSE'), 'SIL OPEN FONT LICENSE');
+    await writeFile(path.join(installed, face.file), 'wOF2fixture');
+    await symlink(installed, link, 'junction');
+    const fixture = { font: { faces: [face] } };
+    assert.match(await renderFontFaces(fixture, project), /data:font\/woff2;base64,/);
+
+    await rm(path.join(installed, face.file));
+    await writeFile(path.join(outside, 'font.woff2'), 'wOF2outside');
+    await symlink(path.join(outside, 'font.woff2'), path.join(installed, face.file));
+    await assert.rejects(renderFontFaces(fixture, project), /Path must stay inside/);
+
+    await rm(link);
+    await symlink(outside, link, 'junction');
+    await assert.rejects(renderFontFaces(fixture, project), /Path must stay inside/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test('rendered conformance resolves variables, inherited paint, gradients and scaled strokes', async () => {

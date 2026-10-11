@@ -171,7 +171,7 @@ export async function resolveRegistry(explicit?: string): Promise<Registry> {
     try {
       root = await realpath(built);
     } catch (cause) {
-      throw new Error(`Could not read the built registry under ${local}. Run npm run build:registry first.`, { cause });
+      throw new Error(`Could not read the built registry under ${local}. Run pnpm run build:registry first.`, { cause });
     }
   }
 

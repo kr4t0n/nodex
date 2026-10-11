@@ -7,28 +7,24 @@
   "engines": {
     "node": ">=22.22.0"
   },
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
   "scripts": {
     "build:registry": "node scripts/build-registry.ts",
-    "build:cli": "npm run build --workspace @kubitnodes/nodex",
+    "build:cli": "pnpm --filter @kubitnodes/nodex run build",
     "db:up": "docker compose up -d --wait postgres",
     "db:down": "docker compose down",
     "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
     "check:registry": "node scripts/build-registry.ts --check",
     "check:shell": "node scripts/check-shell-primitives.mjs",
     "smoke": "node scripts/smoke-components.ts",
-    "typecheck": "tsc --build && tsc --noEmit -p registry/tsconfig.json && tsc --noEmit -p scripts/tsconfig.json && npm run typecheck --workspace @nodex/web",
+    "typecheck": "tsc --build && tsc --noEmit -p registry/tsconfig.json && tsc --noEmit -p scripts/tsconfig.json && pnpm --filter @nodex/web run typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "dev": "npm run dev --workspace @nodex/web",
+    "dev": "pnpm --filter @nodex/web run dev",
     "smoke:cli": "node scripts/smoke-cli.ts",
     "smoke:landing": "node scripts/smoke-landing.ts",
     "smoke:gallery": "node scripts/smoke-gallery.ts",
-    "build": "npm run build:registry && npm run build --workspace @nodex/web",
-    "start": "npm run start --workspace @nodex/web",
+    "build": "pnpm run build:registry && pnpm --filter @nodex/web run build",
+    "start": "pnpm --filter @nodex/web run start",
     "test": "node --test scripts/registry.test.ts"
   },
   "devDependencies": {
@@ -56,13 +52,12 @@
     "react-is": "19.2.8",
     "recharts": "3.10.1",
     "roughjs": "4.6.6",
+    "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "typescript-eslint": "8.67.0"
   },
-  "optionalDependencies": {
-    "@img/sharp-linux-x64": "0.35.3",
-    "@next/swc-linux-x64-gnu": "16.3.2",
-    "@tailwindcss/oxide-linux-x64-gnu": "4.3.3",
-    "lightningcss-linux-x64-gnu": "1.32.0"
+  "packageManager": "pnpm@12.10.1",
+  "dependencies": {
+    "pg": "8.23.0"
   }
 }

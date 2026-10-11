@@ -56,6 +56,7 @@ import { SCATTER_FAMILY_CONSUMER_SOURCE, SCATTER_FAMILY_SLUGS, checkScatterFamil
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const runFile = promisify(execFile);
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
 
 async function run(command: string, args: string[], cwd: string): Promise<string> {
   try {
@@ -231,7 +232,7 @@ async function consumerFixture(): Promise<string> {
     await writeFile(path.join(fixture, 'AGENTS.md'), '# Consumer project\n\nPreserve this project guidance.\n');
     console.log('Installing the standalone consumer platform into an OS temporary directory.');
     await run(npm, ['install', '--no-audit', '--no-fund'], fixture);
-    await run(npm, ['run', 'build:cli'], ROOT);
+    await run(pnpm, ['run', 'build:cli'], ROOT);
     const cli = path.join(ROOT, 'packages/cli/dist/index.js');
     const registry = path.join(ROOT, 'public');
     await run(process.execPath, [cli, 'init', 'mono-editorial', '--registry', registry], fixture);
