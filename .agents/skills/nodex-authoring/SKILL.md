@@ -30,7 +30,7 @@ language; keep the role names consumed by primitives.
   motion and anti-patterns. It is a language foundation, not a component catalogue.
 - Keep named chart descriptions, specimen dimensions, reconstruction notes and
   runtime/build procedures out of `DESIGN.md`. Put component-specific guidance
-  in its metadata/source comments or root `AGENTS.md` gotchas, and procedures in
+  in its metadata/source comments or `docs/reference/chart-contracts/`, and procedures in
   this skill. Adding a chart does not require appending its description to the
   language document.
 - Declare optional density values only if the reading distinction matters.
@@ -180,6 +180,7 @@ pnpm run smoke
 pnpm run smoke:cli
 pnpm run check:shell
 pnpm run lint
+pnpm run format:check
 pnpm run typecheck
 pnpm --filter @nodex/web run build
 ```
@@ -197,7 +198,7 @@ The consumer smoke must compile delivered source in a fresh React/TypeScript/
 Tailwind application and exercise real CLI dependency installation. A working
 repository preview alone does not prove the downstream import paths work.
 It delivers all 24 primitives, checks scoped overrides against unaffected sibling
-instances in both languages, and exercises native controls and reduced motion.
+instances in every language, and exercises native controls and reduced motion.
 
 Review live previews at `http://localhost:4180` for geometry, responsive layout,
 readability, keyboard tooltips and runtime token changes. Source lint detects

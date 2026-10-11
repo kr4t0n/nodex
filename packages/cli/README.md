@@ -78,11 +78,6 @@ nodex logout                      forget the stored token
 nodex whoami                      inspect the current session
 ```
 
-`NODEX_API` optionally selects an account API base separate from the registry
-root. It requires HTTPS, except HTTP on `localhost`, `127.0.0.1` or `[::1]`, and
-rejects credentials, query strings and fragments. Device and `whoami` requests
-never follow redirects; supply the final base URL.
-
 References can be language-qualified (`signal-console/endpoint-latency`) or bare
 (`button`) when `nodex.json` or `--design` supplies a language. Search filters are
 `--design`, `--type`, `--tag`, `--tier` and `--density`. Run any command with
@@ -144,6 +139,21 @@ fail with a nonzero exit code; no empty scan is reported as successful.
 Resolution order is `--registry`, `nodex.json`, `NODEX_REGISTRY`, then
 `https://nodex.kubitnodes.com`. `init` records the resolved root for both local and
 remote registries. Commands work from project subdirectories.
+
+| Environment variable | Purpose                                                       |
+| -------------------- | ------------------------------------------------------------- |
+| `NODEX_REGISTRY`     | Registry root override, after `--registry` and project config |
+| `NODEX_API`          | Account API base; defaults to the selected registry root      |
+| `NODEX_TOKEN`        | Session token override for unattended use                     |
+| `NODEX_CONFIG_DIR`   | Credential-directory override; defaults to `~/.nodex`         |
+
+Set `NODEX_API` when registry files are hosted separately from the account server,
+such as on a CDN. It must be an absolute HTTPS URL; HTTP is allowed only on
+`localhost`, `127.0.0.1` or `[::1]`. Credentials, query strings and fragments are
+rejected. Device start, token polling and authenticated `whoami` requests never
+follow redirects, including same-origin redirects; supply the final API base.
+These CLI variables are read from the process environment. Keep tokens out of
+`nodex.json` and source control.
 
 `--registry <checkout>` reads the checkout's built `public/` directory;
 `--registry <checkout>/public` addresses the same root directly. Run
