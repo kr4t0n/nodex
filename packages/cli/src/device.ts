@@ -17,16 +17,40 @@ export interface DeviceStart {
 }
 
 export function apiBase(registryRoot: string): string {
-  return (process.env.NODEX_API ?? registryRoot).replace(/\/+$/, '');
+  return apiUrl(process.env.NODEX_API ?? registryRoot).toString().replace(/\/+$/, '');
 }
 
 export class DeviceError extends Error {}
 
+function apiUrl(value: string): URL {
+  try {
+    const url = new URL(value);
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    if (
+      (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) ||
+      url.username || url.password || url.search || url.hash ||
+      /[\s\\?#]/.test(value)
+    ) throw new Error();
+    return url;
+  } catch {
+    throw new DeviceError('The API must use HTTPS (HTTP is allowed for loopback), without credentials, query or fragment.');
+  }
+}
+
+async function apiFetch(api: string, path: string, options: RequestInit = {}): Promise<Response> {
+  const base = apiUrl(api).toString().replace(/\/+$/, '');
+  try {
+    return await fetch(`${base}${path}`, { ...options, redirect: 'error' });
+  } catch {
+    throw new DeviceError('Could not reach the sign-in API. Redirects are not allowed.');
+  }
+}
+
 export async function startDevice(api: string): Promise<DeviceStart> {
-  const res = await fetch(`${api}/api/cli/device`, { method: 'POST' });
+  const res = await apiFetch(api, '/api/cli/device', { method: 'POST' });
   if (!res.ok) {
     const detail = res.status === 503 ? 'accounts are not configured there' : `HTTP ${res.status}`;
-    throw new DeviceError(`${api} could not start a sign in (${detail}).`);
+    throw new DeviceError(`Could not start a sign in (${detail}).`);
   }
   const body = (await res.json()) as {
     device_code: string;
@@ -75,7 +99,7 @@ export async function awaitApproval(
     await sleep(interval);
     onTick?.(Math.max(0, Math.round((deadline - Date.now()) / 1000)));
 
-    const res = await fetch(`${api}/api/cli/token`, {
+    const res = await apiFetch(api, '/api/cli/token', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ device_code: start.deviceCode }),
@@ -113,7 +137,7 @@ export async function whoami(
   api: string,
   token: string,
 ): Promise<{ login: string } | undefined> {
-  const res = await fetch(`${api}/api/cli/whoami`, {
+  const res = await apiFetch(api, '/api/cli/whoami', {
     headers: { authorization: `Bearer ${token}` },
   });
   if (!res.ok) return undefined;

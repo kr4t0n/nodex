@@ -807,6 +807,10 @@ Preserve these authentication decisions:
 - Device authorization returns a Nodex CLI session, never a GitHub token.
   Approval is a form POST. Codes use unbiased random selection and avoid
   ambiguous characters; successful exchange consumes the device request.
+- `NODEX_API` overrides the registry root for account requests. Every device
+  operation validates HTTPS (HTTP only on loopback), rejects embedded credentials,
+  queries and fragments, and disables redirects before sending a device code or
+  bearer token. Validation belongs at the transport boundary as well as selection.
 
 The monorepo has one root `.env`, explicitly loaded by Next. It is optional for
 public builds. Database, OAuth credentials and `NEXT_PUBLIC_SITE_URL` are read by

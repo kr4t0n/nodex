@@ -927,6 +927,7 @@ root `.env` and restart the site. `pnpm run db:down` stops local Postgres.
 | `NEXT_PUBLIC_SITE_URL` | Runtime public origin used by server-side OAuth |
 | `NEXT_PUBLIC_REGISTRY_URL` | Registry CDN root, baked into the browser bundle at build time |
 | `NODEX_REGISTRY` | CLI registry override; flag and project config take precedence |
+| `NODEX_API` | Optional CLI account API base when it differs from the registry root |
 | `NODEX_TOKEN` | CLI session token for unattended use |
 | `NODEX_CONFIG_DIR` | Optional CLI credential-directory override |
 
@@ -935,6 +936,12 @@ separately in `~/.nodex/auth.json` with mode `0600`; project config never holds
 a token. `nodex login`, `whoami` and `logout` manage CLI sessions. Public file
 requests carry no bearer token; authenticated registry requests are confined to
 same-origin `api/` paths.
+
+`NODEX_API` defaults to the selected registry root. It must be an absolute HTTPS
+URL; HTTP is allowed only for `localhost`, `127.0.0.1` or `[::1]`. Credentials,
+query strings and fragments are rejected. Device start, token polling and
+authenticated `whoami` requests never follow redirects, including same-origin
+redirects. Configure the final API base directly.
 
 ## Deploy and publish
 
