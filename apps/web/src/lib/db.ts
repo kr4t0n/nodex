@@ -24,7 +24,7 @@ function connectionString(): string {
   if (!url) {
     throw new Error(
       'DATABASE_URL is not set. Copy .env.example to .env, then run ' +
-        '`npm run db:up && npm run db:migrate`.',
+        '`pnpm run db:up && pnpm run db:migrate`.',
     );
   }
   return url;

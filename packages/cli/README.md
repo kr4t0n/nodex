@@ -142,7 +142,7 @@ remote registries. Commands work from project subdirectories.
 
 `--registry <checkout>` reads the checkout's built `public/` directory;
 `--registry <checkout>/public` addresses the same root directly. Run
-`npm run build:registry` in the checkout first. Served registries expose
+`pnpm run build:registry` in the checkout first. Served registries expose
 `r/registry.json`, `r/languages.json` and the file addresses declared by those
 manifests. Public content is static. Language token and design addresses also
 come from the manifest, so guarded assets do not need CLI path conventions.

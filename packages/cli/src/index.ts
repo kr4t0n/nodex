@@ -319,7 +319,7 @@ async function cmdNewLanguage(slug: string, explicit?: string): Promise<void> {
   await mkdir(await writablePath(root, `${base}/expressive`), { recursive: true });
   heading(`Scaffolded ${title}`);
   for (const file of files) out(`  ${file.relative}`);
-  out(`\n  Author component.tsx, example.tsx and explicit meta.json under ${base}/expressive/<slug>/.\n  Run npm run build:registry.\n`);
+  out(`\n  Author component.tsx, example.tsx and explicit meta.json under ${base}/expressive/<slug>/.\n  Run pnpm run build:registry.\n`);
 }
 
 async function main(argv: string[]): Promise<void> {

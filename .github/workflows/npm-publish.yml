@@ -36,6 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
@@ -47,7 +49,7 @@ jobs:
         run: |
           node -e 'const [major, minor, patch] = process.argv[1].split(".").map(Number); if (!(major > 11 || major === 11 && (minor > 5 || minor === 5 && patch >= 1))) throw new Error("Trusted publishing requires npm >=11.5.1");' "$(npm --version)"
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       # A published version is immutable, and npm rejects a republish with an
       # error that reads like a credentials problem. Check first so a re-run of
@@ -73,28 +75,29 @@ jobs:
       # because the web app's pretypecheck syncs from the built manifest.
       - if: steps.version.outputs.published == 'false'
         run: |
-          npm run lint
-          npx playwright install --with-deps chromium
-          npm run build:registry
-          npm run typecheck
-          npm run smoke:cli
+          pnpm run lint
+          pnpm exec playwright install --with-deps chromium
+          pnpm run build:registry
+          pnpm run typecheck
+          pnpm run smoke:cli
 
       - if: steps.version.outputs.published == 'false'
-        run: npm run build:cli
+        run: pnpm run build:cli
 
       # Prove the tarball is what a consumer actually gets: install it into a
       # scratch project and run the binary. Compiling successfully is not the
       # same as being runnable, and `files` narrows what ships.
       - if: steps.version.outputs.published == 'false'
         run: |
-          npm pack --workspace @kubitnodes/nodex --pack-destination "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/nodex-pack"
+          pnpm --filter @kubitnodes/nodex pack --pack-destination "$RUNNER_TEMP/nodex-pack"
           mkdir -p "$RUNNER_TEMP/verify" && cd "$RUNNER_TEMP/verify"
           npm init -y >/dev/null
-          # Whatever npm named it. A scoped package packs to
+          # Whatever pnpm named it. A scoped package packs to
           # <scope>-<name>-<version>.tgz, so hardcoding that spelling breaks
           # silently the next time the package is renamed.
-          npm install "$RUNNER_TEMP"/*.tgz
+          npm install "$RUNNER_TEMP/nodex-pack"/*.tgz
           ./node_modules/.bin/nodex list --registry "$GITHUB_WORKSPACE/public"
 
       - if: steps.version.outputs.published == 'false'
-        run: npm publish --workspace @kubitnodes/nodex
+        run: npm publish "$RUNNER_TEMP/nodex-pack"/*.tgz

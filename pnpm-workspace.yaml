@@ -1,0 +1,14 @@
+packages:
+  - packages/*
+  - apps/*
+
+# Font assets must resolve inside this checkout's node_modules boundary.
+virtualStoreType: project
+
+# The web app syncs registry assets in predev, prebuild and pretypecheck.
+enablePrePostScripts: true
+
+allowBuilds:
+  # Use the published platform binaries; no source-build fallback is needed.
+  '@parcel/watcher': false
+  esbuild: true

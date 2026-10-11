@@ -23,7 +23,7 @@ const url = process.env.DATABASE_URL;
 if (!url) {
   console.error(
     '\nDATABASE_URL is not set.\n' +
-      '  Copy .env.example to .env, then: npm run db:up && npm run db:migrate\n',
+      '  Copy .env.example to .env, then: pnpm run db:up && pnpm run db:migrate\n',
   );
   process.exit(1);
 }
@@ -35,7 +35,7 @@ try {
 } catch (cause) {
   console.error(
     `\nCould not connect to ${redact(url)}.\n` +
-      '  Is the database running? `npm run db:up`\n',
+      '  Is the database running? `pnpm run db:up`\n',
   );
   console.error(`  ${cause.message}\n`);
   process.exit(1);

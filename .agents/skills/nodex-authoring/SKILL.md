@@ -174,23 +174,23 @@ Use interaction-motion roles for controls independently of chart `motion.draw`.
 ## Verification and review
 
 ```bash
-npm run build:registry
-npm test
-npm run smoke
-npm run smoke:cli
-npm run check:shell
-npx eslint .
-npm run typecheck
-npm run build --workspace @nodex/web
+pnpm run build:registry
+pnpm test
+pnpm run smoke
+pnpm run smoke:cli
+pnpm run check:shell
+pnpm run lint
+pnpm run typecheck
+pnpm --filter @nodex/web run build
 ```
 
-Install the browser once with `npx playwright install --with-deps chromium`.
+Install the browser once with `pnpm exec playwright install --with-deps chromium`.
 The build validates source contracts, bundles actual examples, renders them in
 Chromium, checks resolved paint/strokes and emits static previews with local
 interactive bundles. Recharts currently does not emit chart SVG during React
 server rendering; do not restore option-based SVG injection to compensate.
 
-`npm run check:registry` does the same validation without changing repository
+`pnpm run check:registry` does the same validation without changing repository
 source or existing build outputs. It still uses temporary files and a browser.
 
 The consumer smoke must compile delivered source in a fresh React/TypeScript/

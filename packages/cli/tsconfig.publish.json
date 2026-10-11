@@ -9,7 +9,7 @@
   // So publishing emits real JavaScript. rewriteRelativeImportExtensions turns
   // the `.ts` specifiers into `.js` on the way out, which is what lets the
   // source keep the extension the rest of the repo uses without a second copy
-  // of it. Nothing here is used by `npm run typecheck`.
+  // of it. Nothing here is used by `pnpm run typecheck`.
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",

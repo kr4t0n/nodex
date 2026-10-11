@@ -46,7 +46,7 @@ for (const [from, to] of SOURCES) {
   if (!(await exists(from))) {
     console.error(
       `\nMissing ${path.relative(ROOT, from)}.\n` +
-        '  Run `npm run build:registry` first: the app reads the built manifest\n' +
+        '  Run `pnpm run build:registry` first: the app reads the built manifest\n' +
         '  and imports the matching React examples. Generated files are not committed.\n',
     );
     process.exit(1);

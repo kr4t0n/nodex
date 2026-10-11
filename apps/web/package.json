@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@gsap/react": "2.1.2",
-    "@nodex/core": "0.1.0",
+    "@nodex/core": "workspace:*",
     "@phosphor-icons/react": "2.1.10",
     "gsap": "3.15.0",
     "marked": "18.0.10",

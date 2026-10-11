@@ -11,48 +11,96 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       - name: Install preview browser
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       # Build before consumers run: check:registry intentionally emits nothing.
       - name: Build registry
-        run: npm run build:registry
+        run: pnpm run build:registry
 
       # Exercise built previews and a fresh React app with real CLI installation.
       - name: Smoke-test components
-        run: npm run smoke
+        run: pnpm run smoke
 
       - name: Test registry contracts and read-only validation
-        run: npm test
+        run: pnpm test
 
       # Check conflicts, dependency managers, addresses and authenticated paths.
       - name: Smoke-test the CLI
-        run: npm run smoke:cli
+        run: pnpm run smoke:cli
 
       # Keep the shell's curated primitive stylesheet list synchronized.
       - name: Check the shell loads what it uses
-        run: npm run check:shell
+        run: pnpm run check:shell
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       # Prerendering every route reads the manifest, so a build failure here
       # also catches a manifest the app can no longer make sense of.
       - name: Build the site
-        run: npm run build --workspace @nodex/web
+        run: pnpm --filter @nodex/web run build
 
       - name: Smoke-test landing animation and language switching
-        run: npm run smoke:landing
+        run: pnpm run smoke:landing
 
       - name: Smoke-test gallery loading and preview interaction
-        run: npm run smoke:gallery
+        run: pnpm run smoke:gallery
+
+  docker-build:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build the production image without publishing
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: nodex:ci
+
+      - name: Check migration files and native dependencies in the final image
+        run: |
+          docker run --rm nodex:ci node --input-type=module -e '
+            import assert from "node:assert/strict";
+            import { createRequire } from "node:module";
+            import { readdirSync } from "node:fs";
+            const require = createRequire("/app/scripts/migrate.mjs");
+            assert.equal(typeof require("pg").Client, "function");
+            const webRequire = createRequire("/app/apps/web/package.json");
+            const nextRequire = createRequire(webRequire.resolve("next"));
+            assert(nextRequire("sharp").versions.vips);
+            assert(readdirSync("/app/apps/web/migrations").some(file => file.endsWith(".sql")));
+          '
+
+      - name: Check the final image serves the site and registry
+        run: |
+          docker run --detach --name nodex-ci --publish 4180:4180 nodex:ci
+          trap 'docker logs nodex-ci; docker rm --force nodex-ci' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://localhost:4180/r/languages.json >/dev/null; then
+              curl --fail --silent http://localhost:4180/ >/dev/null
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1

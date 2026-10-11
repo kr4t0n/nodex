@@ -470,6 +470,17 @@ languages retain their prior paints through the new roles.
 
 ## Build boundaries and validation
 
+The repository uses the pnpm version pinned in `packageManager`, one
+`pnpm-lock.yaml` and `pnpm-workspace.yaml`; local core references use
+`workspace:*`. Declare tooling dependencies where they are read: root scripts
+need `pg` and `tailwindcss` even when the web app also declares them. Keep the
+project-local virtual store so font package realpaths remain under
+`node_modules`; do not relax font asset containment for symlinked installs.
+The workspace preserves pre/post scripts for web asset synchronization and
+explicitly allows only required dependency builds. CLI consumer manager
+detection and the disposable npm consumer fixture remain independent of the
+repository's package manager. Contributor commands live in README.
+
 `packages/core` owns schema, taxonomy and source loading. It has browser-safe
 schema/taxonomy entrypoints and a Node-only filesystem loader. The CLI imports
 its types only so the published command stays independent of the monorepo.
@@ -798,10 +809,13 @@ Do not infer timing solely from the environment variable's prefix.
 Next supplies same-origin account/device routes and standalone deployment. Docker
 builds the registry before the site and keeps Chromium out of runtime. Migrations
 retain their monorepo path in the image because the migration runner resolves
-relative to its own location. Helm uses an external database and migration Job.
+relative to its own location. Root declares `pg` for that migration script;
+Next's standalone trace must retain its root link and pnpm dependency closure.
+The Docker CI check resolves it from the migration script in the final image.
+Helm uses an external database and migration Job.
 
 Release tags use `v<version>` and trigger CLI and image publishing. The CLI
-package version and lockfile entry must match the tag; Docker tags omit `v`.
+package version must match the tag; Docker tags omit `v`.
 Helm publication follows chart changes on `main` and preserves existing chart
 versions. Bump both chart `version` and `appVersion` for a coordinated release
 so the default app and migration images use the same versioned image.
@@ -810,6 +824,8 @@ The package's publisher configuration must match `kr4t0n/nodex` and workflow
 filename `npm-publish.yml`, with direct publishing allowed. Keep `id-token: write`,
 a GitHub-hosted runner, npm >=11.5.1 and package-manager caching disabled. Registry
 selection uses `NPM_CONFIG_REGISTRY` without generating token-based npmrc entries.
+Build and pack with pnpm to rewrite workspace references, rehearse the tarball
+in a fresh npm consumer, then publish that exact tarball with npm for OIDC.
 Do not restore a token-presence guard: it silently skipped valid trusted releases.
 The workflow rejects tag/package-version mismatches and fails on OIDC errors.
 Check published artifacts as well as workflow status: absent Docker credentials
