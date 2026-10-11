@@ -7,6 +7,8 @@ virtualStoreType: project
 
 # The web app syncs registry assets in predev, prebuild and pretypecheck.
 enablePrePostScripts: true
+# Reinstall hooks even when pnpm finds node_modules already up to date.
+optimisticRepeatInstall: false
 
 allowBuilds:
   # Use the published platform binaries; no source-build fallback is needed.

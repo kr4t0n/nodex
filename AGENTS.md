@@ -481,6 +481,14 @@ explicitly allows only required dependency builds. CLI consumer manager
 detection and the disposable npm consumer fixture remain independent of the
 repository's package manager. Contributor commands live in README.
 
+Husky installs through the root `prepare` script. Its pre-commit hook scans only
+staged changes using the standalone gitleaks binary and fails if it is missing.
+CI checks the full Git history with a version- and checksum-pinned gitleaks release
+before dependency installation. Both scans redact findings; any exception needs
+reviewed evidence that it is a false positive. CI and Docker builds disable hook
+installation because they do not create commits. Setup and manual scan commands
+live in README.
+
 `packages/core` owns schema, taxonomy and source loading. It has browser-safe
 schema/taxonomy entrypoints and a Node-only filesystem loader. The CLI imports
 its types only so the published command stays independent of the monorepo.
