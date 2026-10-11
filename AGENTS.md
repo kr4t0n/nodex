@@ -394,6 +394,9 @@ Never commit directly to either long-lived branch. Preserve the publishing invar
 - Build and pack with pnpm to rewrite workspace references, then publish the exact
   tested tarball with npm for OIDC. Do not restore token-presence guards or token-based
   npmrc generation: they break trusted publishing. Keep package-manager caching disabled.
+- PR verification and npm releases share `smoke:pack`: it builds and packs the CLI,
+  checks the installed bin in an isolated npm consumer against the built registry,
+  and optionally retains the tested archive for publication without repacking.
 - Check artifacts as well as workflow status; absent Docker credentials skip publication.
 
 ## Cross-cutting rendering gotchas

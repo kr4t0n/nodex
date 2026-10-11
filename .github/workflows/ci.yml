@@ -74,6 +74,9 @@ jobs:
       - name: Build registry
         run: pnpm run build:registry
 
+      - name: Smoke-test the packed CLI in a fresh npm consumer
+        run: pnpm run smoke:pack
+
       # Exercise built previews and a fresh React app with real CLI installation.
       - name: Smoke-test components
         run: pnpm run smoke

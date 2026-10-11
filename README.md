@@ -898,6 +898,7 @@ pnpm run build:registry
 pnpm test
 pnpm run smoke
 pnpm run smoke:cli
+pnpm run smoke:pack
 pnpm run check:shell
 pnpm run lint
 pnpm run format:check
@@ -914,6 +915,7 @@ pnpm run smoke:gallery
 | `test`                    | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation                                                                                                                                                                                                               |
 | `smoke`                   | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all six languages, stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli`               | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds                                                                                                                                                                  |
+| `smoke:pack`              | Builds and packs the CLI with pnpm, installs the tarball in a fresh npm project outside the workspace, and runs its installed `nodex list` against the built registry                                                                                                                                                      |
 | `check:shell`             | Gallery primitive classes have their curated stylesheets                                                                                                                                                                                                                                                                   |
 | `smoke:landing`           | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets                                                               |
 | `smoke:gallery`           | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout                                   |
@@ -935,6 +937,12 @@ style rules. The JSX plugins use ESLint's official `@eslint/compat` adapter on
 ESLint 10, with version-specific peer allowances; React Compiler validation is
 not enabled. Keep any rule exception
 local, with the reason beside the code and browser coverage for the behavior.
+
+`smoke:pack` requires the registry build above and runs in CI's required `verify`
+job. It removes its temporary package and consumer after checking them. Pass an
+empty output directory, `pnpm run smoke:pack /tmp/nodex-pack`, to retain the tested
+tarball. The npm release workflow uses this same check and publishes that exact
+archive without repacking; the check itself never publishes or needs credentials.
 
 The consumer smoke installs packages in a disposable directory and therefore
 needs npm network access. Build previews bundle dependencies locally; rendered

@@ -61,19 +61,10 @@ jobs:
           pnpm run typecheck
           pnpm run smoke:cli
 
-      - if: steps.version.outputs.published == 'false'
-        run: pnpm run build:cli
-
       # Exercise the packed files in isolation before publishing that exact tarball.
-      - if: steps.version.outputs.published == 'false'
-        run: |
-          mkdir -p "$RUNNER_TEMP/nodex-pack"
-          pnpm --filter @kubitnodes/nodex pack --pack-destination "$RUNNER_TEMP/nodex-pack"
-          mkdir -p "$RUNNER_TEMP/verify" && cd "$RUNNER_TEMP/verify"
-          npm init -y >/dev/null
-          # Use pnpm's tarball name so a package rename does not break this check.
-          npm install "$RUNNER_TEMP/nodex-pack"/*.tgz
-          ./node_modules/.bin/nodex list --registry "$GITHUB_WORKSPACE/public"
+      - name: Smoke-test the packed CLI in a fresh npm consumer
+        if: steps.version.outputs.published == 'false'
+        run: pnpm run smoke:pack "$RUNNER_TEMP/nodex-pack"
 
       - if: steps.version.outputs.published == 'false'
         run: npm publish "$RUNNER_TEMP/nodex-pack"/*.tgz
