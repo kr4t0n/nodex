@@ -19,8 +19,6 @@ with slim bars, ranked single-line routes, aligned P99 readings and explicit bre
 markers; its original example data and caller-owned footer remain intact. Neutral
 marks encode quantity; color classifies explicit statuses or caller-supplied limits.
 
-## Chart contracts
-
 ## Ordered windows
 
 - Signal Console's throughput, percentile and response charts preserve caller

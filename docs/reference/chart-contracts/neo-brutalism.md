@@ -21,8 +21,6 @@ solid and outlined badges use it, while dashed and quiet badges stay flat.
 Mono Editorial and Signal Console keep zero badge offsets. Reduced motion retains
 resting shadows rather than deleting the visual hierarchy.
 
-## Chart contracts
-
 ## Stacks and paired observations
 
 - Stacked Blocks and Bridge Waterfall contain library sizing overflow inside
