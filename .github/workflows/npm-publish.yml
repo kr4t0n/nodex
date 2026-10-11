@@ -1,21 +1,6 @@
 name: npm
 
-# Publishes packages/cli to npm as @kubitnodes/nodex.
-#
-# Uses npm trusted publishing (OIDC), with no npm token secret. The package's
-# trusted publisher must authorize kr4t0n/nodex and npm-publish.yml on GitHub.
-#
-# Triggered by a v* tag, and manually. Not by pushes to main: the version lives
-# in package.json, so publishing on every push would either republish the same
-# version and fail, or quietly ship whatever happened to be committed.
-#
-# The repo runs TypeScript directly — tsconfig.base.json is emitDeclarationOnly
-# and every specifier ends in `.ts`, because Node strips types natively. That is
-# wrong for a package a stranger installs, who may be on a Node without type
-# stripping, so publishing compiles real JavaScript through
-# tsconfig.publish.json. The single @nodex/core import is `import type` and
-# erases completely, which is why the published package has no dependencies and
-# @nodex/core does not need publishing alongside it.
+# Trusted publishing setup and release steps: README.md, "Deploy and publish".
 
 on:
   push:
@@ -51,9 +36,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # A published version is immutable, and npm rejects a republish with an
-      # error that reads like a credentials problem. Check first so a re-run of
-      # an already-published tag reports the real reason and passes.
+      # Published versions are immutable; let a repeated release skip publication.
       - id: version
         run: |
           VERSION="$(node -p "require('./packages/cli/package.json').version")"
@@ -69,10 +52,7 @@ jobs:
             echo 'published=false' >> "$GITHUB_OUTPUT"
           fi
 
-      # The CLI is the one artifact a stranger runs unsupervised, so it is worth
-      # proving it works before shipping rather than after. smoke:cli drives a
-      # real init and add against a built registry. Typecheck follows the build
-      # because the web app's pretypecheck syncs from the built manifest.
+      # Typecheck follows the registry build because web pretypecheck reads its manifest.
       - if: steps.version.outputs.published == 'false'
         run: |
           pnpm run lint
@@ -84,18 +64,14 @@ jobs:
       - if: steps.version.outputs.published == 'false'
         run: pnpm run build:cli
 
-      # Prove the tarball is what a consumer actually gets: install it into a
-      # scratch project and run the binary. Compiling successfully is not the
-      # same as being runnable, and `files` narrows what ships.
+      # Exercise the packed files in isolation before publishing that exact tarball.
       - if: steps.version.outputs.published == 'false'
         run: |
           mkdir -p "$RUNNER_TEMP/nodex-pack"
           pnpm --filter @kubitnodes/nodex pack --pack-destination "$RUNNER_TEMP/nodex-pack"
           mkdir -p "$RUNNER_TEMP/verify" && cd "$RUNNER_TEMP/verify"
           npm init -y >/dev/null
-          # Whatever pnpm named it. A scoped package packs to
-          # <scope>-<name>-<version>.tgz, so hardcoding that spelling breaks
-          # silently the next time the package is renamed.
+          # Use pnpm's tarball name so a package rename does not break this check.
           npm install "$RUNNER_TEMP/nodex-pack"/*.tgz
           ./node_modules/.bin/nodex list --registry "$GITHUB_WORKSPACE/public"
 

@@ -22,7 +22,8 @@ export interface ArcMatrixDatum {
 }
 
 export interface ArcMatrixProps {
-  /** One observation per product/city pair. Zero is measured absence; omitted pairs are missing. */
+  /** One observation per product/city pair. Zero is measured absence; omitted pairs are missing.
+   * Area and tone use absolute scales so the same value remains comparable across datasets. */
   data: readonly ArcMatrixDatum[];
   height?: number;
   width?: number;
@@ -238,6 +239,7 @@ export function ArcMatrix({
                 hide
                 domain={[-(layout.products.length - 1) * 29 - 16, layout.top]}
               />
+              {/* Scale the range with the domain maximum to keep area per unit constant. */}
               <ZAxis
                 dataKey="value"
                 type="number"

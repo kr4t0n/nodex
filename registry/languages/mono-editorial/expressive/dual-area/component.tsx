@@ -38,7 +38,8 @@ function observation(value: number | null): number | null {
   return value !== null && Number.isFinite(value) && value >= 0 ? value : null;
 }
 
-/** Only the plot receiving input publishes its day; both cursors use that day. */
+/** Only the plot receiving input publishes its day; both cursors use that day.
+ * Recharts syncId alone can leave the receiving plot's prior selection active. */
 function InspectDay({
   ownsInput,
   onInspect,

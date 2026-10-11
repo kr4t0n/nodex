@@ -1,14 +1,6 @@
 /**
- * Apply SQL migrations in order, once each.
- *
- * Plain numbered `.sql` files and a table recording what ran. No ORM and no
- * migration framework, for the same reason the registry ships plain HTML: the
- * whole thing is legible in one sitting, and there is no schema DSL sitting
- * between what you write and what the database gets.
- *
- * Safe to run repeatedly. Applied files are skipped, and each file runs inside a
- * transaction with its bookkeeping row, so a failure halfway leaves nothing
- * behind to reconcile by hand.
+ * Apply numbered SQL files once, in order. Each migration and its bookkeeping
+ * row share a transaction so a failed file can be retried without partial changes.
  */
 
 import { readFile, readdir } from 'node:fs/promises';

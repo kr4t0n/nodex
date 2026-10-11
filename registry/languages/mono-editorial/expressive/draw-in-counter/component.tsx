@@ -225,6 +225,7 @@ export function DrawInCounter({
               {rows.length === 1 && (
                 <Headline total={total} period={periodLabel} />
               )}
+              {/* Area parses the strokeWidth prop for clipping; CSS variables must use style to avoid NaN. */}
               <Area
                 id={`${id}-bookings`}
                 className="nx-cumulative-area"

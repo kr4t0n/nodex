@@ -472,6 +472,29 @@ can progress without starting the entire catalogue. Loaded previews stay mounted
 as you scroll, preserving keyboard inspection, tooltips and control state. Titles
 and labels link to detail pages; the previews themselves retain native interaction.
 
+## Contribution flow
+
+`dev` is the integration branch; `main` holds releases and is GitHub's default.
+Start each task branch from current `dev` and publish it as `<type>/<short-slug>`
+(for example, `docs/developer-guides`). Open its pull request with an explicit
+`--base dev`. Keep one logical change per commit and use Conventional Commits.
+Do not commit or push directly to `dev` or `main`.
+
+Run the [verification checks](#verification), describe the change and validation
+in the PR, and include before/after screenshots for visual changes. Merge with a
+merge commit after independent review and green CI. Release only when requested:
+prepare version changes through a PR to `dev`, then open a release PR from `dev`
+to `main`. See [Deploy and publish](#deploy-and-publish) for the publishing effects
+and tag/version requirements.
+
+Read [AGENTS.md](AGENTS.md) for architecture and gallery runtime boundaries.
+Component types, metadata and local comments document their contracts;
+consumer tests cover regressions. Registry changes follow the
+[authoring skill](.agents/skills/nodex-authoring/SKILL.md); the
+[consumer skill](skills/nodex/SKILL.md) is for downstream apps. The 13 imported
+design skills in `.agents/skills/` are opt-in references, subordinate to the task
+and selected language's design rules and tokens.
+
 ## Use components in a React app
 
 The current component platform is **React 19, React DOM, TypeScript and
@@ -938,16 +961,16 @@ Register a GitHub OAuth app with homepage `http://localhost:4180` and callback
 `http://localhost:4180/api/auth/github/callback`. Fill the credentials in the
 root `.env` and restart the site. `pnpm run db:down` stops local Postgres.
 
-| Variable                                   | Purpose                                                              |
-| ------------------------------------------ | -------------------------------------------------------------------- |
-| `DATABASE_URL`                             | Runtime account database connection                                  |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration                                   |
-| `NEXT_PUBLIC_SITE_URL`                     | Runtime public origin used by server-side OAuth                      |
-| `NEXT_PUBLIC_REGISTRY_URL`                 | Registry CDN root, baked into the browser bundle at build time       |
-| `NODEX_REGISTRY`                           | CLI registry override; flag and project config take precedence       |
-| `NODEX_API`                                | Optional CLI account API base when it differs from the registry root |
-| `NODEX_TOKEN`                              | CLI session token for unattended use                                 |
-| `NODEX_CONFIG_DIR`                         | Optional CLI credential-directory override                           |
+| Variable                                   | Purpose                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------- |
+| `DATABASE_URL`                             | Runtime account database connection                                   |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration                                    |
+| `NEXT_PUBLIC_SITE_URL`                     | Runtime public origin used by server-side OAuth                       |
+| `NEXT_PUBLIC_REGISTRY_URL`                 | Registry CDN root, baked into the browser bundle at build time        |
+| `NODEX_REGISTRY`                           | CLI registry override; flag and project config take precedence        |
+| `NODEX_API`                                | Optional CLI account API base; defaults to the selected registry root |
+| `NODEX_TOKEN`                              | CLI session token for unattended use                                  |
+| `NODEX_CONFIG_DIR`                         | Optional CLI credential-directory override                            |
 
 `.env` is gitignored. Next explicitly loads the root file. CLI credentials live
 separately in `~/.nodex/auth.json` with mode `0600`; project config never holds
@@ -988,7 +1011,12 @@ The existing Docker workflow publishes on `main` and version tags, using
 `DOCKERHUB_REPOSITORY` and `NEXT_PUBLIC_REGISTRY_URL`. The image targets amd64.
 
 The Helm chart in `helm/nodex` deploys the app with an optional external database
-and a migration Job. Its release workflow requires a chart-version bump:
+and a migration Job. Its release workflow requires a chart-version bump.
+
+Enable GitHub Pages for the `gh-pages` branch in repository settings. The workflow
+creates that branch if needed and serves chart packages from its `helm/` folder.
+An existing chart version is never repackaged; bump `helm/nodex/Chart.yaml`'s
+`version` to publish changed chart content.
 
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
@@ -1022,10 +1050,14 @@ The workflow uses a GitHub-hosted runner, Node 24 with npm 11.5.1 or newer,
 `id-token: write`, and no package-manager cache. npm generates provenance
 automatically; an OIDC configuration error fails the publish job.
 
-For a coordinated release, bump `packages/cli/package.json`, plus the Helm
-chart's `version` and `appVersion`. Commit those changes
-on `main` and push a matching annotated tag such as `v0.2.3`. The main push
-publishes the versioned Helm chart; the tag starts the npm and image workflows.
+For a requested coordinated release, bump `packages/cli/package.json`, plus the
+Helm chart's `version` and `appVersion`, on a task branch and merge its reviewed
+PR into `dev`. Open a release PR with head `dev` and base `main`; merge it with a
+merge commit after review and green CI. Then create and push a matching annotated
+`v<version>` tag at the released `main` commit. Never commit release changes
+directly on `main`. The release merge triggers Docker publication and, when the
+chart or its workflow changed, publishes the versioned Helm chart. The tag starts
+the npm and image workflows. Manual publishing also requires a release request.
 Image version tags omit the `v` prefix. Confirm the registry artifacts after
 the workflows finish: missing Docker credentials still make the image job skip,
 so a successful workflow alone does not prove a release exists. The npm workflow

@@ -2,19 +2,7 @@ import 'server-only';
 
 import pg from 'pg';
 
-/**
- * The one connection pool.
- *
- * Cached on `globalThis` because Next replaces module instances on every hot
- * reload in development. Without this, a morning's editing leaves dozens of
- * orphaned pools open and Postgres starts refusing connections, which reads as a
- * database problem rather than a dev-server one.
- *
- * `server-only` above is not decoration: importing this from a client component
- * would try to bundle a database driver and the connection string into the
- * browser. This turns that mistake into a build error.
- */
-
+// Keep one pool across Next's development module reloads.
 declare global {
   var __nodexPool: pg.Pool | undefined;
 }
@@ -33,9 +21,7 @@ function connectionString(): string {
 export function pool(): pg.Pool {
   globalThis.__nodexPool ??= new pg.Pool({
     connectionString: connectionString(),
-    // A dev machine and a small server both want a modest ceiling. The default
-    // of 10 per pool is fine; the timeout is what stops a page hanging forever
-    // on a database that is down.
+    // Bound page waits when the database is unreachable.
     connectionTimeoutMillis: 5000,
     idleTimeoutMillis: 30_000,
   });

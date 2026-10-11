@@ -1,8 +1,9 @@
 # AGENTS.md
 
 Architecture and reasoning for nodex. This root document is the project's high
-level source of truth. Procedures live in the authoring skill; setup and commands
-live in README.md. Update both alongside architectural or usage changes.
+level source of truth. Procedures live in the [authoring skill](.agents/skills/nodex-authoring/SKILL.md);
+setup, commands and contribution flow live in [README.md](README.md). Update them
+alongside architectural or usage changes.
 
 ## Design languages determine form
 
@@ -15,321 +16,20 @@ also encode identity through geometry, annotation and information density.
 - **Primitives** live once under `registry/primitives/` and accept every language's
   shared token roles. Their React APIs wrap native elements and retain editable CSS.
 
-The React delivery and token contract was validated with nine expressive charts
-and all 24 primitives. The complete 65-chart catalogue has now been reconstructed
-through that contract under the owner's authorization.
-The old expressive catalogue at `099f1ef` remains the specimen reference in Git
-history. Rebuild each chart against the current contract; never restore legacy
-runtime artifacts. New families still require their rendering and delivery checks.
-
-Reconstruction is not a redesign. Preserve the previous branch's specimen data,
-titles, copy, chart encoding, proportions and existing language values while
-changing the rendering and delivery architecture. Do not add controls, tables,
-annotations or demo variants, or make unrelated dependency upgrades. The data
-dropdowns and other unsolicited specimen changes have been removed. New product
-behavior requires its own user request.
+Preserve established specimen data, titles, copy, encoding, proportions and
+language values unless the task explicitly changes them. Maintenance does not
+authorize new controls, annotations, demo variants or unrelated dependency upgrades.
 
 Each language's `DESIGN.md` is a downstream foundation for all UI, including
 projects with no charts. It covers visual atmosphere, semantic token roles,
 typography, spacing, geometry, interaction, motion and anti-patterns. Keep named
 chart descriptions, specimen dimensions, reconstruction history and runtime/build
-procedures out of it. Component metadata, local source comments and this file's
-gotchas hold component-specific guidance; the authoring skill holds procedures.
-
-Nocturne is the sixth language, with all 24 shared primitives and twelve charts:
-`nocturne-bars`, `nocturne-line`, `nocturne-ring`, `nocturne-scatter-matrix`,
-`nocturne-promise-lanes`, `nocturne-margin-lanes`, `nocturne-drift-trails`,
-`nocturne-waterfall`, `nocturne-boxplot`, `nocturne-forecast-fan`,
-`nocturne-control` and `nocturne-ecdf`.
-Bars, line, ring and the scatterplot matrix are featured; the matrix replaces the
-former heatmap. The gallery and selected landing belt discover all twelve.
-Graphite grounds, flat charcoal surfaces, embedded Inter,
-compact corners and iris/teal/amber/blue data colors define its dark product UI.
-No new font package or primitive implementation is needed. Inverse surfaces use
-light ink as their background, so Nocturne's historical `onDark*` roles contain
-dark secondary text. Category colors remain independent of intensity and status.
-
-The charts share presentation in `nocturne-chart-frame.tsx`; line, ring, trails, matrix and ECDF
-share stable ID-to-tone assignment in `nocturne-categorical.ts`. Paint references
-stay inside each chart. Bars rank descending with stable ties and unavailable rows
-last; native length encodes finite nonnegative values from a common zero. Lines
-use straight native segments on strictly increasing numeric X, signed readings
-and independent gaps. Direct endpoint names have a reserved gutter and separated
-vertical positions; leader endpoints retain their real data coordinates. The
-compact annotations use bounded HTML inside the native SVG so overflow shows an
-ellipsis instead of silently clipping leading digits or running labels past the
-plot. Full readings remain available through inspection and native title text. The
-full key and endpoint readings refer to the final supplied observation, with an
-unavailable final reading never replaced by an earlier one. Dense series expand
-the plot vertically before scrolling locally.
-
-The thin ring keeps native exact angles without minimum sectors or padding;
-incomplete or overflowing totals are unavailable, and zero stays in its key. All twelve use native
-animation matching with stable observation or aggregate-step IDs. Source delivery, all 24 primitives,
-keyboard/pointer inspection, scoped paint and geometry, data edge cases, dense
-consumer layouts, mobile gallery fit and live reduced motion have dedicated
-coverage. The landing discovers Nocturne through the manifest; its automatic
-sequence still finishes with Sketchbook.
-
-The scatterplot matrix composes native Scatter charts and diagonal Bar histograms.
-Observations retain globally unique IDs, declared cohort IDs and dimension-keyed
-values. Each metric shares its finite extent across all panels and cohorts.
-Missing coordinates are omitted per pair; marginal counts still include each
-available coordinate. Histograms overlay exact cohort counts in shared equal-width
-bins, including lower boundaries and the last upper boundary. Native bar heights
-and public X scales preserve count and interval geometry. Zero counts have no bar.
-Constant dimensions receive finite padding; unrepresentable extents or bin edges
-reject the input. There is no fitted model or density normalization.
-Native tooltip activity links point IDs across panels and their histogram bins.
-Pair data stays memoized. Inspection state belongs to a nested provider whose
-unchanged children contain the native chart tree; only mark components consume
-the selected ID. Storing selection at the matrix root recreates series props and
-restarts Recharts animations even with memoized data. Pointer and keyboard checks
-with motion enabled assert retained marks, unchanged geometry and no new fade.
-Pass linked tooltips as stable React elements: Recharts mounts a content
-function as a component, so inline functions remount their effects and can cause
-selection update loops. Each native chart remains independently keyboard-inspectable, with
-explicit paired/marginal sample counts and omitted counts. Instance-local selection,
-stable cohort tones, scoped fade, local scrolling and source delivery have consumer
-coverage. The matrix uses the existing scatter taxonomy; no heatmap alias remains.
-Its domains contain every finite coordinate, so forced overflow clipping is
-unnecessary. Native clipping follows the padded axis range and cuts extrema dots
-at their centers, including their pointer targets; retain complete endpoint marks.
-
-The three new compositions introduce encoding types in the common taxonomy:
-`paired-range` compares corresponding endpoints of two intervals, `interval-dot`
-combines an independent point with a bounded range, and `trajectory` connects
-two-dimensional positions in observation order. All use native Recharts Scatter
-observations, axes, tooltip and keyboard traversal. Custom compound marks consume
-public native scales; trajectory segments use Recharts Curve. They add no library
-or second rendering runtime. `numeric-domain.ts` guards finite extents and single
-coordinates; `scatter-fade.ts` follows the native animation clock at final
-coordinates so connectors and endpoints stay attached, including after reordering.
-
-Promise lanes renders planned and actual intervals independently on one numeric
-scale. Reversed, incomplete or overflowing intervals are unavailable; zero duration
-uses a tick. Corresponding start and finish connectors appear only for a complete
-pair. Signed start, finish and duration changes are actual minus planned, and
-duration change is independent of starting late. Absolute and difference formatters
-are separate so timestamps need not format like durations. Compact direct readings
-retain full native title text and tooltip values.
-
-Margin lanes subtracts each row's explicit target from its point and expected
-range. All rows must use one measurement unit; a symmetric domain aligns targets
-at zero without percentage normalization. Current points may lie outside their
-expected range. Either mark remains available without the other; a missing target
-prevents both projections. The chart neither estimates uncertainty nor infers an
-outcome from direction. Missing lanes remain inspectable without quantity marks.
-
-Drift trails requires strictly increasing finite times within each series; X and
-Y may reverse or be signed. Each adjacent complete pair contributes one straight
-native curve with a direction chevron when space permits. Incomplete coordinates
-are omitted and counted, and break connections. Only the final supplied complete
-observation receives a filled latest dot and key reading. Composite series and
-observation IDs retain identity through updates. Arrow spacing does not encode
-elapsed time; exact numeric positions and chronological direction are separate.
-The trajectory plot and full key share a vertical scroll region when height is
-constrained; only the plot has a separate horizontal scroller. Keeping the key
-outside that region lets a long legend overflow a short consumer card.
-Consumer coverage checks these data rules, native geometry, mid-animation
-connector attachment, keyboard/pointer inspection, scoped overrides, independent
-instances, constrained layouts and live reduced motion. Gallery checks include
-all twelve on desktop and mobile.
-
-Waterfall uses native Bar interval bounds on a signed numeric scale. Totals are
-derived from caller-ordered starts and changes; a missing or overflowing change
-breaks the balance until an explicit start. Zero uses a tick without minimum bar
-height. The custom native animation interpolator fades final bounds so connectors
-stay attached during updates. Bounded readings and category names remain inside
-their native category bands, retaining full titles and tooltip readings.
-
-Boxplot uses native Scatter observations and public scales for horizontal
-quartile boxes, median ticks, capped whiskers and independent outlier dots.
-The caller supplies ordered five-number summaries and classifies outliers; no
-quartile algorithm or whisker convention is inferred. Signed values are supported.
-Invalid summaries keep their row and any valid outliers; unavailable outliers are
-omitted and counted. Equal quartiles have no manufactured box width. Composite
-row/outlier IDs preserve identity. Both charts guard finite domains and keep plot
-and footer inside a shared vertical scroll region for short consumer cards.
-Consumer checks cover native geometry, balance recovery, degenerate distributions,
-keyboard/pointer inspection, scoped paint, independent instances and live motion.
-
-Forecast fan composes native range Areas and Lines. Coverage probabilities are
-caller-supplied, unique and strictly between zero and one; bands sort widest
-coverage first. Valid ranges nest by coverage, independently of point estimates.
-Crossing ranges invalidate that observation's bands, not its point forecast.
-Missing bounds break each band. Native area shape coordinates supply isolated
-vertical intervals, so a single forecast does not lose its uncertainty mark.
-A collapsed isolated interval keeps a horizontal cap even without a point estimate.
-Recharts skips the Area shape when the entire dataset has one row, so that case
-uses its native dot callback and public scale. Range marks fade at final native
-coordinates; lower bounds and upper bounds stay attached throughout updates.
-The forecast line anchors only to the final supplied observation when available;
-historical intervals and future values are never synthesized. The observed phase
-must precede the forecast phase on strictly increasing finite numeric X.
-
-Control uses a native Line and caller-owned statistical limits. Invalid limits
-leave measured values visible without breach classifications. Equality to a limit
-is within bounds; only strict point breaches receive amber outlines. Optional
-events have unique IDs and finite X inside the supplied observation window.
-No model fitting, specification limit interpretation or sequence rule is inferred.
-
-ECDF uses native Scatter observations for distinct empirical jumps and native
-step-after Curves for their connections. Each series sorts a copy of finite
-samples and aggregates equal values into a single jump of multiplicity / n.
-The inclusive value owns the filled dot. Exact zero and one tails extend only
-across the native domain; adding a threshold outside the sample range extends
-those tails without inventing observations. Quantiles use the inverse empirical
-CDF, with no interpolation. Missing samples are omitted and counted per series;
-zero usable samples retain unavailable key readings. Composite series/value IDs
-preserve aggregate-step identity through sample and series reordering. Connecting
-curves ignore pointer events so the following step cannot intercept the preceding
-observation's dot. Native dot hit targets own pointer inspection. Scoped
-native fade keeps steps attached during animation. Forecast, control and ECDF
-reuse the existing area/line taxonomy, frame, tokens and rendering runtime.
-Their full keys share the vertical scroller, with a separate horizontal plot
-scroller, and their consumer tests cover statistical semantics and native geometry.
-
-Soft Studio is the fifth language, with all 24 shared primitives and nine charts:
-`soft-bars`, `soft-area`, `soft-donut`, `soft-heatmap`, `soft-line`,
-`soft-stacked-bars`, `soft-scatter`, `soft-dumbbell` and `soft-gauge`.
-The original bars, area, donut and heatmap remain the four featured previews;
-the gallery and selected landing belt discover all nine.
-Manrope is embedded through pinned Fontsource metadata; code uses system monospace.
-Cool off-white pages, white surfaces, cobalt actions, tinted fields and contextual
-rounding define the UI. Its shadow roles use negative spread with scoped ink for
-subtle elevation, without changing shared primitive implementations. No texture
-is visible. Existing languages retain their values.
-
-Studio charts share presentation in `_shared/studio-chart-frame.tsx` and stable
-category-tone assignment in `studio-categorical.ts`. Language-specific paint
-references remain in the components. Bars use native bounds with CSS rounding,
-including scoped radius overrides; zero and unavailable values retain labels
-without marks. Area uses strictly increasing numeric X coordinates and native
-monotone interpolation; missing values break the curve and the final supplied
-reading owns the headline. Donut requires a complete finite total, preserves
-exact angles and keeps zero entries in its key. Heatmap declares both domains
-and a fixed positive ceiling; missing or invalid readings retain inspectable
-cells even when every cell is unavailable. Zero dots and missing crosses differ.
-Duplicate IDs/pairs and undeclared heatmap coordinates reject the input. Dense
-plots scroll locally and the donut key stacks below its plot in narrow scopes.
-Line uses independent native monotone curves on strictly increasing numeric X;
-signed values are supported and missing readings break only their own series.
-Horizontal stacks use native absolute bounds from a shared zero; any missing part
-or overflowing total leaves its row unavailable. Both accept explicit ordered
-series and preserve identity colors on reorder. Scatter uses equal-size circles
-on numeric axes, omitting and counting incomplete pairs. Dumbbell retains available
-signed endpoints, connects only complete pairs and shows ties as concentric open
-and filled circles. Gauge uses exact native 180-degree sectors against a finite,
-positive target; invalid or above-target values are unavailable, never clamped.
-Zero and full progress never acquire a decorative sliver.
-Gauge height comes from Recharts' numeric aspect ratio, rather than a percentage
-height that depends on a CSS aspect-ratio wrapper. Its percentage, reading and
-endpoints share the native SVG coordinate system with the sectors. Check visible
-arc bounds and centered, separated text after resizing and without a wrapper
-aspect ratio; a correctly sized card alone does not prove that the chart rendered.
-
-Gallery specimens must fit their complete content before the common preview
-transform scales them. The donut's 280px ring previously overflowed a 278px
-content area; its example now reserves 384px plus 56px of preview padding.
-Do not hide scrollbars or clip keys to compensate for undersized examples.
-Browser checks assert actual scroll extents and surface containment for all nine,
-including scaled desktop thumbnails and mobile thumbnails/detail pages.
-Consumer coverage includes all primitives in the new language and all nine
-charts' geometry, data updates, native inspection, scoped overrides and motion.
-The landing discovers Soft Studio in its list and interactive commands; the
-authored automatic sequence still finishes with Sketchbook.
-
-Sketchbook is the fourth language, with all 24 primitives and nine charts:
-`sketch-bars`, `sketch-bars-horizontal`, `sketch-stacked-bars`, `sketch-line`,
-`sketch-scatter`, `sketch-pie`, `sketch-donut`, `sketch-force` and `sketch-network`.
-The index features bars, line, donut and network; the gallery discovers all nine.
-Its roughViz reference is pinned in the language's `PROVENANCE.md`; extracted
-palette/drawing values and Nodex UI extensions are distinguished there.
-Gaegu regular/bold supplies headings, annotations, short UI text, paragraphs,
-editable values and dense tables. `font.sans` uses Gaegu, with reading text enlarged
-by 2px for its smaller letterforms: body/form values are 16px and prose is 14.5px.
-Supporting text follows the same increase; heading/action/code sizes and spacing
-retain their prior values. Sketchbook embeds only Gaegu; commands use system
-monospace. `font.ui`, `type.uiLabel` and
-`type.choice` separate action/field/choice typography from dense labels and input
-metrics. `type.meterLabel` styles slider/progress labels independently of values.
-The shared `font.heading` role is consumed by Card, Dialog, Empty State
-and Prose headings. Font roles hold independent literal stacks, never root aliases.
-Existing languages retain their prior families and metrics. `texture.*` supplies
-static, noninteractive secondary outlines and corner hatching on framed cards and
-solid actions; outlined actions receive only the second outline. Plain cards and
-quiet actions stay clear. Pseudo-elements remain behind content and inside native
-targets; reduced motion retains decoration. Original languages have zero texture
-opacity. Compound corner values are supported; `radius.avatar` replaces arithmetic
-on `radius.card` so square avatars accept scoped, independent radii.
-
-Sketchbook keeps Recharts' native geometry, scales, tooltip and keyboard
-inspection. Rough.js is a pinned geometry dependency, not a second chart runtime.
-Its generated paths are rendered declaratively by React. Native measurement
-bounds clip filled texture. Bar outlines render outside that fill clip: clipping
-the wobbled boundary stroke cuts away parts of it, which can disappear entirely
-when a thumbnail scales below one pixel. Keep the original stroke token,
-seeded geometry and native hit targets; do not thicken the language's marks or
-change gallery scale to compensate. Check actual rasterized thumbnail edges at
-fractional pixel positions as well as native-size geometry.
-Stable category IDs seed origin-relative paths so reordering
-does not rerandomize a mark. Paint and stroke widths stay in CSS. Only the numeric
-sketch options are resolved from the chart scope; a local hook observes scope,
-stylesheet and color-scheme changes and cleans up its listeners. CSSOM changes
-use the existing `nodex:tokens-changed` event. Invalid sketch settings fall back
-to plain marks. Missing/invalid values and zero retain distinct readings; missing
-or duplicate IDs reject the dataset. Dense labels scroll inside the plot.
-
-Repeated responsibilities live in `_shared/sketch/`: scoped drawing settings,
-seeded marks, frame/tooltip presentation, pie/donut sectors and force/network
-layout. Palette and sketch-specific CSS token references stay in the language
-components and are passed to shared marks, so the shared delivery closure also
-lints with the original languages. Native sectors own exact angles and donut
-holes; convert Recharts' angles to Rough.js' clockwise coordinates before drawing.
-Checking the clip geometry alone will not detect hatching outside a sector.
-
-Line accepts strictly increasing numeric X coordinates and preserves gaps per
-series; scatter omits and counts incomplete coordinate pairs. One missing stack
-segment makes that category unavailable. Pie/donut require complete totals and
-retain zero in their key without manufacturing a sector. Force has no links;
-Network accepts explicit, unique undirected pairs between existing node IDs.
-Their pinned `d3-force` dependency computes only a finite stopped layout from
-cloned, ID-sorted input. It never owns DOM or a running simulation. Native Scatter
-owns numeric scales, area sizing, tooltip and keyboard traversal in caller order.
-Reordering preserves layout and texture; node area scales with value within the
-dataset. Zero/missing nodes use text without area, retaining network topology.
-Recharts fades at final coordinates so links remain attached during transitions.
-
-Neo-brutalism is the third language. Its initial release contains the complete
-shared primitive vocabulary, embedded Space Grotesk/JetBrains Mono and design
-foundations, plus nine expressive charts: `block-bars`, `punch-area`, `split-ring`,
-`stacked-blocks`, `bridge-waterfall`, `twin-pins`, `sticker-scatter`, `tile-heatmap`
-and `hundred-blocks`. The original four remain the language index's curated
-previews; the language gallery contains all nine. Empty featured lists still
-fall back to primitive previews.
-Its categorical yellow/lilac/mint/pink/blue palette is not a sequential data ramp. Gallery
-palette descriptions must not assume every language is monochrome.
-The ng-brutalism reference study informs compact 8px surface/4px control corners,
-larger control type, stronger field shadows and full shadow compression on press.
-These choices live in Neo-brutalism's tokens. `shadow.badge` is a shared role:
-solid and outlined badges use it, while dashed and quiet badges stay flat.
-Mono Editorial and Signal Console keep zero badge offsets. Reduced motion retains
-resting shadows rather than deleting the visual hierarchy.
-
-Signal Console also has nine expressive charts: the original `endpoint-latency`,
-plus `request-throughput`, `latency-trend`, `response-codes`, `latency-histogram`,
-`service-health`, `capacity-ring`, `saturation-scatter` and `trace-spans`.
-The index features endpoint latency, throughput, health and capacity; the gallery
-and landing belt discover all nine from the manifest. All nine charts share
-only console chrome, plot sizing and tooltip presentation in `signal-chart-frame.tsx`.
-Language-specific surface references stay in the components; shared files must
-also pass source lint against other installed languages.
-Each component owns its data validation and native Recharts composition. Existing
-tokens are unchanged. Endpoint Latency has been refined under the owner's request
-with slim bars, ranked single-line routes, aligned P99 readings and explicit breach
-markers; its original example data and caller-owned footer remain intact. Neutral
-marks encode quantity; color classifies explicit statuses or caller-supplied limits.
+procedures out of it. Public types and `meta.json` own component data contracts;
+local comments explain non-obvious implementation choices, and consumer tests
+exercise regressions. Read those alongside the relevant component before changing
+it. Avoid maintaining a second description of its implementation in separate docs.
+The authoring skill holds procedures; `DESIGN.md` and `tokens.json` remain the
+language's visual authority.
 
 The manifest is the catalogue, not the folder layout. A slug names the item;
 `component` names its cross-language type. Types describe marks and encoding,
@@ -338,8 +38,8 @@ not animation or business domain. Taxonomy lives in `packages/core/src/taxonomy.
 The language gallery sorts charts by `component`, then title, then slug for ties.
 Search and type filters retain that order. Featured lists keep their authored order.
 The language index takes up to four previews from `meta.json`'s `featured` list;
-the full catalogue count does not fill empty slots. Restore featured curation
-alongside chart availability after staged reconstruction.
+the full catalogue count does not fill empty slots. Empty featured lists fall
+back to primitives. Keep curation explicit as the catalogue grows.
 
 `density` is optional reading intent (`close-read` or `glance`). Languages declare
 legal values; components may omit it. It remains agent/search metadata and must
@@ -481,13 +181,9 @@ explicitly allows only required dependency builds. CLI consumer manager
 detection and the disposable npm consumer fixture remain independent of the
 repository's package manager. Contributor commands live in README.
 
-Husky installs through the root `prepare` script. Its pre-commit hook scans only
-staged changes using the standalone gitleaks binary and fails if it is missing.
-CI checks the full Git history with a version- and checksum-pinned gitleaks release
-before dependency installation. Both scans redact findings; any exception needs
-reviewed evidence that it is a false positive. CI and Docker builds disable hook
-installation because they do not create commits. Setup and manual scan commands
-live in README.
+The [contributor setup](README.md#develop-the-registry-and-gallery) owns hooks and
+prerequisites; [verification](README.md#verification) owns commands and CI coverage.
+Do not bypass the staged secret scan or the full-history CI scan.
 
 `packages/core` owns schema, taxonomy and source loading. It has browser-safe
 schema/taxonomy entrypoints and a Node-only filesystem loader. The CLI imports
@@ -546,200 +242,47 @@ never format generated build artifacts or imported third-party skills. The
 repository's authoring and consumer skills remain in scope. Keep a mechanical
 formatting baseline separate from behavioral fixes so review can distinguish them.
 
-## Previewing actual React
+## Gallery and preview runtime
 
-Recharts 3.10.1 emits an empty chart wrapper through `renderToStaticMarkup`, even
-with explicit dimensions and animation disabled. The build therefore bundles and
-mounts the actual example in Chromium. It captures the complete rendered example
-as a static document, then includes a local bundle that mounts the same React
-example for interaction. This is a browser snapshot followed by a client mount,
-not React hydration or a second chart renderer.
+[The registry build](scripts/build-registry.ts) mounts actual React examples in
+Chromium because Recharts does not emit chart marks through server rendering.
+Standalone previews contain browser snapshots and a local bundle that mounts the
+example; this is not React hydration. Dependencies are bundled for offline use.
+Only build/test machines need Chromium. Consumers still receive client charts.
 
-Only build/test machines need Chromium. Dependencies are bundled locally;
-previews have no chart-library CDN imports or runtime data fetches. Consumer
-components remain client charts; their server-rendered HTML does not inherit
-the standalone build-time snapshot. Do not claim general Recharts SSR support.
+[The public sync](scripts/sync-registry-public.ts) copies the built artifacts and
+generates explicit lazy imports for the website from each example's metadata.
+The website renders those examples in its own React/Recharts tree, with loading
+boxes instead of iframes or snapshot HTML injection. Keep website and registry
+React types pinned together; ref cleanup types differ across versions. Deploy
+the catalogue, public assets and rebuilt website together when examples change.
 
-The website renders actual React examples in its own component tree. Before
-dev/build, `sync-registry-public.ts` generates explicit lazy imports under
-`apps/web/src/generated/` from each authored example entry and export, checked
-against the built catalogue. The generated directory is ignored. Examples share
-the website's React/Recharts runtime and helper modules; there is no per-preview
-root or iframe. Keep the website and registry React types pinned to the same
-version: two versions disagree about ref cleanup types when source is shared.
-Next compiles imported primitive CSS and the app's Tailwind input scans registry
-source. Do not eagerly import every example or make a second gallery renderer.
-The production website must be rebuilt when example code changes. Standalone
-preview URLs still serve browser snapshots and local bundles for independent
-viewing and validation; the website uses reserved loading boxes until lazy
-examples mount, not snapshot HTML injection.
+[Preview](apps/web/src/components/Preview.tsx) owns framing and measurement;
+[preview-startup](apps/web/src/lib/preview-startup.ts) owns the page-wide startup
+queue. Read their local comments and [gallery checks](scripts/smoke-gallery.ts)
+before changing loading behavior. Preserve these boundaries:
 
-Charts scale from each example's logical width in thumbnails and detail pages;
-primitives render fluidly at native size.
-Preserve each specimen's original proportions and standalone preview padding.
-The build records preview insets outside the chart root's rendered bounds,
-excluding its internal padding. The gallery translates away that standalone page
-space and scales the complete root into the available width and height. Its outer
-edge aligns with the title and type label above; an extra gallery gutter would
-indent it again. Keep internal padding, axes, annotations and corner geometry
-intact; the preview wrapper must not clip chart corners to an unscaled radius.
-Primitives retain their native size and 28px preview inset. Browser checks compare
-actual chart and heading bounds across languages and desktop/mobile widths.
-Chart gallery cells share two subgrid rows: the title/type header and the preview.
-The header distributes its title and type label to keep both aligned when titles
-wrap. Three nested subgrid tracks allowed the 56px gap between cards to inflate
-the label-to-preview gap; the two-row structure keeps that gap at 18px.
-Older manifests without measured insets retain their original framing. Gallery titles
-are supplied by the gallery/caller; existing drawing annotations and console
-status chrome belong to their components. There is no chart data disclosure.
-
-Load-bearing preview behavior:
-
-- Read an initial container width synchronously and keep the viewport-observer
-  timeout fallback. Background tabs may not deliver observers promptly. The
-  fallback must measure current bounds, including local clipping, instead of
-  admitting every distant preview after a fixed delay.
-- `preview-startup.ts` owns one page-wide queue with three concurrent startups.
-  Visible examples precede the 300px preload margin; queued examples are measured
-  again before admission so fast scrolling does not start stale candidates.
-  Native readiness runs after the lazy component commits, fonts finish and three
-  frames pass, with a timer fallback for background tabs. Only that readiness,
-  an error or the 15-second failure timeout releases a startup slot. A local error
-  boundary contains a failed example. Keep loaded examples mounted to retain
-  interaction state. Cancel queued work and release active slots on example or
-  language changes/unmount; dispose the shared
-  observer, viewport listeners and fallback timers when the last preview leaves.
-- Measure the native wrapper including preview padding in unscaled CSS pixels.
-  Transformed client bounds would feed thumbnail scale back into layout. Accept
-  only finite positive heights; grid previews keep fixed boxes for aligned labels.
-- Every grid ancestor holding a scaled frame needs `min-width: 0` or its wide
-  logical content can force the grid open and cancel apparent scaling.
-- Native examples restate inherited font, color and text metrics within their
-  token scope. Preview controls must not be nested in gallery navigation anchors;
-  titles and labels own navigation. Specimen `href="#"` links stay local instead
-  of scrolling the host page. Inline dialogs use the preview's query-container
-  width for their former viewport sizing; they never open a page-wide modal.
-
-## The gallery dogfoods language tokens
-
-The shell owns layout, interaction quality and motion; the language owns paint,
-type, strokes and radii. RootLayout reads the built manifest and loads default
-mono-editorial tokens before first paint. Client language switching uses explicit
-asset addresses. The language index scopes each tile's tokens independently.
-There is no independent gallery dark mode.
-
-`styles/scrollbars.css` owns native scrollbar presentation across the website.
-The app imports it into global CSS; the registry build compiles the same file into
-preview CSS so standalone documents receive it too. Resolve muted/ink paint
-on each element to honor descendant token scopes. Keep transparent tracks, both
-scroll axes, native interaction and forced-color defaults. Gutter reservation is
-local to the terminal; do not reserve scrollbar space on every element. This is
-website chrome, excluded from consumer component and token delivery.
-
-The language token panel separates Chart colors from UI colors. It reads the
-canonical token JSON through the manifest asset address, preserving ramp order
-and including additional chart color roles. UI role labels describe shared
-primitive semantics; they never define paint. Group equal values within each
-section, retaining every role in accessible expandable lists. A chart palette
-alone is incomplete: field, surface, interaction and inverse paints may be absent
-from the ramp. Keep those colors visible without requiring hover.
-UI swatches share one row and shrink to fit narrow screens; labels, values and
-usage remain available in the expandable list and to assistive technology.
-
-Gallery descriptions, summaries, supporting copy, notes, detail values and the
-landing tagline consume the corresponding `type.body.*Size` roles. These roles
-preserve the shell's previous sizes in the original languages and enlarge
-Sketchbook's reading text. Keep them scoped to copy so headings and commands do
-not grow with body text.
-
-The shell still consumes curated primitive CSS classes for its existing markup.
-`check:shell` checks those classes against `SHELL_PRIMITIVES` in RootLayout. Keep
-the curation synchronized or a valid primitive class can render unstyled. New UI
-can consume reusable primitive APIs; avoid an unrelated wholesale shell rewrite.
-
-The landing is two scenes: the name, then the CLI and chart belt together. The
-terminal runs a finite typing sequence after the wordmark folds into the navbar:
-`nodex list`, then `nodex init signal-console`, then a recalled command whose
-language is backspaced and replaced with `neo-brutalism --force`, then another
-edit of that same third prompt to `nodex init sketchbook --force`. Mono Editorial
-is the initial language; Sketchbook is the fourth and final automatic design. Only completed
-commands switch the page, and all four commands carry into keyboard recall.
-There are only three visible command rows. The third becomes the user editor
-with the completed Sketchbook command still present; it never appends a prompt.
-Its language list and chart counts come from the manifest. The selected language
-also determines the belt's expressive charts; never recolor another language's
-charts as a substitute.
-
-The terminal preloads generated token stylesheets and their fonts into a temporary
-document scope before playing. Renaming the generated root selector preserves
-the token authority and makes each switch immediate. Remove that scope and its
-stylesheet on navigation. Scroll position never resets the page language or the
-transcript: offscreen and background-tab playback pauses, then resumes on return.
-Completion permanently hands control to an interactive terminal for the mounted
-page. Unmount the animated transcript and dispose its GSAP timeline and listeners;
-scrolling, theme changes and motion-preference changes must never recreate it.
-There is no replay control. Reduced motion enters the interactive state directly
-when the scene is reached. Keep demo typing out of React's animation-frame render
-cycle and out of screen-reader live announcements.
-
-`LandingTerminalSession` owns the inline prompt, current output and command recall.
-Its parser only handles `nodex list` and `nodex init <manifest-language> [--force]`; it changes
-page tokens and never executes a shell. List output also offers language buttons.
-Retain the last 20 commands for Up/Down recall, preserve drafts across scrolling
-and theme changes, and replace the third prompt's output on submission. Executed
-commands remain in the editor for another edit; history never appends visible rows.
-The handoff must not steal focus or open a mobile keyboard.
-Clicking the terminal's header, transcript or padding focuses the final command
-at its end without moving the page. Exclude native controls and active text
-selections so language buttons, caret placement and transcript copying still work.
-A text mirror reserves the demo's exact wrapping for a native textarea and shows
-an idle block cursor; focus uses the native caret and selection. The idle cursor blinks only without
-reduced motion. Both modes use 16px text on narrow screens to avoid mobile input
-zoom. Keep the terminal's height and final command position stable at handoff so
-editing cannot push the chart belt down after every command.
-`TerminalBody` supplies identical demo/editor dimensions and reserves an extra
-line per manifest language beyond the original four, keeping all three prompts
-visible after catalogue growth. Handoff checks capture the final demo geometry
-inside the browser when its theme applies; awaiting network-based assertions
-before measuring can race the demo's removal.
-The fixed desktop body fits all three prompts and their initial outputs; narrow
-screens retain local scrolling as commands wrap.
-The animated transcript uses that same fixed height and scrolls only its own
-viewport to follow the current command. Both transcript and history share a thin
-native scrollbar, transparent track, token-colored thumb and stable gutter; the
-thumb strengthens on hover or focus. Keep wheel, touch and keyboard scrolling.
-The navbar reserves room for every language's native action height.
-Gallery navigation permits the back-link label to truncate at narrow widths while
-retaining its full accessible name; account actions stay unshrunk. Larger UI fonts
-must fit at 320px after fonts load.
-
-Actual registry previews fill the belt. Each repeated pass owns its trailing gap;
-both passes must be identical width for seamless `xPercent: -50`. Repeat a small
-catalogue to fill the belt. Reserve each frame's dimensions but mount its preview
-only when the belt approaches the viewport, keeping lazy chart modules out of
-the opening hero.
-The terminal and belt share one scene, with a 200px chart strip below the terminal.
-Terminal padding and command spacing expand on tall viewports, and the gap above
-the belt grows with viewport height. The scene can grow on short screens so
-content stays readable without clipping. Landing looping is an explicit product
-exception; it does not relax registry motion rules.
-GSAP is app-only and never enters delivered source.
-
-The landing sign-in aligns to the scaled wordmark in the hero and returns to the
-page gutter in the navigation bar. Measure the wordmark's fractional intrinsic
-width instead of estimating it from its font size, and refresh after fonts load.
-Both motion paths must recompute alignment on resize; fit the wordmark inside
-the viewport gutters on small screens. The tagline and sign-in label share their
-first text baseline, including when the tagline wraps. The row's final transform
-keeps the action at its original navbar center; measure the action as well as the
-wordmark after fonts load or language metrics change. The tagline aligns with the visible left
-edge of Inter's leading n using its optical inset in em, tied to the wordmark's
-animated size; the text box alone includes the glyph's leading space.
-
-`/` reads no cookie and remains static. `/languages` and `/login` read sessions;
-`/l/*` routes derive static parameters from the built manifest. Next route files
-await params and pass plain values to views. `apps/web/AGENTS.md` is generated
-Next guidance; this root file remains the project architecture authority.
+- Startup is bounded and viewport-aware, with a fallback for delayed observers.
+  Cancel queued work and release active slots on navigation. Retain mounted
+  examples so scrolling preserves their interaction state.
+- Measure height in unscaled CSS pixels. Transformed bounds feed thumbnail scale
+  back into layout. Scaled grid ancestors need `min-width: 0`.
+- Scale the complete chart after removing only measured standalone page insets.
+  Keep internal padding, corners and original proportions; primitives stay native-size.
+  Examples must fit their content before scaling; clipping is not a sizing fix.
+- Preview controls must not sit inside navigation anchors. Titles own navigation;
+  placeholder specimen links must not scroll the host. Inline dialogs stay local.
+- The shell owns layout and behavior; scoped language tokens own visual treatment.
+  There is no independent gallery dark mode. Keep `SHELL_PRIMITIVES` synchronized.
+  The token panel reads canonical tokens; its labels must not define a second palette.
+- The landing demo plays once and hands off to its existing prompt without stealing
+  focus or reopening on scroll/theme changes. Its parser changes page tokens;
+  it never executes a shell. GSAP is app-only. Background/offscreen playback pauses;
+  reduced motion enters the interactive state. [Landing checks](scripts/smoke-landing.ts)
+  own the detailed handoff, keyboard and responsive regression cases.
+- `/` reads no cookie and stays static. `/languages` and `/login` read sessions;
+  `/l/*` parameters come from the built manifest. Route files await params.
+  `apps/web/AGENTS.md` holds generated Next guidance; this root is the architecture authority.
 
 ## Static distribution and CLI ownership
 
@@ -757,10 +300,9 @@ stylesheets. The CLI still uses the full `r/registry.json` and per-item JSON.
 Never shrink those source-delivery artifacts to optimize the gallery. Publish
 the new gallery manifest with the corresponding app, including on external CDNs.
 
-CLI resolution is `--registry`, project `nodex.json`, `NODEX_REGISTRY`, then the
-hosted default. It does not guess a registry from the working directory. An
-explicit checkout root resolves to its built `public/`; an already-served root
-works directly. `init` records the canonical selected root.
+[CLI configuration](packages/cli/README.md#registry-and-credentials) owns resolution
+precedence, local/remote registry selection and credential storage. Do not guess a
+registry from the working directory; `init` records the canonical selected root.
 
 CLI discovery JSON projects runtime files to `path` and `target` explicitly.
 Do not serialize manifest file objects unchanged: their embedded source would
@@ -792,11 +334,9 @@ loopback development servers. Auth headers attach only to same-origin guarded
 files and language files use explicit manifest addresses, so future guarded
 assets need no convention-path special case in CLI commands.
 
-`nodex.json` belongs in the consumer repository. `~/.nodex/auth.json` does not:
-it is mode 0600 in a 0700 directory, keyed by registry origin. `NODEX_TOKEN`
-overrides stored credentials; `NODEX_CONFIG_DIR` allows isolated tests. The CLI
-publishes compiled JavaScript for Node 20+, with erased core type imports and no
-runtime workspace dependency. Repo tooling itself needs Node 22.22+.
+Project config must never contain a token. Credentials are private, origin-keyed
+user state. The CLI publishes compiled JavaScript for Node 20+, with erased core
+type imports and no runtime workspace dependency; repo tooling needs Node 22.22+.
 
 ## Accounts and deployment constraints
 
@@ -845,110 +385,19 @@ Next's standalone trace must retain its root link and pnpm dependency closure.
 The Docker CI check resolves it from the migration script in the final image.
 Helm uses an external database and migration Job.
 
-Release tags use `v<version>` and trigger CLI and image publishing. The CLI
-package version must match the tag; Docker tags omit `v`.
-Helm publication follows chart changes on `main` and preserves existing chart
-versions. Bump both chart `version` and `appVersion` for a coordinated release
-so the default app and migration images use the same versioned image.
-The npm workflow uses trusted publishing through GitHub OIDC, not a token secret.
-The package's publisher configuration must match `kr4t0n/nodex` and workflow
-filename `npm-publish.yml`, with direct publishing allowed. Keep `id-token: write`,
-a GitHub-hosted runner, npm >=11.5.1 and package-manager caching disabled. Registry
-selection uses `NPM_CONFIG_REGISTRY` without generating token-based npmrc entries.
-Build and pack with pnpm to rewrite workspace references, rehearse the tarball
-in a fresh npm consumer, then publish that exact tarball with npm for OIDC.
-Do not restore a token-presence guard: it silently skipped valid trusted releases.
-The workflow rejects tag/package-version mismatches and fails on OIDC errors.
-Check published artifacts as well as workflow status: absent Docker credentials
-still cause the image job to skip successfully.
+Contribution and release steps live in [README.md](README.md#contribution-flow).
+Ordinary branches target `dev`; releases go from `dev` to `main` only when requested.
+Never commit directly to either long-lived branch. Preserve the publishing invariants:
 
-## Primitive and chart gotchas
+- CLI version and release tag must match; app and migration images share the Helm
+  `appVersion`. Published chart versions are immutable.
+- Build and pack with pnpm to rewrite workspace references, then publish the exact
+  tested tarball with npm for OIDC. Do not restore token-presence guards or token-based
+  npmrc generation: they break trusted publishing. Keep package-manager caching disabled.
+- Check artifacts as well as workflow status; absent Docker credentials skip publication.
 
-- Signal Console's throughput, percentile and response charts preserve caller
-  order with equal spacing; callers supply equal-duration windows. Their current
-  headline refers to the final window even when it is unavailable. Missing values
-  break individual percentile lines; inconsistent quantile ordering invalidates
-  the entire window. A missing response class invalidates its whole stack, and
-  response counts must be safe nonnegative integers. A zero request total does
-  not imply a zero error rate. Native keyboard inspection retains missing windows.
-- Signal Console's histogram takes pre-aggregated, equal-width buckets. Native
-  numeric scales place exact bucket boundaries and the optional SLO; never infer
-  a percentile or an over-SLO count from a partially overlapping bin. Counts are
-  safe nonnegative integers; an unknown bucket makes the overall total unavailable.
-  A zero count keeps its baseline label. Half-open buckets include the final upper
-  boundary only in the final bucket.
-- Service Health declares both matrix domains. Missing or invalid statuses are
-  unavailable cells, even when every reading is missing. Duplicate pairs and
-  undeclared IDs reject the input. Symbols accompany the semantic status colors.
-  Capacity Ring requires complete usage within a finite, positive capacity; its
-  sector angles are exact with no minimum angles. Usage stays neutral when the
-  caller omits the warning threshold. Saturation Scatter omits and counts invalid
-  observations; shape and hue both report the supplied CPU and latency limits.
-- Trace Spans uses native ranged bars at actual offsets from one origin, so
-  concurrent work stays concurrent. Zero-duration spans retain a tick; missing or
-  reversed endpoints are unavailable. Outcomes must be supplied to claim success
-  or error, and the last-end summary requires every span to have valid endpoints.
-  All nine Signal charts have standalone consumer coverage for geometry,
-  keyboard inspection, scoped token changes, narrow containers, data updates,
-  incomplete/zero/invalid values and live reduced-motion changes.
-- Stacked Blocks and Bridge Waterfall contain library sizing overflow inside
-  their sized plot. Automatic-height wrappers scroll only horizontally when the
-  plot's minimum width requires it; incidental SVG overflow must not create
-  scrollbar pairs in scaled gallery previews. Explicitly height-constrained
-  stacks retain vertical scrolling for additional rows.
-- Bridge Waterfall uses native ranged bars with signed running balances. A null
-  change invalidates following changes and totals until a new start. Zero changes
-  keep labels without visible bars; annotations use public scales so they also
-  survive interrupted animation. Twin Pins has one Scatter observation per row;
-  its circle and square encode the two endpoints on a shared numeric scale.
-  Missing endpoints do not acquire a connecting line. Sticker Scatter retains
-  finite signed coordinates, filters incomplete pairs and reports their count;
-  all stickers have the same size and color follows identity rather than value.
-- Tile Heatmap requires explicit row and column domains and a fixed positive
-  intensity ceiling. Omitted pairs, invalid numbers and out-of-range readings are
-  unavailable. Duplicate pairs and undeclared axis IDs reject the input rather
-  than silently overwriting a reading. Blue fill opacity encodes value/maxValue;
-  the categorical accent palette is not a sequential ramp. Zero and missing cells
-  have different marks. Cells and tooltips use native Scatter coordinates.
-- Hundred Blocks requires whole-percent shares totaling exactly 100. Native
-  Scatter has one observation per category; the custom marks place that category's
-  exact block count on public scales, so decorative units do not create 100
-  keyboard stops. Caller order determines allocation order. Zero-share categories
-  retain key entries. The grid remains square as its container changes width.
-- The five newer Neo charts share `neo-chart-frame.tsx` for their heading, frame,
-  empty state and tooltip surface. It contains only common language-token roles;
-  each component owns its data contract and Recharts composition.
-- Neo-brutalism's Punch Area preserves caller order with equal observation spacing;
-  callers should supply regular intervals. Its headline is the final observation,
-  even when unavailable. Null readings break both line and fill. Square points
-  retain isolated and zero readings. Set Area stroke width through style because
-  Recharts parses the numeric prop while computing its animation clip.
-  Pointer tests on a maximum target the lower interior of its square, within the
-  plot. Its center lies on the top plot boundary, where fractional screen rounding
-  can classify a centered pointer as outside the native inspection region.
-- Split Ring requires a complete, finite allocation before calculating shares.
-  Zero values have key entries but no sectors; an all-zero allocation has no ring.
-  Native Pie angles are exact, with no minimum angles or padding. Its shadow
-  applies to the whole ring, not to each sector. The legend stacks at narrow
-  container widths. Stacked Blocks likewise hides an entire incomplete row rather
-  than allowing Recharts to stack an unknown segment as zero. Row totals use
-  public scales so zero and unavailable rows remain visible. Segment labels are
-  omitted when they cannot fit, with exact values available in keyboard tooltips.
-- `neo-categorical.ts` owns stable ID-to-tone assignment for Block Bars, Split
-  Ring, Stacked Blocks, Sticker Scatter and Hundred Blocks. Language-specific token references remain in the chart
-  modules: shared helpers are also linted against other installed languages.
-  Caller order and repeated display labels are preserved; IDs
-  must be unique. All five can accept explicit category tones.
-- Neo-brutalism's Block Bars uses native Recharts bars and a common zero baseline.
-  The front face encodes magnitude; CSS hard shadows do not change that geometry.
-  Series colors represent categories, with explicit tones or a stable ID-based
-  default. Caller order and duplicate display labels are preserved; IDs must be
-  unique. Zero and unavailable values keep their labels without visible bars.
-  Recharts omits null bars, so missing-value dashes use its public scales to
-  retain the original category slot at the baseline. Value labels belong to the
-  bar shape; LabelList can stay hidden after reduced motion interrupts a draw.
-  Entirely unavailable data renders an explicit empty state.
-  More than six categories scroll within the plot rather than widening the page.
+## Cross-cutting rendering gotchas
+
 - Input IDs use `useId`; independent instances and radio groups must not collide.
 - Native Dialog uses `showModal`/`close`; inline mode exists for specimens. Preserve
   Escape, focus return and controlled state behavior.
@@ -965,413 +414,41 @@ still cause the image job to skip successfully.
 - Invalid chart values are unavailable, not synthetic data. Empty datasets
   render an explicit state. Matrix zero means
   measured absence, while an omitted pair means missing.
-- Arc-matrix retains absolute area and tone encoding: a value has the same mark
-  size and shade across datasets. Do not normalize its marks to each input maximum.
-- Endpoint source, window and freshness come from caller props. The existing
-  example supplies its original sample labels; the runtime does not invent them.
-- Endpoint observations require only the encoded `route` and `p99Ms` fields.
-  Unused request-rate values belong to sample/application data, not the chart API.
-  Duplicate route labels retain separate ranked bands. Invalid or negative readings
-  are omitted and counted; zero has a baseline tick and reading. Public band scales
-  position route/value annotations independently of bar animation. Keep their row
-  positions synchronized on sorting, resizing and reduced-motion changes. The plot
-  grows with the row count and scrolls locally when constrained; full route names
-  remain available in native keyboard and pointer tooltips.
-  Its ten-row example uses compact 18px bands and a wide canvas. The overview fits
-  both dimensions into a fixed-height tile; a tall specimen shrinks its width and
-  typography disproportionately. Adjust the authored composition, not the shared
-  preview transform, to keep it comparable to neighboring console charts.
-- Arc-matrix has one observation series so guide curves cannot become tooltip or
-  keyboard stops. Its custom active cells use stable observation identifiers.
-- Dual-area coordinates a reversed spend bar plot with a sign-up area plot.
-  Both retain identical ordered rows and band scales, including unavailable
-  measures. Recharts' public tooltip hooks publish the inspected day to local
-  React state, and two ReferenceLines place aligned cursors through the scales.
-  `syncId` alone leaves a receiving plot's prior mouse/keyboard state active,
-  which can strand its cursor on another day. Input ownership follows pointer
-  movement, focus and keydown; only that plot displays the combined tooltip.
-  Selection and gradient IDs belong to each component instance. Spend retains
-  its original $18K scale ceiling unless larger caller values require expansion;
-  sign-ups use a zero-based scale.
 - Recharts prioritizes a plot's active mouse hover over its keyboard selection.
   Move the pointer away for keyboard-only inspection. The coordinated chart
   follows the library's selected observation; it does not replace keyboard
   navigation or reach into the library's private state.
   Focus can retain an earlier index; browser tests establish selection with real
   arrow keys and allow the library's animation-frame input throttling to settle.
-- Petal-rose uses one equal-angle Pie with a per-observation outer radius.
-  Library Sector shapes compose the track and petal; labels share that
-  observation, so decorative layers cannot become extra keyboard stops.
-  Radius grows linearly from the inner ring to the current dataset maximum,
-  preserving the old rose renderer's actual encoding despite its `area` name.
-  Zero leaves no petal; do not copy the old all-zero midpoint-radius bug.
-  Label contrast retains the specimen's 8-of-12 reach threshold as a ratio so
-  changing count units cannot put light labels onto short, pale petals.
-  The 5px background strokes are knockout gaps, not data outlines. Numeric
-  labels use `type.plotValue`, separate from card headings.
 - Recharts vertical bars advance to the next route with ArrowLeft in the pinned
   release; the accessible description documents the library's direction.
-- Bar-race receives period frames and stable unique product IDs. It plays
-  once, holds the final frame, and retains whole-plot pointer replay plus a
-  separate keyboard replay button so the chart is not nested inside a button.
-  Reduced motion and zero-duration tokens select the final frame and cancel
-  playback timers. Product identity must survive rank changes; repeated display
-  names are not IDs. Missing final readings retain the known period and replay.
-  Browser regression recording must start before playback is enabled; starting
-  it after a frame-zero assertion can miss that entire frame on a busy page.
-- Stagger-delay uses one native Bar with the public animationInterpolateFn
-  hook. Its per-category delays retain unavailable positions and use the chart
-  motion tokens; there is no extra timer. Dynamic-data and draw-in-counter share
-  only the constrained cubic curve factory supplied to native Area series.
-  Dynamic-data gets its static source badge from the caller and never fabricates
-  a feed. Draw-in-counter uses AreaRevealShape progress for its headline, so
-  the number and area share one library animation. Each changed dataset repeats
-  the original reveal from zero using current library points. Its exact cumulative total
-  stops at missing input; plotted values retain whole-thousand rounding.
-  Recharts parses the Area strokeWidth prop numerically during clipping, so
-  these areas set actual tokenized width through style to avoid NaN clips.
-- Dot-cascade preserves ascending caller order, the sloping baseline and
-  rounded-up two-incident dot stacks, including odd totals. Exact labels are
-  authoritative; zero and unavailable counts add no dots. Launch-fan takes only
-  feature/week observations plus caller guide weeks; legacy MAU copy did not
-  correspond to an encoded field and does not justify adding one. A single
-  launch has a valid leading-edge spoke. Guides never become inspection stops.
-- Donut-redesigned retains its ten-by-ten dot grid and source key; its type is
-  unit-chart, since its slug does not describe donut geometry. Shares must total
-  100 and be whole percents. Tones follow source order. Custom-pie uses a real
-  Pie for share angles and per-observation radius for minutes, with caller scale
-  and reference rings. It sorts by share and ranks tone by minutes. Missing
-  minutes reserve the known angle without a wedge; missing shares invalidate
-  the allocation. Zero minutes leave a label without a synthetic hub sector.
-- Tick-donut requires complete whole-percent shares totaling 100, since an
-  unknown share makes following angular positions unknown. Tones follow caller
-  order, despite old rank comments. Tick-gauge requires one whole percent and
-  caller goal label; zero keeps all remaining ticks. Both retain the original
-  angular sweeps with equal horizontal and vertical pixel units. Fit native axis
-  domains to the actual plot bounds so resizing cannot turn the donut or gauge
-  into an ellipse. The gauge's upper bound includes the complete sweep. Shared
-  radial-tally-marks owns fitted axes, unit texture and library curves; ticks,
-  guides and inspection coordinates use those same public scales.
-  Channels/progress are observations; counting guides are not.
-- Pictorial-bar uses a native continuous Bar clipped through a repeated tree
-  texture. Glyph count changes with width; the old one-tree-per-10K comment was
-  inaccurate. Caller targetK owns the shared track. Preserve labels after the
-  full final glyph, partial clipping, zero tracks and unavailable rows.
-  Consumer checks wait for the native planting/target geometry after data
-  changes; an updated total label alone does not prove the Bar has recalculated.
-- The bar family uses Recharts Bar series, category indices and public scale
-  hooks. Repeated labels do not merge categories. Chunky-bars keeps caller order
-  while rank selects tone, and zero retains a label without a visible bar.
-  Rung charts require nonnegative safe integers: each mark is exactly $1K, so
-  silently rounding fractional counts would change the data. Shared `rung-marks`
-  owns only unit marks and their preserved deterministic width/opacity variation;
-  each component retains its series, scales, geometry, types and annotations.
-  Paired-rungs has two real series and a combined plan tooltip. Stacked-rungs
-  stacks three actual counts, then shifts custom marks by one scale unit per
-  preceding segment to retain gaps without adding synthetic revenue to the stack.
-  An incomplete region suppresses its whole stack and total; treating a missing
-  segment as zero would misplace every later segment. Categories remain available
-  to keyboard inspection. Totals use the library's LabelList so zero/unavailable
-  labels survive zero-height bar filtering. Rung thickness uses `stroke.mark`;
-  numeric label sizes derive from `type.plotValue` with preserved proportions.
-- Rung-histogram consumes explicit time intervals and integer ticket counts.
-  Preserve its bin-edge ticks, sparse interval labels and median flag. An unknown
-  bin suppresses the median and total-based wording; it is not zero tickets.
-  Diverging-bar retains signed values, directional caps and the dashed zero rule.
-  Range-capsules uses real `[low, high]` Bar values and retains its 50–320K specimen
-  scale, expanding for caller values. Invalid/reversed intervals are unavailable;
-  equal endpoints remain inspectable without a visible capsule.
-- Rung-waterfall declares `start`, `change` and `total` steps explicitly. Labels
-  never determine arithmetic. Missing changes invalidate the running total until
-  a new start establishes it; solid rungs add and broken rungs deduct. Recharts
-  removes null bars before generating LabelList entries, so unavailable totals
-  need an annotation positioned with its public scales, without a synthetic bar.
-- Candlestick uses a real range Bar for each complete OHLC quote. Open/close
-  bodies and low/high wicks share the public Y scale. Invalid ranges suppress
-  the whole quote; unchanged and zero prices retain a horizontal body. Extrema
-  are annotations, not extra series. The original preview uses seven $5 ticks.
-- Radial-patchwork composes independent Sector marks in one Scatter observation
-  series. Hour and angular window remain separate from radial files/6 reach;
-  the original 16-unit hole masks reaches of 96 files or fewer. Dial ticks use
-  Cartesian proportions while sectors stay circular through the smaller scale.
-  Fixture state setters enqueue React work; returning from `page.evaluate`
-  does not guarantee new SVG geometry. Poll the updated radius before checking
-  its ratio so fast runners cannot read the previous mode.
-- Radial-convergence takes explicit request assignments and stable theme IDs.
-  Hub area counts actual assignments; an unresolved assignment keeps its rim
-  node without inventing a strand. Requests and hubs share one native series,
-  while leaders, labels and bundle curves never become extra keyboard stops.
-- Bubble-almanac uses a native Z axis for absolute ticket-to-area scaling and
-  a private Curve factory for its irregular midpoint rims. Its dark cores are
-  the preserved fixed texture, not a second inferred measure. Missing counts
-  and zero counts draw no bubble. Years, areas, marginal notes and shelf events
-  belong to the caller. The example explicitly retains the old 540 × 245 plot;
-  the live default retains its original 320px minimum. plotLedger and plotRule
-  preserve the almanac's distinct original paper-line paints.
-  Marginal notes wrap in separate columns within the existing top margin;
-  caller `from` positions remain leader targets and `to` positions guide their
-  bends. Event captions wrap within their shelf columns. Numeric labels use
-  a per-instance SVG filter that fills their actual text bounds with scoped
-  background paint, including digit interiors. Keep that background opaque;
-  group opacity would let bubble cores and ledger rules show through again.
-  Draw leader curves before the labels and protect product headings with the
-  same background so a leader cannot cross their lettering.
-- Parallel-coordinates scoring includes only caller-marked dimensions. The
-  specimen excludes price; repeated product names remain separate rows. Its
-  parallel polylines use unconstrained chord-weighted tangents, while the area
-  charts retain constrained tangents in the shared curve helper. Reference
-  ranges stay fixed and finite readings can extrapolate beyond them. Preserve
-  the old axis brushing; Escape clears the current instance's selections.
-- Thread-triptych retains continuous bumpX curves through all three columns
-  and volume-encoded stroke widths. Routes and real nodes share native
-  inspection; decorative headings add no stops. The old description mentions
-  pinning and bundle hover, but its actual React renderer implemented neither;
-  do not invent those interactions during reconstruction.
-- Cluster-field has exactly one dot per person, deterministic golden-angle
-  placement and caller-declared cross-contribution bridges. Missing counts
-  retain island labels without people or relationships. Glyph size is texture,
-  not another inferred contributor measure.
-- Hourglass-stream retains nearest-40-person tick rounding and exact stage
-  counts. Its 34 threads per adjacent positive pair are illustrative; conversion
-  labels derive from the actual counts. Unknown stages break the guides, and
-  a zero denominator makes conversion unavailable rather than Infinity.
-- Stream-ribbon is a regular zero-based stacked area in the old renderer;
-  its comments incorrectly described a wiggle stack. Preserve that encoding,
-  the graphic labels behind the bands and the actual every-eighth-week ticks.
-  One missing measure suppresses that whole weekly stack so later bands are
-  never shifted by an invented zero. Background 2px strokes are knockout gaps.
-  Examples of wide charts explicitly retain the old build's pinned aspect
-  heights even when the live component's CSS minimum is taller.
-- Aggregate-sankey uses the native weighted Sankey layout with zero iterations,
-  top-aligned columns and source totals determining rank and tone. Its ribbons
-  are filled Curve areas through native link offsets, preserving vertical
-  thickness rather than substituting a thick perpendicular stroke. Real
-  zero-valued links retain topology without ink; incomplete allocations are
-  unavailable as a whole. The pinned library's generic keyboard handler only
-  handles numeric indices, whereas Sankey uses node/link strings. Keep its
-  focusable surface and pointer events, and traverse the real observations
-  locally for keyboard inspection. Public tooltip hooks drive pointer adjacency.
-  Sankey exposes no native animation clock; its finite opacity entry is local
-  layered CSS with direct motion tokens and a reduced-motion media guard.
-- Circular networks pack each node's diameter into its occupied angle and share
-  the remaining circumference equally. Native scatter scales keep the ring
-  circular, ZAxis retains absolute diameters and Curve supplies the inward
-  quadratic links. One observation series includes real links and nodes, with
-  public tooltip hooks driving adjacency. Duplicate names remain indexed.
-  Simple team diameter is linear in headcount; dense repository diameter retains
-  its 3.5px baseline plus 1.7 times the square root of contributors. Dense link
-  width retains its 0.4px baseline, including measured zero. The old dense
-  specimen's signed hash generates 338 negative shared counts among 556 ties;
-  retain its rows, but invalid counts are unavailable and must not acquire SVG's
-  fallback positive stroke. Shared circular-layout owns only packing and the
-  public quadratic curve factory. Dense metadata's replay copy had no handler
-  in the original component; reconstruction does not invent that behavior.
-- Tree uses pinned d3-hierarchy only for the same tidy node positions as the
-  original. Recharts Scatter owns its scales, nodes and inspection; Curve owns
-  the connectors. Keep the default sibling/cousin separation and preorder
-  inspection. Labels and membership come from the caller; no branches collapse.
-- Nested-treemap composes two actual flat Recharts Treemaps. Separate layouts
-  are required because the library's uniform nodeInset cannot reserve the old
-  asymmetric 32px area headings. A nested chart inside SVG foreignObject owns
-  each area's team layout; native rectangles retain the nested gap treatment.
-  The original also has an empty 32px root band. The library rounds layout
-  coordinates to pixels. ResponsiveContainer inherits an enclosing container
-  even when given explicit dimensions; this composition measures its outer
-  plot and supplies each native Treemap its own numeric size. Filter nested
-  parent hover events so they cannot replace the selected team. Memoize each
-  area's data so hover does not restart its
-  animation. The public pointer callbacks inspect real nodes; a focusable local
-  wrapper supplies keyboard traversal because Treemap exposes no accessibility
-  layer. Zero hours add no rectangle but remain available to inspection; missing
-  hours make the complete share hierarchy unavailable. Clip IDs are per instance.
-- Choropleths retain their vendored TypeScript geography as declared runtime
-  files, with no fetch or binary asset requirement. Native Cartesian scales
-  preserve the old 0.75 longitude/latitude aspect. Top/bottom anchors determine
-  map height, even when that clips horizontal overflow; do not fit the map into
-  a different box. State insets preserve their original bounding transforms;
-  world latitude bounds omit Antarctica. Closed native Curve subpaths preserve
-  polygon holes through even-odd fill. Each region is one Scatter observation.
-  Empty observations are explicit; unknown regions use the no-data paint and
-  measured zero uses the lowest band. The original visualMap legend supports
-  multiple toggles and hover emphasis; keep those interactions. Its literal
-  interval gaps (such as 9.5K) have no selected band but retain the actual value
-  for inspection. Map annotations and offsets come from callers, never from
-  production sample labels. Repeated geographic keys make the input unavailable.
-- Force graphs retain the original seeded spring/gravity/repulsion/friction
-  calculation, shared as local geometry with its Apache and BSD notices. Recharts
-  owns native Scatter observations, axes and the entrance animation clock. Seed
-  bounds still determine the simulation's gravity center. The simple force graph
-  fits the complete entrance trajectory with equal X/Y scale and reserves actual
-  label bounds plus the absolute node radii. Seed-only view bounds clipped settled
-  nodes. Label size observation follows font/token changes and replaced Scatter
-  marks. Refitting after a drag uses released positions; changing the view while
-  the pointer is held would invalidate its captured inverse scales. The dense
-  graph retains its seed-based viewport and explicit pan/zoom.
-  The old SSR snapshot ran only two force steps, while live previews
-  settled, so compare against a fully settled reference. Link width does not
-  influence physical spring length in these specimens. Unknown endpoints and
-  repeated directed edges follow the original graph's omission rules.
-- Force dragging captures the stable chart SVG, because Recharts keys individual
-  scatter marks by coordinates. Disable activeShape's automatic raised layer so
-  selected links cannot cover their endpoint nodes; public tooltip hooks still
-  drive adjacency emphasis. Stop using the entrance trajectory after interaction,
-  or it overwrites dragged coordinates even with animation disabled. Pointer
-  movement updates the simulation; release settles it without a background timer.
-  The dense viewport keeps node size at 1 + (zoom - 1) × 0.6 and scopes pan/zoom
-  to the instance. The old dense metadata's replay claim had no handler.
-  Consumer drag checks query and measure the current mark from the stable chart
-  root in one browser evaluation, retrying while a connected mark is unavailable.
-  Evaluating a previously resolved mark can race its removal from the SVG.
-  Recharts leaves native arrow-key page scrolling enabled. On an overflowing
-  consumer page, that scroll can continue into a following pointer check and
-  invalidate its screen coordinates. The force fixture cancels the page-scroll
-  default on the document after React handles each arrow event, then resets the
-  viewport before measuring drag targets. It exercises horizontal overflow and
-  real keyboard navigation while retaining its precise drag assertions. Scope
-  and remove the listener so later consumer checks retain normal browser input.
-- Scatter-morph uses actual Scatter, Bar and Pie series. On a requested view
-  change, sample the currently visible native outlines by stable product ID;
-  custom marks follow the next native series' animation clock to its geometry.
-  Keep native final shapes, preserve all observations through the transition,
-  and capture the current intermediate outline if clicked again. Completed view
-  transitions must not replay their saved outlines on later data updates; those
-  updates belong to the current native series. All three series must match
-  animation records by product ID; the library's positional default transfers
-  geometry between products after reordering, insertion, removal or revenue-rank
-  changes. Consumer checks inspect intermediate geometry for these cases.
-  Read completion inside native shape callbacks too: a container resize can
-  update them without rendering the parent component. A crossfade loses the
-  component's identity tracking. The whole plot still advances on click;
-  its keyboard button is a sibling of the focusable chart SVG. Zero revenue is
-  not an equal-slice donut, and a missing revenue prevents a truthful share total.
 - Recharts makes the chart SVG focusable. Suppress its browser outline for
   pointer focus and style `:focus-visible` with language ink and mark-stroke
   tokens. Pie sectors can also receive pointer focus despite `tabindex="-1"`;
   include these descendants in the same treatment. Keep the accessibility layer
   and keyboard navigation enabled.
-- Scatter marks retain the old renderer's 0.8 opacity where it was implicit.
-  Single-axis retains linear diameter, while dot-heat/calendar-heat retain their
-  original square-root size curves. Tiny dots mean measured zero; missing values
-  have no mark. Peaks annotate one real observation and add no keyboard stops.
-- Matrix heatmaps retain absolute percentage bands, indexed categories and
-  tokenized cell radii. Co-usage self-pairs are inapplicable; an instance with no
-  comparable pairs renders an empty state. Its original band legend toggles
-  visibility per instance. Adoption labels change contrast at 46%. Background
-  strokes are cell gaps. Hover tests target the whole observation group so a
-  value label remains a valid pointer target.
-- Calendar week/period labels and the peak's business description come from
-  caller props. The example alone supplies its original months and release-week
-  wording. Draw the peak annotation above all daily marks through public scales.
-  The note's wrapping box spans the plot width, independently of the peak's
-  week, so peaks at either edge cannot push the text outside the chart.
-  Calendar and almanac annotations use Recharts' public label ZIndexLayer.
-  JSX order alone does not put custom children above Scatter: its portal paints
-  later and can cover lettering and background knockouts, including on hover.
-- Dotty-matrix uses one observation series on projected library scales; slab
-  curves and corner labels are guides. Preserve clipping at the original plot
-  boundary. Beeswarm retains fixed lane calibration while expanding its visible
-  domain; sorting piles must retain stable deal IDs. Its baseline crosses row
-  zero, independently of the below-zero median rule endpoint.
-- Violin takes actual reply-time observations and a positive caller bandwidth.
-  Its 48-sample Gaussian density is normalized within each plan. The example
-  alone generates the old samples. Median rank controls tone; violin and
-  beeswarm retain the original upper-middle median convention. Violin shapes
-  use library-generated closed curves within one Scatter observation series.
-  Median labels sit beyond the scaled silhouette half-width; a fixed offset
-  from the center puts dark text inside the fill as the chart widens.
-- Tick-box validates ordered five-number summaries and retains independent
-  outliers even when a summary is unavailable. Its actual original marks use
-  muted median rules and filled outliers, despite contrary legacy comments.
-  One Scatter observation series retains summary/outlier identities and uses
-  library Rectangle marks with public scales for the whiskers and medians.
-- Hairline-area uses native Bar and Line series. Custom Bar hairlines consume
-  stroke tokens; the line keeps null gaps and contributes the single peak dot.
-  Sparse time labels come from the caller, and unavailable days remain available
-  for keyboard inspection without turning into zero-valued observations.
-- Ridgeline uses native Area, Bar and Line layers over caller density profiles.
-  Bar consumes chart-level data; Area and Line accept their own arrays. Guard
-  hatch dataKey functions because axis calculation can present another series'
-  payload. Its assistive reading uses the public active axis label and the actual
-  union of profile hours: Recharts' own-series tooltip fallback can otherwise
-  return another hour. Preserve the specimen's invisible tooltip/row labels,
-  axis-floor fills and overlap order. The zero-crossing rail is shared with
-  beeswarm; it does not own either chart's series, domains or paint choices.
-
-- Jitter-strip takes fractional band positions directly. The signed fixture hash
-  and rounded band lookup are original behavior. Keep the fixed band viewport;
-  Recharts normally expands a supplied domain to include all data. Overflow is
-  enabled and the Scatter's clip is disabled through its public className so
-  custom marks can retain whole edge dots when their bounds meet the plot.
-- Trend-lineage uses one event series, with scaled guides and survival terminals
-  outside keyboard inspection. The caller supplies its inclusive year window.
-  An incomplete feature timeline cannot claim a continuous history or a tail.
-  Shipped events are filled; reworks are hollow; intervals over two years are
-  dashed. Feature names use column indices so duplicates remain separate.
-
-- Type-colonnade is a network encoding, despite its old bar taxonomy. One
-  repository is one observation and one strand; team counts derive from those
-  available ownership records. Strands retain the original 21-point sampling
-  and library-generated paths. Indexed ownership keeps repeated names distinct.
-
-- Dumbbell-queue requires whole nonnegative minutes because every bead means
-  one minute saved. Missing endpoints stay unavailable, and increases have no
-  saved-minute beads. Its old category axis rounded away the fixture's vertical
-  jitter; the actual original beads sit on the rail. Preserve that placement.
-  Hollow/solid endpoints own inspection; rails and minute beads add no stops.
-
-- Rank-strip is a rank heatmap, not a bump line. Positive integer ranks keep
-  absolute tones; zero is not a rank. Sort by the final declared period, with
-  missing finishes last and stable ties. Do not substitute an earlier known rank
-  for a missing final reading. The original cell edge, pale-cell label paint and
-  radius have semantic token roles; they are not background knockouts.
-
-- Tick-rows uses a native horizontal Bar per team, with one thin vertical
-  mark per release and a counting dot every fifth mark. Keep counts whole and
-  nonnegative, caller order, deterministic height/opacity, and zero/unavailable
-  totals. Category boundaries carry the row rules; labels use library scales.
-
-- Barcode-lollipop renders only the chart, with the side note and legend removed
-  at the owner's request. Its 676px example width retains the original 540px plot
-  and preview padding; the plot fills the component's available width.
-  Day labels, sparse axis labels and weekend flags belong to the caller. The
-  example only shows APR, since the old automatic ticks never reached MAY/JUN's
-  formatter positions. Every supplied day retains a calendar rule; unavailable
-  readings have no peak. Up to three greatest readings at least six day positions
-  apart are labelled; stems are decorative, and only peaks own inspection.
-
-- Hundred-field takes up to four ordered whole-percent shares. Known shares
-  cannot total more than 100; partial allocation does not generate extra people.
-  One segment is one observation, and its exact share determines its dot count.
-  Preserve golden-angle positions and the old spoke schedule (units 0, 5, 10,
-  etc.). Unknown and zero shares keep distinct labels. The four recorded cores
-  determine layout; additional categories require a separate composition.
-
 - Recharts Scatter spreads internal observation fields into symbol props. A
   field named `option` replaces the custom shape with a default symbol. Keep
   public business fields on the caller API, but map collisions to distinct
   internal names before passing observations to the library.
-- Ballot-tally preserves a hundred marks per available option, with distinct
-  selected/unselected heights, offsets and thickness. Rows can total above 100
-  because respondents may choose several options. A missing count must not
-  produce a hundred unselected respondents. Shared tally-marks owns only the
-  vertical unit marks and deterministic variation used by ballot-tally and
-  tick-rows; each retains its series, scales, counting dots, labels and geometry.
-  Ballot option headings use the same Y scale as their ticks. Percentages of the
-  full chart height drift across the margin-adjusted rows and overlap lower
-  tallies. Headings sit above the count labels, including short/zero selections;
-  dividers separate those complete rows. Automatic height reserves at least
-  60px per row for the headings, marks and divider rules.
 
 ## Remaining scope
 
-The original 65-chart catalogue now follows the React source-delivery and token
-contract, with original fixtures and encodings preserved subject to explicit
-unavailable-data rules. New chart families, specialist library selection, arbitrary
-asset delivery and large-data performance need their own evidence. Consumer server
+New chart families, specialist library selection, arbitrary asset delivery and
+large-data performance need their own evidence. Consumer server
 rendering remains limited by Recharts. Commercial provenance for material revived
 from older samples needs review; deleting old files does not establish a license.
+
+## Skills and documentation boundaries
 
 Two skills serve different audiences: `skills/nodex/SKILL.md` teaches downstream
 use and must contain no registry-authoring procedure;
 `.agents/skills/nodex-authoring/SKILL.md` owns the repository procedure. Keep the
 split, and replace obsolete instructions when the architecture changes.
+
+The 13 imported design skills under `.agents/skills/` are opt-in references, not
+repository defaults. Use one only when the task calls for it; its aesthetic,
+layout, animation or image-generation preferences are subordinate to the task,
+the selected language's DESIGN.md/tokens and this architecture. Do not apply a
+style overhaul merely because a skill is installed. Preserve upstream skill files;
+this repository boundary governs how they are used here.

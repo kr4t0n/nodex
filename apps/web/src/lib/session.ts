@@ -6,22 +6,11 @@ import { cookies } from 'next/headers';
 import { databaseConfigured, query } from './db.ts';
 
 /**
- * Sessions.
- *
- * The cookie carries an opaque random token. The database stores only its
- * SHA-256, so a leaked database read hands the reader nothing usable: the server
- * never needs to reproduce a token, only to compare one.
- *
- * This still guards nothing but page sequencing. Every language is public, and
- * the registry is served as static files that never consult a cookie. When a
- * restricted language exists, the check belongs on the route that streams its
- * bytes, not here, because a page-level check protects the page and not the
- * content behind it.
+ * Cookies carry opaque tokens; only their SHA-256 fingerprints enter the database.
  */
 
 export const SESSION_COOKIE = 'nx_session';
 
-/** Long enough not to be an irritation, short enough that a stolen laptop expires. */
 const SESSION_DAYS = 30;
 
 export interface SessionUser {
@@ -59,19 +48,11 @@ export async function createSession(
 }
 
 /**
- * The signed-in user, or undefined.
- *
- * Returns undefined rather than throwing when the accounts layer is absent or
- * unreachable, so a missing database degrades to "signed out" instead of a 500
- * on every page. The landing page never calls this at all, which is why it stays
- * static and keeps working regardless.
+ * An absent or unreachable accounts database degrades to signed out.
  */
 export async function currentUser(): Promise<SessionUser | undefined> {
-  // Read the cookie BEFORE checking configuration, even though the check is
-  // cheaper. Touching `cookies()` is what marks the calling route dynamic, and
-  // returning early would make that marking depend on whether DATABASE_URL
-  // happened to be set during the build. A route that prerendered without it
-  // would then serve a cached "signed out" answer to everyone, forever.
+  // Read cookies before configuration so an unconfigured build cannot cache a
+  // signed-out response as static HTML.
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token || !databaseConfigured()) return undefined;
@@ -94,8 +75,7 @@ export async function currentUser(): Promise<SessionUser | undefined> {
       avatarUrl: row.avatar_url,
     };
   } catch {
-    // Deliberately swallowed and deliberately not logged with the token in
-    // scope. A database that is down should read as signed out, not as a crash.
+    // Do not log database errors with a session token in scope.
     return undefined;
   }
 }
@@ -104,7 +84,7 @@ export async function isSignedIn(): Promise<boolean> {
   return Boolean(await currentUser());
 }
 
-/** Delete the row as well as the cookie, so the token is dead everywhere. */
+/** Attempt server revocation; always clear this browser's cookie. */
 export async function destroySession(): Promise<void> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;

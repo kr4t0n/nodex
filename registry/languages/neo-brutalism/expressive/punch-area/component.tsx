@@ -245,6 +245,7 @@ export function PunchArea({
                     ) : null;
                   }}
                 />
+                {/* Area parses the strokeWidth prop for clipping; CSS variables must use style to avoid NaN. */}
                 <Area
                   id={`${id}-trend`}
                   dataKey="value"

@@ -6,20 +6,13 @@ import { DEFAULT_REGISTRY, type Registry } from './registry.ts';
 import { bold, dim, fail, heading, out } from './ui.ts';
 
 /**
- * Sign in by device code.
- *
- * The CLI cannot receive a redirect, so the browser does the authenticating and
- * the terminal polls. What comes back is a nodex session, not a GitHub token, so
- * signing out only has to delete it in one place.
+ * Poll for browser approval and store the resulting Nodex session locally.
  */
 export async function cmdLogin(registry: Registry): Promise<void> {
   heading('Login');
   out();
 
   if (!registry.isRemote) {
-    // Name the root. Without it this reads as a non-sequitur to anyone who
-    // installed the CLI globally and happened to run it inside a checkout,
-    // which is exactly where someone working on nodex runs everything.
     out('  This registry is a directory, read straight off disk, so there is');
     out('  no server to sign in to.');
     out();
@@ -97,8 +90,6 @@ export async function cmdWhoami(registry: Registry): Promise<void> {
   heading('Whoami');
   out();
 
-  // Same trap as login: "not signed in to /Users/..." invites someone to sign
-  // in to a directory, which is not a thing.
   if (!registry.isRemote) {
     out('  This registry is a directory, which has no sessions.');
     out();

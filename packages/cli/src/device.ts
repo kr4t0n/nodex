@@ -1,11 +1,7 @@
 import process from 'node:process';
 
 /**
- * Device authorization, client half.
- *
- * The API lives at the registry root, which is true whenever the registry is
- * served by the nodex app. When the registry is a CDN the two are different
- * hosts, and `NODEX_API` points at the app.
+ * NODEX_API separates account requests from static registry hosting on a CDN.
  */
 
 export interface DeviceStart {
@@ -133,11 +129,7 @@ const sleep = (seconds: number) =>
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 /**
- * Poll until approved, rejected, or expired.
- *
- * Honours `slow_down` by widening the interval permanently rather than for one
- * round, which is what the server is asking for: a client that speeds back up
- * immediately just gets told again.
+ * Keep the increased interval after slow_down for all subsequent polls.
  */
 export async function awaitApproval(
   api: string,

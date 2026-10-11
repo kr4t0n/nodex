@@ -1,13 +1,5 @@
 import 'server-only';
 
-/**
- * GitHub OAuth, the web half.
- *
- * Only what the flow needs. No SDK: this is two HTTP calls, and a dependency
- * would be more code to audit than the code it replaces for something that
- * touches credentials.
- */
-
 export interface GitHubUser {
   id: number;
   login: string;
@@ -36,8 +28,7 @@ export function authorizeUrl(state: string): string {
   const params = new URLSearchParams({
     client_id: process.env.GITHUB_CLIENT_ID ?? '',
     redirect_uri: callbackUrl(),
-    // The default scope already includes the public profile. Asking for less is
-    // not possible; asking for more would be asking for access this does not use.
+    // Sign-in needs profile access only, never repository access.
     scope: 'read:user',
     state,
     allow_signup: 'true',
@@ -46,11 +37,7 @@ export function authorizeUrl(state: string): string {
 }
 
 /**
- * Trade the callback code for an access token.
- *
- * GitHub returns 200 with an `error` field rather than an HTTP error status when
- * the code is bad, so checking `res.ok` alone silently produces `undefined` and
- * a confusing failure two calls later.
+ * GitHub can return an error payload with HTTP 200; validate both status and body.
  */
 export async function exchangeCode(code: string): Promise<string> {
   const res = await fetch('https://github.com/login/oauth/access_token', {
