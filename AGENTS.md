@@ -800,13 +800,23 @@ Preserve these authentication decisions:
 - Cookies contain opaque random session tokens; the database stores SHA-256.
 - OAuth state is httpOnly, compared in constant time and deleted after use.
   Errors redirect with fixed public tokens, never upstream messages that might
-  include request credentials.
+  include request credentials. Post-auth destinations are fixed relative paths;
+  `NEXT_PUBLIC_SITE_URL` configures GitHub's callback and the device verification
+  URL, not the origin of an authenticated browser's redirect. OAuth fetches reject
+  redirects and validate token/profile JSON before using credentials or writing users.
 - `currentUser` touches cookies before checking configuration so prerendering
   cannot cache an unconfigured signed-out result. `/languages` also declares
   force-dynamic.
 - Device authorization returns a Nodex CLI session, never a GitHub token.
   Approval is a form POST. Codes use unbiased random selection and avoid
-  ambiguous characters; successful exchange consumes the device request.
+  ambiguous characters; successful exchange consumes the device request through
+  `DELETE ... RETURNING`. Only the deleting poll can mint a session, even when
+  concurrent polls read the same approval. Consumption precedes session creation;
+  a storage failure requires a new sign-in, rather than replaying an approval.
+- `NODEX_API` overrides the registry root for account requests. Every device
+  operation validates HTTPS (HTTP only on loopback), rejects embedded credentials,
+  queries and fragments, and disables redirects before sending a device code or
+  bearer token. Validation belongs at the transport boundary as well as selection.
 
 The monorepo has one root `.env`, explicitly loaded by Next. It is optional for
 public builds. Database, OAuth credentials and `NEXT_PUBLIC_SITE_URL` are read by

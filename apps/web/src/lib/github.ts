@@ -55,6 +55,7 @@ export function authorizeUrl(state: string): string {
 export async function exchangeCode(code: string): Promise<string> {
   const res = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
+    redirect: 'error',
     headers: { 'content-type': 'application/json', accept: 'application/json' },
     body: JSON.stringify({
       client_id: process.env.GITHUB_CLIENT_ID,
@@ -64,24 +65,20 @@ export async function exchangeCode(code: string): Promise<string> {
     }),
   });
 
-  const payload = (await res.json()) as {
-    access_token?: string;
-    error?: string;
-    error_description?: string;
-  };
-
-  if (!payload.access_token) {
-    // The description is GitHub's own prose and carries no secret. The token
-    // never appears here because there is not one.
-    throw new Error(
-      payload.error_description ?? payload.error ?? 'no access token returned',
-    );
+  const payload: unknown = await res.json().catch(() => null);
+  if (
+    !res.ok || !record(payload) || 'error' in payload ||
+    !nonemptyText(payload.access_token) || !/^[A-Za-z0-9._~+/-]+=*$/.test(payload.access_token) ||
+    typeof payload.token_type !== 'string' || payload.token_type.toLowerCase() !== 'bearer'
+  ) {
+    throw new Error('GitHub token exchange failed.');
   }
   return payload.access_token;
 }
 
 export async function fetchUser(accessToken: string): Promise<GitHubUser> {
   const res = await fetch('https://api.github.com/user', {
+    redirect: 'error',
     headers: {
       authorization: `Bearer ${accessToken}`,
       accept: 'application/vnd.github+json',
@@ -89,7 +86,33 @@ export async function fetchUser(accessToken: string): Promise<GitHubUser> {
     },
   });
   if (!res.ok) {
-    throw new Error(`GitHub user lookup returned ${res.status}`);
+    throw new Error('GitHub user lookup failed.');
   }
-  return (await res.json()) as GitHubUser;
+  const payload: unknown = await res.json().catch(() => null);
+  if (
+    !record(payload) || typeof payload.id !== 'number' ||
+    !Number.isSafeInteger(payload.id) || payload.id <= 0 ||
+    !nonemptyText(payload.login) ||
+    !(payload.name === null || typeof payload.name === 'string') ||
+    !(payload.avatar_url === null || secureAvatar(payload.avatar_url))
+  ) throw new Error('GitHub returned an invalid profile.');
+  return { id: payload.id, login: payload.login, name: payload.name, avatar_url: payload.avatar_url };
+}
+
+function record(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function nonemptyText(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && !/[\p{Cc}\p{Cf}]/u.test(value);
+}
+
+function secureAvatar(value: unknown): value is string {
+  if (!nonemptyText(value)) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password;
+  } catch {
+    return false;
+  }
 }

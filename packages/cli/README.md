@@ -78,6 +78,11 @@ nodex logout                      forget the stored token
 nodex whoami                      inspect the current session
 ```
 
+`NODEX_API` optionally selects an account API base separate from the registry
+root. It requires HTTPS, except HTTP on `localhost`, `127.0.0.1` or `[::1]`, and
+rejects credentials, query strings and fragments. Device and `whoami` requests
+never follow redirects; supply the final base URL.
+
 References can be language-qualified (`signal-console/endpoint-latency`) or bare
 (`button`) when `nodex.json` or `--design` supplies a language. Search filters are
 `--design`, `--type`, `--tag`, `--tier` and `--density`. Run any command with
