@@ -20,6 +20,9 @@ overrides:
   # Bound recursion and rewrite work in minimatch's brace expansion.
   # https://github.com/advisories/GHSA-q2hr-2g5m-vwhr
   brace-expansion: 5.0.12
+  # The 2.5 patch line removes micromatch/braces; 2.5.6 fixes Windows ia32 builds.
+  # https://github.com/advisories/GHSA-vfj7-8cjw-p6xm
+  '@parcel/watcher': 2.5.6
 
 allowBuilds:
   # Use the published platform binaries; no source-build fallback is needed.
