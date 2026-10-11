@@ -51,7 +51,8 @@ export default async function Page({
                 className="mt-5 mb-0 text-[13.5px] leading-[1.75]"
                 style={{ color: 'var(--nx-muted)' }}
               >
-                Signed in as {user.login}. Enter the code shown in your terminal.
+                Signed in as {user.login}. Enter the code shown in your
+                terminal.
               </p>
 
               {error ? (
@@ -129,7 +130,10 @@ function Outcome({ done }: { done: string }) {
           ? 'You can close this tab. The terminal will pick it up within a few seconds.'
           : 'Nothing was granted. The terminal will report that the request was denied.'}
       </p>
-      <Link href="/languages" className="nx-btn nx-btn--quiet mt-9 no-underline">
+      <Link
+        href="/languages"
+        className="nx-btn nx-btn--quiet mt-9 no-underline"
+      >
         Back to the languages
       </Link>
     </>

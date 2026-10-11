@@ -35,5 +35,11 @@ const observations: readonly DualAreaDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <DualArea data={observations} animate={animate} aria-label="Daily ad spend and sign-ups over 30 days" />;
+  return (
+    <DualArea
+      data={observations}
+      animate={animate}
+      aria-label="Daily ad spend and sign-ups over 30 days"
+    />
+  );
 }

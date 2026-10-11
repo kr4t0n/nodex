@@ -3,14 +3,8 @@
   "title": "Task time before and after",
   "description": "Yellow circles and lilac squares connect paired readings on a common scale, with direct labels above and below each row.",
   "component": "dumbbell",
-  "exports": [
-    "TwinPins"
-  ],
-  "tags": [
-    "comparison",
-    "before-after",
-    "paired"
-  ],
+  "exports": ["TwinPins"],
+  "tags": ["comparison", "before-after", "paired"],
   "props": [
     {
       "name": "data",
@@ -83,17 +77,13 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "neo-chart-frame.tsx"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

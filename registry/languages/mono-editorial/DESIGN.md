@@ -23,13 +23,13 @@ Preserve that character in ordinary pages and forms as well as in reports.
 Warm off-white paper and near-black ink define the palette. Every intermediate
 value is a warm grey. Emphasis comes from weight, size, position and density.
 
-| Token | Value | Role |
-| --- | --- | --- |
-| `--nx-bg` / `--nx-paper` | `#F0EFEB` | page and surface ground |
+| Token                    | Value     | Role                                      |
+| ------------------------ | --------- | ----------------------------------------- |
+| `--nx-bg` / `--nx-paper` | `#F0EFEB` | page and surface ground                   |
 | `--nx-ink` / `--nx-dark` | `#1C1C1A` | primary text, marks and inverted surfaces |
-| `--nx-muted` | `#8F8E88` | supporting text and secondary emphasis |
-| `--nx-faint` | `#C6C5BF` | quiet captions and minor details |
-| `--nx-grid` | `#DEDDD6` | structural rules and separators |
+| `--nx-muted`             | `#8F8E88` | supporting text and secondary emphasis    |
+| `--nx-faint`             | `#C6C5BF` | quiet captions and minor details          |
+| `--nx-grid`              | `#DEDDD6` | structural rules and separators           |
 
 Use the semantic role appropriate to the content. Additional tonal roles refine
 this hierarchy; they do not introduce an accent palette. Selection, urgency and
@@ -48,14 +48,14 @@ palette that can drift from the language.
 Inter is the single typeface, using the defined weights from 400 to 800. The
 scale is restrained; weight, tracking and surrounding space establish hierarchy.
 
-| Role | Size | Treatment |
-| --- | --- | --- |
-| Page title | `22px` | weight 800, `-0.02em` tracking |
-| Card title | `16.5px` | weight 700, `-0.02em` tracking |
-| Body | `11.5px` | `1.7` line height |
-| Control | `12px` | `1.4` line height |
-| Action | `11.5px` | weight 600, `0.01em` tracking |
-| Caption | `9.5px` | weight 500, uppercase, `0.08em` tracking |
+| Role       | Size     | Treatment                                |
+| ---------- | -------- | ---------------------------------------- |
+| Page title | `22px`   | weight 800, `-0.02em` tracking           |
+| Card title | `16.5px` | weight 700, `-0.02em` tracking           |
+| Body       | `11.5px` | `1.7` line height                        |
+| Control    | `12px`   | `1.4` line height                        |
+| Action     | `11.5px` | weight 600, `0.01em` tracking            |
+| Caption    | `9.5px`  | weight 500, uppercase, `0.08em` tracking |
 
 Use negative tracking for headings and positive tracking for uppercase labels.
 Small captions should read as supporting credit lines, leaving primary content

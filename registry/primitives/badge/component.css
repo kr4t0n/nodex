@@ -1,50 +1,50 @@
 @layer components {
-/* badge - shared primitive, themed by the active language's tokens.
+  /* badge - shared primitive, themed by the active language's tokens.
 
    Solid and outlined badges use the language's small offset shadow. Dashed
    and quiet labels stay flat; their lighter treatment carries less emphasis. */
 
-.nx-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--nx-space-badgeGap);
-  padding: var(--nx-space-badgePadding);
-  border: var(--nx-stroke-hairline) solid transparent;
-  border-radius: var(--nx-radius-pill);
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-uiLabel-size);
-  font-weight: var(--nx-type-uiLabel-weight);
-  letter-spacing: var(--nx-type-uiLabel-tracking);
-  line-height: var(--nx-type-badge-lineHeight);
-  text-transform: var(--nx-type-uiLabel-transform);
-  white-space: nowrap;
-  color: var(--nx-muted);
-}
+  .nx-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nx-space-badgeGap);
+    padding: var(--nx-space-badgePadding);
+    border: var(--nx-stroke-hairline) solid transparent;
+    border-radius: var(--nx-radius-pill);
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-uiLabel-size);
+    font-weight: var(--nx-type-uiLabel-weight);
+    letter-spacing: var(--nx-type-uiLabel-tracking);
+    line-height: var(--nx-type-badge-lineHeight);
+    text-transform: var(--nx-type-uiLabel-transform);
+    white-space: nowrap;
+    color: var(--nx-muted);
+  }
 
-.nx-badge--solid {
-  background: var(--nx-badgeFill);
-  border-color: var(--nx-ink);
-  color: var(--nx-badgeText);
-}
+  .nx-badge--solid {
+    background: var(--nx-badgeFill);
+    border-color: var(--nx-ink);
+    color: var(--nx-badgeText);
+  }
 
-.nx-badge--solid,
-.nx-badge--outline {
-  box-shadow: var(--nx-shadow-badge) var(--nx-ink);
-}
+  .nx-badge--solid,
+  .nx-badge--outline {
+    box-shadow: var(--nx-shadow-badge) var(--nx-ink);
+  }
 
-.nx-badge--outline {
-  border-color: var(--nx-ink);
-  color: var(--nx-ink);
-}
+  .nx-badge--outline {
+    border-color: var(--nx-ink);
+    color: var(--nx-ink);
+  }
 
-.nx-badge--dashed {
-  border-style: dashed;
-  border-color: var(--nx-faint);
-  color: var(--nx-muted);
-}
+  .nx-badge--dashed {
+    border-style: dashed;
+    border-color: var(--nx-faint);
+    color: var(--nx-muted);
+  }
 
-.nx-badge--quiet {
-  color: var(--nx-faint);
-  padding-inline: 0;
-}
+  .nx-badge--quiet {
+    color: var(--nx-faint);
+    padding-inline: 0;
+  }
 }

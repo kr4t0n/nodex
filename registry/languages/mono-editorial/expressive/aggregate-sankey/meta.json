@@ -7,25 +7,13 @@
   "runtime": "react",
   "density": "glance",
   "aspectRatio": "720/320",
-  "tags": [
-    "attribution"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["attribution"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "AggregateSankey"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["AggregateSankey"],
+  "files": ["component.tsx", "component.css"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

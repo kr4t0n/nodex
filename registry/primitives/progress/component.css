@@ -1,5 +1,5 @@
 @layer components {
-/* progress - shared primitive, themed by the active language's tokens.
+  /* progress - shared primitive, themed by the active language's tokens.
 
    A real <progress> element, so assistive technology announces the value and
    the indeterminate state without any ARIA of our own.
@@ -8,107 +8,108 @@
    comma-joined list is discarded wholesale by a browser that does not know one
    of its parts. */
 
-.nx-progress {
-  appearance: none;
-  display: block;
-  width: 100%;
-  /* Deliberately thin. This language measures with lines, so a progress bar is
+  .nx-progress {
+    appearance: none;
+    display: block;
+    width: 100%;
+    /* Deliberately thin. This language measures with lines, so a progress bar is
      a rule that fills rather than a container that drains. */
-  height: calc(var(--nx-stroke-hairline) * 4);
-  border: 0;
-  border-radius: var(--nx-radius-pill);
-  background: var(--nx-grid);
-  overflow: hidden;
-}
+    height: calc(var(--nx-stroke-hairline) * 4);
+    border: 0;
+    border-radius: var(--nx-radius-pill);
+    background: var(--nx-grid);
+    overflow: hidden;
+  }
 
-/* Track */
-.nx-progress::-webkit-progress-bar {
-  background: var(--nx-grid);
-  border-radius: var(--nx-radius-pill);
-}
+  /* Track */
+  .nx-progress::-webkit-progress-bar {
+    background: var(--nx-grid);
+    border-radius: var(--nx-radius-pill);
+  }
 
-/* Fill */
-.nx-progress::-webkit-progress-value {
-  background: var(--nx-valueFill);
-  border-radius: var(--nx-radius-pill);
-  transition: width var(--nx-motion-progress-duration) var(--nx-motion-progress-easing);
-}
+  /* Fill */
+  .nx-progress::-webkit-progress-value {
+    background: var(--nx-valueFill);
+    border-radius: var(--nx-radius-pill);
+    transition: width var(--nx-motion-progress-duration)
+      var(--nx-motion-progress-easing);
+  }
 
-.nx-progress::-moz-progress-bar {
-  background: var(--nx-valueFill);
-  border-radius: var(--nx-radius-pill);
-}
+  .nx-progress::-moz-progress-bar {
+    background: var(--nx-valueFill);
+    border-radius: var(--nx-radius-pill);
+  }
 
-/* Quiet, for a secondary measure beside a primary one. */
-.nx-progress--quiet::-webkit-progress-value {
-  background: var(--nx-valueQuietFill);
-}
+  /* Quiet, for a secondary measure beside a primary one. */
+  .nx-progress--quiet::-webkit-progress-value {
+    background: var(--nx-valueQuietFill);
+  }
 
-.nx-progress--quiet::-moz-progress-bar {
-  background: var(--nx-valueQuietFill);
-}
+  .nx-progress--quiet::-moz-progress-bar {
+    background: var(--nx-valueQuietFill);
+  }
 
-/* Thick, where the bar is the subject rather than an annotation. */
-.nx-progress--thick {
-  height: 9px;
-}
+  /* Thick, where the bar is the subject rather than an annotation. */
+  .nx-progress--thick {
+    height: 9px;
+  }
 
-/* Indeterminate: a <progress> with no value attribute.
+  /* Indeterminate: a <progress> with no value attribute.
 
    Deliberately NOT an animated stripe. This language forbids looping animation,
    so an unknown quantity is shown as a dashed track, which reads as "not yet
    measured" without moving. A language that permits loops can override this. */
-.nx-progress:indeterminate {
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--nx-muted) 0,
-    var(--nx-muted) 3px,
-    transparent 3px,
-    transparent 7px
-  );
-}
-
-.nx-progress:indeterminate::-webkit-progress-bar {
-  background: transparent;
-}
-
-.nx-progress-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-fieldGap);
-  width: 100%;
-  font-family: var(--nx-font-sans);
-}
-
-.nx-progress-label {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--nx-space-labelValueGap);
-  font-size: var(--nx-type-caption-size);
-  font-weight: var(--nx-type-caption-weight);
-  letter-spacing: var(--nx-type-caption-tracking);
-  text-transform: uppercase;
-  color: var(--nx-muted);
-}
-
-.nx-progress-label > label {
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-meterLabel-size);
-  font-weight: var(--nx-type-meterLabel-weight);
-  letter-spacing: var(--nx-type-meterLabel-tracking);
-  text-transform: var(--nx-type-meterLabel-transform);
-}
-
-/* Numerals align so a column of measures can be read down. */
-.nx-progress-label > :last-child {
-  font-variant-numeric: tabular-nums;
-  color: var(--nx-ink);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-progress::-webkit-progress-value {
-    transition: none;
+  .nx-progress:indeterminate {
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--nx-muted) 0,
+      var(--nx-muted) 3px,
+      transparent 3px,
+      transparent 7px
+    );
   }
-}
+
+  .nx-progress:indeterminate::-webkit-progress-bar {
+    background: transparent;
+  }
+
+  .nx-progress-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-fieldGap);
+    width: 100%;
+    font-family: var(--nx-font-sans);
+  }
+
+  .nx-progress-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nx-space-labelValueGap);
+    font-size: var(--nx-type-caption-size);
+    font-weight: var(--nx-type-caption-weight);
+    letter-spacing: var(--nx-type-caption-tracking);
+    text-transform: uppercase;
+    color: var(--nx-muted);
+  }
+
+  .nx-progress-label > label {
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-meterLabel-size);
+    font-weight: var(--nx-type-meterLabel-weight);
+    letter-spacing: var(--nx-type-meterLabel-tracking);
+    text-transform: var(--nx-type-meterLabel-transform);
+  }
+
+  /* Numerals align so a column of measures can be read down. */
+  .nx-progress-label > :last-child {
+    font-variant-numeric: tabular-nums;
+    color: var(--nx-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-progress::-webkit-progress-value {
+      transition: none;
+    }
+  }
 }

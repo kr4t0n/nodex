@@ -1,20 +1,6 @@
 name: docker
 
-# Publishes the web app to Docker Hub.
-#
-# Needs two repository secrets:
-#   DOCKERHUB_USERNAME  your Docker Hub account
-#   DOCKERHUB_TOKEN     an access token from Docker Hub, not your password
-#
-# And optionally two repository variables:
-#   DOCKERHUB_REPOSITORY       image name, defaults to <username>/nodex
-#   NEXT_PUBLIC_REGISTRY_URL   bake a CDN origin into the client bundle
-#
-# The registry URL is a build argument rather than runtime configuration
-# because Next inlines NEXT_PUBLIC_* into the browser bundle at build time, and
-# the code that reads it runs in the browser. NEXT_PUBLIC_SITE_URL is different:
-# only server code reads it, so it stays runtime configuration and one image can
-# serve any hostname.
+# Publishing configuration and release steps: README.md, "Deploy and publish".
 
 on:
   push:
@@ -29,10 +15,7 @@ jobs:
       contents: read
 
     steps:
-      # Skip rather than fail when the credentials are absent, so a fork or a
-      # repository that has not set them up yet does not collect a red cross on
-      # every push. Read through `env` rather than interpolated into the script
-      # body, which keeps the values out of the shell command line.
+      # Unconfigured forks skip publication. Keep secrets out of script interpolation.
       - id: guard
         env:
           USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -75,11 +58,7 @@ jobs:
           # The repository root, not apps/web: the image builds the registry
           # before the app, and that lives outside the app directory.
           context: .
-          # amd64 only. An arm64 image would need the linux-arm64 variants of
-          # lightningcss, oxide, swc, and sharp added to optionalDependencies
-          # in the root package.json, for the same reason the x64 ones are
-          # there, and emulated arm64 builds are slow enough to want a good
-          # reason first.
+          # Only amd64 is exercised by the build-only pull-request check.
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

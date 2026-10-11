@@ -7,22 +7,13 @@
   "runtime": "react",
   "strokeAsArea": true,
   "density": "glance",
-  "tags": [
-    "integration",
-    "hub"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["integration", "hub"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "560/360",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "ForceGraph"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["ForceGraph"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

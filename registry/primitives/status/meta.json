@@ -5,20 +5,11 @@
   "component": "status",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "feedback",
-    "text"
-  ],
+  "tags": ["feedback", "text"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Status",
-    "StatusBlock"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Status", "StatusBlock"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

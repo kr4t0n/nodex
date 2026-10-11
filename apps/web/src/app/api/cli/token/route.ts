@@ -23,13 +23,21 @@ export async function POST(request: NextRequest) {
 
   let deviceCode: string | undefined;
   try {
-    const body = (await request.json()) as { device_code?: string };
+    const body: unknown = await request.json();
+    if (
+      typeof body !== 'object' ||
+      body === null ||
+      Array.isArray(body) ||
+      !('device_code' in body) ||
+      typeof body.device_code !== 'string' ||
+      body.device_code.length !== 43 ||
+      /[^A-Za-z0-9_-]/.test(body.device_code)
+    )
+      return fail('invalid_request');
     deviceCode = body.device_code;
   } catch {
     return fail('invalid_request');
   }
-
-  if (!deviceCode) return fail('invalid_request');
 
   let outcome;
   try {

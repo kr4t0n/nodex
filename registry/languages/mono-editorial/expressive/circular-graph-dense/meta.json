@@ -7,23 +7,13 @@
   "runtime": "react",
   "strokeAsArea": true,
   "density": "close-read",
-  "tags": [
-    "source",
-    "git",
-    "log"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["source", "git", "log"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "560/400",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "CircularGraphDense"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["CircularGraphDense"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

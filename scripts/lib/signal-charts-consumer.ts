@@ -70,32 +70,112 @@ export function SignalChartsConsumer({ animate }: { animate: boolean }) {
 }
 `;
 
-export const SIGNAL_CHART_SLUGS = ['endpoint-latency', 'request-throughput', 'latency-trend', 'response-codes', 'latency-histogram', 'service-health', 'capacity-ring', 'saturation-scatter', 'trace-spans'] as const;
-const chart = (page: Page, slug: string, scope = 'primary') => page.locator(`#signal-${scope} [data-nx-chart="${slug}"]`);
-const setMode = (page: Page, mode: string) => page.evaluate(mode => (window as unknown as { nodexSignal: { setMode: (mode: string) => void } }).nodexSignal.setMode(mode), mode);
+export const SIGNAL_CHART_SLUGS = [
+  'endpoint-latency',
+  'request-throughput',
+  'latency-trend',
+  'response-codes',
+  'latency-histogram',
+  'service-health',
+  'capacity-ring',
+  'saturation-scatter',
+  'trace-spans',
+] as const;
+const chart = (page: Page, slug: string, scope = 'primary') =>
+  page.locator(`#signal-${scope} [data-nx-chart="${slug}"]`);
+const setMode = (page: Page, mode: string) =>
+  page.evaluate(
+    (mode) =>
+      (
+        window as unknown as {
+          nodexSignal: { setMode: (mode: string) => void };
+        }
+      ).nodexSignal.setMode(mode),
+    mode,
+  );
 
 export async function checkSignalChartsConsumer(page: Page): Promise<void> {
   const endpoints = chart(page, 'endpoint-latency');
-  const throughput = chart(page, 'request-throughput'); const latency = chart(page, 'latency-trend');
-  const responses = chart(page, 'response-codes'); const histogram = chart(page, 'latency-histogram');
-  const health = chart(page, 'service-health'); const capacity = chart(page, 'capacity-ring');
-  const scatter = chart(page, 'saturation-scatter'); const spans = chart(page, 'trace-spans');
-  for (const slug of SIGNAL_CHART_SLUGS) for (const scope of ['primary', 'secondary']) await expect(chart(page, slug, scope).locator('svg.recharts-surface')).toHaveCount(1);
-  await expect(endpoints.locator('[data-nx-summary]')).toHaveText('1 OF 4 OVER SLO');
-  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText(['800', '300', '200', '0']);
-  await expect(endpoints.locator('[data-nx-endpoint-route="GET /catalog"]')).toHaveCount(2);
+  const throughput = chart(page, 'request-throughput');
+  const latency = chart(page, 'latency-trend');
+  const responses = chart(page, 'response-codes');
+  const histogram = chart(page, 'latency-histogram');
+  const health = chart(page, 'service-health');
+  const capacity = chart(page, 'capacity-ring');
+  const scatter = chart(page, 'saturation-scatter');
+  const spans = chart(page, 'trace-spans');
+  for (const slug of SIGNAL_CHART_SLUGS)
+    for (const scope of ['primary', 'secondary'])
+      await expect(
+        chart(page, slug, scope).locator('svg.recharts-surface'),
+      ).toHaveCount(1);
+  await expect(endpoints.locator('[data-nx-summary]')).toHaveText(
+    '1 OF 4 OVER SLO',
+  );
+  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText([
+    '800',
+    '300',
+    '200',
+    '0',
+  ]);
+  await expect(
+    endpoints.locator('[data-nx-endpoint-route="GET /catalog"]'),
+  ).toHaveCount(2);
   await expect(endpoints.locator('[data-nx-endpoint-zero]')).toHaveCount(1);
-  const endpointBars = await endpoints.locator('.recharts-bar-rectangle path').evaluateAll(elements => elements.map(element => { const box = (element as SVGGraphicsElement).getBBox(); return { x: box.x, y: box.y, width: box.width, height: box.height }; }));
-  assert(Math.abs(endpointBars[1]!.width / endpointBars[0]!.width - 300 / 800) < 0.001, 'Ranked bars must encode p99 on one shared scale');
-  const endpointSlo = await endpoints.locator('.recharts-reference-line line').evaluate(element => Number(element.getAttribute('x1')));
-  assert(Math.abs(endpointSlo - endpointBars[1]!.x - endpointBars[1]!.width) < 0.01, 'A reading at the SLO must end exactly on the objective');
-  const endpointLabels = await endpoints.locator('[data-nx-endpoint-value]').evaluateAll(elements => elements.map(element => ({ x: Number(element.getAttribute('x')), y: Number(element.getAttribute('y')) })));
-  assert(endpointLabels.every(point => point.x === endpointLabels[0]!.x), 'P99 readings must share an aligned column');
-  for (let i = 0; i < endpointBars.length; i++) assert(Math.abs(endpointLabels[i]!.y - endpointBars[i]!.y - endpointBars[i]!.height / 2) < 0.01, 'Each P99 label must track its native bar band');
-  assert(await endpoints.locator('[data-nx-endpoint-label]').evaluateAll(elements => elements.every(element => element.querySelectorAll('tspan').length === 1)), 'Route labels must stay on one line');
+  const endpointBars = await endpoints
+    .locator('.recharts-bar-rectangle path')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const box = (element as SVGGraphicsElement).getBBox();
+        return { x: box.x, y: box.y, width: box.width, height: box.height };
+      }),
+    );
+  assert(
+    Math.abs(endpointBars[1]!.width / endpointBars[0]!.width - 300 / 800) <
+      0.001,
+    'Ranked bars must encode p99 on one shared scale',
+  );
+  const endpointSlo = await endpoints
+    .locator('.recharts-reference-line line')
+    .evaluate((element) => Number(element.getAttribute('x1')));
+  assert(
+    Math.abs(endpointSlo - endpointBars[1]!.x - endpointBars[1]!.width) < 0.01,
+    'A reading at the SLO must end exactly on the objective',
+  );
+  const endpointLabels = await endpoints
+    .locator('[data-nx-endpoint-value]')
+    .evaluateAll((elements) =>
+      elements.map((element) => ({
+        x: Number(element.getAttribute('x')),
+        y: Number(element.getAttribute('y')),
+      })),
+    );
+  assert(
+    endpointLabels.every((point) => point.x === endpointLabels[0]!.x),
+    'P99 readings must share an aligned column',
+  );
+  for (let i = 0; i < endpointBars.length; i++)
+    assert(
+      Math.abs(
+        endpointLabels[i]!.y - endpointBars[i]!.y - endpointBars[i]!.height / 2,
+      ) < 0.01,
+      'Each P99 label must track its native bar band',
+    );
+  assert(
+    await endpoints
+      .locator('[data-nx-endpoint-label]')
+      .evaluateAll((elements) =>
+        elements.every(
+          (element) => element.querySelectorAll('tspan').length === 1,
+        ),
+      ),
+    'Route labels must stay on one line',
+  );
   await endpoints.locator('svg.recharts-surface').focus();
   await endpoints.locator('svg.recharts-surface').press('ArrowLeft');
-  await expect(endpoints.getByRole('status')).toContainText('POST /a-long-route/that-needs-the-full-tooltip');
+  await expect(endpoints.getByRole('status')).toContainText(
+    'POST /a-long-route/that-needs-the-full-tooltip',
+  );
   await expect(endpoints.getByRole('status')).toContainText('Within SLO');
   await expect(throughput.locator('[data-nx-summary]')).toHaveText('18 REQ/S');
   await expect(throughput.locator('[data-nx-throughput]')).toHaveCount(4);
@@ -106,93 +186,267 @@ export async function checkSignalChartsConsumer(page: Page): Promise<void> {
   await expect(spans.locator('[data-nx-span]')).toHaveCount(3);
   await expect(spans.locator('[data-nx-span-state]')).toHaveText('0ms');
 
-  const bars = await histogram.locator('[data-nx-bucket]').evaluateAll(elements => elements.map(element => { const box = (element as SVGGraphicsElement).getBBox(); return { x:box.x, width:box.width, height:box.height }; }));
+  const bars = await histogram
+    .locator('[data-nx-bucket]')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const box = (element as SVGGraphicsElement).getBBox();
+        return { x: box.x, width: box.width, height: box.height };
+      }),
+    );
   assert.equal(bars.length, 3);
-  assert(Math.abs(bars[1]!.height / bars[0]!.height - 3) < 0.01, 'Histogram heights must encode counts');
-  assert(Math.abs(bars[1]!.width - bars[0]!.width) < 0.01 && Math.abs(bars[1]!.x - bars[0]!.x - bars[0]!.width) < 0.01, 'Equal numeric buckets must be contiguous and equally wide');
-  const objectiveX = await histogram.locator('.recharts-reference-line line').evaluate(element => Number(element.getAttribute('x1')));
-  assert(Math.abs(objectiveX - bars[1]!.x - bars[1]!.width / 2) < 0.01, 'An objective inside a bucket must use its exact numeric position');
-  const usedAngle = await capacity.locator('[data-nx-capacity-part="Used"]').evaluate(element => Math.abs(Number(element.getAttribute('data-nx-end')) - Number(element.getAttribute('data-nx-start'))));
-  assert(Math.abs(usedAngle - 216) < 0.001, '60% usage must occupy exactly 216 degrees');
-  const spanBoxes = await spans.locator('[data-nx-span] .recharts-rectangle').evaluateAll(elements => elements.map(element => { const box = (element as SVGGraphicsElement).getBBox(); return { x:box.x, width:box.width }; }));
-  assert(Math.abs(spanBoxes[1]!.width / spanBoxes[0]!.width - 0.4) < 0.01, 'Span length must encode elapsed time');
-  assert(Math.abs((spanBoxes[2]!.x - spanBoxes[0]!.x) / spanBoxes[0]!.width - 0.4) < 0.01, 'Concurrent spans must keep their actual start offsets');
+  assert(
+    Math.abs(bars[1]!.height / bars[0]!.height - 3) < 0.01,
+    'Histogram heights must encode counts',
+  );
+  assert(
+    Math.abs(bars[1]!.width - bars[0]!.width) < 0.01 &&
+      Math.abs(bars[1]!.x - bars[0]!.x - bars[0]!.width) < 0.01,
+    'Equal numeric buckets must be contiguous and equally wide',
+  );
+  const objectiveX = await histogram
+    .locator('.recharts-reference-line line')
+    .evaluate((element) => Number(element.getAttribute('x1')));
+  assert(
+    Math.abs(objectiveX - bars[1]!.x - bars[1]!.width / 2) < 0.01,
+    'An objective inside a bucket must use its exact numeric position',
+  );
+  const usedAngle = await capacity
+    .locator('[data-nx-capacity-part="Used"]')
+    .evaluate((element) =>
+      Math.abs(
+        Number(element.getAttribute('data-nx-end')) -
+          Number(element.getAttribute('data-nx-start')),
+      ),
+    );
+  assert(
+    Math.abs(usedAngle - 216) < 0.001,
+    '60% usage must occupy exactly 216 degrees',
+  );
+  const spanBoxes = await spans
+    .locator('[data-nx-span] .recharts-rectangle')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const box = (element as SVGGraphicsElement).getBBox();
+        return { x: box.x, width: box.width };
+      }),
+    );
+  assert(
+    Math.abs(spanBoxes[1]!.width / spanBoxes[0]!.width - 0.4) < 0.01,
+    'Span length must encode elapsed time',
+  );
+  assert(
+    Math.abs((spanBoxes[2]!.x - spanBoxes[0]!.x) / spanBoxes[0]!.width - 0.4) <
+      0.01,
+    'Concurrent spans must keep their actual start offsets',
+  );
 
   for (const slug of SIGNAL_CHART_SLUGS) {
     await page.mouse.move(0, 0);
     const surface = chart(page, slug).locator('svg.recharts-surface');
     await surface.focus();
-    await surface.press(slug === 'trace-spans' || slug === 'endpoint-latency' ? 'ArrowLeft' : 'ArrowRight');
+    await surface.press(
+      slug === 'trace-spans' || slug === 'endpoint-latency'
+        ? 'ArrowLeft'
+        : 'ArrowRight',
+    );
     await expect(chart(page, slug).getByRole('status')).toBeVisible();
   }
-  const siblingPaint = await chart(page, 'request-throughput', 'secondary').locator('.recharts-area-curve').evaluate(element => getComputedStyle(element).stroke);
-  await page.locator('#signal-primary').evaluate(element => {
+  const siblingPaint = await chart(page, 'request-throughput', 'secondary')
+    .locator('.recharts-area-curve')
+    .evaluate((element) => getComputedStyle(element).stroke);
+  await page.locator('#signal-primary').evaluate((element) => {
     const node = element as HTMLElement;
-    node.style.setProperty('--nx-ink', '#153354'); node.style.setProperty('--nx-muted', '#7399aa');
-    node.style.setProperty('--nx-crit', '#eb586a'); node.style.setProperty('--nx-withinObjective', '#329978');
+    node.style.setProperty('--nx-ink', '#153354');
+    node.style.setProperty('--nx-muted', '#7399aa');
+    node.style.setProperty('--nx-crit', '#eb586a');
+    node.style.setProperty('--nx-withinObjective', '#329978');
     node.style.setProperty('--nx-surface', '#15212f');
   });
-  for (const slug of SIGNAL_CHART_SLUGS) await expect.poll(() => chart(page, slug).evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(21, 33, 47)');
-  await expect.poll(() => throughput.locator('.recharts-area-curve').evaluate(element => getComputedStyle(element).stroke)).toBe('rgb(21, 51, 84)');
-  for (const mark of [histogram.locator('[data-nx-bucket]').first(), spans.locator('[data-nx-span="b"] .recharts-rectangle')]) {
-    await expect.poll(() => mark.evaluate(element => getComputedStyle(element).fill)).toBe('rgb(115, 153, 170)');
+  for (const slug of SIGNAL_CHART_SLUGS)
+    await expect
+      .poll(() =>
+        chart(page, slug).evaluate(
+          (element) => getComputedStyle(element).backgroundColor,
+        ),
+      )
+      .toBe('rgb(21, 33, 47)');
+  await expect
+    .poll(() =>
+      throughput
+        .locator('.recharts-area-curve')
+        .evaluate((element) => getComputedStyle(element).stroke),
+    )
+    .toBe('rgb(21, 51, 84)');
+  for (const mark of [
+    histogram.locator('[data-nx-bucket]').first(),
+    spans.locator('[data-nx-span="b"] .recharts-rectangle'),
+  ]) {
+    await expect
+      .poll(() => mark.evaluate((element) => getComputedStyle(element).fill))
+      .toBe('rgb(115, 153, 170)');
   }
-  for (const mark of [endpoints.locator('.recharts-bar-rectangle path').first(), endpoints.locator('[data-nx-endpoint-value]').first(), latency.locator('[data-nx-latency="2"][data-nx-percentile="p99Ms"]'), responses.locator('[data-nx-code="serverError"]').first(), health.locator('[data-nx-state="down"] rect'), scatter.locator('[data-nx-host="c"] rect')]) {
-    await expect.poll(() => mark.evaluate(element => getComputedStyle(element).fill)).toBe('rgb(235, 88, 106)');
+  for (const mark of [
+    endpoints.locator('.recharts-bar-rectangle path').first(),
+    endpoints.locator('[data-nx-endpoint-value]').first(),
+    latency.locator('[data-nx-latency="2"][data-nx-percentile="p99Ms"]'),
+    responses.locator('[data-nx-code="serverError"]').first(),
+    health.locator('[data-nx-state="down"] rect'),
+    scatter.locator('[data-nx-host="c"] rect'),
+  ]) {
+    await expect
+      .poll(() => mark.evaluate((element) => getComputedStyle(element).fill))
+      .toBe('rgb(235, 88, 106)');
   }
-  await expect.poll(() => capacity.locator('[data-nx-capacity-part="Used"]').evaluate(element => getComputedStyle(element).fill)).toBe('rgb(50, 153, 120)');
-  assert.equal(await chart(page, 'request-throughput', 'secondary').locator('.recharts-area-curve').evaluate(element => getComputedStyle(element).stroke), siblingPaint, 'Descendant tokens must not affect a sibling chart');
-  await page.locator('#signal-primary').evaluate(element => element.removeAttribute('style'));
-  await page.evaluate(() => (window as unknown as { nodexSignal: { setRevision: (value: boolean) => void } }).nodexSignal.setRevision(true));
-  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText(['900', '800', '300', '0']);
-  await expect(endpoints.locator('[data-nx-endpoint-row]').first()).toHaveAttribute('data-nx-endpoint-route', 'GET /catalog');
-  await expect(chart(page, 'endpoint-latency', 'secondary').locator('[data-nx-endpoint-value]')).toHaveText(['800', '300', '200', '0']);
+  await expect
+    .poll(() =>
+      capacity
+        .locator('[data-nx-capacity-part="Used"]')
+        .evaluate((element) => getComputedStyle(element).fill),
+    )
+    .toBe('rgb(50, 153, 120)');
+  assert.equal(
+    await chart(page, 'request-throughput', 'secondary')
+      .locator('.recharts-area-curve')
+      .evaluate((element) => getComputedStyle(element).stroke),
+    siblingPaint,
+    'Descendant tokens must not affect a sibling chart',
+  );
+  await page
+    .locator('#signal-primary')
+    .evaluate((element) => element.removeAttribute('style'));
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexSignal: { setRevision: (value: boolean) => void };
+      }
+    ).nodexSignal.setRevision(true),
+  );
+  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText([
+    '900',
+    '800',
+    '300',
+    '0',
+  ]);
+  await expect(
+    endpoints.locator('[data-nx-endpoint-row]').first(),
+  ).toHaveAttribute('data-nx-endpoint-route', 'GET /catalog');
+  await expect(
+    chart(page, 'endpoint-latency', 'secondary').locator(
+      '[data-nx-endpoint-value]',
+    ),
+  ).toHaveText(['800', '300', '200', '0']);
   await expect(throughput.locator('[data-nx-summary]')).toHaveText('42 REQ/S');
-  await expect(capacity.locator('[data-nx-capacity-percent]')).toHaveText('80%');
+  await expect(capacity.locator('[data-nx-capacity-percent]')).toHaveText(
+    '80%',
+  );
   await expect(capacity).toContainText('ABOVE THRESHOLD');
-  await expect(scatter.locator('[data-nx-host="a"]')).toHaveAttribute('data-nx-cpu', '40');
-  await expect(spans.locator('[data-nx-span="c"]')).toHaveAttribute('data-nx-start-ms', '40');
+  await expect(scatter.locator('[data-nx-host="a"]')).toHaveAttribute(
+    'data-nx-cpu',
+    '40',
+  );
+  await expect(spans.locator('[data-nx-span="c"]')).toHaveAttribute(
+    'data-nx-start-ms',
+    '40',
+  );
 
   for (const width of [375, 320]) {
-    await page.locator('#signal-primary').evaluate((element, width) => { (element as HTMLElement).style.width = `${width}px`; }, width);
-    for (const slug of SIGNAL_CHART_SLUGS) await expect.poll(() => chart(page, slug).evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
-    await expect.poll(() => capacity.evaluate(element => element.querySelector('dl')!.getBoundingClientRect().top >= element.querySelector('svg')!.getBoundingClientRect().bottom)).toBe(true);
+    await page.locator('#signal-primary').evaluate((element, width) => {
+      (element as HTMLElement).style.width = `${width}px`;
+    }, width);
+    for (const slug of SIGNAL_CHART_SLUGS)
+      await expect
+        .poll(() =>
+          chart(page, slug).evaluate(
+            (element) => element.scrollWidth <= element.clientWidth,
+          ),
+        )
+        .toBe(true);
+    await expect
+      .poll(() =>
+        capacity.evaluate(
+          (element) =>
+            element.querySelector('dl')!.getBoundingClientRect().top >=
+            element.querySelector('svg')!.getBoundingClientRect().bottom,
+        ),
+      )
+      .toBe(true);
   }
-  await page.locator('#signal-primary').evaluate(element => element.removeAttribute('style'));
-  await page.evaluate(() => (window as unknown as { nodexSignal: { setRevision: (value: boolean) => void } }).nodexSignal.setRevision(false));
+  await page
+    .locator('#signal-primary')
+    .evaluate((element) => element.removeAttribute('style'));
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexSignal: { setRevision: (value: boolean) => void };
+      }
+    ).nodexSignal.setRevision(false),
+  );
   await setMode(page, 'partial');
-  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText(['200', '0']);
+  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText([
+    '200',
+    '0',
+  ]);
   await expect(endpoints).toContainText('2 UNAVAILABLE');
   await expect(throughput.locator('[data-nx-throughput]')).toHaveCount(2);
   await expect(throughput.locator('[data-nx-summary]')).toHaveText('— REQ/S');
   await expect(latency.locator('[data-nx-percentile="p99Ms"]')).toHaveCount(2);
   await expect(latency.locator('[data-nx-percentile="p50Ms"]')).toHaveCount(4);
   await expect(responses.locator('[data-nx-response="1"]')).toHaveCount(0);
-  await expect(responses.locator('[data-nx-response-state="1"]')).toHaveText('?');
+  await expect(responses.locator('[data-nx-response-state="1"]')).toHaveText(
+    '?',
+  );
   await expect(histogram.locator('[data-nx-bucket]')).toHaveCount(2);
   await expect(histogram.locator('[data-nx-summary]')).toHaveText('— REQUESTS');
   await expect(health.locator('[data-nx-state="unavailable"]')).toHaveCount(2);
   await expect(scatter.locator('[data-nx-host]')).toHaveCount(2);
   await expect(scatter).toContainText('1 UNAVAILABLE');
   await expect(spans.locator('[data-nx-span="b"]')).toHaveCount(0);
-  await expect(spans.locator('[data-nx-span-state="b"]')).toHaveText('Unavailable');
-  await expect(spans.locator('[data-nx-summary]')).toHaveText('— MS / LAST END');
+  await expect(spans.locator('[data-nx-span-state="b"]')).toHaveText(
+    'Unavailable',
+  );
+  await expect(spans.locator('[data-nx-summary]')).toHaveText(
+    '— MS / LAST END',
+  );
   await expect(capacity.getByRole('status')).toBeVisible();
 
   await setMode(page, 'zero');
   await expect(endpoints.locator('[data-nx-endpoint-zero]')).toHaveCount(4);
-  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText(['0', '0', '0', '0']);
-  await expect(endpoints.locator('[data-nx-summary]')).toHaveText('0 OF 4 OVER SLO');
+  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText([
+    '0',
+    '0',
+    '0',
+    '0',
+  ]);
+  await expect(endpoints.locator('[data-nx-summary]')).toHaveText(
+    '0 OF 4 OVER SLO',
+  );
   await expect(throughput.locator('[data-nx-throughput]')).toHaveCount(4);
   await expect(latency.locator('[data-nx-latency]')).toHaveCount(12);
   await expect(responses.locator('[data-nx-response]')).toHaveCount(0);
-  await expect(responses.locator('[data-nx-response-state]')).toHaveText(['0', '0', '0', '0']);
+  await expect(responses.locator('[data-nx-response-state]')).toHaveText([
+    '0',
+    '0',
+    '0',
+    '0',
+  ]);
   await expect(histogram.locator('[data-nx-bucket]')).toHaveCount(0);
-  await expect(histogram.locator('[data-nx-bucket-state]')).toHaveText(['0', '0', '0']);
-  await expect(capacity.locator('[data-nx-capacity-part="Used"]')).toHaveCount(0);
+  await expect(histogram.locator('[data-nx-bucket-state]')).toHaveText([
+    '0',
+    '0',
+    '0',
+  ]);
+  await expect(capacity.locator('[data-nx-capacity-part="Used"]')).toHaveCount(
+    0,
+  );
   await expect(capacity.locator('[data-nx-capacity-percent]')).toHaveText('0%');
   await expect(scatter.locator('[data-nx-host]')).toHaveCount(3);
-  await expect(spans.locator('[data-nx-span-state]')).toHaveText(['0ms', '0ms', '0ms', '0ms']);
+  await expect(spans.locator('[data-nx-span-state]')).toHaveText([
+    '0ms',
+    '0ms',
+    '0ms',
+    '0ms',
+  ]);
   await setMode(page, 'single');
   await expect(endpoints.locator('[data-nx-endpoint-row]')).toHaveCount(1);
   await expect(throughput.locator('[data-nx-throughput]')).toHaveCount(1);
@@ -202,33 +456,92 @@ export async function checkSignalChartsConsumer(page: Page): Promise<void> {
   await expect(spans.locator('[data-nx-span]')).toHaveCount(1);
   for (const mode of ['empty', 'invalid']) {
     await setMode(page, mode);
-    for (const slug of SIGNAL_CHART_SLUGS.filter(slug => slug !== 'service-health')) {
+    for (const slug of SIGNAL_CHART_SLUGS.filter(
+      (slug) => slug !== 'service-health',
+    )) {
       await expect(chart(page, slug).getByRole('status')).toBeVisible();
       await expect(chart(page, slug).locator('svg')).toHaveCount(0);
     }
-    if (mode === 'empty') await expect(health.locator('[data-nx-state="unavailable"]')).toHaveCount(4);
+    if (mode === 'empty')
+      await expect(health.locator('[data-nx-state="unavailable"]')).toHaveCount(
+        4,
+      );
   }
   await setMode(page, 'duplicates');
-  for (const slug of ['request-throughput', 'latency-trend', 'response-codes', 'service-health', 'saturation-scatter', 'trace-spans']) await expect(chart(page, slug).locator('svg')).toHaveCount(0);
+  for (const slug of [
+    'request-throughput',
+    'latency-trend',
+    'response-codes',
+    'service-health',
+    'saturation-scatter',
+    'trace-spans',
+  ])
+    await expect(chart(page, slug).locator('svg')).toHaveCount(0);
   await setMode(page, 'limits');
   await expect(endpoints).toContainText('SLO UNAVAILABLE');
   await expect(endpoints.locator('.recharts-reference-line')).toHaveCount(0);
-  const unclassifiedColor = await endpoints.getByText('SLO UNAVAILABLE · BARS UNCLASSIFIED').evaluate(element => getComputedStyle(element).color);
-  await expect.poll(() => endpoints.locator('.recharts-bar-rectangle path').first().evaluate(element => getComputedStyle(element).fill)).toBe(unclassifiedColor);
-  for (const slug of ['latency-histogram', 'capacity-ring', 'saturation-scatter']) await expect(chart(page, slug).locator('svg')).toHaveCount(0);
+  const unclassifiedColor = await endpoints
+    .getByText('SLO UNAVAILABLE · BARS UNCLASSIFIED')
+    .evaluate((element) => getComputedStyle(element).color);
+  await expect
+    .poll(() =>
+      endpoints
+        .locator('.recharts-bar-rectangle path')
+        .first()
+        .evaluate((element) => getComputedStyle(element).fill),
+    )
+    .toBe(unclassifiedColor);
+  for (const slug of [
+    'latency-histogram',
+    'capacity-ring',
+    'saturation-scatter',
+  ])
+    await expect(chart(page, slug).locator('svg')).toHaveCount(0);
   await expect(latency).toContainText('SLO UNAVAILABLE');
   await expect(latency.locator('.recharts-reference-line')).toHaveCount(0);
-  await setMode(page, 'quantiles'); await expect(latency.locator('svg')).toHaveCount(0);
-  await setMode(page, 'fractional'); await expect(responses.locator('svg')).toHaveCount(0); await expect(histogram.locator('svg')).toHaveCount(0);
+  await setMode(page, 'quantiles');
+  await expect(latency.locator('svg')).toHaveCount(0);
+  await setMode(page, 'fractional');
+  await expect(responses.locator('svg')).toHaveCount(0);
+  await expect(histogram.locator('svg')).toHaveCount(0);
   await setMode(page, 'normal');
-  await page.evaluate(() => (window as unknown as { nodexSignal: { setAnimate: (value: boolean) => void } }).nodexSignal.setAnimate(true));
-  for (const slug of SIGNAL_CHART_SLUGS) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'false');
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexSignal: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexSignal.setAnimate(true),
+  );
+  for (const slug of SIGNAL_CHART_SLUGS)
+    await expect(chart(page, slug)).toHaveAttribute(
+      'data-nx-animated',
+      'false',
+    );
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  for (const slug of SIGNAL_CHART_SLUGS) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
+  for (const slug of SIGNAL_CHART_SLUGS)
+    await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const slug of SIGNAL_CHART_SLUGS) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'false');
-  await expect(throughput.locator('[data-nx-throughput]')).toHaveCount(4); await expect(health.locator('[data-nx-health]')).toHaveCount(4);
-  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText(['800', '300', '200', '0']);
-  await page.evaluate(() => (window as unknown as { nodexSignal: { setAnimate: (value: boolean) => void } }).nodexSignal.setAnimate(false));
-  console.log('Validated nine Signal Console charts: quantitative geometry, ranked endpoint alignment, complete counts, real span offsets, native keyboard inspection, scoped tokens, mobile fit, missing/zero/invalid observations and reduced motion.');
+  for (const slug of SIGNAL_CHART_SLUGS)
+    await expect(chart(page, slug)).toHaveAttribute(
+      'data-nx-animated',
+      'false',
+    );
+  await expect(throughput.locator('[data-nx-throughput]')).toHaveCount(4);
+  await expect(health.locator('[data-nx-health]')).toHaveCount(4);
+  await expect(endpoints.locator('[data-nx-endpoint-value]')).toHaveText([
+    '800',
+    '300',
+    '200',
+    '0',
+  ]);
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexSignal: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexSignal.setAnimate(false),
+  );
+  console.log(
+    'Validated nine Signal Console charts: quantitative geometry, ranked endpoint alignment, complete counts, real span offsets, native keyboard inspection, scoped tokens, mobile fit, missing/zero/invalid observations and reduced motion.',
+  );
 }

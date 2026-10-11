@@ -8,6 +8,13 @@ const orders: readonly SplitRingDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <SplitRing data={orders} unitLabel="Orders" contextLabel="This month"
-    animate={animate} aria-label="Order share by sales channel" />;
+  return (
+    <SplitRing
+      data={orders}
+      unitLabel="Orders"
+      contextLabel="This month"
+      animate={animate}
+      aria-label="Order share by sales channel"
+    />
+  );
 }

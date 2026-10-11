@@ -6,23 +6,13 @@
   "tier": "expressive",
   "runtime": "react",
   "density": "glance",
-  "tags": [
-    "growth",
-    "geo"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["growth", "geo"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "580/380",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "ChoroplethStates"
-  ],
-  "files": [
-    "component.tsx",
-    "geo.ts"
-  ],
+  "exports": ["ChoroplethStates"],
+  "files": ["component.tsx", "geo.ts"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

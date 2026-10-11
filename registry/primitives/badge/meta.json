@@ -5,19 +5,11 @@
   "component": "badge",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "label",
-    "meta"
-  ],
+  "tags": ["label", "meta"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Badge"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Badge"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

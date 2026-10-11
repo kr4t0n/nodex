@@ -57,7 +57,9 @@ async function readAuth(): Promise<AuthFile> {
 async function writeAuth(file: AuthFile): Promise<void> {
   await mkdir(configDir(), { recursive: true, mode: 0o700 });
   const target = authPath();
-  await writeFile(target, `${JSON.stringify(file, null, 2)}\n`, { mode: 0o600 });
+  await writeFile(target, `${JSON.stringify(file, null, 2)}\n`, {
+    mode: 0o600,
+  });
   // Set explicitly as well as at create time: `writeFile` honours the mode only
   // when it creates the file, so an existing 0644 from an older version would
   // otherwise survive forever.

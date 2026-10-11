@@ -8,7 +8,12 @@ export function Example() {
         description="You have edited this file since adding it. Fetching it again overwrites your changes, and nodex keeps no copy of them."
         inline
         open
-        actions={<><DialogAction>Keep mine</DialogAction><DialogAction confirm>Overwrite</DialogAction></>}
+        actions={
+          <>
+            <DialogAction>Keep mine</DialogAction>
+            <DialogAction confirm>Overwrite</DialogAction>
+          </>
+        }
       />
     </div>
   );

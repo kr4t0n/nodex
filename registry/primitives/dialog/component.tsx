@@ -19,7 +19,22 @@ export type DialogProps = Omit<ComponentPropsWithRef<'dialog'>, 'title'> & {
  * Modal dialogs use the browser's top layer, focus management, and Escape handling.
  * inline is for a visible, nonmodal specimen in documentation.
  */
-export function Dialog({ title, description, actions, open, onOpenChange, modal = true, inline = false, wide = false, className = '', children, ref, onClose, onCancel, ...props }: DialogProps) {
+export function Dialog({
+  title,
+  description,
+  actions,
+  open,
+  onOpenChange,
+  modal = true,
+  inline = false,
+  wide = false,
+  className = '',
+  children,
+  ref,
+  onClose,
+  onCancel,
+  ...props
+}: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descriptionId = useId();
@@ -46,7 +61,12 @@ export function Dialog({ title, description, actions, open, onOpenChange, modal 
       open={inline ? open : undefined}
       className={`nx-dialog${inline ? ' nx-dialog--inline' : ''}${wide ? ' nx-dialog--wide' : ''} ${className}`.trim()}
       aria-labelledby={props['aria-labelledby'] ?? titleId}
-      aria-describedby={props['aria-describedby'] ?? ((description !== undefined && description !== null) ? descriptionId : undefined)}
+      aria-describedby={
+        props['aria-describedby'] ??
+        (description !== undefined && description !== null
+          ? descriptionId
+          : undefined)
+      }
       onClose={(event) => {
         onClose?.(event);
         if (open !== false) onOpenChange?.(false);
@@ -60,17 +80,38 @@ export function Dialog({ title, description, actions, open, onOpenChange, modal 
       }}
     >
       <div className="nx-dialog__body">
-        <h2 className="nx-dialog__title" id={titleId}>{title}</h2>
-        {(description !== undefined && description !== null) && <p className="nx-dialog__sub" id={descriptionId}>{description}</p>}
+        <h2 className="nx-dialog__title" id={titleId}>
+          {title}
+        </h2>
+        {description !== undefined && description !== null && (
+          <p className="nx-dialog__sub" id={descriptionId}>
+            {description}
+          </p>
+        )}
         {children}
       </div>
-      {(actions !== undefined && actions !== null) && <div className="nx-dialog__actions">{actions}</div>}
+      {actions !== undefined && actions !== null && (
+        <div className="nx-dialog__actions">{actions}</div>
+      )}
     </dialog>
   );
 }
 
-export type DialogActionProps = ComponentPropsWithRef<'button'> & { confirm?: boolean };
+export type DialogActionProps = ComponentPropsWithRef<'button'> & {
+  confirm?: boolean;
+};
 
-export function DialogAction({ confirm = false, type = 'button', className = '', ...props }: DialogActionProps) {
-  return <button {...props} type={type} className={`nx-dialog__action${confirm ? ' nx-dialog__action--confirm' : ''} ${className}`.trim()} />;
+export function DialogAction({
+  confirm = false,
+  type = 'button',
+  className = '',
+  ...props
+}: DialogActionProps) {
+  return (
+    <button
+      {...props}
+      type={type}
+      className={`nx-dialog__action${confirm ? ' nx-dialog__action--confirm' : ''} ${className}`.trim()}
+    />
+  );
 }

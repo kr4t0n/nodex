@@ -1,5 +1,5 @@
 @layer components {
-/* checkbox - shared primitive, themed by the active language's tokens.
+  /* checkbox - shared primitive, themed by the active language's tokens.
 
    Built on a real <input type="checkbox"> with appearance stripped. That keeps
    keyboard operation, form participation, indeterminate state, and screen
@@ -9,68 +9,73 @@
    The choice row is duplicated in the radio primitive rather than shared:
    primitives are copied individually, so each must stand alone. */
 
-.nx-choice {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--nx-space-choiceGap);
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-choice-size);
-  font-weight: var(--nx-type-choice-weight);
-  line-height: var(--nx-type-choice-lineHeight);
-  color: var(--nx-ink);
-  cursor: pointer;
-}
+  .nx-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nx-space-choiceGap);
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-choice-size);
+    font-weight: var(--nx-type-choice-weight);
+    line-height: var(--nx-type-choice-lineHeight);
+    color: var(--nx-ink);
+    cursor: pointer;
+  }
 
-.nx-choice--disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+  .nx-choice--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 
-.nx-checkbox {
-  appearance: none;
-  flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
-  margin: 0;
-  display: inline-grid;
-  place-content: center;
-  border: var(--nx-stroke-hairline) solid var(--nx-muted);
-  border-radius: var(--nx-radius-checkbox);
-  background: var(--nx-bg);
-  cursor: inherit;
-  transition:
-    background-color var(--nx-motion-toggle-duration) var(--nx-motion-toggle-easing),
-    border-color var(--nx-motion-toggle-duration) var(--nx-motion-toggle-easing);
-}
+  .nx-checkbox {
+    appearance: none;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    display: inline-grid;
+    place-content: center;
+    border: var(--nx-stroke-hairline) solid var(--nx-muted);
+    border-radius: var(--nx-radius-checkbox);
+    background: var(--nx-bg);
+    cursor: inherit;
+    transition:
+      background-color var(--nx-motion-toggle-duration)
+        var(--nx-motion-toggle-easing),
+      border-color var(--nx-motion-toggle-duration)
+        var(--nx-motion-toggle-easing);
+  }
 
-/* The tick is drawn from two borders rather than a glyph, so it scales with the
+  /* The tick is drawn from two borders rather than a glyph, so it scales with the
    box and needs no font. Doubled from the hairline: at 14px a true hairline
    tick disappears. */
-.nx-checkbox::before {
-  content: '';
-  width: 3px;
-  height: 6.5px;
-  margin-top: -2px;
-  border-right: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-selectionText);
-  border-bottom: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-selectionText);
-  transform: rotate(45deg) scale(0);
-  transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
-}
+  .nx-checkbox::before {
+    content: '';
+    width: 3px;
+    height: 6.5px;
+    margin-top: -2px;
+    border-right: calc(var(--nx-stroke-hairline) * 2) solid
+      var(--nx-selectionText);
+    border-bottom: calc(var(--nx-stroke-hairline) * 2) solid
+      var(--nx-selectionText);
+    transform: rotate(45deg) scale(0);
+    transition: transform var(--nx-motion-mark-duration)
+      var(--nx-motion-mark-easing);
+  }
 
-.nx-checkbox:hover {
-  border-color: var(--nx-ink);
-}
+  .nx-checkbox:hover {
+    border-color: var(--nx-ink);
+  }
 
-.nx-checkbox:checked {
-  background: var(--nx-selectionFill);
-  border-color: var(--nx-ink);
-}
+  .nx-checkbox:checked {
+    background: var(--nx-selectionFill);
+    border-color: var(--nx-ink);
+  }
 
-.nx-checkbox:checked::before {
-  transform: rotate(45deg) scale(1);
-}
+  .nx-checkbox:checked::before {
+    transform: rotate(45deg) scale(1);
+  }
 
-/* Indeterminate is a real state on the element, so style it rather than
+  /* Indeterminate is a real state on the element, so style it rather than
    inventing a third visual.
 
    `data-indeterminate` is matched alongside the pseudo-class because the
@@ -78,44 +83,45 @@
    rendering: a statically rendered checkbox loses the state entirely, which is
    what happened to this primitive's own preview. Setting the property remains
    the real mechanism, and the attribute is what lets rendered markup carry it. */
-.nx-checkbox:indeterminate,
-.nx-checkbox[data-indeterminate='true'] {
-  background: var(--nx-selectionFill);
-  border-color: var(--nx-ink);
-}
-
-.nx-checkbox:indeterminate::before,
-.nx-checkbox[data-indeterminate='true']::before {
-  width: 7px;
-  height: 0;
-  margin-top: 0;
-  border-right: 0;
-  border-bottom: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-selectionText);
-  transform: rotate(0deg) scale(1);
-}
-
-.nx-checkbox:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 2px;
-}
-
-.nx-checkbox:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* A group of choices separated by space, not by boxes. */
-.nx-choice-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-choiceGroupGap);
-  width: 100%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-checkbox,
-  .nx-checkbox::before {
-    transition: none;
+  .nx-checkbox:indeterminate,
+  .nx-checkbox[data-indeterminate='true'] {
+    background: var(--nx-selectionFill);
+    border-color: var(--nx-ink);
   }
-}
+
+  .nx-checkbox:indeterminate::before,
+  .nx-checkbox[data-indeterminate='true']::before {
+    width: 7px;
+    height: 0;
+    margin-top: 0;
+    border-right: 0;
+    border-bottom: calc(var(--nx-stroke-hairline) * 2) solid
+      var(--nx-selectionText);
+    transform: rotate(0deg) scale(1);
+  }
+
+  .nx-checkbox:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 2px;
+  }
+
+  .nx-checkbox:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* A group of choices separated by space, not by boxes. */
+  .nx-choice-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-choiceGroupGap);
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-checkbox,
+    .nx-checkbox::before {
+      transition: none;
+    }
+  }
 }

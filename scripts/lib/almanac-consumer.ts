@@ -12,16 +12,176 @@ import {BubbleAlmanac} from './components/nodex/bubble-almanac/component';
  }
  export function AlmanacConsumer({animate}:{animate:boolean}){const [mode,setMode]=useState<Mode>('normal');useEffect(()=>{window.nodexAlmanacFixture={setMode};},[]);return <><section id="almanac-primary" className="w-[660px] space-y-6"><Charts mode={mode} animate={animate}/></section><section id="almanac-secondary" className="w-[520px] space-y-6"><Charts mode="normal" animate={false}/></section></>;}
 `;
-async function setMode(page:Page,mode:string){await page.evaluate(value=>(window as unknown as {nodexAlmanacFixture:{setMode:(mode:string)=>void}}).nodexAlmanacFixture.setMode(value),mode);}
-export async function checkAlmanacConsumer(page:Page):Promise<void>{
- const node=page.locator('#almanac-primary [data-nx-chart="bubble-almanac"]');const sibling=page.locator('#almanac-secondary [data-nx-chart="bubble-almanac"]');
- await expect(node.locator('[data-nx-bubble]')).toHaveCount(3);await expect(node.locator('[data-nx-core]')).toHaveCount(2);await expect(node.locator('[data-nx-largest]')).toHaveCount(3);await expect(node.locator('[data-nx-year-label]')).toHaveCount(2);await expect(node.locator('[data-nx-area-label]')).toHaveCount(2);await expect(node.locator('[data-nx-marginal-note]')).toHaveText('Caller note');await expect(node.locator('[data-nx-event]')).toContainText('Caller event');
- const radius=Number(await node.locator('[data-nx-bubble="0:0"]').getAttribute('data-nx-radius'));const large=Number(await node.locator('[data-nx-bubble="1:0"]').getAttribute('data-nx-radius'));assert(Math.abs(large/radius-2)<1e-9,'Bubble area must scale with tickets');assert((await node.locator('[data-nx-bubble="0:0"]').getAttribute('d'))?.includes('C'));await expect.poll(()=>node.locator('[data-nx-beta="true"]').evaluate(e=>getComputedStyle(e).fill)).toBe('none');
- await node.scrollIntoViewIfNeeded();await page.mouse.move(880,10);await node.locator('svg.recharts-surface').focus();await page.keyboard.press('ArrowLeft');await expect(node.getByRole('status')).toHaveText('Same · 2021 — 400 tickets');await page.keyboard.press('ArrowRight');await expect(node.getByRole('status')).toHaveText('Same · 2020 — 200 tickets (beta)');await expect(sibling.getByRole('status')).toHaveCount(0);
- await node.evaluate(e=>{const s=(e as HTMLElement).style;s.setProperty('--nx-ink','#123456');s.setProperty('--nx-muted','#234567');s.setProperty('--nx-plotLedger','#345678');s.setProperty('--nx-stroke-mark','1.2px');s.setProperty('--nx-type-plotValue-size','34px');});await expect.poll(()=>node.locator('[data-nx-core]').first().evaluate(e=>getComputedStyle(e).fill)).toBe('rgb(18, 52, 86)');await expect.poll(()=>node.locator('[data-nx-beta="true"]').evaluate(e=>getComputedStyle(e).stroke)).toBe('rgb(35, 69, 103)');await expect.poll(()=>node.locator('[data-nx-ledger-line]').first().evaluate(e=>getComputedStyle(e).stroke)).toBe('rgb(52, 86, 120)');await expect.poll(()=>node.locator('[data-nx-beta="true"]').evaluate(e=>getComputedStyle(e).strokeWidth)).toBe('1.2px');await expect.poll(()=>node.locator('[data-nx-largest]').first().evaluate(e=>getComputedStyle(e).fontSize)).toBe('17px');assert.notEqual(await sibling.locator('[data-nx-core]').first().evaluate(e=>getComputedStyle(e).fill),'rgb(18, 52, 86)');
- const width=Number(await node.locator('svg').getAttribute('width'));await node.evaluate(e=>{(e as HTMLElement).style.width='340px';});await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBeLessThan(width);await node.evaluate(e=>{(e as HTMLElement).style.width='';});await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBe(width);
- await setMode(page,'revised');await expect(node.locator('[data-nx-event]')).toContainText('Updated event');await expect.poll(async()=>Number(await node.locator('[data-nx-bubble="0:0"]').getAttribute('data-nx-radius'))).toBeCloseTo(radius,6);await expect.poll(async()=>Number(await node.locator('[data-nx-bubble="1:0"]').getAttribute('data-nx-radius'))/large).toBeCloseTo(Math.SQRT2,6);
- await setMode(page,'partial');await expect(node.locator('[data-nx-bubble]')).toHaveCount(2);await expect(node.locator('[data-nx-core]')).toHaveCount(2);
- for(const mode of ['zero','single','invalid','empty','duplicate']){await setMode(page,mode);if(['invalid','empty','duplicate'].includes(mode))await expect(node.getByRole('status')).toContainText('available');else await expect(node.locator('svg.recharts-surface')).toHaveCount(1);if(mode==='zero'){await expect(node.locator('[data-nx-bubble]')).toHaveCount(0);await expect(node.locator('[data-nx-core]')).toHaveCount(0);await expect(node.locator('[data-nx-largest]')).toHaveCount(0);}if(mode==='single')await expect(node.locator('[data-nx-bubble]')).toHaveCount(1);assert.equal(await node.evaluate(e=>/NaN|Infinity/.test(e.innerHTML)),false);}
- await setMode(page,'normal');console.log('Validated absolute native bubble-area scale, uneven rims, beta outlines, caller notes/events, missing and zero readings, scoped ledger/type/strokes and keyboard pairs.');
+async function setMode(page: Page, mode: string) {
+  await page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexAlmanacFixture: { setMode: (mode: string) => void };
+        }
+      ).nodexAlmanacFixture.setMode(value),
+    mode,
+  );
+}
+export async function checkAlmanacConsumer(page: Page): Promise<void> {
+  const node = page.locator(
+    '#almanac-primary [data-nx-chart="bubble-almanac"]',
+  );
+  const sibling = page.locator(
+    '#almanac-secondary [data-nx-chart="bubble-almanac"]',
+  );
+  await expect(node.locator('[data-nx-bubble]')).toHaveCount(3);
+  await expect(node.locator('[data-nx-core]')).toHaveCount(2);
+  await expect(node.locator('[data-nx-largest]')).toHaveCount(3);
+  await expect(node.locator('[data-nx-year-label]')).toHaveCount(2);
+  await expect(node.locator('[data-nx-area-label]')).toHaveCount(2);
+  await expect(node.locator('[data-nx-marginal-note]')).toHaveText(
+    'Caller note',
+  );
+  await expect(node.locator('[data-nx-event]')).toContainText('Caller event');
+  const radius = Number(
+    await node.locator('[data-nx-bubble="0:0"]').getAttribute('data-nx-radius'),
+  );
+  const large = Number(
+    await node.locator('[data-nx-bubble="1:0"]').getAttribute('data-nx-radius'),
+  );
+  assert(
+    Math.abs(large / radius - 2) < 1e-9,
+    'Bubble area must scale with tickets',
+  );
+  assert(
+    (await node.locator('[data-nx-bubble="0:0"]').getAttribute('d'))?.includes(
+      'C',
+    ),
+  );
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-beta="true"]')
+        .evaluate((e) => getComputedStyle(e).fill),
+    )
+    .toBe('none');
+  await node.scrollIntoViewIfNeeded();
+  await page.mouse.move(880, 10);
+  await node.locator('svg.recharts-surface').focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(node.getByRole('status')).toHaveText(
+    'Same · 2021 — 400 tickets',
+  );
+  await page.keyboard.press('ArrowRight');
+  await expect(node.getByRole('status')).toHaveText(
+    'Same · 2020 — 200 tickets (beta)',
+  );
+  await expect(sibling.getByRole('status')).toHaveCount(0);
+  await node.evaluate((e) => {
+    const s = (e as HTMLElement).style;
+    s.setProperty('--nx-ink', '#123456');
+    s.setProperty('--nx-muted', '#234567');
+    s.setProperty('--nx-plotLedger', '#345678');
+    s.setProperty('--nx-stroke-mark', '1.2px');
+    s.setProperty('--nx-type-plotValue-size', '34px');
+  });
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-core]')
+        .first()
+        .evaluate((e) => getComputedStyle(e).fill),
+    )
+    .toBe('rgb(18, 52, 86)');
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-beta="true"]')
+        .evaluate((e) => getComputedStyle(e).stroke),
+    )
+    .toBe('rgb(35, 69, 103)');
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-ledger-line]')
+        .first()
+        .evaluate((e) => getComputedStyle(e).stroke),
+    )
+    .toBe('rgb(52, 86, 120)');
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-beta="true"]')
+        .evaluate((e) => getComputedStyle(e).strokeWidth),
+    )
+    .toBe('1.2px');
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-largest]')
+        .first()
+        .evaluate((e) => getComputedStyle(e).fontSize),
+    )
+    .toBe('17px');
+  assert.notEqual(
+    await sibling
+      .locator('[data-nx-core]')
+      .first()
+      .evaluate((e) => getComputedStyle(e).fill),
+    'rgb(18, 52, 86)',
+  );
+  const width = Number(await node.locator('svg').getAttribute('width'));
+  await node.evaluate((e) => {
+    (e as HTMLElement).style.width = '340px';
+  });
+  await expect
+    .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+    .toBeLessThan(width);
+  await node.evaluate((e) => {
+    (e as HTMLElement).style.width = '';
+  });
+  await expect
+    .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+    .toBe(width);
+  await setMode(page, 'revised');
+  await expect(node.locator('[data-nx-event]')).toContainText('Updated event');
+  await expect
+    .poll(async () =>
+      Number(
+        await node
+          .locator('[data-nx-bubble="0:0"]')
+          .getAttribute('data-nx-radius'),
+      ),
+    )
+    .toBeCloseTo(radius, 6);
+  await expect
+    .poll(
+      async () =>
+        Number(
+          await node
+            .locator('[data-nx-bubble="1:0"]')
+            .getAttribute('data-nx-radius'),
+        ) / large,
+    )
+    .toBeCloseTo(Math.SQRT2, 6);
+  await setMode(page, 'partial');
+  await expect(node.locator('[data-nx-bubble]')).toHaveCount(2);
+  await expect(node.locator('[data-nx-core]')).toHaveCount(2);
+  for (const mode of ['zero', 'single', 'invalid', 'empty', 'duplicate']) {
+    await setMode(page, mode);
+    if (['invalid', 'empty', 'duplicate'].includes(mode))
+      await expect(node.getByRole('status')).toContainText('available');
+    else await expect(node.locator('svg.recharts-surface')).toHaveCount(1);
+    if (mode === 'zero') {
+      await expect(node.locator('[data-nx-bubble]')).toHaveCount(0);
+      await expect(node.locator('[data-nx-core]')).toHaveCount(0);
+      await expect(node.locator('[data-nx-largest]')).toHaveCount(0);
+    }
+    if (mode === 'single')
+      await expect(node.locator('[data-nx-bubble]')).toHaveCount(1);
+    assert.equal(
+      await node.evaluate((e) => /NaN|Infinity/.test(e.innerHTML)),
+      false,
+    );
+  }
+  await setMode(page, 'normal');
+  console.log(
+    'Validated absolute native bubble-area scale, uneven rims, beta outlines, caller notes/events, missing and zero readings, scoped ledger/type/strokes and keyboard pairs.',
+  );
 }

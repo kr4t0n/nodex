@@ -140,9 +140,24 @@ Resolution order is `--registry`, `nodex.json`, `NODEX_REGISTRY`, then
 `https://nodex.kubitnodes.com`. `init` records the resolved root for both local and
 remote registries. Commands work from project subdirectories.
 
+| Environment variable | Purpose                                                       |
+| -------------------- | ------------------------------------------------------------- |
+| `NODEX_REGISTRY`     | Registry root override, after `--registry` and project config |
+| `NODEX_API`          | Account API base; defaults to the selected registry root      |
+| `NODEX_TOKEN`        | Session token override for unattended use                     |
+| `NODEX_CONFIG_DIR`   | Credential-directory override; defaults to `~/.nodex`         |
+
+Set `NODEX_API` when registry files are hosted separately from the account server,
+such as on a CDN. It must be an absolute HTTPS URL; HTTP is allowed only on
+`localhost`, `127.0.0.1` or `[::1]`. Credentials, query strings and fragments are
+rejected. Device start, token polling and authenticated `whoami` requests never
+follow redirects, including same-origin redirects; supply the final API base.
+These CLI variables are read from the process environment. Keep tokens out of
+`nodex.json` and source control.
+
 `--registry <checkout>` reads the checkout's built `public/` directory;
 `--registry <checkout>/public` addresses the same root directly. Run
-`npm run build:registry` in the checkout first. Served registries expose
+`pnpm run build:registry` in the checkout first. Served registries expose
 `r/registry.json`, `r/languages.json` and the file addresses declared by those
 manifests. Public content is static. Language token and design addresses also
 come from the manifest, so guarded assets do not need CLI path conventions.

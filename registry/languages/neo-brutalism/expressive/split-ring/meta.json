@@ -3,14 +3,8 @@
   "title": "Orders by channel",
   "description": "An outlined ring with a hard ink shadow, exact proportions and a directly labelled categorical key.",
   "component": "donut",
-  "exports": [
-    "SplitRing"
-  ],
-  "tags": [
-    "composition",
-    "share",
-    "categorical"
-  ],
+  "exports": ["SplitRing"],
+  "tags": ["composition", "share", "categorical"],
   "props": [
     {
       "name": "data",
@@ -71,17 +65,13 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "neo-categorical.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

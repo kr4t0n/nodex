@@ -7,23 +7,13 @@
   "runtime": "react",
   "strokeAsArea": true,
   "density": "close-read",
-  "tags": [
-    "source",
-    "service",
-    "mesh"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["source", "service", "mesh"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "560/420",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "ForceGraphDense"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["ForceGraphDense"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

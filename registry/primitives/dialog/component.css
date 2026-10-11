@@ -1,5 +1,5 @@
 @layer components {
-/* dialog - shared primitive, themed by the active language's tokens.
+  /* dialog - shared primitive, themed by the active language's tokens.
 
    Built on native <dialog>, which brings the focus trap, the top layer, Escape
    to close, inert background content, and correct announcement. Reimplementing
@@ -10,122 +10,124 @@
    The backdrop separates the modal from its surroundings. The active language
    determines whether its surface also casts a shadow. */
 
-.nx-dialog {
-  box-shadow: var(--nx-shadow-surface) var(--nx-ink);
-  margin: auto;
-  padding: 0;
-  width: min(440px, calc(100vw - 48px));
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-radius: var(--nx-radius-card);
-  background: var(--nx-surfaceFill);
-  color: var(--nx-ink);
-  font-family: var(--nx-font-sans);
-}
+  .nx-dialog {
+    box-shadow: var(--nx-shadow-surface) var(--nx-ink);
+    margin: auto;
+    padding: 0;
+    width: min(440px, calc(100vw - 48px));
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-radius: var(--nx-radius-card);
+    background: var(--nx-surfaceFill);
+    color: var(--nx-ink);
+    font-family: var(--nx-font-sans);
+  }
 
-.nx-dialog::backdrop {
-  /* Mixed from ink rather than a black literal, so it stays correct in a
+  .nx-dialog::backdrop {
+    /* Mixed from ink rather than a black literal, so it stays correct in a
      language whose ink is not near-black. */
-  background: color-mix(in oklab, var(--nx-ink) 32%, transparent);
-}
+    background: color-mix(in oklab, var(--nx-ink) 32%, transparent);
+  }
 
-.nx-dialog__body {
-  padding: var(--nx-space-dialogBodyPadding);
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-dialogGap);
-}
+  .nx-dialog__body {
+    padding: var(--nx-space-dialogBodyPadding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-dialogGap);
+  }
 
-.nx-dialog__title {
-  margin: 0;
-  font-family: var(--nx-font-heading, var(--nx-font-sans));
-  font-size: var(--nx-type-cardTitle-size);
-  font-weight: var(--nx-type-cardTitle-weight);
-  letter-spacing: var(--nx-type-cardTitle-tracking);
-}
+  .nx-dialog__title {
+    margin: 0;
+    font-family: var(--nx-font-heading, var(--nx-font-sans));
+    font-size: var(--nx-type-cardTitle-size);
+    font-weight: var(--nx-type-cardTitle-weight);
+    letter-spacing: var(--nx-type-cardTitle-tracking);
+  }
 
-.nx-dialog__sub {
-  margin: 0;
-  font-size: var(--nx-type-subtitle-size);
-  font-weight: var(--nx-type-subtitle-weight);
-  line-height: var(--nx-type-body-lineHeight);
-  color: var(--nx-muted);
-  max-width: 52ch;
-}
+  .nx-dialog__sub {
+    margin: 0;
+    font-size: var(--nx-type-subtitle-size);
+    font-weight: var(--nx-type-subtitle-weight);
+    line-height: var(--nx-type-body-lineHeight);
+    color: var(--nx-muted);
+    max-width: 52ch;
+  }
 
-/* Actions separated by a rule, not by a filled footer bar. */
-.nx-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--nx-space-dialogGap);
-  padding: var(--nx-space-dialogActionsPadding);
-  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
-}
+  /* Actions separated by a rule, not by a filled footer bar. */
+  .nx-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--nx-space-dialogGap);
+    padding: var(--nx-space-dialogActionsPadding);
+    border-top: var(--nx-stroke-hairline) solid var(--nx-border);
+  }
 
-/* Actions.
+  /* Actions.
 
    Duplicated from the button primitive rather than depending on it, because
    primitives are copied individually and a dialog whose buttons are unstyled is
    not a usable copy. If you have already added the button primitive, use
    .nx-btn here instead and delete these three rules. */
-.nx-dialog__action {
-  box-shadow: var(--nx-shadow-action) var(--nx-ink);
-  padding: var(--nx-space-compactActionPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-radius: var(--nx-radius-pill);
-  background: transparent;
-  color: var(--nx-ink);
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-action-size);
-  font-weight: var(--nx-type-action-weight);
-  line-height: var(--nx-type-action-lineHeight);
-  white-space: nowrap;
-  cursor: pointer;
-}
+  .nx-dialog__action {
+    box-shadow: var(--nx-shadow-action) var(--nx-ink);
+    padding: var(--nx-space-compactActionPadding);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-radius: var(--nx-radius-pill);
+    background: transparent;
+    color: var(--nx-ink);
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-action-size);
+    font-weight: var(--nx-type-action-weight);
+    line-height: var(--nx-type-action-lineHeight);
+    white-space: nowrap;
+    cursor: pointer;
+  }
 
-.nx-dialog__action:hover {
-  border-color: var(--nx-ink);
-}
+  .nx-dialog__action:hover {
+    border-color: var(--nx-ink);
+  }
 
-/* Confirmation shares the primary action paint. Destructive intent must also
+  /* Confirmation shares the primary action paint. Destructive intent must also
    be explicit in the label; action color alone does not express it. */
-.nx-dialog__action--confirm {
-  background: var(--nx-actionFill);
-  border-color: var(--nx-actionBorder);
-  color: var(--nx-actionText);
-}
+  .nx-dialog__action--confirm {
+    background: var(--nx-actionFill);
+    border-color: var(--nx-actionBorder);
+    color: var(--nx-actionText);
+  }
 
-.nx-dialog__action:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 3px;
-}
+  .nx-dialog__action:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 3px;
+  }
 
-/* Inline variant: rendered open and in flow, for documentation and previews
+  /* Inline variant: rendered open and in flow, for documentation and previews
    where a real modal would escape the frame and could not be measured. */
-.nx-dialog--inline {
-  position: static;
-  display: block;
-}
+  .nx-dialog--inline {
+    position: static;
+    display: block;
+  }
 
-/* A wide dialog, for one containing a chart rather than a sentence. */
-.nx-dialog--wide {
-  width: min(760px, calc(100vw - 48px));
-}
+  /* A wide dialog, for one containing a chart rather than a sentence. */
+  .nx-dialog--wide {
+    width: min(760px, calc(100vw - 48px));
+  }
 
-/* Entry is a fade only. There is no scale or slide, because this language does
+  /* Entry is a fade only. There is no scale or slide, because this language does
    not move things that are not data. */
-@media (prefers-reduced-motion: no-preference) {
-  .nx-dialog[open] {
-    animation: nx-dialog-in var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
+  @media (prefers-reduced-motion: no-preference) {
+    .nx-dialog[open] {
+      animation: nx-dialog-in var(--nx-motion-surface-duration)
+        var(--nx-motion-surface-easing);
+    }
+
+    .nx-dialog[open]::backdrop {
+      animation: nx-dialog-in var(--nx-motion-surface-duration)
+        var(--nx-motion-surface-easing);
+    }
   }
 
-  .nx-dialog[open]::backdrop {
-    animation: nx-dialog-in var(--nx-motion-surface-duration) var(--nx-motion-surface-easing);
+  @keyframes nx-dialog-in {
+    from {
+      opacity: 0;
+    }
   }
-}
-
-@keyframes nx-dialog-in {
-  from {
-    opacity: 0;
-  }
-}
 }

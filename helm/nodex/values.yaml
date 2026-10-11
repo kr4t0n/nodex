@@ -12,8 +12,8 @@
 # ─────────────────────────────────────────────────────────────────────
 
 # Optional overrides; default to the release name, the standard Helm pattern.
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 
 commonLabels: {}
 commonAnnotations: {}
@@ -25,7 +25,7 @@ image:
   repository: kr4t0n/nodex
   # Falls back to the release tag pinned by .Chart.AppVersion. Override to
   # deploy a different image without changing the chart version.
-  tag: ""
+  tag: ''
   pullPolicy: IfNotPresent
 
 # References existing Secrets of type kubernetes.io/dockerconfigjson.
@@ -37,7 +37,7 @@ imagePullSecrets: []
 # serves any hostname. It is what OAuth redirects and the CLI's device
 # verification URL are built from, so a wrong value breaks sign-in while
 # the rest of the site keeps working.
-siteUrl: ""
+siteUrl: ''
 
 # ─── Accounts: entirely optional ─────────────────────────────────────
 # Leave all of this empty for a public, read-only deployment. Every
@@ -45,19 +45,19 @@ siteUrl: ""
 # anonymously. Accounts only gate the /languages index today.
 database:
   # Either set `url` and the chart puts it in a generated Secret...
-  url: ""
+  url: ''
   # ...or point at a Secret you manage elsewhere (sealed-secrets,
   # external-secrets, vault) and the chart references it directly.
-  existingSecret: ""
+  existingSecret: ''
   existingSecretKey: DATABASE_URL
 
 github:
   # From https://github.com/settings/developers. The callback URL must be
   # exactly <siteUrl>/api/auth/github/callback.
-  clientId: ""
-  clientSecret: ""
+  clientId: ''
+  clientSecret: ''
   # A Secret carrying GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET.
-  existingSecret: ""
+  existingSecret: ''
 
 # ─── Schema migrations ───────────────────────────────────────────────
 # Runs `node scripts/migrate.mjs` from the same image as a pre-install and
@@ -79,7 +79,7 @@ service:
 
 ingress:
   enabled: false
-  className: ""
+  className: ''
   annotations: {}
   # - host: nodex.example.com
   #   paths:

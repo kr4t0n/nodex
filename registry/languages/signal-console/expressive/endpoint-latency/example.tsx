@@ -14,5 +14,15 @@ const endpoints = [
 ] as const;
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <EndpointLatency data={endpoints} objectiveMs={300} source="EDGE GATEWAY" window="5M WINDOW" updated="UPDATED 0S AGO" animate={animate} aria-label="Gateway routes ranked by p99 latency" />;
+  return (
+    <EndpointLatency
+      data={endpoints}
+      objectiveMs={300}
+      source="EDGE GATEWAY"
+      window="5M WINDOW"
+      updated="UPDATED 0S AGO"
+      animate={animate}
+      aria-label="Gateway routes ranked by p99 latency"
+    />
+  );
 }

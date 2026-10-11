@@ -24,18 +24,18 @@ labels and repeatable placement over expressive composition.
 Cool near-black ground and cool off-white ink establish the structure. Hue
 carries a defined meaning.
 
-| Token | Value | Role |
-| --- | --- | --- |
-| `--nx-bg` | `#0B0E13` | page ground |
-| `--nx-surface` | `#12161D` | panel and card ground |
-| `--nx-ink` | `#D7DEE8` | primary text and marks |
-| `--nx-muted` | `#8A94A3` | supporting text and labels |
-| `--nx-faint` | `#5A6472` | quiet captions and minor details |
-| `--nx-grid` | `#1E242E` | structural rules and separators |
-| `--nx-accent` / `--nx-ok` | `#4DD4A8` | primary emphasis or healthy status |
-| `--nx-withinObjective` | `#2FA37C` | a measured value within its stated objective |
-| `--nx-warn` | `#E3B341` | warning or a stated limit requiring attention |
-| `--nx-crit` | `#F0616D` | critical or failing status |
+| Token                     | Value     | Role                                          |
+| ------------------------- | --------- | --------------------------------------------- |
+| `--nx-bg`                 | `#0B0E13` | page ground                                   |
+| `--nx-surface`            | `#12161D` | panel and card ground                         |
+| `--nx-ink`                | `#D7DEE8` | primary text and marks                        |
+| `--nx-muted`              | `#8A94A3` | supporting text and labels                    |
+| `--nx-faint`              | `#5A6472` | quiet captions and minor details              |
+| `--nx-grid`               | `#1E242E` | structural rules and separators               |
+| `--nx-accent` / `--nx-ok` | `#4DD4A8` | primary emphasis or healthy status            |
+| `--nx-withinObjective`    | `#2FA37C` | a measured value within its stated objective  |
+| `--nx-warn`               | `#E3B341` | warning or a stated limit requiring attention |
+| `--nx-crit`               | `#F0616D` | critical or failing status                    |
 
 Separate neutral structure, magnitude and status. Within a surface, give colored
 marks one clear meaning. Using the same green for both quantity and health makes
@@ -57,14 +57,14 @@ to the monospace stack, so ordinary controls and prose retain the same identity.
 Numerals are tabular: columns align on digits and changing values retain stable
 width.
 
-| Role | Size | Treatment |
-| --- | --- | --- |
-| Page title | `18px` | weight 700, zero tracking |
-| Card title | `12px` | weight 600, `0.02em` tracking |
-| Body | `11.5px` | `1.7` line height |
-| Control | `12px` | `1.4` line height |
-| Action | `11.5px` | weight 600, `0.01em` tracking |
-| Caption | `9px` | weight 500, uppercase, `0.1em` tracking |
+| Role       | Size     | Treatment                               |
+| ---------- | -------- | --------------------------------------- |
+| Page title | `18px`   | weight 700, zero tracking               |
+| Card title | `12px`   | weight 600, `0.02em` tracking           |
+| Body       | `11.5px` | `1.7` line height                       |
+| Control    | `12px`   | `1.4` line height                       |
+| Action     | `11.5px` | weight 600, `0.01em` tracking           |
+| Caption    | `9px`    | weight 500, uppercase, `0.1em` tracking |
 
 The primary title and label scale uses zero or positive tracking and weights
 from 400 to 700. Prose and prominent-value roles retain their own defined

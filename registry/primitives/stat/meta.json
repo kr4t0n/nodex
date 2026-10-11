@@ -5,20 +5,11 @@
   "component": "stat",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "data",
-    "text"
-  ],
+  "tags": ["data", "text"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Stat",
-    "StatGroup"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Stat", "StatGroup"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

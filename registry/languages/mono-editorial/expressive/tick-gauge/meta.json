@@ -7,21 +7,12 @@
   "runtime": "react",
   "density": "glance",
   "aspectRatio": "560/360",
-  "tags": [
-    "quarterly",
-    "target"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["quarterly", "target"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "TickGauge"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["TickGauge"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

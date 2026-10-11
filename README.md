@@ -5,16 +5,16 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains **100 expressive charts** (64 Mono Editorial, nine Signal Console,
-nine Neo-brutalism, nine Sketchbook and nine Soft Studio) and **24 reusable primitives**, delivered as editable React source.
+The registry contains **112 expressive charts** (64 Mono Editorial, nine Signal Console,
+nine Neo-brutalism, nine Sketchbook, nine Soft Studio and twelve Nocturne) and **24 reusable primitives**, delivered as editable React source.
 This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
-Five design languages are available: Mono Editorial, Signal Console,
-**Neo-brutalism**, **Sketchbook** and **Soft Studio**. Neo-brutalism starts with all 24 shared primitives, a complete
+Six design languages are available: Mono Editorial, Signal Console,
+**Neo-brutalism**, **Sketchbook**, **Soft Studio** and **Nocturne**. Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
 yellow actions, pink badges, mint selections, cream fields and blue value
@@ -49,6 +49,143 @@ The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex implements these through its own semantic tokens and React primitives.
 
+## Nocturne
+
+Nocturne is available at `/l/nocturne`, with all 24 shared primitives and twelve
+expressive charts. Graphite pages, layered charcoal surfaces, embedded Inter,
+compact corners and restrained iris, teal, amber and blue define its dark product
+interface. Body copy is 14px; editable values are 16px. Surfaces remain flat and
+opaque. The [design guide](registry/languages/nocturne/DESIGN.md) covers the
+complete language, including forms, navigation, prose, interaction and motion.
+
+| Chart                     | Type         | Reading                                                                                                    |
+| ------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| `nocturne-bars`           | Bar          | Slim horizontal bars rank categories, retaining stable ties, zero readings and unavailable rows            |
+| `nocturne-line`           | Line         | Straight segments preserve numeric intervals and independent gaps; endpoint labels separate crowded series |
+| `nocturne-ring`           | Donut        | Thin, exact sectors allocate a complete total, with a responsive key                                       |
+| `nocturne-scatter-matrix` | Scatter      | Linked pairwise observations and diagonal histograms compare metrics and cohorts on shared numeric scales  |
+| `nocturne-promise-lanes`  | Paired range | Planned and actual intervals distinguish shifts in start, finish and duration                              |
+| `nocturne-margin-lanes`   | Interval dot | Current values and expected ranges share a signed deviation scale around each row's target                 |
+| `nocturne-drift-trails`   | Trajectory   | Chronological paths across two numeric axes preserve reversals, gaps and final observations                |
+| `nocturne-waterfall`      | Waterfall    | Signed changes bridge running balances; missing changes break the chain until an explicit start            |
+| `nocturne-boxplot`        | Boxplot      | Horizontal quartile boxes, median ticks, supplied whiskers and independent outliers compare distributions  |
+| `nocturne-forecast-fan`   | Area         | Observed history and point forecasts share explicitly labeled prediction intervals                         |
+| `nocturne-control`        | Line         | Supplied statistical control limits identify strict point breaches, with optional event references         |
+| `nocturne-ecdf`           | Line         | Exact cumulative steps reveal inclusive threshold shares and empirical percentiles without bins            |
+
+```bash
+nodex init nocturne
+nodex add nocturne/nocturne-bars nocturne/nocturne-line
+nodex add nocturne/nocturne-ring nocturne/nocturne-scatter-matrix button card
+nodex add nocturne/nocturne-promise-lanes nocturne/nocturne-margin-lanes nocturne/nocturne-drift-trails
+nodex add nocturne/nocturne-waterfall nocturne/nocturne-boxplot
+nodex add nocturne/nocturne-forecast-fan nocturne/nocturne-control nocturne/nocturne-ecdf
+```
+
+Bars accept `{ id, label, value }`; the ring also accepts an optional category
+`tone` from `a`–`d`. IDs must be unique and nonempty; repeated display labels are
+allowed. Bars rank finite nonnegative values descending, with stable ties and
+unavailable rows last. The ring requires a complete finite total before drawing
+shares. Zero never acquires a bar or sector.
+
+Lines accept ordered `{ id, label, tone? }` series and observations with
+`{ id, label, x, values }`. X coordinates are finite and strictly increasing;
+signed Y readings are supported. Missing values break only their own series.
+Endpoint labels and key readings refer to the final supplied observation, even
+when unavailable. Category colors and native animation matching retain identity
+through reordering.
+
+The scatterplot matrix replaces the former activity heatmap and its featured
+preview. It takes observations with `{ id, label, cohortId, values }`, at least
+two `{ id, label, unit?, valueFormatter? }` dimensions, and declared
+`{ id, label, tone? }` cohorts. Each metric shares one finite numeric extent across
+all panels. Missing coordinates are omitted and counted per pair; other measured
+coordinates still contribute to their marginal histograms. Diagonal histograms
+overlay cohort counts in shared equal-width bins (`binCount`, default 6, range
+2–24). Bins include their lower boundary; only the final bin includes its upper
+boundary. No density, model fit or correlation coefficient is inferred. Native
+pointer and keyboard inspection links the same observation across the matrix,
+including its histogram bins, without restarting chart animations. Narrow or
+short consumers scroll locally.
+
+Promise lanes takes `{ id, label, planned, actual }` rows. Each interval is a
+`[start, end]` pair or `null` on one common numeric scale. Planned and actual
+intervals render independently; incomplete, reversed or nonfinite intervals are
+unavailable, and zero duration is a tick. Start, finish and duration differences
+require both intervals and use actual minus planned. `valueFormatter` formats
+absolute coordinates; `deltaFormatter` formats differences, so dates and elapsed
+time can use different notation.
+
+Margin lanes takes `{ id, label, target, value, range }` rows. All rows share one
+measurement unit; the chart subtracts each row's target and uses a symmetric
+deviation scale. The current dot and caller-supplied expected `[low, high]` range
+remain independent. No confidence estimate, normalization or outcome classification
+is inferred. A missing target leaves the row inspectable without projected marks.
+
+Drift trails takes `{ id, label, tone?, observations }` series. Each observation
+has `{ id, label, time, x, y }`. Times must be finite and strictly increasing within
+each series; numeric X and Y may reverse, be signed or be zero. Incomplete pairs
+are omitted and counted, and break the trail. Only the final supplied observation
+can receive a filled latest marker. Missing final coordinates never promote an
+earlier reading. `xLabel`, `yLabel`, `xFormatter` and `yFormatter` identify both
+measures. Arrows indicate chronological direction, not speed or duration.
+
+These introduce the cross-language types `paired-range`, `interval-dot` and
+`trajectory`. Discover them through gallery filters or, for example,
+`nodex search --design nocturne --type paired-range`.
+
+Waterfall takes ordered `{ id, label, kind, value }` steps. `start` sets a balance,
+`change` adds a signed amount, and `total` reads the derived balance without taking
+a value. Missing or overflowing changes break the chain until the next explicit
+start. Zero remains a tick; signed changes retain their full length across zero.
+`valueFormatter` and `deltaFormatter` separate absolute and change readings.
+
+Boxplot takes `{ id, label, summary, outliers? }` rows. The summary is an ordered,
+finite `[lowerWhisker, q1, median, q3, upperWhisker]` tuple or `null`. Optional
+outliers contain `{ id, label?, value }`, with IDs unique within each row. Signed
+values are supported, equal quartiles collapse to a median tick, and outliers
+remain visible independently of summary availability. Invalid outlier readings
+are omitted and counted. The caller supplies the quartile method, whisker policy
+and outlier classification; the chart does not estimate them.
+
+Forecast fan takes `{ id, label, x, kind, value }` observations and explicit
+`{ id, coverage }` bands. Numeric X must increase strictly; observed rows precede
+forecast rows. Each forecast provides `intervals` keyed by band ID, containing
+ordered `[lower, upper]` bounds or `null`. Coverage probabilities are distinct and
+strictly between zero and one. Broader intervals must contain narrower ones;
+crossing intervals are unavailable at that observation while its point forecast
+remains visible. A point estimate need not lie inside every interval. Missing
+values and bounds remain independent gaps; isolated ranges remain visible as
+vertical strokes. The application supplies the model and prediction intervals.
+
+Control takes `{ id, label, x, value }` observations and caller-supplied
+`{ lower, center, upper }` statistical `limits`, or `null`. These limits must be
+finite and ordered; unavailable limits retain observations without classifying
+them. Only strict point breaches are marked: equality is within the limits.
+Optional `{ id, x, label }` events refer to positions inside the observation
+window. The chart does not estimate limits, evaluate sequence rules or infer an
+overall stability verdict. Statistical control limits are separate from business
+targets and specification limits.
+
+ECDF takes `{ id, label, tone?, samples }` series, with `{ id, value }` samples.
+It sorts finite signed values without mutating input, combines ties into exact
+inclusive jumps and divides by each series' measured sample count. Missing or
+nonfinite values are omitted and counted. `threshold` reports the share at or
+below a supplied value, including values outside the sample range. `percentiles`
+defaults to `[0.5, 0.9]`; each reading is the smallest observed value reaching its
+probability, without interpolation. Empty series retain unavailable readings.
+These three charts use the existing area and line taxonomy; analytical intent is
+documented in their metadata and tags.
+
+All twelve support native keyboard inspection, descendant token overrides,
+container resizing and live reduced motion. Dense consumer plots scroll locally;
+compact annotations use visible ellipses, with full readings retained in inspection.
+The gallery specimens fit completely before scaling. The language index features
+bars, line, ring and the scatterplot matrix; the gallery and selected landing belt discover
+all twelve. The landing terminal accepts `nodex init nocturne` and
+selects its actual chart belt. The automatic demonstration still ends with
+Sketchbook. Fonts and their license travel inside the token stylesheet.
+
 ## Soft Studio
 
 Soft Studio is available at `/l/soft-studio`, with all 24 shared primitives and
@@ -58,17 +195,17 @@ interface. Fields and badges stay flat; framed surfaces use subtle diffuse
 elevation. Body copy is 15px and editable values are 16px. The
 [design guide](registry/languages/soft-studio/DESIGN.md) covers the complete UI.
 
-| Chart | Type | Reading |
-| --- | --- | --- |
-| `soft-bars` | Bar | Rounded category bars with direct values and an exact zero baseline |
-| `soft-area` | Area | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps |
-| `soft-donut` | Donut | Exact shares of a complete total, a generous opening and a responsive key |
-| `soft-heatmap` | Heatmap | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
-| `soft-line` | Line | Independent monotone series on a numeric timeline, preserving each series' gaps |
-| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals |
-| `soft-scatter` | Scatter | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted |
-| `soft-dumbbell` | Dumbbell | Open and filled endpoints compare readings, including decreases, ties and missing partners |
-| `soft-gauge` | Gauge | Exact progress across a half-circle against an explicit positive target |
+| Chart               | Type        | Reading                                                                                         |
+| ------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| `soft-bars`         | Bar         | Rounded category bars with direct values and an exact zero baseline                             |
+| `soft-area`         | Area        | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps   |
+| `soft-donut`        | Donut       | Exact shares of a complete total, a generous opening and a responsive key                       |
+| `soft-heatmap`      | Heatmap     | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
+| `soft-line`         | Line        | Independent monotone series on a numeric timeline, preserving each series' gaps                 |
+| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals                   |
+| `soft-scatter`      | Scatter     | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted               |
+| `soft-dumbbell`     | Dumbbell    | Open and filled endpoints compare readings, including decreases, ties and missing partners      |
+| `soft-gauge`        | Gauge       | Exact progress across a half-circle against an explicit positive target                         |
 
 ```bash
 nodex init soft-studio
@@ -121,17 +258,17 @@ Sketchbook is available at `/l/sketchbook`, with all 24 shared primitives and
 nine charts covering the [roughViz catalogue](https://www.jwilber.me/roughviz/).
 All use native Recharts geometry and inspection with seeded Rough.js decoration.
 
-| roughViz chart | Nodex component | Encoding |
-| --- | --- | --- |
-| Bar | `sketch-bars` | Vertical category bars from zero |
-| BarH | `sketch-bars-horizontal` | Horizontal category bars from zero |
-| StackedBar | `sketch-stacked-bars` | Absolute vertical stacks with complete totals |
-| Line | `sketch-line` | Multiple series on a numeric X axis |
-| Scatter | `sketch-scatter` | Equal-size marks on numeric X/Y axes |
-| Pie | `sketch-pie` | Exact sector shares of a complete total |
-| Donut | `sketch-donut` | Exact sector shares with a central total |
-| Force | `sketch-force` | Collision-positioned bubbles, area proportional to value |
-| Network | `sketch-network` | Area-scaled nodes with explicit undirected links |
+| roughViz chart | Nodex component          | Encoding                                                 |
+| -------------- | ------------------------ | -------------------------------------------------------- |
+| Bar            | `sketch-bars`            | Vertical category bars from zero                         |
+| BarH           | `sketch-bars-horizontal` | Horizontal category bars from zero                       |
+| StackedBar     | `sketch-stacked-bars`    | Absolute vertical stacks with complete totals            |
+| Line           | `sketch-line`            | Multiple series on a numeric X axis                      |
+| Scatter        | `sketch-scatter`         | Equal-size marks on numeric X/Y axes                     |
+| Pie            | `sketch-pie`             | Exact sector shares of a complete total                  |
+| Donut          | `sketch-donut`           | Exact sector shares with a central total                 |
+| Force          | `sketch-force`           | Collision-positioned bubbles, area proportional to value |
+| Network        | `sketch-network`         | Area-scaled nodes with explicit undirected links         |
 
 Gaegu supplies headings, chart annotations, short UI text, paragraphs, editable
 values and dense tables; commands remain monospace. Its regular and bold faces
@@ -204,17 +341,17 @@ Embedded font metadata accepts pinned static `@fontsource` and variable
 Signal Console has nine charts at `/l/signal-console`, using its existing dark
 surfaces, JetBrains Mono, compact instrument layout and semantic status colors.
 
-| Chart | Type | Reading |
-| --- | --- | --- |
-| `endpoint-latency` | Bar | Routes ranked by P99 latency against an objective |
-| `request-throughput` | Area | Request rate across equal-duration windows |
-| `latency-trend` | Line | P50/P95/P99 patterns and P99 objective breaches |
-| `response-codes` | Stacked bar | Complete HTTP response counts by status class |
-| `latency-histogram` | Histogram | Counts in equal-width latency buckets |
-| `service-health` | Heatmap | Healthy, degraded, down and unavailable service windows |
-| `capacity-ring` | Donut | Exact used/available capacity with an optional warning threshold |
-| `saturation-scatter` | Scatter | Host CPU and latency against two explicit limits |
-| `trace-spans` | Range bar | Actual start/end offsets, preserving concurrent spans |
+| Chart                | Type        | Reading                                                          |
+| -------------------- | ----------- | ---------------------------------------------------------------- |
+| `endpoint-latency`   | Bar         | Routes ranked by P99 latency against an objective                |
+| `request-throughput` | Area        | Request rate across equal-duration windows                       |
+| `latency-trend`      | Line        | P50/P95/P99 patterns and P99 objective breaches                  |
+| `response-codes`     | Stacked bar | Complete HTTP response counts by status class                    |
+| `latency-histogram`  | Histogram   | Counts in equal-width latency buckets                            |
+| `service-health`     | Heatmap     | Healthy, degraded, down and unavailable service windows          |
+| `capacity-ring`      | Donut       | Exact used/available capacity with an optional warning threshold |
+| `saturation-scatter` | Scatter     | Host CPU and latency against two explicit limits                 |
+| `trace-spans`        | Range bar   | Actual start/end offsets, preserving concurrent spans            |
 
 Each chart accepts application data, provides keyboard inspection and supports
 scoped tokens and reduced motion. Missing data stays distinct from zero; partial
@@ -237,18 +374,40 @@ nodex add signal-console/request-throughput signal-console/service-health
 
 ## Develop the registry and gallery
 
-Prerequisites: Node **22.22+** (CI and Docker use Node 24), npm 10+, and Chromium
-installed through Playwright. No database or credentials are needed to build.
+Prerequisites: Node **22.22+** (CI and Docker use Node 24), pnpm **12.10.1**, Chromium
+installed through Playwright, and [gitleaks **8.30.1**](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1)
+on `PATH` for commits. Install the standalone gitleaks binary for your platform;
+`gitleaks version` confirms it is available. No database or credentials are needed to build.
+Use the pnpm version pinned in `packageManager`; Corepack users can invoke
+`corepack pnpm` in place of `pnpm`. The workspace and install-script allowlist
+live in `pnpm-workspace.yaml`. Keep `pnpm-lock.yaml` as the sole project lockfile.
+When switching an existing npm checkout, remove its root and workspace
+`node_modules` directories before installing.
+
+Security overrides in `pnpm-workspace.yaml` pin patched transitive dependencies;
+their comments link the relevant advisories. Before removing an override, verify
+the resolved version, run `pnpm audit` and repeat the verification suite below,
+including the Docker build check for changes to Next or its native dependencies.
 
 ```bash
-npm ci
-npx playwright install --with-deps chromium
-npm run build:registry
-npm run dev
+pnpm install --frozen-lockfile
+pnpm exec playwright install --with-deps chromium
+pnpm run build:registry
+pnpm run dev
 ```
 
-The gallery runs at `http://localhost:4180`. Production: `npm run build`, then
-`npm start`. Rebuild the registry after editing its source; the gallery reads
+`pnpm install` runs `prepare` to install the Husky Git hooks. The pre-commit hook
+scans staged changes with gitleaks, redacts findings, and blocks the commit if it
+finds a secret or the gitleaks binary is missing. To run the same check manually:
+`gitleaks git --pre-commit --staged --redact --no-banner`. Remove any detected
+secret before committing; rotate exposed credentials if they were already shared.
+CI and Docker builds set `HUSKY=0` because they do not make commits; CI runs its
+own pinned gitleaks scan before installing dependencies.
+
+The gallery runs at `http://localhost:4180`. Production: `pnpm run build`, then
+`pnpm start`. The web build script sets `NODE_ENV=production`, including when the
+calling shell exports `NODE_ENV=development`.
+Rebuild the registry after editing its source; the gallery reads
 built metadata. `dev` and the web build copy the artifacts into the app's public
 directory and generate lazy imports from each component's declared example entry
 and export. React components and example edits participate in Next's development
@@ -315,6 +474,29 @@ can progress without starting the entire catalogue. Loaded previews stay mounted
 as you scroll, preserving keyboard inspection, tooltips and control state. Titles
 and labels link to detail pages; the previews themselves retain native interaction.
 
+## Contribution flow
+
+`dev` is the integration branch; `main` holds releases and is GitHub's default.
+Start each task branch from current `dev` and publish it as `<type>/<short-slug>`
+(for example, `docs/developer-guides`). Open its pull request with an explicit
+`--base dev`. Keep one logical change per commit and use Conventional Commits.
+Do not commit or push directly to `dev` or `main`.
+
+Run the [verification checks](#verification), describe the change and validation
+in the PR, and include before/after screenshots for visual changes. Merge with a
+merge commit after independent review and green CI. Release only when requested:
+prepare version changes through a PR to `dev`, then open a release PR from `dev`
+to `main`. See [Deploy and publish](#deploy-and-publish) for the publishing effects
+and tag/version requirements.
+
+Read [AGENTS.md](AGENTS.md) for architecture and gallery runtime boundaries.
+Component types, metadata and local comments document their contracts;
+consumer tests cover regressions. Registry changes follow the
+[authoring skill](.agents/skills/nodex-authoring/SKILL.md); the
+[consumer skill](skills/nodex/SKILL.md) is for downstream apps. The 13 imported
+design skills in `.agents/skills/` are opt-in references, subordinate to the task
+and selected language's design rules and tokens.
+
 ## Use components in a React app
 
 The current component platform is **React 19, React DOM, TypeScript and
@@ -363,8 +545,8 @@ retains the resting position and shadow.
 Import the token stylesheet once after Tailwind in your application stylesheet:
 
 ```css
-@import "tailwindcss";
-@import "./nodex-tokens.css";
+@import 'tailwindcss';
+@import './nodex-tokens.css';
 ```
 
 Ensure Tailwind scans the configured component destination. Its default
@@ -489,12 +671,12 @@ intermediate petal paints as language tokens.
 
 The bar family preserves each specimen's original marks and labels:
 
-| Component | Required observation fields | Encoding |
-| --- | --- | --- |
-| `chunky-bars` | `plan`, `mrrK` | Rounded bars; tone ranks revenue without changing plan order |
-| `rung-bars` | `plan`, `mrrK` | One rung per $1K, with a counting dot every fifth rung |
-| `paired-rungs` | `plan`, `beforeK`, `afterK` | Grey and ink rung stacks compare both measures for a plan |
-| `stacked-rungs` | `region`, `coreK`, `addOnsK`, `servicesK` | Three revenue segments separated by empty rung positions |
+| Component       | Required observation fields               | Encoding                                                     |
+| --------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| `chunky-bars`   | `plan`, `mrrK`                            | Rounded bars; tone ranks revenue without changing plan order |
+| `rung-bars`     | `plan`, `mrrK`                            | One rung per $1K, with a counting dot every fifth rung       |
+| `paired-rungs`  | `plan`, `beforeK`, `afterK`               | Grey and ink rung stacks compare both measures for a plan    |
+| `stacked-rungs` | `region`, `coreK`, `addOnsK`, `servicesK` | Three revenue segments separated by empty rung positions     |
 
 Each component takes a required `data` array and the same optional dimensions,
 `animate`, `className` and `aria-label` props as the other charts. Zero is measured;
@@ -511,11 +693,11 @@ nodex add chunky-bars rung-bars paired-rungs stacked-rungs
 
 The next bar variants extend that composition:
 
-| Component | Required observation fields | Encoding |
-| --- | --- | --- |
-| `rung-histogram` | `fromHours`, `toHours`, `tickets` | One rung per integer ticket; interval ticks and a median flag |
-| `diverging-bar` | `segment`, `netAccounts` | Signed bars extend from zero; tone and caps reinforce direction |
-| `range-capsules` | `day`, `lowK`, `highK` | Each capsule spans an observed minimum and maximum |
+| Component        | Required observation fields                      | Encoding                                                             |
+| ---------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
+| `rung-histogram` | `fromHours`, `toHours`, `tickets`                | One rung per integer ticket; interval ticks and a median flag        |
+| `diverging-bar`  | `segment`, `netAccounts`                         | Signed bars extend from zero; tone and caps reinforce direction      |
+| `range-capsules` | `day`, `lowK`, `highK`                           | Each capsule spans an observed minimum and maximum                   |
 | `rung-waterfall` | `label`, `kind`, and `valueK` for starts/changes | Integer changes update a running total; broken rungs mark deductions |
 
 Waterfall `kind` is `start`, `change` or `total`. A start sets the running value,
@@ -530,59 +712,59 @@ nodex add rung-histogram diverging-bar range-capsules rung-waterfall
 
 The scatter and heatmap components also require caller observations:
 
-| Component | Data contract |
-| --- | --- |
-| `plumb-scatter` | Product, price percentile and satisfaction; both measures range from 0 to 100 |
-| `single-axis` / `dot-heat` | Day, hour and ticket count; the former uses linear diameter, the latter the original square-root size curve |
-| `brand-spectrum` | Opposing traits, our position and competitor positions, all on a 0–1 scale |
-| `matrix-heat` | Feature labels and a square matrix of co-usage percentages; self-pairs are inapplicable |
-| `matrix-heat-glance` | Feature labels and ordered releases with adoption percentages |
-| `calendar-heat` | Ordered week labels and Monday–Sunday deploy counts; optional period and peak labels come from the caller |
-| `dotty-matrix` | Ordered squads with task matrices indexed by lane and week |
-| `beeswarm` | Deal values in thousands and enterprise flags; one dot per deal, piled into calibrated lanes |
-| `violin` | Plan labels, observed reply times and positive density bandwidths in hours |
-| `tick-box` | Plan labels, ordered five-number summaries and individual outliers in hours |
-| `hairline-area` | Ordered days and values in thousands, with caller-supplied sparse axis labels |
-| `jitter-strip` | Nonnegative hours with caller-supplied fractional band positions; ordered band labels |
-| `trend-lineage` | Feature events, survival state and an explicit year window; incomplete timelines are unavailable |
-| `type-colonnade` | Ordered repository ownership indices and team labels, with derived team counts |
-| `dumbbell-queue` | Before/after whole-minute times; one bead per saved minute, with independently available endpoints |
-| `rank-strip` | Positive integer product ranks and ordered periods; rows sort by the final period, with unavailable finishes last |
-| `force-graph` | Caller hub and service IDs, monthly syncs and side roads; preserved force layout, dragging and adjacency |
-| `force-graph-dense` | Service domains, daily calls and explicit weighted links; preserved mesh physics, dragging, pan and zoom |
-| `scatter-morph` | Stable product IDs, price, satisfaction and revenue; reader-controlled scatter/bar/donut outline transitions |
-| `choropleth-states` | State sign-ups, preserved geographic insets and five-band controls; optional caller annotations |
-| `choropleth-world` | Country monthly actives, the original latitude window and five-band controls; offline geography |
-| `tree` | Caller root, product areas and feature membership; tidy hierarchy layout with all branches expanded |
-| `nested-treemap` | Complete team effort hours grouped by area; native nested layouts, header bands and derived shares |
-| `circular-graph` | Ordered teams and indexed ties; headcount diameters, weighted threads and adjacency inspection |
-| `circular-graph-dense` | Repositories, organizations and shared-contributor ties; diameter-aware ring spacing and selective rotated labels |
-| `aggregate-sankey` | Complete channel-to-plan counts; ranked source tones, native weighted layout and node/link inspection |
-| `parallel-coords` | Caller dimensions and scored ranges; complete product paths, axis brushing and derived best-all-round highlight |
-| `thread-triptych` | Ordered route endpoints and volume; one continuous weighted path through three caller-owned columns |
-| `cluster-field` | Whole core and island contributor counts, caller layout positions and explicit cross-contribution flags |
-| `hourglass-stream` | Whole stage populations, nearest-40-person ticks and exact adjacent conversion rates |
-| `stream-ribbon` | Ordered surfaces and weeks in a regular stacked area, preserving the original renderer’s actual encoding |
-| `bubble-almanac` | Indexed product/year ticket counts and beta flags, with caller event shelf and marginal notes |
-| `candlestick` | Ordered open/close/low/high quotes; hollow up bodies, ink down bodies and unchanged-price marks |
-| `radial-patchwork` | Deployment hour, angular window, files touched and incident status; overlapping independent sectors |
-| `radial-convergence` | Explicit request-to-theme assignments; hub area counts actual assignments |
-| `bar-race` | Period revenue frames with stable product IDs; one playback, replay, and final-frame reduced motion |
-| `stagger-delay` | Caller-ordered market values, magnitude tones and a token-timed bar stagger |
-| `dynamic-data` | Caller samples and static source status; last sample owns the current value |
-| `draw-in-counter` | Daily bookings and period label; cumulative area and exact headline share the library animation |
-| `dot-cascade` | Whole incident counts above a sloping baseline; odd totals round the final two-incident dot up |
-| `launch-fan` | Feature launch weeks and caller week guides, projected through the original fan |
-| `donut-redesigned` | Complete whole-percent source shares in a ten-by-ten dot grid |
-| `custom-pie` | User shares determine angle; minutes determine radius, with caller reference scale and rings |
-| `tick-donut` | Ordered whole-percent channel shares totaling 100; one tick per percent |
-| `tick-gauge` | Whole-percent progress and caller goal label; 100 reached or remaining ticks |
-| `pictorial-bar` | Yearly trees in thousands and a caller target; continuous bars clip a repeated tree texture |
-| `tick-rows` | Whole release counts by team; one tick per release and one counting dot per five |
-| `barcode-lollipop` | Day labels, peak users and weekend flags; unavailable readings retain their calendar hairlines |
-| `hundred-field` | Up to four whole-percent disposition shares; each dot is one person in a hundred, with no invented unallocated people |
-| `ballot-tally` | Each option has a whole picked count out of 100; repeated choices permit row totals above 100. Automatic height reserves readable spacing for each option's heading and ticks |
-| `ridgeline` | Ordered pipeline density profiles with unique nonnegative hours and nullable density weights |
+| Component                  | Data contract                                                                                                                                                                 |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plumb-scatter`            | Product, price percentile and satisfaction; both measures range from 0 to 100                                                                                                 |
+| `single-axis` / `dot-heat` | Day, hour and ticket count; the former uses linear diameter, the latter the original square-root size curve                                                                   |
+| `brand-spectrum`           | Opposing traits, our position and competitor positions, all on a 0–1 scale                                                                                                    |
+| `matrix-heat`              | Feature labels and a square matrix of co-usage percentages; self-pairs are inapplicable                                                                                       |
+| `matrix-heat-glance`       | Feature labels and ordered releases with adoption percentages                                                                                                                 |
+| `calendar-heat`            | Ordered week labels and Monday–Sunday deploy counts; optional period and peak labels come from the caller                                                                     |
+| `dotty-matrix`             | Ordered squads with task matrices indexed by lane and week                                                                                                                    |
+| `beeswarm`                 | Deal values in thousands and enterprise flags; one dot per deal, piled into calibrated lanes                                                                                  |
+| `violin`                   | Plan labels, observed reply times and positive density bandwidths in hours                                                                                                    |
+| `tick-box`                 | Plan labels, ordered five-number summaries and individual outliers in hours                                                                                                   |
+| `hairline-area`            | Ordered days and values in thousands, with caller-supplied sparse axis labels                                                                                                 |
+| `jitter-strip`             | Nonnegative hours with caller-supplied fractional band positions; ordered band labels                                                                                         |
+| `trend-lineage`            | Feature events, survival state and an explicit year window; incomplete timelines are unavailable                                                                              |
+| `type-colonnade`           | Ordered repository ownership indices and team labels, with derived team counts                                                                                                |
+| `dumbbell-queue`           | Before/after whole-minute times; one bead per saved minute, with independently available endpoints                                                                            |
+| `rank-strip`               | Positive integer product ranks and ordered periods; rows sort by the final period, with unavailable finishes last                                                             |
+| `force-graph`              | Caller hub and service IDs, monthly syncs and side roads; preserved force layout, dragging and adjacency                                                                      |
+| `force-graph-dense`        | Service domains, daily calls and explicit weighted links; preserved mesh physics, dragging, pan and zoom                                                                      |
+| `scatter-morph`            | Stable product IDs, price, satisfaction and revenue; reader-controlled scatter/bar/donut outline transitions                                                                  |
+| `choropleth-states`        | State sign-ups, preserved geographic insets and five-band controls; optional caller annotations                                                                               |
+| `choropleth-world`         | Country monthly actives, the original latitude window and five-band controls; offline geography                                                                               |
+| `tree`                     | Caller root, product areas and feature membership; tidy hierarchy layout with all branches expanded                                                                           |
+| `nested-treemap`           | Complete team effort hours grouped by area; native nested layouts, header bands and derived shares                                                                            |
+| `circular-graph`           | Ordered teams and indexed ties; headcount diameters, weighted threads and adjacency inspection                                                                                |
+| `circular-graph-dense`     | Repositories, organizations and shared-contributor ties; diameter-aware ring spacing and selective rotated labels                                                             |
+| `aggregate-sankey`         | Complete channel-to-plan counts; ranked source tones, native weighted layout and node/link inspection                                                                         |
+| `parallel-coords`          | Caller dimensions and scored ranges; complete product paths, axis brushing and derived best-all-round highlight                                                               |
+| `thread-triptych`          | Ordered route endpoints and volume; one continuous weighted path through three caller-owned columns                                                                           |
+| `cluster-field`            | Whole core and island contributor counts, caller layout positions and explicit cross-contribution flags                                                                       |
+| `hourglass-stream`         | Whole stage populations, nearest-40-person ticks and exact adjacent conversion rates                                                                                          |
+| `stream-ribbon`            | Ordered surfaces and weeks in a regular stacked area, preserving the original renderer’s actual encoding                                                                      |
+| `bubble-almanac`           | Indexed product/year ticket counts and beta flags, with caller event shelf and marginal notes                                                                                 |
+| `candlestick`              | Ordered open/close/low/high quotes; hollow up bodies, ink down bodies and unchanged-price marks                                                                               |
+| `radial-patchwork`         | Deployment hour, angular window, files touched and incident status; overlapping independent sectors                                                                           |
+| `radial-convergence`       | Explicit request-to-theme assignments; hub area counts actual assignments                                                                                                     |
+| `bar-race`                 | Period revenue frames with stable product IDs; one playback, replay, and final-frame reduced motion                                                                           |
+| `stagger-delay`            | Caller-ordered market values, magnitude tones and a token-timed bar stagger                                                                                                   |
+| `dynamic-data`             | Caller samples and static source status; last sample owns the current value                                                                                                   |
+| `draw-in-counter`          | Daily bookings and period label; cumulative area and exact headline share the library animation                                                                               |
+| `dot-cascade`              | Whole incident counts above a sloping baseline; odd totals round the final two-incident dot up                                                                                |
+| `launch-fan`               | Feature launch weeks and caller week guides, projected through the original fan                                                                                               |
+| `donut-redesigned`         | Complete whole-percent source shares in a ten-by-ten dot grid                                                                                                                 |
+| `custom-pie`               | User shares determine angle; minutes determine radius, with caller reference scale and rings                                                                                  |
+| `tick-donut`               | Ordered whole-percent channel shares totaling 100; one tick per percent                                                                                                       |
+| `tick-gauge`               | Whole-percent progress and caller goal label; 100 reached or remaining ticks                                                                                                  |
+| `pictorial-bar`            | Yearly trees in thousands and a caller target; continuous bars clip a repeated tree texture                                                                                   |
+| `tick-rows`                | Whole release counts by team; one tick per release and one counting dot per five                                                                                              |
+| `barcode-lollipop`         | Day labels, peak users and weekend flags; unavailable readings retain their calendar hairlines                                                                                |
+| `hundred-field`            | Up to four whole-percent disposition shares; each dot is one person in a hundred, with no invented unallocated people                                                         |
+| `ballot-tally`             | Each option has a whole picked count out of 100; repeated choices permit row totals above 100. Automatic height reserves readable spacing for each option's heading and ticks |
+| `ridgeline`                | Ordered pipeline density profiles with unique nonnegative hours and nullable density weights                                                                                  |
 
 Tick-donut and tick-gauge keep circular geometry at responsive and explicit
 dimensions. Their ticks and counting guides share equal axis scales, and the
@@ -702,30 +884,65 @@ under system `/tmp`, and remove it when the work is complete.
 
 ## Verification
 
+The `ci` workflow runs `verify` on pull requests and pushes to `dev` and `main`,
+with read-only repository contents permission. Pull requests also run `docker-build`
+to build and check the production image without publishing it.
+
+CI scans the full Git history with gitleaks 8.30.1, downloaded from its official
+release and verified against a pinned SHA-256 checksum. Run the same history scan
+locally with `gitleaks git --redact --no-banner`. Keep findings redacted when
+sharing results; add an exception only after reviewing a confirmed false positive.
+
 ```bash
-npm run build:registry
-npm test
-npm run smoke
-npm run smoke:cli
-npm run check:shell
-npm run lint
-npm run typecheck
-npm run build --workspace @nodex/web
-npm run smoke:landing
-npm run smoke:gallery
+pnpm run build:registry
+pnpm test
+pnpm run smoke
+pnpm run smoke:cli
+pnpm run smoke:pack
+pnpm run check:shell
+pnpm run lint
+pnpm run format:check
+pnpm run typecheck
+pnpm --filter @nodex/web run build
+pnpm run smoke:landing
+pnpm run smoke:gallery
 ```
 
-| Command | Coverage |
-| --- | --- |
-| `build:registry` | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance |
-| `check:registry` | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched |
-| `test` | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation |
-| `smoke` | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all five languages, stable sketch geometry, Soft Studio geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
-| `smoke:cli` | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds |
-| `check:shell` | Gallery primitive classes have their curated stylesheets |
-| `smoke:landing` | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets |
-| `smoke:gallery` | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout |
-| `lint` / `typecheck` | Application, registry, CLI and build source |
+| Command                   | Coverage                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build:registry`          | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance                                                                                                                                                                                                     |
+| `check:registry`          | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched                                                                                                                                                                                                                        |
+| `test`                    | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation                                                                                                                                                                                                               |
+| `smoke`                   | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all six languages, stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
+| `smoke:cli`               | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds                                                                                                                                                                  |
+| `smoke:pack`              | Builds and packs the CLI with pnpm, installs the tarball in a fresh npm project outside the workspace, and runs its installed `nodex list` against the built registry                                                                                                                                                      |
+| `check:shell`             | Gallery primitive classes have their curated stylesheets                                                                                                                                                                                                                                                                   |
+| `smoke:landing`           | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets                                                               |
+| `smoke:gallery`           | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout                                   |
+| `lint` / `typecheck`      | Application, registry, CLI and build source                                                                                                                                                                                                                                                                                |
+| `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation                                                                                                                                                                                                                           |
+
+Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
+stylesheet to sort utilities, including in delivered registry source. Generated
+registry/web output, the pnpm lockfile, Helm templates and imported third-party
+skills are excluded in `.prettierignore`. Our authoring and consumer skills remain
+included. Formatting changes source layout and class order; the build still
+delivers editable source and rewrites imports through the same contract.
+
+ESLint checks TypeScript, React's automatic JSX runtime, hook order/dependencies
+and JSX accessibility across application and registry source. Next's recommended
+and Core Web Vitals rules apply only to `apps/web`. Warnings fail `lint`;
+`lint:fix` applies available fixes. `eslint-config-prettier` disables conflicting
+style rules. The JSX plugins use ESLint's official `@eslint/compat` adapter on
+ESLint 10, with version-specific peer allowances; React Compiler validation is
+not enabled. Keep any rule exception
+local, with the reason beside the code and browser coverage for the behavior.
+
+`smoke:pack` requires the registry build above and runs in CI's required `verify`
+job. It removes its temporary package and consumer after checking them. Pass an
+empty output directory, `pnpm run smoke:pack /tmp/nodex-pack`, to retain the tested
+tarball. The npm release workflow uses this same check and publishes that exact
+archive without repacking; the check itself never publishes or needs credentials.
 
 The consumer smoke installs packages in a disposable directory and therefore
 needs npm network access. Build previews bundle dependencies locally; rendered
@@ -733,7 +950,7 @@ examples need no CDN chart scripts or external data fetches. Chromium belongs to
 the build and test environment, not the production server image.
 
 `smoke:landing` and `smoke:gallery` require the web build above. Both also accept
-an existing server URL, such as `npm run smoke:gallery -- http://localhost:4180`.
+an existing server URL, such as `pnpm run smoke:gallery http://localhost:4180`.
 
 ## Accounts and configuration
 
@@ -746,29 +963,42 @@ For optional local accounts:
 
 ```bash
 cp .env.example .env
-npm run db:up
-npm run db:migrate
+pnpm run db:up
+pnpm run db:migrate
 ```
 
 Register a GitHub OAuth app with homepage `http://localhost:4180` and callback
 `http://localhost:4180/api/auth/github/callback`. Fill the credentials in the
-root `.env` and restart the site. `npm run db:down` stops local Postgres.
+root `.env` and restart the site. `pnpm run db:down` stops local Postgres.
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Runtime account database connection |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration |
-| `NEXT_PUBLIC_SITE_URL` | Runtime public origin used by server-side OAuth |
-| `NEXT_PUBLIC_REGISTRY_URL` | Registry CDN root, baked into the browser bundle at build time |
-| `NODEX_REGISTRY` | CLI registry override; flag and project config take precedence |
-| `NODEX_TOKEN` | CLI session token for unattended use |
-| `NODEX_CONFIG_DIR` | Optional CLI credential-directory override |
+| Variable                                   | Purpose                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------- |
+| `DATABASE_URL`                             | Runtime account database connection                                   |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration                                    |
+| `NEXT_PUBLIC_SITE_URL`                     | Runtime public origin used by server-side OAuth                       |
+| `NEXT_PUBLIC_REGISTRY_URL`                 | Registry CDN root, baked into the browser bundle at build time        |
+| `NODEX_REGISTRY`                           | CLI registry override; flag and project config take precedence        |
+| `NODEX_API`                                | Optional CLI account API base; defaults to the selected registry root |
+| `NODEX_TOKEN`                              | CLI session token for unattended use                                  |
+| `NODEX_CONFIG_DIR`                         | Optional CLI credential-directory override                            |
 
 `.env` is gitignored. Next explicitly loads the root file. CLI credentials live
 separately in `~/.nodex/auth.json` with mode `0600`; project config never holds
 a token. `nodex login`, `whoami` and `logout` manage CLI sessions. Public file
 requests carry no bearer token; authenticated registry requests are confined to
 same-origin `api/` paths.
+
+`NODEX_API` defaults to the selected registry root. It must be an absolute HTTPS
+URL; HTTP is allowed only for `localhost`, `127.0.0.1` or `[::1]`. Credentials,
+query strings and fragments are rejected. Device start, token polling and
+authenticated `whoami` requests never follow redirects, including same-origin
+redirects. Configure the final API base directly.
+
+`pnpm run test:auth` tests auth boundaries without a database and is included in
+`pnpm test`. `pnpm run test:auth:postgres` requires `DATABASE_URL` pointing to a
+migrated, disposable PostgreSQL database. CI runs that suite against its isolated
+PostgreSQL 17 service, including six synchronized polls of one approval and a
+check that exactly one usable CLI session is created. Never target production.
 
 ## Deploy and publish
 
@@ -791,32 +1021,53 @@ The existing Docker workflow publishes on `main` and version tags, using
 `DOCKERHUB_REPOSITORY` and `NEXT_PUBLIC_REGISTRY_URL`. The image targets amd64.
 
 The Helm chart in `helm/nodex` deploys the app with an optional external database
-and a migration Job. Its release workflow requires a chart-version bump:
+and a migration Job. Its release workflow requires a chart-version bump.
+
+Enable GitHub Pages for the `gh-pages` branch in repository settings. The workflow
+creates that branch if needed and serves chart packages from its `helm/` folder.
+An existing chart version is never repackaged; bump `helm/nodex/Chart.yaml`'s
+`version` to publish changed chart content.
 
 ```bash
 helm repo add nodex https://kr4t0n.github.io/nodex/helm
 helm repo update
-helm upgrade --install nodex nodex/nodex --version 0.2.3 --set siteUrl=https://nodex.example.com
+helm upgrade --install nodex nodex/nodex --version 0.3.0 --set siteUrl=https://nodex.example.com
 ```
 
-Chart `0.2.3` pins the app and migration Job to `kr4t0n/nodex:0.2.3` through
+Chart `0.3.0` pins the app and migration Job to `kr4t0n/nodex:0.3.0` through
 `appVersion`; `image.tag` is an explicit override.
 
-`npm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
+`pnpm run build:cli` compiles the CLI to JavaScript for Node 20+. Its npm package,
 `@kubitnodes/nodex`, has no runtime dependencies on the monorepo. The npm workflow
 publishes on version tags or manual runs through
 [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/), and verifies
-the packed artifact before publishing. In the npm package settings, authorize
+the packed artifact before publishing. Build and pack with pnpm so workspace
+references become ordinary versions, then publish that exact tarball with npm:
+
+```bash
+pnpm run build:cli
+mkdir -p /tmp/nodex-pack
+pnpm --filter @kubitnodes/nodex pack --pack-destination /tmp/nodex-pack
+npm publish --dry-run --force /tmp/nodex-pack/kubitnodes-nodex-0.3.0.tgz
+```
+
+The dry run does not publish; `--force` skips the local already-published-version
+check for this rehearsal. The release workflow uses neither flag.
+In the npm package settings, authorize
 GitHub owner `kr4t0n`, repository `nodex`, and workflow filename
 `npm-publish.yml` for direct publishing. No npm token secret is required.
 The workflow uses a GitHub-hosted runner, Node 24 with npm 11.5.1 or newer,
 `id-token: write`, and no package-manager cache. npm generates provenance
 automatically; an OIDC configuration error fails the publish job.
 
-For a coordinated release, bump `packages/cli/package.json` and its lockfile
-entry, plus the Helm chart's `version` and `appVersion`. Commit those changes
-on `main` and push a matching annotated tag such as `v0.2.3`. The main push
-publishes the versioned Helm chart; the tag starts the npm and image workflows.
+For a requested coordinated release, bump `packages/cli/package.json`, plus the
+Helm chart's `version` and `appVersion`, on a task branch and merge its reviewed
+PR into `dev`. Open a release PR with head `dev` and base `main`; merge it with a
+merge commit after review and green CI. Then create and push a matching annotated
+`v<version>` tag at the released `main` commit. Never commit release changes
+directly on `main`. The release merge triggers Docker publication and, when the
+chart or its workflow changed, publishes the versioned Helm chart. The tag starts
+the npm and image workflows. Manual publishing also requires a release request.
 Image version tags omit the `v` prefix. Confirm the registry artifacts after
 the workflows finish: missing Docker credentials still make the image job skip,
 so a successful workflow alone does not prove a release exists. The npm workflow

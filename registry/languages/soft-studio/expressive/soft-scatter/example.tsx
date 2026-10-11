@@ -14,5 +14,14 @@ const data: SoftScatterDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <SoftScatter data={data} xLabel="Focus time · minutes" yLabel="Energy · out of 10" contextLabel="Ten moments from your week" height={364} animate={animate} />;
+  return (
+    <SoftScatter
+      data={data}
+      xLabel="Focus time · minutes"
+      yLabel="Energy · out of 10"
+      contextLabel="Ten moments from your week"
+      height={364}
+      animate={animate}
+    />
+  );
 }

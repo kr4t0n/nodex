@@ -15,5 +15,14 @@ const data: SoftLineDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <SoftLine data={data} series={series} unitLabel="Hours" contextLabel="A rhythm of your own" height={364} animate={animate} />;
+  return (
+    <SoftLine
+      data={data}
+      series={series}
+      unitLabel="Hours"
+      contextLabel="A rhythm of your own"
+      height={364}
+      animate={animate}
+    />
+  );
 }

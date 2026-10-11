@@ -62,7 +62,8 @@ async function loadComponent(dir: string): Promise<LoadedComponent> {
     componentMetaSchema.parse(value),
   );
   for (const name of [...meta.files, meta.example.entry]) {
-    if (!(await pathExists(path.join(dir, name)))) throw new Error(`${dir}: missing declared file ${name}`);
+    if (!(await pathExists(path.join(dir, name))))
+      throw new Error(`${dir}: missing declared file ${name}`);
   }
   return { meta, dir, files: meta.files };
 }

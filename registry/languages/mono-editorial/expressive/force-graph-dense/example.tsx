@@ -51,9 +51,16 @@ function mesh(domains: readonly Domain[] = DOMAINS): {
 
     for (let i = 0; i < count; i++) {
       // A few mid-weights per domain, then a long tail of small services.
-      const calls = i < 3 ? 14 + rnd(di + 2, i + 4) * 18 : 2 + rnd(di + 5, i + 9) * 9;
+      const calls =
+        i < 3 ? 14 + rnd(di + 2, i + 4) * 18 : 2 + rnd(di + 5, i + 9) * 9;
       const name = `${domain}-${String(i + 1).padStart(2, '0')}`;
-      nodes.push({ name, callsK: Math.round(calls), hub: false, tone, domain: di });
+      nodes.push({
+        name,
+        callsK: Math.round(calls),
+        hub: false,
+        tone,
+        domain: di,
+      });
 
       edges.push({
         source: name,
@@ -65,7 +72,10 @@ function mesh(domains: readonly Domain[] = DOMAINS): {
 
       // The occasional shortcut inside a domain, which is how these grow.
       if (i > 1 && rnd(di + 3, i + 11) < 0.22) {
-        const peer = String(1 + Math.floor(rnd(di + 4, i + 13) * i)).padStart(2, '0');
+        const peer = String(1 + Math.floor(rnd(di + 4, i + 13) * i)).padStart(
+          2,
+          '0',
+        );
         edges.push({
           source: name,
           target: `${domain}-${peer}`,
@@ -97,7 +107,14 @@ function mesh(domains: readonly Domain[] = DOMAINS): {
   for (let k = 0; k < 26; k++) {
     const a = nodes[1 + Math.floor(rnd(k + 1, 17) * (nodes.length - 1))];
     const b = nodes[1 + Math.floor(rnd(k + 3, 23) * (nodes.length - 1))];
-    if (a && b && a.name !== b.name && a.domain !== b.domain && !a.hub && !b.hub) {
+    if (
+      a &&
+      b &&
+      a.name !== b.name &&
+      a.domain !== b.domain &&
+      !a.hub &&
+      !b.hub
+    ) {
       edges.push({
         source: a.name,
         target: b.name,
@@ -116,6 +133,19 @@ const MESH = mesh();
 const NODES = MESH.nodes;
 const EDGES = MESH.edges;
 
-const data=NODES.map(n=>({id:n.name,name:n.name,callsK:n.callsK,hub:n.hub,domainIndex:n.domain}));
-const edges=EDGES.map(e=>({source:e.source,target:e.target,width:e.width,treatment:e.tone as ForceGraphDenseEdge['treatment']}));
-export function Example(){return <ForceGraphDense data={data} edges={edges}/>;}
+const data = NODES.map((n) => ({
+  id: n.name,
+  name: n.name,
+  callsK: n.callsK,
+  hub: n.hub,
+  domainIndex: n.domain,
+}));
+const edges = EDGES.map((e) => ({
+  source: e.source,
+  target: e.target,
+  width: e.width,
+  treatment: e.tone as ForceGraphDenseEdge['treatment'],
+}));
+export function Example() {
+  return <ForceGraphDense data={data} edges={edges} />;
+}

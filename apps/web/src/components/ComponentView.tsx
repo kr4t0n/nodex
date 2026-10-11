@@ -42,7 +42,10 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
               title="No such component"
               hint={`Nothing named "${name}" exists in ${slug}.`}
               action={
-                <Link href={`/l/${slug}`} className="nx-btn nx-btn--outline no-underline">
+                <Link
+                  href={`/l/${slug}`}
+                  className="nx-btn nx-btn--outline no-underline"
+                >
                   Back to the language
                 </Link>
               }
@@ -60,7 +63,10 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
   const facts: Array<[string, string]> = [
     ['Type', item.meta.component],
     ['Runtime', item.meta.runtime],
-    ['Tier', isPrimitive ? 'primitive, shared by every language' : 'expressive'],
+    [
+      'Tier',
+      isPrimitive ? 'primitive, shared by every language' : 'expressive',
+    ],
   ];
   if (item.dependencies?.length) {
     facts.push(['Dependencies', item.dependencies.join(', ')]);
@@ -92,10 +98,7 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
             </p>
 
             <div className="mt-9">
-              <Preview
-                item={item}
-                language={slug}
-              />
+              <Preview item={item} language={slug} />
             </div>
           </div>
 
@@ -109,14 +112,18 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
                     className="py-2.5 text-[9px] font-bold tracking-[0.08em] uppercase"
                     style={{
                       color: 'var(--nx-muted)',
-                      borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)',
+                      borderTop:
+                        'var(--nx-stroke-hairline) solid var(--nx-grid)',
                     }}
                   >
                     {label}
                   </dt>
                   <dd
                     className="m-0 py-2.5 text-[length:var(--nx-type-body-detailSize)]"
-                    style={{ borderTop: 'var(--nx-stroke-hairline) solid var(--nx-grid)' }}
+                    style={{
+                      borderTop:
+                        'var(--nx-stroke-hairline) solid var(--nx-grid)',
+                    }}
                   >
                     {value}
                   </dd>

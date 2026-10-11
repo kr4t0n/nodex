@@ -6,23 +6,13 @@
   "tier": "expressive",
   "runtime": "react",
   "density": "glance",
-  "tags": [
-    "global",
-    "ops"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["global", "ops"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "640/380",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "ChoroplethWorld"
-  ],
-  "files": [
-    "component.tsx",
-    "geo.ts"
-  ],
+  "exports": ["ChoroplethWorld"],
+  "files": ["component.tsx", "geo.ts"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

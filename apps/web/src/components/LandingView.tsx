@@ -56,7 +56,9 @@ export function LandingView() {
   const [catalog, setCatalog] = useState<Catalog>();
   const [catalogFailed, setCatalogFailed] = useState(false);
   const reduced = usePrefersReducedMotion();
-  const landingLanguage = useLandingLanguage(catalog?.languages ?? NO_LANGUAGES);
+  const landingLanguage = useLandingLanguage(
+    catalog?.languages ?? NO_LANGUAGES,
+  );
 
   const root = useRef<HTMLDivElement>(null);
   const hero = useRef<HTMLElement>(null);
@@ -66,10 +68,14 @@ export function LandingView() {
   const signIn = useRef<HTMLAnchorElement>(null);
   const barBg = useRef<HTMLDivElement>(null);
 
-  const language = catalog?.languages.find((entry) => entry.slug === landingLanguage.slug);
+  const language = catalog?.languages.find(
+    (entry) => entry.slug === landingLanguage.slug,
+  );
 
   useEffect(() => {
-    void loadCatalog().then(setCatalog).catch(() => setCatalogFailed(true));
+    void loadCatalog()
+      .then(setCatalog)
+      .catch(() => setCatalogFailed(true));
   }, []);
 
   // Spread a large catalog across the run; repeat a small catalog so each
@@ -99,7 +105,8 @@ export function LandingView() {
    */
   useGSAP(
     () => {
-      if (!hero.current || !mark.current || !row.current || !signIn.current) return;
+      if (!hero.current || !mark.current || !row.current || !signIn.current)
+        return;
 
       const markElement = mark.current;
       const rowElement = row.current;
@@ -125,12 +132,16 @@ export function LandingView() {
       const heroSize = () =>
         Math.min(
           500,
-          Math.max(64, (window.innerWidth - gutter()) * NAV_FONT / markWidth()),
+          Math.max(
+            64,
+            ((window.innerWidth - gutter()) * NAV_FONT) / markWidth(),
+          ),
         );
       const heroScale = () => heroSize() / NAV_FONT;
       const taglineX = () => heroSize() * MARK_LEFT_INSET;
       const signInX = () => markWidth() * heroScale() - rowElement.clientWidth;
-      const markTop = () => (window.innerHeight - heroSize() * MARK_LEADING) / 2;
+      const markTop = () =>
+        (window.innerHeight - heroSize() * MARK_LEADING) / 2;
       const markY = () => markTop() - NAV_TOP;
       const rowY = () =>
         markTop() + heroSize() * MARK_LEADING + HERO_ROW_GAP - NAV_TOP;
@@ -139,7 +150,12 @@ export function LandingView() {
       const barRowY = () => {
         const rowBounds = rowElement.getBoundingClientRect();
         const actionBounds = signInElement.getBoundingClientRect();
-        return rowBounds.top + rowBounds.height / 2 - actionBounds.top - actionBounds.height / 2;
+        return (
+          rowBounds.top +
+          rowBounds.height / 2 -
+          actionBounds.top -
+          actionBounds.height / 2
+        );
       };
 
       const toHero = () => {
@@ -153,7 +169,10 @@ export function LandingView() {
         gsap.set(mark.current, { y: 0, scale: 1 });
         gsap.set(row.current, { y: barRowY() });
         gsap.set(signIn.current, { x: 0 });
-        gsap.set(tagline.current, { x: NAV_FONT * MARK_LEFT_INSET, opacity: 0 });
+        gsap.set(tagline.current, {
+          x: NAV_FONT * MARK_LEFT_INSET,
+          opacity: 0,
+        });
         gsap.set(barBg.current, { opacity: 1 });
       };
 
@@ -241,8 +260,7 @@ export function LandingView() {
           ref={barBg}
           className="absolute inset-0 backdrop-blur-[6px]"
           style={{
-            background:
-              'color-mix(in oklab, var(--nx-bg) 88%, transparent)',
+            background: 'color-mix(in oklab, var(--nx-bg) 88%, transparent)',
           }}
         />
 
@@ -335,11 +353,7 @@ export function LandingView() {
  * seam never shows. Under reduced motion it does not move at all and becomes an
  * ordinary horizontal scroller.
  */
-function ComponentBelt({
-  items,
-}: {
-  items: Item[];
-}) {
+function ComponentBelt({ items }: { items: Item[] }) {
   const reduced = usePrefersReducedMotion();
   const [mounted, setMounted] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -367,7 +381,11 @@ function ComponentBelt({
         repeat: -1,
       });
     },
-    { scope: wrap, dependencies: [reduced, items.length, mounted], revertOnUpdate: true },
+    {
+      scope: wrap,
+      dependencies: [reduced, items.length, mounted],
+      revertOnUpdate: true,
+    },
   );
 
   /**
@@ -380,14 +398,10 @@ function ComponentBelt({
 
   return (
     <section aria-label="Component previews" className="w-full min-w-0">
-
       {/* The fallback is a CSS variant, not a JS branch: choosing it in
           JavaScript would make the server and client markup differ and trip
           hydration. */}
-      <div
-        ref={wrap}
-        className="overflow-hidden motion-reduce:overflow-x-auto"
-      >
+      <div ref={wrap} className="overflow-hidden motion-reduce:overflow-x-auto">
         <div ref={track} className="flex w-max">
           {passes.map((pass) => (
             <div
@@ -404,11 +418,13 @@ function ComponentBelt({
                   className="m-0 shrink-0"
                   style={{ width: RUN_CARD_WIDTH, height: RUN_CARD_HEIGHT }}
                 >
-                  {mounted && <Preview
-                    item={item}
-                    language={item.meta.language}
-                    boxHeight={RUN_CARD_HEIGHT}
-                  />}
+                  {mounted && (
+                    <Preview
+                      item={item}
+                      language={item.meta.language}
+                      boxHeight={RUN_CARD_HEIGHT}
+                    />
+                  )}
                 </figure>
               ))}
             </div>

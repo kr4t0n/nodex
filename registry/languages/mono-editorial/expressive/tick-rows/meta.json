@@ -7,26 +7,13 @@
   "runtime": "react",
   "density": "glance",
   "aspectRatio": "560/340",
-  "tags": [
-    "release",
-    "log"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["release", "log"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "TickRows"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts",
-    "tally-marks.tsx"
-  ],
+  "exports": ["TickRows"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts", "tally-marks.tsx"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

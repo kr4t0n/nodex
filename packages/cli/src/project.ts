@@ -45,15 +45,25 @@ export async function findConfig(
     let config: ProjectConfig;
     try {
       config = JSON.parse(raw) as ProjectConfig;
-      if (!config || typeof config.language !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.language)) throw new Error('language must be a slug');
-      if (config.registry !== undefined && typeof config.registry !== 'string') throw new Error('registry must be a path or URL');
+      if (
+        !config ||
+        typeof config.language !== 'string' ||
+        !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.language)
+      )
+        throw new Error('language must be a slug');
+      if (config.registry !== undefined && typeof config.registry !== 'string')
+        throw new Error('registry must be a path or URL');
       for (const name of ['components', 'tokens', 'design'] as const) {
         const value = config.paths?.[name];
-        if (typeof value !== 'string' || path.isAbsolute(value)) throw new Error(`paths.${name} must be project-relative`);
+        if (typeof value !== 'string' || path.isAbsolute(value))
+          throw new Error(`paths.${name} must be project-relative`);
         containedPath(dir, value);
       }
     } catch (cause) {
-      throw new Error(`Invalid ${path.join(dir, CONFIG_FILE)}: ${String(cause)}`, { cause });
+      throw new Error(
+        `Invalid ${path.join(dir, CONFIG_FILE)}: ${String(cause)}`,
+        { cause },
+      );
     }
     return { dir, config };
   }
@@ -66,7 +76,10 @@ export async function findConfig(
  * anything, and an agent reads AGENTS.md. Dropping tokens into the project
  * without telling the agent they exist would waste the whole exercise.
  */
-export function agentsSnippet(config: ProjectConfig, languageName: string): string {
+export function agentsSnippet(
+  config: ProjectConfig,
+  languageName: string,
+): string {
   return `<!-- nodex:start -->
 ## Design language: ${languageName}
 
@@ -101,7 +114,10 @@ This project uses the \`${config.language}\` design language from nodex.
 }
 
 /** Only replace the section nodex owns; retain all other project instructions. */
-export function withAgentsSnippet(existing: string | undefined, snippet: string): string {
+export function withAgentsSnippet(
+  existing: string | undefined,
+  snippet: string,
+): string {
   const source = existing ?? '# AGENTS.md\n';
   const start = source.indexOf('<!-- nodex:start -->');
   const end = source.indexOf('<!-- nodex:end -->', start);

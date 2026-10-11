@@ -5,20 +5,10 @@ import { createHash, randomBytes, randomInt } from 'node:crypto';
 import { query } from './db.ts';
 
 /**
- * Device authorization, server half.
- *
- * The CLI has no way to receive a redirect, so it takes two codes: a long one it
- * keeps and polls with, and a short one a person reads off the terminal and
- * types into a browser. What it ends up holding is a nodex session with
- * `origin = 'cli'`, not a GitHub token, so revoking it needs nothing but a
- * delete here.
+ * Device exchange issues a Nodex session with origin 'cli', never a GitHub token.
  */
 
-/**
- * No `0/O`, `1/I/L`, `U`, or `V`. Every one of those is read wrong off a
- * terminal or misheard when someone reads a code aloud, and this code is
- * typed by hand.
- */
+/** Exclude ambiguous characters from codes typed by hand. */
 const ALPHABET = 'ABCDEFGHJKMNPQRSTWXYZ23456789';
 const USER_CODE_LENGTH = 8;
 
@@ -40,9 +30,7 @@ function fingerprint(value: string): string {
 }
 
 /**
- * `randomInt` rather than `randomBytes` modulo the alphabet length. The modulo
- * is biased whenever the alphabet does not divide 256, which 29 does not, and a
- * biased code is a smaller search space than it looks.
+ * randomInt avoids modulo bias because the alphabet length does not divide 256.
  */
 function userCode(): string {
   let out = '';
@@ -102,7 +90,9 @@ export async function findByUserCode(
     [normalizeUserCode(code)],
   );
   const row = rows[0];
-  return row ? { userCode: row.user_code, expiresAt: row.expires_at } : undefined;
+  return row
+    ? { userCode: row.user_code, expiresAt: row.expires_at }
+    : undefined;
 }
 
 /** Typed by hand, so accept lower case and a missing separator. */
@@ -149,11 +139,7 @@ export type PollOutcome =
   | { status: 'approved'; userId: string };
 
 /**
- * One poll.
- *
- * An unknown device code is reported as expired rather than as unknown: telling
- * a caller which of the two it is turns polling into an oracle for whether a
- * code was ever valid.
+ * Report unknown codes as expired to avoid revealing whether a code was valid.
  */
 export async function poll(deviceCode: string): Promise<PollOutcome> {
   const hash = fingerprint(deviceCode);
@@ -201,12 +187,21 @@ export async function poll(deviceCode: string): Promise<PollOutcome> {
   }
 
   if (row.approved_at && row.user_id) {
-    // One exchange per request. Deleting here is what stops a replayed poll
-    // minting a second session from the same approval.
-    await query('delete from cli_auth_requests where device_code_hash = $1', [
-      hash,
-    ]);
-    return { status: 'approved', userId: row.user_id };
+    // Only the poll that deletes the row owns its approval. Another poll may
+    // have read the same snapshot before either reached this statement.
+    const consumed = await query<{ user_id: string }>(
+      `delete from cli_auth_requests
+        where device_code_hash = $1
+          and approved_at is not null
+          and user_id is not null
+          and denied_at is null
+          and expires_at > now()
+        returning user_id`,
+      [hash],
+    );
+    return consumed[0]
+      ? { status: 'approved', userId: consumed[0].user_id }
+      : { status: 'expired' };
   }
 
   return { status: 'pending' };

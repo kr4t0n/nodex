@@ -1,140 +1,146 @@
 @layer components {
-/* button - shared primitive, themed by the active language's tokens.
+  /* button - shared primitive, themed by the active language's tokens.
    The React API wraps a native button. These classes also remain available
    when composing the same visual treatment with an existing headless control. */
 
-.nx-btn {
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--nx-space-actionGap);
-  padding: var(--nx-space-actionPadding);
-  border: var(--nx-stroke-hairline) solid transparent;
-  border-radius: var(--nx-radius-pill);
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-action-size);
-  font-weight: var(--nx-type-action-weight);
-  letter-spacing: var(--nx-type-action-tracking);
-  line-height: var(--nx-type-action-lineHeight);
-  white-space: nowrap;
-  cursor: pointer;
-  background: transparent;
-  color: var(--nx-ink);
-  transition:
-    background-color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
-    color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
-    border-color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
-    box-shadow var(--nx-motion-press-duration) var(--nx-motion-press-easing),
-    transform var(--nx-motion-press-duration) var(--nx-motion-press-easing);
-}
-
-/* Solid. The only high-emphasis action on a surface. */
-.nx-btn--solid {
-  background: var(--nx-actionFill);
-  border-color: var(--nx-actionBorder);
-  color: var(--nx-actionText);
-}
-
-.nx-btn--solid:hover:not(:disabled):not([aria-disabled='true']) {
-  background: var(--nx-actionHoverFill);
-  border-color: var(--nx-actionHoverBorder);
-}
-
-/* Outline. Structural paint is independent of quiet tracks and grid fills. */
-.nx-btn--outline {
-  border-color: var(--nx-border);
-  color: var(--nx-ink);
-}
-
-.nx-btn--outline:hover:not(:disabled):not([aria-disabled='true']) {
-  border-color: var(--nx-ink);
-}
-
-.nx-btn--outline[aria-pressed='true'],
-.nx-btn--outline[data-active='true'] {
-  background: var(--nx-selectionFill);
-  border-color: var(--nx-ink);
-  color: var(--nx-selectionText);
-}
-
-/* Quiet. For tertiary navigation where a border would be noise. */
-.nx-btn--quiet {
-  color: var(--nx-muted);
-  padding-inline: var(--nx-space-quietActionPaddingInline);
-}
-
-.nx-btn--quiet:hover:not(:disabled):not([aria-disabled='true']) {
-  color: var(--nx-ink);
-}
-
-.nx-btn--solid,
-.nx-btn--outline {
-  box-shadow: var(--nx-shadow-action) var(--nx-ink);
-}
-
-/* Static decoration, inside the native hit target and behind its label.
-   Kept local so class-only consumers and individually delivered primitives
-   receive the same treatment. Zero opacity leaves flat languages unchanged. */
-.nx-btn--solid::before,
-.nx-btn--outline::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  inset: var(--nx-texture-outlineInset);
-  border: var(--nx-stroke-hairline) solid;
-  border-color: inherit;
-  border-radius: var(--nx-texture-outlineRadius);
-  opacity: var(--nx-texture-outlineOpacity);
-}
-
-.nx-btn--solid::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  right: 3px;
-  bottom: 3px;
-  width: min(var(--nx-texture-hatchSize), 40%);
-  height: min(var(--nx-texture-hatchSize), 70%);
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  background: repeating-linear-gradient(var(--nx-texture-hatchAngle), currentColor 0 var(--nx-stroke-hairline), transparent var(--nx-stroke-hairline) var(--nx-texture-hatchGap));
-  opacity: var(--nx-texture-hatchOpacity);
-}
-
-/* The language owns press travel and the remaining shadow. */
-.nx-btn:active:not(:disabled):not([aria-disabled='true']) {
-  transform: translate(var(--nx-motion-press-x), var(--nx-motion-press-y));
-}
-
-.nx-btn--solid:active:not(:disabled):not([aria-disabled='true']),
-.nx-btn--outline:active:not(:disabled):not([aria-disabled='true']) {
-  box-shadow: var(--nx-shadow-actionPressed) var(--nx-ink);
-}
-
-.nx-btn:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 3px;
-}
-
-.nx-btn:disabled,
-.nx-btn[aria-disabled='true'] {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-@media (prefers-reduced-motion: reduce) {
   .nx-btn {
-    transition: none;
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nx-space-actionGap);
+    padding: var(--nx-space-actionPadding);
+    border: var(--nx-stroke-hairline) solid transparent;
+    border-radius: var(--nx-radius-pill);
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-action-size);
+    font-weight: var(--nx-type-action-weight);
+    letter-spacing: var(--nx-type-action-tracking);
+    line-height: var(--nx-type-action-lineHeight);
+    white-space: nowrap;
+    cursor: pointer;
+    background: transparent;
+    color: var(--nx-ink);
+    transition:
+      background-color var(--nx-motion-control-duration)
+        var(--nx-motion-control-easing),
+      color var(--nx-motion-control-duration) var(--nx-motion-control-easing),
+      border-color var(--nx-motion-control-duration)
+        var(--nx-motion-control-easing),
+      box-shadow var(--nx-motion-press-duration) var(--nx-motion-press-easing),
+      transform var(--nx-motion-press-duration) var(--nx-motion-press-easing);
   }
-  .nx-btn:active:not(:disabled):not([aria-disabled='true']) {
-    transform: none;
+
+  /* Solid. The only high-emphasis action on a surface. */
+  .nx-btn--solid {
+    background: var(--nx-actionFill);
+    border-color: var(--nx-actionBorder);
+    color: var(--nx-actionText);
   }
-  .nx-btn--solid:active:not(:disabled):not([aria-disabled='true']),
-  .nx-btn--outline:active:not(:disabled):not([aria-disabled='true']) {
+
+  .nx-btn--solid:hover:not(:disabled):not([aria-disabled='true']) {
+    background: var(--nx-actionHoverFill);
+    border-color: var(--nx-actionHoverBorder);
+  }
+
+  /* Outline. Structural paint is independent of quiet tracks and grid fills. */
+  .nx-btn--outline {
+    border-color: var(--nx-border);
+    color: var(--nx-ink);
+  }
+
+  .nx-btn--outline:hover:not(:disabled):not([aria-disabled='true']) {
+    border-color: var(--nx-ink);
+  }
+
+  .nx-btn--outline[aria-pressed='true'],
+  .nx-btn--outline[data-active='true'] {
+    background: var(--nx-selectionFill);
+    border-color: var(--nx-ink);
+    color: var(--nx-selectionText);
+  }
+
+  /* Quiet. For tertiary navigation where a border would be noise. */
+  .nx-btn--quiet {
+    color: var(--nx-muted);
+    padding-inline: var(--nx-space-quietActionPaddingInline);
+  }
+
+  .nx-btn--quiet:hover:not(:disabled):not([aria-disabled='true']) {
+    color: var(--nx-ink);
+  }
+
+  .nx-btn--solid,
+  .nx-btn--outline {
     box-shadow: var(--nx-shadow-action) var(--nx-ink);
   }
-}
+
+  /* Static decoration, inside the native hit target and behind its label.
+   Kept local so class-only consumers and individually delivered primitives
+   receive the same treatment. Zero opacity leaves flat languages unchanged. */
+  .nx-btn--solid::before,
+  .nx-btn--outline::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    inset: var(--nx-texture-outlineInset);
+    border: var(--nx-stroke-hairline) solid;
+    border-color: inherit;
+    border-radius: var(--nx-texture-outlineRadius);
+    opacity: var(--nx-texture-outlineOpacity);
+  }
+
+  .nx-btn--solid::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    right: 3px;
+    bottom: 3px;
+    width: min(var(--nx-texture-hatchSize), 40%);
+    height: min(var(--nx-texture-hatchSize), 70%);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    background: repeating-linear-gradient(
+      var(--nx-texture-hatchAngle),
+      currentColor 0 var(--nx-stroke-hairline),
+      transparent var(--nx-stroke-hairline) var(--nx-texture-hatchGap)
+    );
+    opacity: var(--nx-texture-hatchOpacity);
+  }
+
+  /* The language owns press travel and the remaining shadow. */
+  .nx-btn:active:not(:disabled):not([aria-disabled='true']) {
+    transform: translate(var(--nx-motion-press-x), var(--nx-motion-press-y));
+  }
+
+  .nx-btn--solid:active:not(:disabled):not([aria-disabled='true']),
+  .nx-btn--outline:active:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--nx-shadow-actionPressed) var(--nx-ink);
+  }
+
+  .nx-btn:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 3px;
+  }
+
+  .nx-btn:disabled,
+  .nx-btn[aria-disabled='true'] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-btn {
+      transition: none;
+    }
+    .nx-btn:active:not(:disabled):not([aria-disabled='true']) {
+      transform: none;
+    }
+    .nx-btn--solid:active:not(:disabled):not([aria-disabled='true']),
+    .nx-btn--outline:active:not(:disabled):not([aria-disabled='true']) {
+      box-shadow: var(--nx-shadow-action) var(--nx-ink);
+    }
+  }
 }

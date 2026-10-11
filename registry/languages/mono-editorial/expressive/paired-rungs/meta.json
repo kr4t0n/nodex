@@ -8,30 +8,17 @@
   "library": "recharts",
   "density": "glance",
   "entry": "component.tsx",
-  "exports": [
-    "PairedRungs"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts",
-    "rung-marks.tsx"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "exports": ["PairedRungs"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts", "rung-marks.tsx"],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 676,
     "height": 456
   },
-  "tags": [
-    "billing",
-    "yoy"
-  ],
+  "tags": ["billing", "yoy"],
   "props": [
     {
       "name": "data",

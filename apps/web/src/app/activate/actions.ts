@@ -17,7 +17,8 @@ export async function approveCode(formData: FormData): Promise<void> {
   if (!user) redirect(`/login?next=activate`);
 
   const pending = await findByUserCode(code);
-  if (!pending) redirect(`/activate?code=${encodeURIComponent(code)}&error=unknown`);
+  if (!pending)
+    redirect(`/activate?code=${encodeURIComponent(code)}&error=unknown`);
 
   const ok = await approve(code, user.id);
   redirect(

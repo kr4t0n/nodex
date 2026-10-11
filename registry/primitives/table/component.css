@@ -1,5 +1,5 @@
 @layer components {
-/* table - shared primitive, themed by the active language's tokens.
+  /* table - shared primitive, themed by the active language's tokens.
 
    Hairline rules between rows and nothing else: no zebra striping, no vertical
    borders, no surrounding box. The language has no elevation model, so a table
@@ -9,86 +9,87 @@
    never both. Top and bottom borders on every row is the laziest possible table
    and doubles the line weight at every boundary. */
 
-.nx-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--nx-font-sans);
-  font-size: var(--nx-type-body-size);
-  color: var(--nx-ink);
-}
-
-.nx-table caption {
-  text-align: left;
-  padding-bottom: var(--nx-space-captionGap);
-  font-size: var(--nx-type-label-size);
-  font-weight: var(--nx-type-label-weight);
-  letter-spacing: var(--nx-type-label-tracking);
-  text-transform: uppercase;
-  color: var(--nx-muted);
-}
-
-.nx-table th {
-  text-align: left;
-  padding: var(--nx-space-tableHeadPadding);
-  font-size: var(--nx-type-label-size);
-  font-weight: var(--nx-type-label-weight);
-  letter-spacing: var(--nx-type-label-tracking);
-  text-transform: uppercase;
-  color: var(--nx-muted);
-  border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
-  white-space: nowrap;
-}
-
-.nx-table td {
-  padding: var(--nx-space-tableCellPadding);
-  border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
-  vertical-align: top;
-}
-
-.nx-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-/* Numerals align on the decimal and use tabular figures, because a column of
-   numbers that does not line up is unreadable at this size. */
-.nx-table .nx-num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  padding-right: 0;
-}
-
-.nx-table th.nx-num {
-  text-align: right;
-}
-
-/* Row emphasis by weight, never by background fill. */
-.nx-table .nx-row--strong td {
-  font-weight: var(--nx-font-weight-bold);
-}
-
-.nx-table .nx-cell--quiet {
-  color: var(--nx-muted);
-}
-
-/* Interactive rows get a hairline that firms up on the left edge, which reads
-   as a pointer without introducing a fill. */
-.nx-table--interactive tbody tr {
-  cursor: pointer;
-  transition: box-shadow var(--nx-motion-toggle-duration) var(--nx-motion-toggle-easing);
-}
-
-.nx-table--interactive tbody tr:hover {
-  box-shadow: inset 2px 0 0 var(--nx-ink);
-}
-
-.nx-table--interactive tbody tr:focus-within {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: -1px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-table--interactive tbody tr {
-    transition: none;
+  .nx-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--nx-font-sans);
+    font-size: var(--nx-type-body-size);
+    color: var(--nx-ink);
   }
-}
+
+  .nx-table caption {
+    text-align: left;
+    padding-bottom: var(--nx-space-captionGap);
+    font-size: var(--nx-type-label-size);
+    font-weight: var(--nx-type-label-weight);
+    letter-spacing: var(--nx-type-label-tracking);
+    text-transform: uppercase;
+    color: var(--nx-muted);
+  }
+
+  .nx-table th {
+    text-align: left;
+    padding: var(--nx-space-tableHeadPadding);
+    font-size: var(--nx-type-label-size);
+    font-weight: var(--nx-type-label-weight);
+    letter-spacing: var(--nx-type-label-tracking);
+    text-transform: uppercase;
+    color: var(--nx-muted);
+    border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
+    white-space: nowrap;
+  }
+
+  .nx-table td {
+    padding: var(--nx-space-tableCellPadding);
+    border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
+    vertical-align: top;
+  }
+
+  .nx-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  /* Numerals align on the decimal and use tabular figures, because a column of
+   numbers that does not line up is unreadable at this size. */
+  .nx-table .nx-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    padding-right: 0;
+  }
+
+  .nx-table th.nx-num {
+    text-align: right;
+  }
+
+  /* Row emphasis by weight, never by background fill. */
+  .nx-table .nx-row--strong td {
+    font-weight: var(--nx-font-weight-bold);
+  }
+
+  .nx-table .nx-cell--quiet {
+    color: var(--nx-muted);
+  }
+
+  /* Interactive rows get a hairline that firms up on the left edge, which reads
+   as a pointer without introducing a fill. */
+  .nx-table--interactive tbody tr {
+    cursor: pointer;
+    transition: box-shadow var(--nx-motion-toggle-duration)
+      var(--nx-motion-toggle-easing);
+  }
+
+  .nx-table--interactive tbody tr:hover {
+    box-shadow: inset 2px 0 0 var(--nx-ink);
+  }
+
+  .nx-table--interactive tbody tr:focus-within {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: -1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-table--interactive tbody tr {
+      transition: none;
+    }
+  }
 }

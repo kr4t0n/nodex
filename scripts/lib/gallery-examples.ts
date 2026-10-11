@@ -1,22 +1,49 @@
 import path from 'node:path';
 
-import type { LoadedComponent, LoadedSource } from '../../packages/core/src/load.ts';
+import type {
+  LoadedComponent,
+  LoadedSource,
+} from '../../packages/core/src/load.ts';
 import type { GalleryItem } from '../../packages/core/src/schema.ts';
 
 /** Explicit imports let the website bundle examples lazily with one React runtime. */
-export function galleryExamples(source: LoadedSource, items: GalleryItem[], directory: string): string {
+export function galleryExamples(
+  source: LoadedSource,
+  items: GalleryItem[],
+  directory: string,
+): string {
   const components = new Map<string, LoadedComponent>([
-    ...source.primitives.map((component) => [`shared/${component.meta.slug}`, component] as const),
-    ...source.languages.flatMap((language) => language.expressive.map((component) =>
-      [`${language.meta.slug}/${component.meta.slug}`, component] as const)),
+    ...source.primitives.map(
+      (component) => [`shared/${component.meta.slug}`, component] as const,
+    ),
+    ...source.languages.flatMap((language) =>
+      language.expressive.map(
+        (component) =>
+          [`${language.meta.slug}/${component.meta.slug}`, component] as const,
+      ),
+    ),
   ]);
-  const keys = new Set(items.map((item) => `${item.meta.language}/${item.name}`));
-  if (keys.size !== items.length || keys.size !== components.size || [...keys].some((key) => !components.has(key))) {
-    throw new Error('Gallery catalogue and authored examples differ. Run npm run build:registry before preparing the website.');
+  const keys = new Set(
+    items.map((item) => `${item.meta.language}/${item.name}`),
+  );
+  if (
+    keys.size !== items.length ||
+    keys.size !== components.size ||
+    [...keys].some((key) => !components.has(key))
+  ) {
+    throw new Error(
+      'Gallery catalogue and authored examples differ. Run pnpm run build:registry before preparing the website.',
+    );
   }
   const entries = [...keys].sort().map((key) => {
     const component = components.get(key)!;
-    const relative = path.relative(directory, path.join(component.dir, component.meta.example.entry)).split(path.sep).join('/');
+    const relative = path
+      .relative(
+        directory,
+        path.join(component.dir, component.meta.example.entry),
+      )
+      .split(path.sep)
+      .join('/');
     const specifier = relative.startsWith('.') ? relative : `./${relative}`;
     return `  ${JSON.stringify(key)}: lazy(() => import(${JSON.stringify(specifier)}).then((module) => ({ default: module[${JSON.stringify(component.meta.example.export)}] }))),`;
   });

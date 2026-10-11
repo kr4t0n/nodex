@@ -5,14 +5,14 @@ commit [`17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76`](https://github.com/jwilber/r
 Source defaults take precedence over its README. This is a Nodex interpretation
 of that visual vocabulary; it does not deliver roughViz or its imperative D3 runtime.
 
-| Tokens | Reference | Treatment |
-| --- | --- | --- |
-| `color.seriesA`–`seriesI` | [`src/utils/colors.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/utils/colors.js) | Preserve all nine distinct colors; convert named CSS colors to equivalent hex. Repeated entries reuse the same roles. |
-| `font.heading` | [`src/Chart.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/Chart.js) | Preserve Gaegu; embed Latin regular and bold from `@fontsource/gaegu@5.3.0`. |
-| `color.ink`, `stroke.mark`, `stroke.axis`, `sketch.axisRoughness`, `sketch.fillWeight` | [`src/Bar.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/Bar.js) | Black ink, 1px mark strokes, 0.5px axes, 0.5 axis roughness and 0.5 fill weight. |
-| `sketch.roughness` | [`src/utils/roughCeiling.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/utils/roughCeiling.js) | Preserve the default of 1. |
-| `sketch.bowing` | `src/Chart.js` above | Preserve the default of 0. |
-| `sketch.fillStyle`, `sketch.hachureAngle`, `sketch.hachureGap` | `roughjs@4.6.6` generator and hatch filler | Explicit hachure, −41 degrees, and a 4px gap (the default four times a 1px mark stroke). |
+| Tokens                                                                                 | Reference                                                                                                                                  | Treatment                                                                                                             |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `color.seriesA`–`seriesI`                                                              | [`src/utils/colors.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/utils/colors.js)             | Preserve all nine distinct colors; convert named CSS colors to equivalent hex. Repeated entries reuse the same roles. |
+| `font.heading`                                                                         | [`src/Chart.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/Chart.js)                           | Preserve Gaegu; embed Latin regular and bold from `@fontsource/gaegu@5.3.0`.                                          |
+| `color.ink`, `stroke.mark`, `stroke.axis`, `sketch.axisRoughness`, `sketch.fillWeight` | [`src/Bar.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/Bar.js)                               | Black ink, 1px mark strokes, 0.5px axes, 0.5 axis roughness and 0.5 fill weight.                                      |
+| `sketch.roughness`                                                                     | [`src/utils/roughCeiling.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa2e9f1d76fbc8ebcff3f414d374d76/src/utils/roughCeiling.js) | Preserve the default of 1.                                                                                            |
+| `sketch.bowing`                                                                        | `src/Chart.js` above                                                                                                                       | Preserve the default of 0.                                                                                            |
+| `sketch.fillStyle`, `sketch.hachureAngle`, `sketch.hachureGap`                         | `roughjs@4.6.6` generator and hatch filler                                                                                                 | Explicit hachure, −41 degrees, and a 4px gap (the default four times a 1px mark stroke).                              |
 
 The default single-series bar color in the pinned source is red; the README
 says sky blue. Sketchbook deliberately uses roughViz's categorical palette
@@ -33,17 +33,17 @@ The pinned [`src/index.js`](https://github.com/jwilber/roughViz/blob/17c7ea86bfa
 exports nine chart types, also shown in the [official catalogue](https://www.jwilber.me/roughviz/).
 Its README lists only seven; Force and Network are additional exports.
 
-| roughViz export | Nodex component |
-| --- | --- |
-| `Bar` | `sketch-bars` |
-| `BarH` | `sketch-bars-horizontal` |
-| `StackedBar` | `sketch-stacked-bars` |
-| `Line` | `sketch-line` |
-| `Scatter` | `sketch-scatter` |
-| `Pie` | `sketch-pie` |
-| `Donut` | `sketch-donut` |
-| `Force` | `sketch-force` |
-| `Network` | `sketch-network` |
+| roughViz export | Nodex component          |
+| --------------- | ------------------------ |
+| `Bar`           | `sketch-bars`            |
+| `BarH`          | `sketch-bars-horizontal` |
+| `StackedBar`    | `sketch-stacked-bars`    |
+| `Line`          | `sketch-line`            |
+| `Scatter`       | `sketch-scatter`         |
+| `Pie`           | `sketch-pie`             |
+| `Donut`         | `sketch-donut`           |
+| `Force`         | `sketch-force`           |
+| `Network`       | `sketch-network`         |
 
 Force positions bubbles without relationships; Network adds supplied links.
 Nodex uses pinned `d3-force@3.0.0` only as a stopped numeric layout solver, on

@@ -8,6 +8,13 @@ const hours: readonly SketchBarsDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <SketchBars data={hours} unitLabel="Studio hours" contextLabel="This week" animate={animate}
-    aria-label="Studio hours by activity this week" />;
+  return (
+    <SketchBars
+      data={hours}
+      unitLabel="Studio hours"
+      contextLabel="This week"
+      animate={animate}
+      aria-label="Studio hours by activity this week"
+    />
+  );
 }

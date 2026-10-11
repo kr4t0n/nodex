@@ -5,20 +5,11 @@
   "component": "radio",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "form",
-    "interactive"
-  ],
+  "tags": ["form", "interactive"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Radio",
-    "RadioGroup"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Radio", "RadioGroup"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

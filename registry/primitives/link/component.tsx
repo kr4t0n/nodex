@@ -7,11 +7,19 @@ export type LinkProps = ComponentPropsWithRef<'a'> & {
 };
 
 /** The external treatment adds a visual mark; target remains the caller's choice. */
-export function Link({ variant = 'default', external = false, className = '', ...props }: LinkProps) {
+export function Link({
+  variant = 'default',
+  external = false,
+  className = '',
+  children,
+  ...props
+}: LinkProps) {
   return (
     <a
       {...props}
       className={`nx-link${variant === 'default' ? '' : ` nx-link--${variant}`}${external ? ' nx-link--external' : ''} ${className}`.trim()}
-    />
+    >
+      {children}
+    </a>
   );
 }

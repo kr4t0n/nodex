@@ -18,20 +18,20 @@ and plain surfaces remain clear. Never distort an entire interface to imitate ha
 
 ## Color and contrast
 
-| Role | Purpose |
-| --- | --- |
-| `bg`, `paper` | Warm notebook ground and plain surfaces |
-| `surfaceFill`, `fieldFill` | White grouped surfaces and pale cream editable fields |
-| `ink`, `border` | Black lettering and structural boundaries |
-| `muted`, `faint` | Readable supporting copy on light surfaces |
-| `grid` | Quiet guides and tracks, separate from structural outlines |
-| `actionFill`, `actionText`, `actionBorder` | Coral actions with black text and outlines |
-| `actionHoverFill`, `actionHoverBorder` | Darker coral feedback with a stable border |
-| `selectionFill`, `selectionText` | Sky-blue selection with black marks |
-| `badgeFill`, `badgeText` | Yellow labels with black lettering |
-| `valueFill`, `valueQuietFill` | Dark green and violet progress or adjustable values |
-| `seriesA`–`seriesI` | Coral, sky blue, mint, tan, lavender, pink, lime, yellow and orange categories |
-| `onDarkMuted`, `onDarkFaint` | Supporting text on inverted ink surfaces |
+| Role                                       | Purpose                                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------------------ |
+| `bg`, `paper`                              | Warm notebook ground and plain surfaces                                        |
+| `surfaceFill`, `fieldFill`                 | White grouped surfaces and pale cream editable fields                          |
+| `ink`, `border`                            | Black lettering and structural boundaries                                      |
+| `muted`, `faint`                           | Readable supporting copy on light surfaces                                     |
+| `grid`                                     | Quiet guides and tracks, separate from structural outlines                     |
+| `actionFill`, `actionText`, `actionBorder` | Coral actions with black text and outlines                                     |
+| `actionHoverFill`, `actionHoverBorder`     | Darker coral feedback with a stable border                                     |
+| `selectionFill`, `selectionText`           | Sky-blue selection with black marks                                            |
+| `badgeFill`, `badgeText`                   | Yellow labels with black lettering                                             |
+| `valueFill`, `valueQuietFill`              | Dark green and violet progress or adjustable values                            |
+| `seriesA`–`seriesI`                        | Coral, sky blue, mint, tan, lavender, pink, lime, yellow and orange categories |
+| `onDarkMuted`, `onDarkFaint`               | Supporting text on inverted ink surfaces                                       |
 
 **Category, not rank.** The accent palette is categorical. Never use its order
 as a sequential intensity ramp or infer a status from a category hue. Position,

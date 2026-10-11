@@ -26,8 +26,13 @@ body {
 
 /* The idle editor keeps the demo's block caret without taking keyboard focus. */
 @keyframes nx-terminal-caret {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /*
