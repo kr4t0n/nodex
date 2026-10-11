@@ -24,6 +24,7 @@
     "format:check": "prettier --check .",
     "dev": "pnpm --filter @nodex/web run dev",
     "smoke:cli": "node scripts/smoke-cli.ts",
+    "smoke:pack": "node scripts/smoke-packed-cli.ts",
     "smoke:landing": "node scripts/smoke-landing.ts",
     "smoke:gallery": "node scripts/smoke-gallery.ts",
     "build": "pnpm run build:registry && pnpm --filter @nodex/web run build",
