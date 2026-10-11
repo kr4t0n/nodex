@@ -9,13 +9,29 @@ export type EmptyStateProps = Omit<ComponentPropsWithRef<'div'>, 'title'> & {
   centered?: boolean;
 };
 
-export function EmptyState({ title, hint, action, quiet = false, centered = false, className = '', children, ...props }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  hint,
+  action,
+  quiet = false,
+  centered = false,
+  className = '',
+  children,
+  ...props
+}: EmptyStateProps) {
   return (
-    <div {...props} className={`nx-empty${quiet ? ' nx-empty--quiet' : ''}${centered ? ' nx-empty--center' : ''} ${className}`.trim()}>
+    <div
+      {...props}
+      className={`nx-empty${quiet ? ' nx-empty--quiet' : ''}${centered ? ' nx-empty--center' : ''} ${className}`.trim()}
+    >
       <p className="nx-empty__title">{title}</p>
-      {(hint !== undefined && hint !== null) && <p className="nx-empty__hint">{hint}</p>}
+      {hint !== undefined && hint !== null && (
+        <p className="nx-empty__hint">{hint}</p>
+      )}
       {children}
-      {(action !== undefined && action !== null) && <div className="nx-empty__action">{action}</div>}
+      {action !== undefined && action !== null && (
+        <div className="nx-empty__action">{action}</div>
+      )}
     </div>
   );
 }

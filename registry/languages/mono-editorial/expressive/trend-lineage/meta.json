@@ -7,25 +7,13 @@
   "runtime": "react",
   "density": "close-read",
   "aspectRatio": "560/340",
-  "tags": [
-    "product",
-    "history"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["product", "history"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "TrendLineage"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["TrendLineage"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

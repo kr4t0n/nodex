@@ -7,33 +7,21 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SketchBars"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["SketchBars"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "sketch/use-sketch-settings.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1",
-    "roughjs@4.6.6"
-  ],
+  "dependencies": ["recharts@3.10.1", "roughjs@4.6.6"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 720,
     "height": 420
   },
-  "tags": [
-    "categorical",
-    "comparison",
-    "sketch",
-    "roughviz"
-  ],
+  "tags": ["categorical", "comparison", "sketch", "roughviz"],
   "props": [
     {
       "name": "data",

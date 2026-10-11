@@ -33,30 +33,58 @@ export async function authHarness(t: TestContext, stubDatabase = true) {
       resolveDir: path.join(ROOT, 'apps/web'),
     },
     tsconfig: path.join(ROOT, 'apps/web/tsconfig.json'),
-    bundle: true, platform: 'node', format: 'cjs', packages: 'external', outfile,
-    plugins: [{
-      name: 'auth-context',
-      setup(builder) {
-        builder.onResolve({ filter: /^server-only$/ }, () => ({ path: 'server-only', namespace: 'auth-test' }));
-        builder.onResolve({ filter: /^next\/headers$/ }, () => ({ path: 'cookies', namespace: 'auth-test' }));
-        if (stubDatabase) builder.onResolve({ filter: /(?:^|\/)db\.ts$/ }, () => ({ path: 'db', namespace: 'auth-test' }));
-        builder.onLoad({ filter: /.*/, namespace: 'auth-test' }, ({ path: name }) => ({
-          contents: name === 'server-only' ? '' : name === 'cookies' ? `
+    bundle: true,
+    platform: 'node',
+    format: 'cjs',
+    packages: 'external',
+    outfile,
+    plugins: [
+      {
+        name: 'auth-context',
+        setup(builder) {
+          builder.onResolve({ filter: /^server-only$/ }, () => ({
+            path: 'server-only',
+            namespace: 'auth-test',
+          }));
+          builder.onResolve({ filter: /^next\/headers$/ }, () => ({
+            path: 'cookies',
+            namespace: 'auth-test',
+          }));
+          if (stubDatabase)
+            builder.onResolve({ filter: /(?:^|\/)db\.ts$/ }, () => ({
+              path: 'db',
+              namespace: 'auth-test',
+            }));
+          builder.onLoad(
+            { filter: /.*/, namespace: 'auth-test' },
+            ({ path: name }) => ({
+              contents:
+                name === 'server-only'
+                  ? ''
+                  : name === 'cookies'
+                    ? `
             export const store = new Map();
             export async function cookies() { return store; }
-          ` : `
+          `
+                    : `
             export const database = { query: async () => [] };
             export function query(...args) { return database.query(...args); }
             export function databaseConfigured() { return true; }
           `,
-        }));
+            }),
+          );
+        },
       },
-    }],
+    ],
   });
   return createRequire(import.meta.url)(outfile) as {
     github: typeof GitHub;
     device: typeof Device;
-    db: typeof Database & { database: { query: (sql: string, values?: unknown[]) => Promise<unknown[]> } };
+    db: typeof Database & {
+      database: {
+        query: (sql: string, values?: unknown[]) => Promise<unknown[]>;
+      };
+    };
     token: (request: Request) => Promise<Response>;
     callback: (request: Request) => Promise<Response>;
     beginOAuth: (request: Request) => Promise<Response>;

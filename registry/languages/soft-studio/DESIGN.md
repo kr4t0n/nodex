@@ -21,23 +21,23 @@ stable colors. A colorful page still needs an obvious primary action.
 
 ## Color and contrast
 
-| Role | Meaning |
-| --- | --- |
-| `bg`, `paper` | Cool off-white page ground and plain surfaces |
-| `surfaceFill` | White grouped surfaces and dialogs |
-| `fieldFill` | Cool tinted editable fields and their option pickers |
-| `ink`, `muted`, `faint` | Primary, supporting and minor text |
-| `border` | Structural and control boundaries |
-| `grid` | Quiet separators, tracks and plot guides |
-| `actionFill`, `actionText`, `actionBorder` | Cobalt actions with white lettering |
-| `actionHoverFill`, `actionHoverBorder` | Deeper cobalt hover feedback |
-| `selectionFill`, `selectionText` | Selected controls and their white marks |
-| `badgeFill`, `badgeText` | Pale blue labels with readable blue text |
-| `valueFill`, `valueQuietFill` | Teal progress and supporting lavender values |
-| `seriesA`–`seriesD` | Blue, teal, apricot and lavender category identities |
-| `trendLine`, `trendFill` | A strong blue trend with a quiet blue area |
-| `heatFill` | One ordered intensity scale, independent of category colors |
-| `onDarkMuted`, `onDarkFaint` | Supporting text on inverted ink surfaces |
+| Role                                       | Meaning                                                     |
+| ------------------------------------------ | ----------------------------------------------------------- |
+| `bg`, `paper`                              | Cool off-white page ground and plain surfaces               |
+| `surfaceFill`                              | White grouped surfaces and dialogs                          |
+| `fieldFill`                                | Cool tinted editable fields and their option pickers        |
+| `ink`, `muted`, `faint`                    | Primary, supporting and minor text                          |
+| `border`                                   | Structural and control boundaries                           |
+| `grid`                                     | Quiet separators, tracks and plot guides                    |
+| `actionFill`, `actionText`, `actionBorder` | Cobalt actions with white lettering                         |
+| `actionHoverFill`, `actionHoverBorder`     | Deeper cobalt hover feedback                                |
+| `selectionFill`, `selectionText`           | Selected controls and their white marks                     |
+| `badgeFill`, `badgeText`                   | Pale blue labels with readable blue text                    |
+| `valueFill`, `valueQuietFill`              | Teal progress and supporting lavender values                |
+| `seriesA`–`seriesD`                        | Blue, teal, apricot and lavender category identities        |
+| `trendLine`, `trendFill`                   | A strong blue trend with a quiet blue area                  |
+| `heatFill`                                 | One ordered intensity scale, independent of category colors |
+| `onDarkMuted`, `onDarkFaint`               | Supporting text on inverted ink surfaces                    |
 
 **Stable meaning.** Category color does not mean success, warning or rank. Keep
 identity colors stable when data moves. Intensity uses a fixed, declared scale.

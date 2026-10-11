@@ -10,5 +10,13 @@ const data: NocturneWaterfallDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <NocturneWaterfall data={data} unitLabel="Seats through the quarter" contextLabel="Q3 · licensed seats" height={432} animate={animate} />;
+  return (
+    <NocturneWaterfall
+      data={data}
+      unitLabel="Seats through the quarter"
+      contextLabel="Q3 · licensed seats"
+      height={432}
+      animate={animate}
+    />
+  );
 }

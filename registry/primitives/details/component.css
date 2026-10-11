@@ -1,5 +1,5 @@
 @layer components {
-/* details - shared primitive, themed by the active language's tokens.
+  /* details - shared primitive, themed by the active language's tokens.
 
    Built on <details> and <summary>, which is the rare disclosure widget that
    needs no JavaScript at all: the browser supplies the toggle, the keyboard
@@ -10,83 +10,84 @@
    Separated by rules rather than boxed, because this language has no elevation
    model and a stack of bordered cards would read as clutter. */
 
-.nx-details {
-  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
-  font-family: var(--nx-font-sans);
-  color: var(--nx-ink);
-}
-
-/* The last item in a group closes the stack, so the group reads as a block. */
-.nx-details:last-of-type {
-  border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
-}
-
-.nx-details__summary {
-  font-family: var(--nx-font-ui);
-  display: flex;
-  align-items: center;
-  gap: var(--nx-space-disclosureGap);
-  padding: var(--nx-space-disclosurePadding);
-  font-size: var(--nx-type-disclosure-size);
-  font-weight: var(--nx-type-disclosure-weight);
-  line-height: var(--nx-type-disclosure-lineHeight);
-  cursor: pointer;
-  /* Suppress the default disclosure triangle in both engines so the chevron
-     below is the only marker. */
-  list-style: none;
-}
-
-.nx-details__summary::-webkit-details-marker {
-  display: none;
-}
-
-.nx-details__summary:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 2px;
-}
-
-/* Chevron at the language's hairline weight, pushed to the end of the row. */
-.nx-details__summary::after {
-  content: '';
-  flex: 0 0 auto;
-  width: 5px;
-  height: 5px;
-  margin-left: auto;
-  border-right: var(--nx-stroke-hairline) solid var(--nx-muted);
-  border-bottom: var(--nx-stroke-hairline) solid var(--nx-muted);
-  transform: translateY(-1px) rotate(45deg);
-  transition: transform var(--nx-motion-disclosure-duration) var(--nx-motion-disclosure-easing);
-}
-
-/* Motivated motion: the chevron points at the content it just revealed. */
-.nx-details[open] > .nx-details__summary::after {
-  transform: translateY(1px) rotate(-135deg);
-}
-
-.nx-details[open] > .nx-details__summary {
-  color: var(--nx-ink);
-}
-
-.nx-details__body {
-  padding: var(--nx-space-disclosureBodyPadding);
-  font-size: var(--nx-type-body-size);
-  line-height: var(--nx-type-disclosure-bodyLineHeight);
-  color: var(--nx-muted);
-  max-width: 64ch;
-}
-
-/* A short label sitting beside the summary text, for a count or a state. */
-.nx-details__meta {
-  font-size: var(--nx-type-uiLabel-size);
-  font-weight: var(--nx-type-uiLabel-weight);
-  letter-spacing: var(--nx-type-uiLabel-tracking);
-  text-transform: var(--nx-type-uiLabel-transform);
-  color: var(--nx-faint);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-details__summary::after {
-    transition: none;
+  .nx-details {
+    border-top: var(--nx-stroke-hairline) solid var(--nx-border);
+    font-family: var(--nx-font-sans);
+    color: var(--nx-ink);
   }
-}
+
+  /* The last item in a group closes the stack, so the group reads as a block. */
+  .nx-details:last-of-type {
+    border-bottom: var(--nx-stroke-hairline) solid var(--nx-border);
+  }
+
+  .nx-details__summary {
+    font-family: var(--nx-font-ui);
+    display: flex;
+    align-items: center;
+    gap: var(--nx-space-disclosureGap);
+    padding: var(--nx-space-disclosurePadding);
+    font-size: var(--nx-type-disclosure-size);
+    font-weight: var(--nx-type-disclosure-weight);
+    line-height: var(--nx-type-disclosure-lineHeight);
+    cursor: pointer;
+    /* Suppress the default disclosure triangle in both engines so the chevron
+     below is the only marker. */
+    list-style: none;
+  }
+
+  .nx-details__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .nx-details__summary:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 2px;
+  }
+
+  /* Chevron at the language's hairline weight, pushed to the end of the row. */
+  .nx-details__summary::after {
+    content: '';
+    flex: 0 0 auto;
+    width: 5px;
+    height: 5px;
+    margin-left: auto;
+    border-right: var(--nx-stroke-hairline) solid var(--nx-muted);
+    border-bottom: var(--nx-stroke-hairline) solid var(--nx-muted);
+    transform: translateY(-1px) rotate(45deg);
+    transition: transform var(--nx-motion-disclosure-duration)
+      var(--nx-motion-disclosure-easing);
+  }
+
+  /* Motivated motion: the chevron points at the content it just revealed. */
+  .nx-details[open] > .nx-details__summary::after {
+    transform: translateY(1px) rotate(-135deg);
+  }
+
+  .nx-details[open] > .nx-details__summary {
+    color: var(--nx-ink);
+  }
+
+  .nx-details__body {
+    padding: var(--nx-space-disclosureBodyPadding);
+    font-size: var(--nx-type-body-size);
+    line-height: var(--nx-type-disclosure-bodyLineHeight);
+    color: var(--nx-muted);
+    max-width: 64ch;
+  }
+
+  /* A short label sitting beside the summary text, for a count or a state. */
+  .nx-details__meta {
+    font-size: var(--nx-type-uiLabel-size);
+    font-weight: var(--nx-type-uiLabel-weight);
+    letter-spacing: var(--nx-type-uiLabel-tracking);
+    text-transform: var(--nx-type-uiLabel-transform);
+    color: var(--nx-faint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-details__summary::after {
+      transition: none;
+    }
+  }
 }

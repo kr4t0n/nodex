@@ -11,5 +11,13 @@ const data: SoftAreaDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <SoftArea data={data} unitLabel="Completed sessions" contextLabel="Weekly practice" height={364} animate={animate} />;
+  return (
+    <SoftArea
+      data={data}
+      unitLabel="Completed sessions"
+      contextLabel="Weekly practice"
+      height={364}
+      animate={animate}
+    />
+  );
 }

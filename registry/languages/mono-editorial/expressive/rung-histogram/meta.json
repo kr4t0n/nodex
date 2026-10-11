@@ -7,26 +7,13 @@
   "runtime": "react",
   "density": "glance",
   "aspectRatio": "560/340",
-  "tags": [
-    "support",
-    "desk"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["support", "desk"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "RungHistogram"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts",
-    "rung-marks.tsx"
-  ],
+  "exports": ["RungHistogram"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts", "rung-marks.tsx"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

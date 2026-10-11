@@ -1,4 +1,9 @@
-import type { GalleryItem, GalleryRegistry, NodexMeta, PublishedLanguage } from '@nodex/core/schema';
+import type {
+  GalleryItem,
+  GalleryRegistry,
+  NodexMeta,
+  PublishedLanguage,
+} from '@nodex/core/schema';
 
 /**
  * Discovery and downloads use the built manifest. The website also bundles
@@ -54,7 +59,8 @@ export function loadCatalog(): Promise<Catalog> {
 
 export function expressiveFor(catalog: Catalog, language: string): Item[] {
   return catalog.items.filter(
-    (item) => item.meta.language === language && item.meta.tier === 'expressive',
+    (item) =>
+      item.meta.language === language && item.meta.tier === 'expressive',
   );
 }
 

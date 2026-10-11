@@ -56,34 +56,148 @@ export function NeoExtendedConsumer({ animate }: { animate: boolean }) {
 }
 `;
 
-const slugs = ['bridge-waterfall', 'twin-pins', 'sticker-scatter', 'tile-heatmap', 'hundred-blocks'] as const;
-const chart = (page: Page, slug: string, scope = 'primary') => page.locator(`#neo-extended-${scope} [data-nx-chart="${slug}"]`);
-const setMode = (page: Page, mode: string) => page.evaluate(mode => (window as unknown as { nodexNeoExtended: { setMode: (value: string) => void } }).nodexNeoExtended.setMode(mode), mode);
+const slugs = [
+  'bridge-waterfall',
+  'twin-pins',
+  'sticker-scatter',
+  'tile-heatmap',
+  'hundred-blocks',
+] as const;
+const chart = (page: Page, slug: string, scope = 'primary') =>
+  page.locator(`#neo-extended-${scope} [data-nx-chart="${slug}"]`);
+const setMode = (page: Page, mode: string) =>
+  page.evaluate(
+    (mode) =>
+      (
+        window as unknown as {
+          nodexNeoExtended: { setMode: (value: string) => void };
+        }
+      ).nodexNeoExtended.setMode(mode),
+    mode,
+  );
 async function colors(page: Page, scope: string) {
-  return page.locator(`#neo-extended-${scope} [data-nx-sticker], #neo-extended-${scope} [data-nx-unit]`).evaluateAll(elements => Object.fromEntries(elements.map(element => [element.getAttribute('data-nx-sticker') ? `point/${element.getAttribute('data-nx-sticker')}` : `share/${element.getAttribute('data-nx-unit')}`, getComputedStyle(element).fill])));
+  return page
+    .locator(
+      `#neo-extended-${scope} [data-nx-sticker], #neo-extended-${scope} [data-nx-unit]`,
+    )
+    .evaluateAll((elements) =>
+      Object.fromEntries(
+        elements.map((element) => [
+          element.getAttribute('data-nx-sticker')
+            ? `point/${element.getAttribute('data-nx-sticker')}`
+            : `share/${element.getAttribute('data-nx-unit')}`,
+          getComputedStyle(element).fill,
+        ]),
+      ),
+    );
 }
 
 export async function checkNeoExtendedConsumer(page: Page): Promise<void> {
-  const bridge = chart(page, 'bridge-waterfall'); const pairs = chart(page, 'twin-pins');
-  const scatter = chart(page, 'sticker-scatter'); const heat = chart(page, 'tile-heatmap'); const blocks = chart(page, 'hundred-blocks');
-  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText(['100', '+50', '-20', '130']);
-  assert.deepEqual(await bridge.locator('[data-nx-bridge]').evaluateAll(elements => elements.map(element => [Number(element.getAttribute('data-nx-from')), Number(element.getAttribute('data-nx-to'))])), [[0, 100], [100, 150], [130, 150], [0, 130]]);
-  const heights = await bridge.locator('[data-nx-bridge]').evaluateAll(elements => elements.map(element => (element as SVGGraphicsElement).getBBox().height));
-  assert(Math.abs(heights[1]! / heights[0]! - 0.5) < 0.001 && Math.abs(heights[2]! / heights[0]! - 0.2) < 0.001, 'Floating bar lengths must encode the change');
+  const bridge = chart(page, 'bridge-waterfall');
+  const pairs = chart(page, 'twin-pins');
+  const scatter = chart(page, 'sticker-scatter');
+  const heat = chart(page, 'tile-heatmap');
+  const blocks = chart(page, 'hundred-blocks');
+  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText([
+    '100',
+    '+50',
+    '-20',
+    '130',
+  ]);
+  assert.deepEqual(
+    await bridge
+      .locator('[data-nx-bridge]')
+      .evaluateAll((elements) =>
+        elements.map((element) => [
+          Number(element.getAttribute('data-nx-from')),
+          Number(element.getAttribute('data-nx-to')),
+        ]),
+      ),
+    [
+      [0, 100],
+      [100, 150],
+      [130, 150],
+      [0, 130],
+    ],
+  );
+  const heights = await bridge
+    .locator('[data-nx-bridge]')
+    .evaluateAll((elements) =>
+      elements.map(
+        (element) => (element as SVGGraphicsElement).getBBox().height,
+      ),
+    );
+  assert(
+    Math.abs(heights[1]! / heights[0]! - 0.5) < 0.001 &&
+      Math.abs(heights[2]! / heights[0]! - 0.2) < 0.001,
+    'Floating bar lengths must encode the change',
+  );
   await expect(pairs.locator('[data-nx-pair]')).toHaveCount(3);
-  const pins = await pairs.locator('[data-nx-pair-rail]').evaluateAll(elements => elements.map(element => [Number(element.getAttribute('x1')), Number(element.getAttribute('x2'))]));
-  assert(pins[0]![1]! > pins[0]![0]! && pins[1]![1]! < pins[1]![0]! && pins[2]![0] === pins[2]![1], 'Pairs must retain increasing, decreasing and equal values');
+  const pins = await pairs
+    .locator('[data-nx-pair-rail]')
+    .evaluateAll((elements) =>
+      elements.map((element) => [
+        Number(element.getAttribute('x1')),
+        Number(element.getAttribute('x2')),
+      ]),
+    );
+  assert(
+    pins[0]![1]! > pins[0]![0]! &&
+      pins[1]![1]! < pins[1]![0]! &&
+      pins[2]![0] === pins[2]![1],
+    'Pairs must retain increasing, decreasing and equal values',
+  );
   await expect(scatter.locator('[data-nx-sticker]')).toHaveCount(3);
-  const points = await scatter.locator('[data-nx-sticker]').evaluateAll(elements => elements.map(element => ({ x: Number(element.getAttribute('x')), y: Number(element.getAttribute('y')), width: Number(element.getAttribute('width')) })));
-  assert(points[0]!.x < points[2]!.x && points[2]!.x < points[1]!.x && points[0]!.y > points[2]!.y && points[2]!.y > points[1]!.y, 'Scatter position must follow both numeric scales');
-  assert(points.every(point => point.width === points[0]!.width), 'Sticker sizes must remain equal');
+  const points = await scatter
+    .locator('[data-nx-sticker]')
+    .evaluateAll((elements) =>
+      elements.map((element) => ({
+        x: Number(element.getAttribute('x')),
+        y: Number(element.getAttribute('y')),
+        width: Number(element.getAttribute('width')),
+      })),
+    );
+  assert(
+    points[0]!.x < points[2]!.x &&
+      points[2]!.x < points[1]!.x &&
+      points[0]!.y > points[2]!.y &&
+      points[2]!.y > points[1]!.y,
+    'Scatter position must follow both numeric scales',
+  );
+  assert(
+    points.every((point) => point.width === points[0]!.width),
+    'Sticker sizes must remain equal',
+  );
   await expect(heat.locator('[data-nx-tile]')).toHaveCount(4);
-  assert.deepEqual(await heat.locator('[data-nx-tile-fill]').evaluateAll(elements => elements.map(element => getComputedStyle(element).fillOpacity)), ['0', '0.5', '1', '0']);
+  assert.deepEqual(
+    await heat
+      .locator('[data-nx-tile-fill]')
+      .evaluateAll((elements) =>
+        elements.map((element) => getComputedStyle(element).fillOpacity),
+      ),
+    ['0', '0.5', '1', '0'],
+  );
   await expect(heat.locator('[data-nx-value="0"] circle')).toHaveCount(1);
   await expect(heat.locator('[data-nx-value="missing"] line')).toHaveCount(2);
   await expect(blocks.locator('[data-nx-unit]')).toHaveCount(100);
-  for (const [id, count] of [['a', 40], ['b', 30], ['c', 20], ['d', 10]] as const) await expect(blocks.locator(`[data-nx-unit="${id}"]`)).toHaveCount(count);
-  assert.equal(new Set(await blocks.locator('[data-nx-cell]').evaluateAll(elements => elements.map(element => element.getAttribute('data-nx-cell')))).size, 100, 'Waffle cells must never overlap by allocation index');
+  for (const [id, count] of [
+    ['a', 40],
+    ['b', 30],
+    ['c', 20],
+    ['d', 10],
+  ] as const)
+    await expect(blocks.locator(`[data-nx-unit="${id}"]`)).toHaveCount(count);
+  assert.equal(
+    new Set(
+      await blocks
+        .locator('[data-nx-cell]')
+        .evaluateAll((elements) =>
+          elements.map((element) => element.getAttribute('data-nx-cell')),
+        ),
+    ).size,
+    100,
+    'Waffle cells must never overlap by allocation index',
+  );
 
   for (const [node, first, second] of [
     [bridge, 'Opening100 Revenue', 'New+50 RevenueBalance: 150'],
@@ -92,83 +206,235 @@ export async function checkNeoExtendedConsumer(page: Page): Promise<void> {
     [heat, 'Same · Mon0 Hours', 'Same · Tue5 Hours'],
     [blocks, 'Same40% · 40 of 100 blocks', 'Same30% · 30 of 100 blocks'],
   ] as const) {
-    await node.scrollIntoViewIfNeeded(); await page.mouse.move(880, 10); await node.locator('svg.recharts-surface').focus();
-    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(first);
-    await page.keyboard.press('ArrowRight'); await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(second);
+    await node.scrollIntoViewIfNeeded();
+    await page.mouse.move(880, 10);
+    await node.locator('svg.recharts-surface').focus();
+    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+      first,
+    );
+    await page.keyboard.press('ArrowRight');
+    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+      second,
+    );
   }
-  await expect(page.locator('#neo-extended-secondary .recharts-tooltip-wrapper:visible')).toHaveCount(0);
+  await expect(
+    page.locator('#neo-extended-secondary .recharts-tooltip-wrapper:visible'),
+  ).toHaveCount(0);
   await scatter.locator('[data-nx-sticker="a"]').hover();
-  await expect(scatter.locator('.recharts-tooltip-wrapper:visible')).toHaveText('SameReach: 10Engagement: 20');
+  await expect(scatter.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+    'SameReach: 10Engagement: 20',
+  );
   await heat.locator('[data-nx-tile]').last().hover();
-  await expect(heat.locator('.recharts-tooltip-wrapper:visible')).toHaveText('Same · TueUnavailable');
+  await expect(heat.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+    'Same · TueUnavailable',
+  );
   await blocks.locator('[data-nx-unit="c"]').first().hover();
-  await expect(blocks.locator('.recharts-tooltip-wrapper:visible')).toHaveText('Third20% · 20 of 100 blocks');
+  await expect(blocks.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+    'Third20% · 20 of 100 blocks',
+  );
 
   const sibling = await colors(page, 'secondary');
-  await page.locator('#neo-extended-primary').evaluate(element => {
-    const node = element as HTMLElement; node.style.setProperty('--nx-seriesA', '#d5a1eb'); node.style.setProperty('--nx-ink', '#24395a'); node.style.setProperty('--nx-valueFill', '#315c9c');
+  await page.locator('#neo-extended-primary').evaluate((element) => {
+    const node = element as HTMLElement;
+    node.style.setProperty('--nx-seriesA', '#d5a1eb');
+    node.style.setProperty('--nx-ink', '#24395a');
+    node.style.setProperty('--nx-valueFill', '#315c9c');
   });
-  for (const mark of [bridge.locator('[data-nx-bridge]').first(), pairs.locator('[data-nx-pin-before]').first(), scatter.locator('[data-nx-sticker="a"]'), blocks.locator('[data-nx-unit="a"]').first()]) {
-    await expect.poll(() => mark.evaluate(element => ({ fill: getComputedStyle(element).fill, stroke: getComputedStyle(element).stroke }))).toEqual({ fill: 'rgb(213, 161, 235)', stroke: 'rgb(36, 57, 90)' });
+  for (const mark of [
+    bridge.locator('[data-nx-bridge]').first(),
+    pairs.locator('[data-nx-pin-before]').first(),
+    scatter.locator('[data-nx-sticker="a"]'),
+    blocks.locator('[data-nx-unit="a"]').first(),
+  ]) {
+    await expect
+      .poll(() =>
+        mark.evaluate((element) => ({
+          fill: getComputedStyle(element).fill,
+          stroke: getComputedStyle(element).stroke,
+        })),
+      )
+      .toEqual({ fill: 'rgb(213, 161, 235)', stroke: 'rgb(36, 57, 90)' });
   }
-  await expect.poll(() => heat.locator('[data-nx-tile-fill]').first().evaluate(element => getComputedStyle(element).fill)).toBe('rgb(49, 92, 156)');
-  assert.deepEqual(await colors(page, 'secondary'), sibling, 'A descendant palette must not change sibling instances');
-  await page.locator('#neo-extended-primary').evaluate(element => element.removeAttribute('style'));
+  await expect
+    .poll(() =>
+      heat
+        .locator('[data-nx-tile-fill]')
+        .first()
+        .evaluate((element) => getComputedStyle(element).fill),
+    )
+    .toBe('rgb(49, 92, 156)');
+  assert.deepEqual(
+    await colors(page, 'secondary'),
+    sibling,
+    'A descendant palette must not change sibling instances',
+  );
+  await page
+    .locator('#neo-extended-primary')
+    .evaluate((element) => element.removeAttribute('style'));
   const original = await colors(page, 'primary');
-  await page.evaluate(() => (window as unknown as { nodexNeoExtended: { setRevision: (value: boolean) => void } }).nodexNeoExtended.setRevision(true));
-  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText(['100', '+70', '-20', '150']);
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexNeoExtended: { setRevision: (value: boolean) => void };
+      }
+    ).nodexNeoExtended.setRevision(true),
+  );
+  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText([
+    '100',
+    '+70',
+    '-20',
+    '150',
+  ]);
   await expect(blocks.locator('[data-nx-unit="a"]')).toHaveCount(20);
-  assert.deepEqual(await colors(page, 'primary'), original, 'Reordering must retain observation and share identity colors');
-  await expect(heat.locator('[data-nx-tile-fill]').nth(1)).toHaveAttribute('fill-opacity', '0.5');
+  assert.deepEqual(
+    await colors(page, 'primary'),
+    original,
+    'Reordering must retain observation and share identity colors',
+  );
+  await expect(heat.locator('[data-nx-tile-fill]').nth(1)).toHaveAttribute(
+    'fill-opacity',
+    '0.5',
+  );
 
   for (const width of [375, 320]) {
-    await page.locator('#neo-extended-primary').evaluate((element, width) => { (element as HTMLElement).style.width = `${width}px`; }, width);
-    for (const slug of slugs) await expect.poll(() => chart(page, slug).evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
-    await expect.poll(() => blocks.evaluate(element => element.querySelector('ul')!.getBoundingClientRect().top >= element.querySelector('svg')!.getBoundingClientRect().bottom)).toBe(true);
-    const cell = await blocks.locator('[data-nx-unit]').first().evaluate(element => {
-      const { width, height } = (element as SVGGraphicsElement).getBBox();
-      return { width, height };
-    });
-    assert(Math.abs(cell.width - cell.height) < 0.01, 'Units must stay square at narrow widths');
+    await page.locator('#neo-extended-primary').evaluate((element, width) => {
+      (element as HTMLElement).style.width = `${width}px`;
+    }, width);
+    for (const slug of slugs)
+      await expect
+        .poll(() =>
+          chart(page, slug).evaluate(
+            (element) => element.scrollWidth <= element.clientWidth,
+          ),
+        )
+        .toBe(true);
+    await expect
+      .poll(() =>
+        blocks.evaluate(
+          (element) =>
+            element.querySelector('ul')!.getBoundingClientRect().top >=
+            element.querySelector('svg')!.getBoundingClientRect().bottom,
+        ),
+      )
+      .toBe(true);
+    const cell = await blocks
+      .locator('[data-nx-unit]')
+      .first()
+      .evaluate((element) => {
+        const { width, height } = (element as SVGGraphicsElement).getBBox();
+        return { width, height };
+      });
+    assert(
+      Math.abs(cell.width - cell.height) < 0.01,
+      'Units must stay square at narrow widths',
+    );
   }
-  await page.locator('#neo-extended-primary').evaluate(element => element.removeAttribute('style'));
-  await page.evaluate(() => (window as unknown as { nodexNeoExtended: { setRevision: (value: boolean) => void } }).nodexNeoExtended.setRevision(false));
+  await page
+    .locator('#neo-extended-primary')
+    .evaluate((element) => element.removeAttribute('style'));
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexNeoExtended: { setRevision: (value: boolean) => void };
+      }
+    ).nodexNeoExtended.setRevision(false),
+  );
   await setMode(page, 'partial');
-  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText(['100', '—', '—', '—', '20', '+5', '25']);
+  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText([
+    '100',
+    '—',
+    '—',
+    '—',
+    '20',
+    '+5',
+    '25',
+  ]);
   await expect(bridge.locator('[data-nx-bridge-join]')).toHaveCount(2);
-  await expect(pairs.locator('[data-nx-pin-before]')).toHaveCount(1); await expect(pairs.locator('[data-nx-pin-after]')).toHaveCount(1);
-  await expect(pairs.locator('[data-nx-pair-rail]')).toHaveCount(0);
-  await expect(scatter.locator('[data-nx-sticker]')).toHaveCount(1); await expect(scatter).toContainText('2 unavailable');
-  await expect(heat.locator('[data-nx-value="missing"]')).toHaveCount(2);
-  await expect(blocks.getByRole('status')).toHaveText('Provide complete whole-percent shares totaling 100.');
-  await setMode(page, 'negative');
-  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText(['10', '-30', '-20']);
-  await expect(bridge.locator('[data-nx-bridge="b"]')).toHaveAttribute('data-nx-from', '-20');
   await expect(pairs.locator('[data-nx-pin-before]')).toHaveCount(1);
-  await expect(scatter.locator('[data-nx-sticker="a"]')).toHaveAttribute('data-nx-x', '-10');
+  await expect(pairs.locator('[data-nx-pin-after]')).toHaveCount(1);
+  await expect(pairs.locator('[data-nx-pair-rail]')).toHaveCount(0);
+  await expect(scatter.locator('[data-nx-sticker]')).toHaveCount(1);
+  await expect(scatter).toContainText('2 unavailable');
+  await expect(heat.locator('[data-nx-value="missing"]')).toHaveCount(2);
+  await expect(blocks.getByRole('status')).toHaveText(
+    'Provide complete whole-percent shares totaling 100.',
+  );
+  await setMode(page, 'negative');
+  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText([
+    '10',
+    '-30',
+    '-20',
+  ]);
+  await expect(bridge.locator('[data-nx-bridge="b"]')).toHaveAttribute(
+    'data-nx-from',
+    '-20',
+  );
+  await expect(pairs.locator('[data-nx-pin-before]')).toHaveCount(1);
+  await expect(scatter.locator('[data-nx-sticker="a"]')).toHaveAttribute(
+    'data-nx-x',
+    '-10',
+  );
   await setMode(page, 'zero');
-  await expect(bridge.locator('[data-nx-bridge]')).toHaveCount(0); await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText(['0']);
-  await expect(pairs.locator('[data-nx-pin-before]')).toHaveCount(1); await expect(pairs.locator('[data-nx-pin-after]')).toHaveCount(1);
-  await expect(scatter.locator('[data-nx-sticker]')).toHaveCount(1); await expect(heat.locator('[data-nx-value="0"]')).toHaveCount(1);
+  await expect(bridge.locator('[data-nx-bridge]')).toHaveCount(0);
+  await expect(bridge.locator('[data-nx-bridge-label]')).toHaveText(['0']);
+  await expect(pairs.locator('[data-nx-pin-before]')).toHaveCount(1);
+  await expect(pairs.locator('[data-nx-pin-after]')).toHaveCount(1);
+  await expect(scatter.locator('[data-nx-sticker]')).toHaveCount(1);
+  await expect(heat.locator('[data-nx-value="0"]')).toHaveCount(1);
   await expect(blocks.locator('[data-nx-unit]')).toHaveCount(0);
   await setMode(page, 'single');
-  await expect(bridge.locator('[data-nx-bridge]')).toHaveCount(1); await expect(pairs.locator('[data-nx-pair]')).toHaveCount(1);
-  await expect(scatter.locator('[data-nx-sticker]')).toHaveCount(1); await expect(blocks.locator('[data-nx-unit]')).toHaveCount(100);
+  await expect(bridge.locator('[data-nx-bridge]')).toHaveCount(1);
+  await expect(pairs.locator('[data-nx-pair]')).toHaveCount(1);
+  await expect(scatter.locator('[data-nx-sticker]')).toHaveCount(1);
+  await expect(blocks.locator('[data-nx-unit]')).toHaveCount(100);
   for (const mode of ['empty', 'invalid', 'duplicates']) {
     await setMode(page, mode);
-    for (const slug of slugs) { await expect(chart(page, slug).getByRole('status')).toBeVisible(); await expect(chart(page, slug).locator('svg')).toHaveCount(0); }
+    for (const slug of slugs) {
+      await expect(chart(page, slug).getByRole('status')).toBeVisible();
+      await expect(chart(page, slug).locator('svg')).toHaveCount(0);
+    }
   }
-  await setMode(page, 'fractional'); await expect(blocks.getByRole('status')).toHaveText('Provide complete whole-percent shares totaling 100.');
-  await setMode(page, 'bad-scale'); await expect(heat.getByRole('status')).toHaveText('A finite, positive scale maximum is required.');
+  await setMode(page, 'fractional');
+  await expect(blocks.getByRole('status')).toHaveText(
+    'Provide complete whole-percent shares totaling 100.',
+  );
+  await setMode(page, 'bad-scale');
+  await expect(heat.getByRole('status')).toHaveText(
+    'A finite, positive scale maximum is required.',
+  );
   await setMode(page, 'normal');
-  await page.evaluate(() => (window as unknown as { nodexNeoExtended: { setAnimate: (value: boolean) => void } }).nodexNeoExtended.setAnimate(true));
-  for (const slug of slugs) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'false');
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexNeoExtended: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexNeoExtended.setAnimate(true),
+  );
+  for (const slug of slugs)
+    await expect(chart(page, slug)).toHaveAttribute(
+      'data-nx-animated',
+      'false',
+    );
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  for (const slug of slugs) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
+  for (const slug of slugs)
+    await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const slug of slugs) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'false');
-  await expect(blocks.locator('[data-nx-unit]')).toHaveCount(100); await expect(heat.locator('[data-nx-tile]')).toHaveCount(4);
+  for (const slug of slugs)
+    await expect(chart(page, slug)).toHaveAttribute(
+      'data-nx-animated',
+      'false',
+    );
+  await expect(blocks.locator('[data-nx-unit]')).toHaveCount(100);
+  await expect(heat.locator('[data-nx-tile]')).toHaveCount(4);
   await expect(bridge.locator('[data-nx-bridge-label]')).toHaveCount(4);
-  await page.evaluate(() => (window as unknown as { nodexNeoExtended: { setAnimate: (value: boolean) => void } }).nodexNeoExtended.setAnimate(false));
-  console.log('Validated five additional Neo charts: signed balances, paired endpoints, numeric scatter, fixed-intensity cells, exact 100-block allocation, native tooltips, scoped identity, mobile fit and missing/zero/invalid data.');
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexNeoExtended: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexNeoExtended.setAnimate(false),
+  );
+  console.log(
+    'Validated five additional Neo charts: signed balances, paired endpoints, numeric scatter, fixed-intensity cells, exact 100-block allocation, native tooltips, scoped identity, mobile fit and missing/zero/invalid data.',
+  );
 }

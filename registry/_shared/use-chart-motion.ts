@@ -13,13 +13,25 @@ function durationInMs(value: string): number {
 
 function easingFromToken(value: string): EasingInput {
   const normalized = value.replace(/\s/g, '');
-  if (['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'].includes(normalized)) {
+  if (
+    ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'].includes(
+      normalized,
+    )
+  ) {
     return normalized as EasingInput;
   }
-  const match = /^cubic-bezier\((-?[\d.]+),(-?[\d.]+),(-?[\d.]+),(-?[\d.]+)\)$/.exec(normalized);
-  if (match && match.slice(1).every((part) => Number.isFinite(Number(part)))
-    && Number(match[1]) >= 0 && Number(match[1]) <= 1
-    && Number(match[3]) >= 0 && Number(match[3]) <= 1) {
+  const match =
+    /^cubic-bezier\((-?[\d.]+),(-?[\d.]+),(-?[\d.]+),(-?[\d.]+)\)$/.exec(
+      normalized,
+    );
+  if (
+    match &&
+    match.slice(1).every((part) => Number.isFinite(Number(part))) &&
+    Number(match[1]) >= 0 &&
+    Number(match[1]) <= 1 &&
+    Number(match[3]) >= 0 &&
+    Number(match[3]) <= 1
+  ) {
     return normalized as EasingInput;
   }
   return 'linear';
@@ -33,7 +45,10 @@ function easingFromToken(value: string): EasingInput {
 export function useChartMotion(animate = true) {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const [timing, setTiming] = useState<{ duration: number; easing: EasingInput }>({ duration: 0, easing: 'linear' });
+  const [timing, setTiming] = useState<{
+    duration: number;
+    easing: EasingInput;
+  }>({ duration: 0, easing: 'linear' });
 
   useEffect(() => {
     const node = ref.current;
@@ -41,19 +56,36 @@ export function useChartMotion(animate = true) {
     let frame = 0;
     const read = () => {
       const style = getComputedStyle(node);
-      const duration = durationInMs(style.getPropertyValue('--nx-motion-draw-duration'));
-      const easing = easingFromToken(style.getPropertyValue('--nx-motion-draw-easing'));
-      setTiming((previous) => previous.duration === duration && previous.easing === easing ? previous : { duration, easing });
+      const duration = durationInMs(
+        style.getPropertyValue('--nx-motion-draw-duration'),
+      );
+      const easing = easingFromToken(
+        style.getPropertyValue('--nx-motion-draw-easing'),
+      );
+      setTiming((previous) =>
+        previous.duration === duration && previous.easing === easing
+          ? previous
+          : { duration, easing },
+      );
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(read);
     };
     const observer = new MutationObserver(schedule);
-    for (let ancestor: HTMLElement | null = node; ancestor; ancestor = ancestor.parentElement) {
+    for (
+      let ancestor: HTMLElement | null = node;
+      ancestor;
+      ancestor = ancestor.parentElement
+    ) {
       observer.observe(ancestor, { attributes: true });
     }
-    observer.observe(document.head, { attributes: true, childList: true, subtree: true, characterData: true });
+    observer.observe(document.head, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
     const scheme = window.matchMedia('(prefers-color-scheme: dark)');
     scheme.addEventListener('change', schedule);
     window.addEventListener('resize', schedule);

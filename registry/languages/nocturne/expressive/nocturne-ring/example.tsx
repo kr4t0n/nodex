@@ -8,5 +8,13 @@ const data: NocturneRingDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <NocturneRing data={data} unitLabel="Allocated hours" contextLabel="This cycle" height={344} animate={animate} />;
+  return (
+    <NocturneRing
+      data={data}
+      unitLabel="Allocated hours"
+      contextLabel="This cycle"
+      height={344}
+      animate={animate}
+    />
+  );
 }

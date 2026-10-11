@@ -7,12 +7,8 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "SketchDonut"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["SketchDonut"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
@@ -22,22 +18,14 @@
     "sketch/marks.tsx",
     "sketch/polar.tsx"
   ],
-  "dependencies": [
-    "recharts@3.10.1",
-    "roughjs@4.6.6"
-  ],
+  "dependencies": ["recharts@3.10.1", "roughjs@4.6.6"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 720,
     "height": 440
   },
-  "tags": [
-    "composition",
-    "part-to-whole",
-    "sketch",
-    "roughviz"
-  ],
+  "tags": ["composition", "part-to-whole", "sketch", "roughviz"],
   "props": [
     {
       "name": "data",

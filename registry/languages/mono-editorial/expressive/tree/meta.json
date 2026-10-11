@@ -6,10 +6,7 @@
   "tier": "expressive",
   "runtime": "react",
   "density": "glance",
-  "tags": [
-    "product",
-    "catalog"
-  ],
+  "tags": ["product", "catalog"],
   "dependencies": [
     "recharts@3.10.1",
     "d3-hierarchy@3.1.2",
@@ -18,16 +15,9 @@
   "aspectRatio": "580/320",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "Tree"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["Tree"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

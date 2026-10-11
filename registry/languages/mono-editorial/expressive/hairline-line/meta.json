@@ -7,28 +7,17 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "HairlineLine"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "exports": ["HairlineLine"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 676,
     "height": 456
   },
-  "tags": [
-    "growth"
-  ],
+  "tags": ["growth"],
   "props": [
     {
       "name": "data",

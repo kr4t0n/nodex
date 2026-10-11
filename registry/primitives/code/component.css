@@ -1,73 +1,73 @@
 @layer components {
-/* code - shared primitive, themed by the active language's tokens.
+  /* code - shared primitive, themed by the active language's tokens.
 
    Inline code, keyboard keys, and code blocks. The tint is mixed from the grid
    token rather than being its own colour, so it stays correct in any language
    without adding a value to the palette. */
 
-.nx-code {
-  font-family: var(--nx-font-mono);
-  font-size: var(--nx-type-code-inlineSize);
-  padding: var(--nx-space-inlineCodePadding);
-  border-radius: var(--nx-radius-code);
-  background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
-  color: var(--nx-ink);
-  /* Long identifiers and URLs must not push a column wider than its container. */
-  overflow-wrap: anywhere;
-}
+  .nx-code {
+    font-family: var(--nx-font-mono);
+    font-size: var(--nx-type-code-inlineSize);
+    padding: var(--nx-space-inlineCodePadding);
+    border-radius: var(--nx-radius-code);
+    background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
+    color: var(--nx-ink);
+    /* Long identifiers and URLs must not push a column wider than its container. */
+    overflow-wrap: anywhere;
+  }
 
-/* A keyboard key reads as a physical object, which in a language with no
+  /* A keyboard key reads as a physical object, which in a language with no
    elevation model means a hairline outline rather than a shadow. */
-.nx-kbd {
-  display: inline-block;
-  min-width: 1.5em;
-  padding: var(--nx-space-keyPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-bottom-width: calc(var(--nx-stroke-hairline) * 2);
-  border-radius: var(--nx-radius-code);
-  background: var(--nx-bg);
-  font-family: var(--nx-font-mono);
-  font-size: var(--nx-type-code-keySize);
-  line-height: var(--nx-type-code-keyLineHeight);
-  text-align: center;
-  color: var(--nx-ink);
-}
+  .nx-kbd {
+    display: inline-block;
+    min-width: 1.5em;
+    padding: var(--nx-space-keyPadding);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-bottom-width: calc(var(--nx-stroke-hairline) * 2);
+    border-radius: var(--nx-radius-code);
+    background: var(--nx-bg);
+    font-family: var(--nx-font-mono);
+    font-size: var(--nx-type-code-keySize);
+    line-height: var(--nx-type-code-keyLineHeight);
+    text-align: center;
+    color: var(--nx-ink);
+  }
 
-/* Block. Bordered rather than filled: a large tinted panel would read as a card
+  /* Block. Bordered rather than filled: a large tinted panel would read as a card
    and this language separates with lines. */
-.nx-pre {
-  margin: 0;
-  padding: var(--nx-space-codeBlockPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-radius: var(--nx-radius-card);
-  background: var(--nx-bg);
-  overflow-x: auto;
-  font-family: var(--nx-font-mono);
-  font-size: var(--nx-type-code-blockSize);
-  line-height: var(--nx-type-code-blockLineHeight);
-  color: var(--nx-ink);
-  tab-size: 2;
-}
+  .nx-pre {
+    margin: 0;
+    padding: var(--nx-space-codeBlockPadding);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-radius: var(--nx-radius-card);
+    background: var(--nx-bg);
+    overflow-x: auto;
+    font-family: var(--nx-font-mono);
+    font-size: var(--nx-type-code-blockSize);
+    line-height: var(--nx-type-code-blockLineHeight);
+    color: var(--nx-ink);
+    tab-size: 2;
+  }
 
-.nx-pre .nx-code {
-  padding: 0;
-  background: none;
-  font-size: inherit;
-}
+  .nx-pre .nx-code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+  }
 
-/* A command the reader is expected to run, rather than code they read. The pill
+  /* A command the reader is expected to run, rather than code they read. The pill
    shape marks it as actionable, matching the button and badge radius. */
-.nx-command {
-  display: flex;
-  align-items: center;
-  gap: var(--nx-space-commandGap);
-  padding: var(--nx-space-commandPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-radius: var(--nx-radius-card);
-  font-family: var(--nx-font-mono);
-  font-size: var(--nx-type-code-commandSize);
-  line-height: var(--nx-type-code-commandLineHeight);
-  color: var(--nx-ink);
-  overflow-wrap: anywhere;
-}
+  .nx-command {
+    display: flex;
+    align-items: center;
+    gap: var(--nx-space-commandGap);
+    padding: var(--nx-space-commandPadding);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-radius: var(--nx-radius-card);
+    font-family: var(--nx-font-mono);
+    font-size: var(--nx-type-code-commandSize);
+    line-height: var(--nx-type-code-commandLineHeight);
+    color: var(--nx-ink);
+    overflow-wrap: anywhere;
+  }
 }

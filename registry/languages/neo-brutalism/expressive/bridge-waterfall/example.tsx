@@ -8,5 +8,12 @@ const steps: readonly BridgeWaterfallDatum[] = [
   { id: 'closing', label: 'Closing', kind: 'total' },
 ];
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <BridgeWaterfall data={steps} unitLabel="Revenue · $K" contextLabel="Monthly bridge" animate={animate} />;
+  return (
+    <BridgeWaterfall
+      data={steps}
+      unitLabel="Revenue · $K"
+      contextLabel="Monthly bridge"
+      animate={animate}
+    />
+  );
 }

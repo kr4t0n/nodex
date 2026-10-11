@@ -7,21 +7,12 @@
   "runtime": "react",
   "density": "close-read",
   "aspectRatio": "780/300",
-  "tags": [
-    "product",
-    "analytics"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["product", "analytics"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "StreamRibbon"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["StreamRibbon"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",

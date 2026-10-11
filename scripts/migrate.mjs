@@ -17,7 +17,13 @@ import process from 'node:process';
 
 import pg from 'pg';
 
-const DIR = path.resolve(import.meta.dirname, '..', 'apps', 'web', 'migrations');
+const DIR = path.resolve(
+  import.meta.dirname,
+  '..',
+  'apps',
+  'web',
+  'migrations',
+);
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -31,7 +37,9 @@ if (!url) {
 let failureReported = false;
 function reportFailure() {
   if (!failureReported) {
-    console.error('Could not apply database migrations. Check database configuration, availability and migration SQL.');
+    console.error(
+      'Could not apply database migrations. Check database configuration, availability and migration SQL.',
+    );
     failureReported = true;
   }
   process.exitCode = 1;
@@ -44,7 +52,10 @@ try {
 }
 
 async function migrate() {
-  const client = new pg.Client({ connectionString: url, connectionTimeoutMillis: 5000 });
+  const client = new pg.Client({
+    connectionString: url,
+    connectionTimeoutMillis: 5000,
+  });
   // Connection failures between queries arrive as events, outside await's catch.
   client.on('error', reportFailure);
   try {
@@ -67,7 +78,9 @@ async function migrate() {
       try {
         await client.query('begin');
         await client.query(sql);
-        await client.query('insert into schema_migrations (name) values ($1)', [name]);
+        await client.query('insert into schema_migrations (name) values ($1)', [
+          name,
+        ]);
         await client.query('commit');
       } catch (cause) {
         await client.query('rollback');

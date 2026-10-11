@@ -3,14 +3,8 @@
   "title": "Monthly revenue bridge",
   "description": "Floating mint gains and pink losses connect yellow opening and lilac closing balances. Signed labels retain direction without color.",
   "component": "waterfall",
-  "exports": [
-    "BridgeWaterfall"
-  ],
-  "tags": [
-    "change",
-    "balance",
-    "contribution"
-  ],
+  "exports": ["BridgeWaterfall"],
+  "tags": ["change", "balance", "contribution"],
   "props": [
     {
       "name": "data",
@@ -71,17 +65,13 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
     "neo-chart-frame.tsx"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

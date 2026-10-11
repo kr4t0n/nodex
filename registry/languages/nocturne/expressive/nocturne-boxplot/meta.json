@@ -7,9 +7,7 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "NocturneBoxplot"
-  ],
+  "exports": ["NocturneBoxplot"],
   "props": [
     {
       "name": "data",
@@ -58,9 +56,7 @@
       "description": "Accessible title for the native chart."
     }
   ],
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
@@ -68,19 +64,12 @@
     "numeric-domain.ts",
     "scatter-fade.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 760,
     "height": 488
   },
-  "tags": [
-    "distribution",
-    "quartiles",
-    "outliers",
-    "dark"
-  ]
+  "tags": ["distribution", "quartiles", "outliers", "dark"]
 }

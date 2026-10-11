@@ -5,6 +5,15 @@ export type BadgeProps = ComponentPropsWithRef<'span'> & {
   variant?: 'solid' | 'outline' | 'dashed' | 'quiet';
 };
 
-export function Badge({ variant = 'outline', className = '', ...props }: BadgeProps) {
-  return <span {...props} className={`nx-badge nx-badge--${variant} ${className}`.trim()} />;
+export function Badge({
+  variant = 'outline',
+  className = '',
+  ...props
+}: BadgeProps) {
+  return (
+    <span
+      {...props}
+      className={`nx-badge nx-badge--${variant} ${className}`.trim()}
+    />
+  );
 }

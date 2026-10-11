@@ -532,6 +532,19 @@ rectangles and lines need not emit a path or circle before it can be inspected.
 ESLint and TypeScript include registry code, examples and build scripts. Do not
 reinstate the old registry-wide ESLint ignore. Run the required checks from
 README after changes; consumer smoke is essential after modifying delivery.
+React/JSX accessibility and hook order/dependency rules cover the same authored
+source; Next rules are scoped to the web app. TypeScript owns prop validation,
+and Prettier owns style. Hook lint does not opt the source into React Compiler.
+Warnings fail CI. Keep exceptions local and explain the native keyboard or
+delivery contract that a static rule cannot infer.
+
+Prettier owns formatting and Tailwind utility order, using the web app's v4
+stylesheet entry. Preserve whitespace inside class strings: conditional template
+fragments include leading separators that must not collapse adjacent classes.
+Format authored registry source, including delivered modules;
+never format generated build artifacts or imported third-party skills. The
+repository's authoring and consumer skills remain in scope. Keep a mechanical
+formatting baseline separate from behavioral fixes so review can distinguish them.
 
 ## Previewing actual React
 

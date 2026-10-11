@@ -7,25 +7,13 @@
   "runtime": "react",
   "density": "close-read",
   "aspectRatio": "560/400",
-  "tags": [
-    "product",
-    "analytics"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["product", "analytics"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "MatrixHeat"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["MatrixHeat"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

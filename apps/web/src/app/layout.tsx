@@ -48,24 +48,30 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const catalog = await readCatalog();
-  const language = catalog.languages.find((entry) => entry.slug === OWN_LANGUAGE);
+  const language = catalog.languages.find(
+    (entry) => entry.slug === OWN_LANGUAGE,
+  );
   if (!language) throw new Error(`Missing default language: ${OWN_LANGUAGE}`);
   const stylesheets = SHELL_PRIMITIVES.flatMap((name) => {
-    const item = catalog.items.find((entry) => entry.name === name && entry.meta.tier === 'primitive');
+    const item = catalog.items.find(
+      (entry) => entry.name === name && entry.meta.tier === 'primitive',
+    );
     if (!item) throw new Error(`Missing shell primitive: ${name}`);
-    return item.files.filter((file) => file.target.endsWith('.css')).map((file) => registryFileUrl(file.path));
+    return item.files
+      .filter((file) => file.target.endsWith('.css'))
+      .map((file) => registryFileUrl(file.path));
   });
 
   return (
     <html lang="en" data-nx-language={OWN_LANGUAGE}>
       <head>
-        <link id="nx-language-tokens" rel="stylesheet" href={tokensUrl(language)} />
+        <link
+          id="nx-language-tokens"
+          rel="stylesheet"
+          href={tokensUrl(language)}
+        />
         {[...new Set(stylesheets)].map((href) => (
-          <link
-            key={href}
-            rel="stylesheet"
-            href={href}
-          />
+          <link key={href} rel="stylesheet" href={href} />
         ))}
       </head>
       <body>{children}</body>

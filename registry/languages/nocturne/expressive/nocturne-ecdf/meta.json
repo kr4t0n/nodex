@@ -7,9 +7,7 @@
   "runtime": "react",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "NocturneEcdf"
-  ],
+  "exports": ["NocturneEcdf"],
   "props": [
     {
       "name": "data",
@@ -68,9 +66,7 @@
       "description": "Accessible title for the native chart."
     }
   ],
-  "files": [
-    "component.tsx"
-  ],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
@@ -79,20 +75,12 @@
     "scatter-fade.ts",
     "nocturne-categorical.ts"
   ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "dependencies": ["recharts@3.10.1"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",
     "width": 760,
     "height": 568
   },
-  "tags": [
-    "ecdf",
-    "percentiles",
-    "distribution",
-    "analysis",
-    "dark"
-  ]
+  "tags": ["ecdf", "percentiles", "distribution", "analysis", "dark"]
 }

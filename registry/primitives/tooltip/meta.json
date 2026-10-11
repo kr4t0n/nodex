@@ -5,20 +5,11 @@
   "component": "tooltip",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "overlay",
-    "text"
-  ],
+  "tags": ["overlay", "text"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Tooltip",
-    "TooltipTrigger"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Tooltip", "TooltipTrigger"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

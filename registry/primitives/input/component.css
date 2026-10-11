@@ -1,88 +1,89 @@
 @layer components {
-/* input - shared primitive, themed by the active language's tokens.
+  /* input - shared primitive, themed by the active language's tokens.
 
    Label sits above, helper or error below. Placeholder is never the label:
    it disappears the moment someone types, and a field with no visible label is
    unusable for anyone who looks away mid-entry. */
 
-.nx-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-fieldGap);
-  font-family: var(--nx-font-sans);
-}
+  .nx-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-fieldGap);
+    font-family: var(--nx-font-sans);
+  }
 
-.nx-field__label {
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-uiLabel-size);
-  font-weight: var(--nx-type-uiLabel-weight);
-  letter-spacing: var(--nx-type-uiLabel-tracking);
-  text-transform: var(--nx-type-uiLabel-transform);
-  color: var(--nx-muted);
-}
+  .nx-field__label {
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-uiLabel-size);
+    font-weight: var(--nx-type-uiLabel-weight);
+    letter-spacing: var(--nx-type-uiLabel-tracking);
+    text-transform: var(--nx-type-uiLabel-transform);
+    color: var(--nx-muted);
+  }
 
-.nx-input {
-  box-shadow: var(--nx-shadow-control) var(--nx-ink);
-  width: 100%;
-  padding: var(--nx-space-controlPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-radius: var(--nx-radius-pill);
-  background: var(--nx-fieldFill);
-  color: var(--nx-ink);
-  font-family: var(--nx-font-sans);
-  font-size: var(--nx-type-control-size);
-  line-height: var(--nx-type-control-lineHeight);
-  transition: border-color var(--nx-motion-control-duration) var(--nx-motion-control-easing);
-}
+  .nx-input {
+    box-shadow: var(--nx-shadow-control) var(--nx-ink);
+    width: 100%;
+    padding: var(--nx-space-controlPadding);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-radius: var(--nx-radius-pill);
+    background: var(--nx-fieldFill);
+    color: var(--nx-ink);
+    font-family: var(--nx-font-sans);
+    font-size: var(--nx-type-control-size);
+    line-height: var(--nx-type-control-lineHeight);
+    transition: border-color var(--nx-motion-control-duration)
+      var(--nx-motion-control-easing);
+  }
 
-/* Placeholder must clear WCAG AA against the field background, so it uses the
+  /* Placeholder must clear WCAG AA against the field background, so it uses the
    muted token rather than the faint one. Faint is for captions on paper, and
    fails contrast at this size. */
-.nx-input::placeholder {
-  color: var(--nx-muted);
-  opacity: 1;
-}
-
-.nx-input:hover {
-  border-color: var(--nx-muted);
-}
-
-.nx-input:focus {
-  outline: none;
-  border-color: var(--nx-ink);
-}
-
-.nx-input:focus-visible {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 2px;
-}
-
-.nx-input:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.nx-field__help {
-  font-size: var(--nx-type-help-size);
-  line-height: var(--nx-type-help-lineHeight);
-  color: var(--nx-muted);
-}
-
-.nx-field__error {
-  font-size: var(--nx-type-help-size);
-  line-height: var(--nx-type-help-lineHeight);
-  color: var(--nx-ink);
-  font-weight: var(--nx-font-weight-semibold);
-}
-
-.nx-field[data-invalid='true'] .nx-input {
-  border-color: var(--nx-ink);
-  border-style: dashed;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nx-input {
-    transition: none;
+  .nx-input::placeholder {
+    color: var(--nx-muted);
+    opacity: 1;
   }
-}
+
+  .nx-input:hover {
+    border-color: var(--nx-muted);
+  }
+
+  .nx-input:focus {
+    outline: none;
+    border-color: var(--nx-ink);
+  }
+
+  .nx-input:focus-visible {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 2px;
+  }
+
+  .nx-input:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .nx-field__help {
+    font-size: var(--nx-type-help-size);
+    line-height: var(--nx-type-help-lineHeight);
+    color: var(--nx-muted);
+  }
+
+  .nx-field__error {
+    font-size: var(--nx-type-help-size);
+    line-height: var(--nx-type-help-lineHeight);
+    color: var(--nx-ink);
+    font-weight: var(--nx-font-weight-semibold);
+  }
+
+  .nx-field[data-invalid='true'] .nx-input {
+    border-color: var(--nx-ink);
+    border-style: dashed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-input {
+      transition: none;
+    }
+  }
 }

@@ -1,5 +1,5 @@
 @layer components {
-/* prose - shared primitive, themed by the active language's tokens.
+  /* prose - shared primitive, themed by the active language's tokens.
 
    Long-form text: rendered markdown, documentation, an article body. One class
    on a wrapper styles everything inside, because the content is authored
@@ -8,187 +8,187 @@
    This is the primitive a language's own DESIGN.md renders through, so a
    language without one cannot present its written half in its own voice. */
 
-.nx-prose {
-  font-family: var(--nx-font-sans);
-  font-size: var(--nx-type-prose-size);
-  line-height: var(--nx-type-prose-lineHeight);
-  color: var(--nx-ink);
-  /* A measure, not a width. Long lines are the most common failure in
+  .nx-prose {
+    font-family: var(--nx-font-sans);
+    font-size: var(--nx-type-prose-size);
+    line-height: var(--nx-type-prose-lineHeight);
+    color: var(--nx-ink);
+    /* A measure, not a width. Long lines are the most common failure in
      documentation and the easiest to prevent. */
-  max-width: 68ch;
-}
+    max-width: 68ch;
+  }
 
-/* Flow spacing rather than margins on every element: the gap belongs between
+  /* Flow spacing rather than margins on every element: the gap belongs between
    siblings, so the first and last child never push against their container. */
-.nx-prose > * + * {
-  margin-top: var(--nx-space-proseFlowGap);
-}
+  .nx-prose > * + * {
+    margin-top: var(--nx-space-proseFlowGap);
+  }
 
-/* Headings below set their own larger top margin to open a section. On the
+  /* Headings below set their own larger top margin to open a section. On the
    FIRST child there is nothing above to separate from, so that margin becomes a
    phantom gap that pushes the whole block down and makes the container taller
    than its content. Markdown very often opens with a heading, so this is the
    common case rather than the edge one. */
-.nx-prose > :first-child {
-  margin-top: 0;
-}
+  .nx-prose > :first-child {
+    margin-top: 0;
+  }
 
-.nx-prose h1,
-.nx-prose h2,
-.nx-prose h3,
-.nx-prose h4 {
-  margin-bottom: 0;
-  font-family: var(--nx-font-heading, var(--nx-font-sans));
-  letter-spacing: var(--nx-type-prose-headingTracking);
-}
+  .nx-prose h1,
+  .nx-prose h2,
+  .nx-prose h3,
+  .nx-prose h4 {
+    margin-bottom: 0;
+    font-family: var(--nx-font-heading, var(--nx-font-sans));
+    letter-spacing: var(--nx-type-prose-headingTracking);
+  }
 
-.nx-prose h1 {
-  font-size: var(--nx-type-prose-titleSize);
-  font-weight: var(--nx-type-prose-titleWeight);
-}
+  .nx-prose h1 {
+    font-size: var(--nx-type-prose-titleSize);
+    font-weight: var(--nx-type-prose-titleWeight);
+  }
 
-/* Section headings are set as small caps rather than large type. Hierarchy by
+  /* Section headings are set as small caps rather than large type. Hierarchy by
    tracking and colour, not by scale, which is how this language handles it
    everywhere else. */
-.nx-prose h2 {
-  margin-top: var(--nx-space-proseSectionGap);
-  font-size: var(--nx-type-prose-sectionSize);
-  font-weight: var(--nx-font-weight-bold);
-  letter-spacing: var(--nx-type-prose-sectionTracking);
-  text-transform: uppercase;
-  color: var(--nx-muted);
-}
+  .nx-prose h2 {
+    margin-top: var(--nx-space-proseSectionGap);
+    font-size: var(--nx-type-prose-sectionSize);
+    font-weight: var(--nx-font-weight-bold);
+    letter-spacing: var(--nx-type-prose-sectionTracking);
+    text-transform: uppercase;
+    color: var(--nx-muted);
+  }
 
-.nx-prose h3 {
-  margin-top: var(--nx-space-proseSubheadingGap);
-  font-size: var(--nx-type-prose-subheadingSize);
-  font-weight: var(--nx-font-weight-bold);
-}
+  .nx-prose h3 {
+    margin-top: var(--nx-space-proseSubheadingGap);
+    font-size: var(--nx-type-prose-subheadingSize);
+    font-weight: var(--nx-font-weight-bold);
+  }
 
-.nx-prose h4 {
-  margin-top: var(--nx-space-proseMinorHeadingGap);
-  font-size: var(--nx-type-prose-minorHeadingSize);
-  font-weight: var(--nx-font-weight-semibold);
-  color: var(--nx-muted);
-}
+  .nx-prose h4 {
+    margin-top: var(--nx-space-proseMinorHeadingGap);
+    font-size: var(--nx-type-prose-minorHeadingSize);
+    font-weight: var(--nx-font-weight-semibold);
+    color: var(--nx-muted);
+  }
 
-.nx-prose p,
-.nx-prose li {
-  margin: 0;
-}
+  .nx-prose p,
+  .nx-prose li {
+    margin: 0;
+  }
 
-.nx-prose ul,
-.nx-prose ol {
-  margin-block: 0;
-  padding-left: var(--nx-space-proseIndent);
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-proseListGap);
-}
+  .nx-prose ul,
+  .nx-prose ol {
+    margin-block: 0;
+    padding-left: var(--nx-space-proseIndent);
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-proseListGap);
+  }
 
-.nx-prose li::marker {
-  color: var(--nx-faint);
-}
+  .nx-prose li::marker {
+    color: var(--nx-faint);
+  }
 
-.nx-prose strong {
-  font-weight: var(--nx-font-weight-bold);
-}
+  .nx-prose strong {
+    font-weight: var(--nx-font-weight-bold);
+  }
 
-.nx-prose em {
-  font-style: italic;
-}
+  .nx-prose em {
+    font-style: italic;
+  }
 
-.nx-prose a {
-  color: var(--nx-ink);
-  text-decoration-line: underline;
-  text-decoration-thickness: var(--nx-stroke-hairline);
-  text-decoration-color: var(--nx-faint);
-  text-underline-offset: var(--nx-space-linkUnderlineOffset);
-}
+  .nx-prose a {
+    color: var(--nx-ink);
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--nx-stroke-hairline);
+    text-decoration-color: var(--nx-faint);
+    text-underline-offset: var(--nx-space-linkUnderlineOffset);
+  }
 
-.nx-prose a:hover {
-  text-decoration-color: var(--nx-ink);
-}
+  .nx-prose a:hover {
+    text-decoration-color: var(--nx-ink);
+  }
 
-.nx-prose code {
-  font-family: var(--nx-font-mono);
-  font-size: var(--nx-type-code-inlineSize);
-  padding: var(--nx-space-inlineCodePadding);
-  border-radius: var(--nx-radius-code);
-  background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
-  overflow-wrap: anywhere;
-}
+  .nx-prose code {
+    font-family: var(--nx-font-mono);
+    font-size: var(--nx-type-code-inlineSize);
+    padding: var(--nx-space-inlineCodePadding);
+    border-radius: var(--nx-radius-code);
+    background: color-mix(in oklab, var(--nx-grid) 55%, transparent);
+    overflow-wrap: anywhere;
+  }
 
-.nx-prose pre {
-  margin: 0;
-  padding: var(--nx-space-codeBlockPadding);
-  border: var(--nx-stroke-hairline) solid var(--nx-border);
-  border-radius: var(--nx-radius-card);
-  overflow-x: auto;
-  font-family: var(--nx-font-mono);
-  font-size: var(--nx-type-code-blockSize);
-  line-height: var(--nx-type-code-blockLineHeight);
-}
+  .nx-prose pre {
+    margin: 0;
+    padding: var(--nx-space-codeBlockPadding);
+    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border-radius: var(--nx-radius-card);
+    overflow-x: auto;
+    font-family: var(--nx-font-mono);
+    font-size: var(--nx-type-code-blockSize);
+    line-height: var(--nx-type-code-blockLineHeight);
+  }
 
-.nx-prose pre code {
-  padding: 0;
-  background: none;
-  font-size: inherit;
-}
+  .nx-prose pre code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+  }
 
-/* A quotation is marked by a rule in the margin, not by a fill or a glyph.
+  /* A quotation is marked by a rule in the margin, not by a fill or a glyph.
    Margins are zeroed because the browser gives blockquote and pre a block
    margin of their own, which would stack on top of the flow gap above and make
    these two elements sit further from their neighbours than anything else. */
-.nx-prose blockquote {
-  margin: 0;
-  padding-left: var(--nx-space-proseIndent);
-  border-left: var(--nx-stroke-hairline) solid var(--nx-border);
-  color: var(--nx-muted);
-}
+  .nx-prose blockquote {
+    margin: 0;
+    padding-left: var(--nx-space-proseIndent);
+    border-left: var(--nx-stroke-hairline) solid var(--nx-border);
+    color: var(--nx-muted);
+  }
 
-.nx-prose hr {
-  border: 0;
-  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
-  margin-block: var(--nx-space-proseRuleGap);
-}
+  .nx-prose hr {
+    border: 0;
+    border-top: var(--nx-stroke-hairline) solid var(--nx-border);
+    margin-block: var(--nx-space-proseRuleGap);
+  }
 
-.nx-prose table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--nx-type-body-size);
-}
+  .nx-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--nx-type-body-size);
+  }
 
-.nx-prose th {
-  text-align: left;
-  padding: var(--nx-space-proseTablePadding);
-  font-size: var(--nx-type-label-size);
-  font-weight: var(--nx-type-label-weight);
-  letter-spacing: var(--nx-type-label-tracking);
-  text-transform: uppercase;
-  color: var(--nx-muted);
-  white-space: nowrap;
-}
+  .nx-prose th {
+    text-align: left;
+    padding: var(--nx-space-proseTablePadding);
+    font-size: var(--nx-type-label-size);
+    font-weight: var(--nx-type-label-weight);
+    letter-spacing: var(--nx-type-label-tracking);
+    text-transform: uppercase;
+    color: var(--nx-muted);
+    white-space: nowrap;
+  }
 
-/* Rule below each row only, never above and below: doubling the line at every
+  /* Rule below each row only, never above and below: doubling the line at every
    boundary is the laziest possible table. */
-.nx-prose td {
-  padding: var(--nx-space-proseTablePadding);
-  border-top: var(--nx-stroke-hairline) solid var(--nx-border);
-  vertical-align: top;
-}
+  .nx-prose td {
+    padding: var(--nx-space-proseTablePadding);
+    border-top: var(--nx-stroke-hairline) solid var(--nx-border);
+    vertical-align: top;
+  }
 
-.nx-prose img {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--nx-radius-card);
-}
+  .nx-prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--nx-radius-card);
+  }
 
-/* Narrow, for a sidebar or an annotation column beside a chart. */
-.nx-prose--narrow {
-  font-size: var(--nx-type-prose-narrowSize);
-  line-height: var(--nx-type-prose-narrowLineHeight);
-  max-width: 46ch;
-  color: var(--nx-muted);
-}
+  /* Narrow, for a sidebar or an annotation column beside a chart. */
+  .nx-prose--narrow {
+    font-size: var(--nx-type-prose-narrowSize);
+    line-height: var(--nx-type-prose-narrowLineHeight);
+    max-width: 46ch;
+    color: var(--nx-muted);
+  }
 }

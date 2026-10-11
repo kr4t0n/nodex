@@ -8,6 +8,13 @@ const channels: readonly BlockBarsDatum[] = [
 ];
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <BlockBars data={channels} unitLabel="Sign-ups" contextLabel="Last 30 days"
-    animate={animate} aria-label="Sign-ups by acquisition channel over the last 30 days" />;
+  return (
+    <BlockBars
+      data={channels}
+      unitLabel="Sign-ups"
+      contextLabel="Last 30 days"
+      animate={animate}
+      aria-label="Sign-ups by acquisition channel over the last 30 days"
+    />
+  );
 }

@@ -12,7 +12,12 @@
   "files": ["component.tsx"],
   "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "dependencies": ["recharts@3.10.1"],
-  "example": { "entry": "example.tsx", "export": "Example", "width": 676, "height": 456 },
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 676,
+    "height": 456
+  },
   "tags": ["team", "retro", "board"],
   "props": [
     {

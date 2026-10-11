@@ -5,19 +5,11 @@
   "component": "prose",
   "tier": "primitive",
   "runtime": "react",
-  "tags": [
-    "text",
-    "documentation"
-  ],
+  "tags": ["text", "documentation"],
   "dependencies": [],
   "entry": "component.tsx",
-  "exports": [
-    "Prose"
-  ],
-  "files": [
-    "component.tsx",
-    "component.css"
-  ],
+  "exports": ["Prose"],
+  "files": ["component.tsx", "component.css"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

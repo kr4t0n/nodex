@@ -25,60 +25,256 @@ export function TimelineConsumer({ animate }: { animate: boolean }) {
 }
 `;
 async function setMode(page: Page, mode: string) {
-  await page.evaluate((value)=>(window as unknown as {nodexTimelineFixture:{setMode:(mode:string)=>void}}).nodexTimelineFixture.setMode(value),mode);
+  await page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexTimelineFixture: { setMode: (mode: string) => void };
+        }
+      ).nodexTimelineFixture.setMode(value),
+    mode,
+  );
 }
 export async function checkTimelineConsumer(page: Page): Promise<void> {
-  const node=page.locator('#timeline-primary [data-nx-chart="trend-lineage"]');
-  const sibling=page.locator('#timeline-secondary [data-nx-chart="trend-lineage"]');
+  const node = page.locator(
+    '#timeline-primary [data-nx-chart="trend-lineage"]',
+  );
+  const sibling = page.locator(
+    '#timeline-secondary [data-nx-chart="trend-lineage"]',
+  );
   await expect(node.locator('[data-nx-event]')).toHaveCount(4);
   await expect(node.locator('[data-nx-lifeline="dormant"]')).toHaveCount(1);
   await expect(node.locator('[data-nx-lifeline="active"]')).toHaveCount(1);
   await expect(node.locator('[data-nx-tail="0"]')).toHaveCount(1);
   await expect(node.locator('[data-nx-terminal="retired"]')).toHaveCount(1);
-  await node.scrollIntoViewIfNeeded();await node.locator('[data-nx-observation="0:1"]').hover();
-  const tooltip=node.locator('.recharts-tooltip-wrapper:visible');
+  await node.scrollIntoViewIfNeeded();
+  await node.locator('[data-nx-observation="0:1"]').hover();
+  const tooltip = node.locator('.recharts-tooltip-wrapper:visible');
   await expect(tooltip).toHaveText('A — reworked 2021');
-  await page.mouse.move(880,10);await page.evaluate(()=>new Promise<void>(r=>requestAnimationFrame(()=>r())));
-  await node.locator('svg.recharts-surface').focus();await page.keyboard.press('ArrowRight');
+  await page.mouse.move(880, 10);
+  await page.evaluate(
+    () => new Promise<void>((r) => requestAnimationFrame(() => r())),
+  );
+  await node.locator('svg.recharts-surface').focus();
+  await page.keyboard.press('ArrowRight');
   await expect(tooltip).toHaveText(/A — (shipped|reworked) \d+/);
-  await page.keyboard.press('ArrowLeft');await expect(tooltip).toHaveText('A — shipped 2018');
-  await page.keyboard.press('ArrowRight');await expect(tooltip).toHaveText('A — reworked 2021');
-  await page.keyboard.press('ArrowRight');await expect(tooltip).toHaveText('A — reworked 2022');
-  await page.keyboard.press('ArrowRight');await expect(tooltip).toHaveText('A — shipped 2017');
-  for(let i=0;i<6;i++) {await page.keyboard.press('ArrowRight');await expect(tooltip).toHaveText(/A — (shipped|reworked) \d+/);await page.evaluate(()=>new Promise<void>(r=>requestAnimationFrame(()=>r())));}
-  await expect(sibling.locator('.recharts-tooltip-wrapper:visible')).toHaveCount(0);
-  const siblingPaint=await sibling.locator('[data-nx-event="shipped"]').first().evaluate(e=>getComputedStyle(e).fill);
-  await node.evaluate(e=>{const s=(e as HTMLElement).style;s.setProperty('--nx-ink','#123456');s.setProperty('--nx-bg','#eeeecc');s.setProperty('--nx-stroke-mark','1.25px');});
-  await expect.poll(()=>node.locator('[data-nx-event="shipped"]').first().evaluate(e=>getComputedStyle(e).fill)).toBe('rgb(18, 52, 86)');
-  await expect.poll(()=>node.locator('[data-nx-event="reworked"]').first().evaluate(e=>getComputedStyle(e).fill)).toBe('rgb(238, 238, 204)');
-  await expect.poll(()=>node.locator('[data-nx-event="reworked"]').first().evaluate(e=>getComputedStyle(e).strokeWidth)).toBe('1.75px');
-  assert.equal(await sibling.locator('[data-nx-event="shipped"]').first().evaluate(e=>getComputedStyle(e).fill),siblingPaint);
-  const width=Number(await node.locator('svg').getAttribute('width'));
-  await node.evaluate(e=>{(e as HTMLElement).style.width='340px';});
-  await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBeLessThan(width);
-  await node.evaluate(e=>{(e as HTMLElement).style.width='';});await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBe(width);
-  await setMode(page,'revised');await expect(node.locator('[data-nx-tail="0"]')).toHaveCount(0);await expect(node.locator('[data-nx-tail="1"]')).toHaveCount(1);
-  await setMode(page,'partial');await expect(node.locator('[data-nx-event]')).toHaveCount(1);await expect(node.locator('[data-nx-tail]')).toHaveCount(0);
-  for(const mode of ['single','zero','invalid','empty','window']) {
-    await setMode(page,mode);
-    if(['invalid','empty','window'].includes(mode)) await expect(node.getByRole('status')).toHaveText('No events available.');
-    else await expect(node.locator('svg.recharts-surface')).toHaveCount(1);
-    assert.equal(await node.evaluate(e=>/NaN|Infinity/.test(e.innerHTML)),false,`${mode} produced invalid timeline geometry`);
+  await page.keyboard.press('ArrowLeft');
+  await expect(tooltip).toHaveText('A — shipped 2018');
+  await page.keyboard.press('ArrowRight');
+  await expect(tooltip).toHaveText('A — reworked 2021');
+  await page.keyboard.press('ArrowRight');
+  await expect(tooltip).toHaveText('A — reworked 2022');
+  await page.keyboard.press('ArrowRight');
+  await expect(tooltip).toHaveText('A — shipped 2017');
+  for (let i = 0; i < 6; i++) {
+    await page.keyboard.press('ArrowRight');
+    await expect(tooltip).toHaveText(/A — (shipped|reworked) \d+/);
+    await page.evaluate(
+      () => new Promise<void>((r) => requestAnimationFrame(() => r())),
+    );
   }
-  await setMode(page,'normal');
+  await expect(
+    sibling.locator('.recharts-tooltip-wrapper:visible'),
+  ).toHaveCount(0);
+  const siblingPaint = await sibling
+    .locator('[data-nx-event="shipped"]')
+    .first()
+    .evaluate((e) => getComputedStyle(e).fill);
+  await node.evaluate((e) => {
+    const s = (e as HTMLElement).style;
+    s.setProperty('--nx-ink', '#123456');
+    s.setProperty('--nx-bg', '#eeeecc');
+    s.setProperty('--nx-stroke-mark', '1.25px');
+  });
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-event="shipped"]')
+        .first()
+        .evaluate((e) => getComputedStyle(e).fill),
+    )
+    .toBe('rgb(18, 52, 86)');
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-event="reworked"]')
+        .first()
+        .evaluate((e) => getComputedStyle(e).fill),
+    )
+    .toBe('rgb(238, 238, 204)');
+  await expect
+    .poll(() =>
+      node
+        .locator('[data-nx-event="reworked"]')
+        .first()
+        .evaluate((e) => getComputedStyle(e).strokeWidth),
+    )
+    .toBe('1.75px');
+  assert.equal(
+    await sibling
+      .locator('[data-nx-event="shipped"]')
+      .first()
+      .evaluate((e) => getComputedStyle(e).fill),
+    siblingPaint,
+  );
+  const width = Number(await node.locator('svg').getAttribute('width'));
+  await node.evaluate((e) => {
+    (e as HTMLElement).style.width = '340px';
+  });
+  await expect
+    .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+    .toBeLessThan(width);
+  await node.evaluate((e) => {
+    (e as HTMLElement).style.width = '';
+  });
+  await expect
+    .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+    .toBe(width);
+  await setMode(page, 'revised');
+  await expect(node.locator('[data-nx-tail="0"]')).toHaveCount(0);
+  await expect(node.locator('[data-nx-tail="1"]')).toHaveCount(1);
+  await setMode(page, 'partial');
+  await expect(node.locator('[data-nx-event]')).toHaveCount(1);
+  await expect(node.locator('[data-nx-tail]')).toHaveCount(0);
+  for (const mode of ['single', 'zero', 'invalid', 'empty', 'window']) {
+    await setMode(page, mode);
+    if (['invalid', 'empty', 'window'].includes(mode))
+      await expect(node.getByRole('status')).toHaveText('No events available.');
+    else await expect(node.locator('svg.recharts-surface')).toHaveCount(1);
+    assert.equal(
+      await node.evaluate((e) => /NaN|Infinity/.test(e.innerHTML)),
+      false,
+      `${mode} produced invalid timeline geometry`,
+    );
+  }
+  await setMode(page, 'normal');
   await checkGeometricTimelines(page);
-  console.log('Validated event-only inspection, dormant intervals, survival tails, repeated feature names, scoped event paint/strokes, resizing and incomplete timelines.');
+  console.log(
+    'Validated event-only inspection, dormant intervals, survival tails, repeated feature names, scoped event paint/strokes, resizing and incomplete timelines.',
+  );
 }
 
-async function checkGeometricTimelines(page:Page):Promise<void>{
- const fan=page.locator('#timeline-primary [data-nx-chart="launch-fan"]');const dots=page.locator('#timeline-primary [data-nx-chart="dot-cascade"]');
- await expect(fan.locator('[data-nx-launch]')).toHaveCount(2);await expect(fan.locator('[data-nx-spoke]')).toHaveCount(2);await expect(fan.locator('[data-nx-week-guide]')).toHaveCount(4);await expect(dots.locator('[data-nx-incident-dot], [data-nx-stack-top]')).toHaveCount(5);await expect(dots.locator('[data-nx-stack-top]')).toHaveCount(2);await expect(dots.locator('[data-nx-cause]')).toHaveCount(2);await expect(dots.locator('[data-nx-total="0"]')).toHaveText('5');
- assert.notEqual(await dots.locator('[data-nx-stack-top="0"]').getAttribute('cx'),await dots.locator('[data-nx-stack-top="1"]').getAttribute('cx'));
- const originalY=Number(await fan.locator('[data-nx-launch="0"]').getAttribute('cy'));
- for(const [node,mark,expected] of [[fan,'[data-nx-launch="0"]','A · W1'],[dots,'[data-nx-stack-top="0"]','A — 5 incidents']] as const){await node.scrollIntoViewIfNeeded();await node.locator(mark).hover();const tooltip=node.locator('.recharts-tooltip-wrapper:visible');await expect(tooltip).toHaveText(expected);await page.mouse.move(880,10);await page.evaluate(()=>new Promise<void>(r=>requestAnimationFrame(()=>r())));await node.locator('svg.recharts-surface').focus();await page.keyboard.press('ArrowRight');await expect(tooltip).toHaveText(node===fan?'A · W6':'A — 3 incidents');await node.evaluate(e=>{const s=(e as HTMLElement).style;s.setProperty('--nx-ink','#123456');s.setProperty('--nx-grid','#234567');s.setProperty('--nx-plotFaint','#234567');s.setProperty('--nx-stroke-mark','1.4px');s.setProperty('--nx-type-plotValue-size','34px');});await expect.poll(()=>node.locator(mark).evaluate(e=>getComputedStyle(e).fill)).toBe('rgb(18, 52, 86)');const guide=node.locator('[data-nx-floor], [data-nx-week-guide]').first();await expect.poll(()=>guide.evaluate(e=>getComputedStyle(e).stroke)).toBe('rgb(35, 69, 103)');await expect.poll(()=>guide.evaluate(e=>getComputedStyle(e).strokeWidth)).toBe('1.4px');const width=Number(await node.locator('svg').getAttribute('width'));await node.evaluate(e=>{(e as HTMLElement).style.width='340px';});await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBeLessThan(width);await node.evaluate(e=>{(e as HTMLElement).style.width='';});await expect.poll(async()=>Number(await node.locator('svg').getAttribute('width'))).toBe(width);}
- await expect.poll(()=>dots.locator('[data-nx-total="0"]').evaluate(e=>getComputedStyle(e).fontSize)).toBe('18px');assert.notEqual(await page.locator('#timeline-secondary [data-nx-launch="0"]').evaluate(e=>getComputedStyle(e).fill),'rgb(18, 52, 86)');
- await setMode(page,'revised');await expect(fan.locator('[data-nx-launch-label="0"]')).toHaveText('A · W12');assert(Number(await fan.locator('[data-nx-launch="0"]').getAttribute('cy'))<originalY);await expect(dots.locator('[data-nx-incident-dot], [data-nx-stack-top]')).toHaveCount(7);
- await setMode(page,'partial');await expect(fan.locator('[data-nx-launch]')).toHaveCount(1);await expect(fan.locator('[data-nx-spoke]')).toHaveCount(1);await expect(fan.locator('[data-nx-launch-label="1"]')).toHaveText('A · —');await expect(dots.locator('[data-nx-total="1"]')).toHaveText('—');await expect(dots.locator('[data-nx-incident-dot], [data-nx-stack-top]')).toHaveCount(3);
- for(const mode of ['single','zero','invalid','empty']){await setMode(page,mode);for(const node of [fan,dots]){if(mode==='invalid'||mode==='empty')await expect(node.getByRole('status')).toContainText('available');else await expect(node.locator('svg.recharts-surface')).toHaveCount(1);assert.equal(await node.evaluate(e=>/NaN|Infinity/.test(e.innerHTML)),false);}if(mode==='zero'){await expect(fan.locator('[data-nx-launch]')).toHaveCount(2);await expect(fan.locator('[data-nx-spoke]')).toHaveCount(0);await expect(dots.locator('[data-nx-stack-top], [data-nx-incident-dot]')).toHaveCount(0);await expect(dots.locator('[data-nx-total="0"]')).toHaveText('0');}if(mode==='single'){await expect(fan.locator('[data-nx-launch]')).toHaveCount(1);await expect(dots.locator('[data-nx-stack-top]')).toHaveCount(1);}}
- await setMode(page,'normal');
+async function checkGeometricTimelines(page: Page): Promise<void> {
+  const fan = page.locator('#timeline-primary [data-nx-chart="launch-fan"]');
+  const dots = page.locator('#timeline-primary [data-nx-chart="dot-cascade"]');
+  await expect(fan.locator('[data-nx-launch]')).toHaveCount(2);
+  await expect(fan.locator('[data-nx-spoke]')).toHaveCount(2);
+  await expect(fan.locator('[data-nx-week-guide]')).toHaveCount(4);
+  await expect(
+    dots.locator('[data-nx-incident-dot], [data-nx-stack-top]'),
+  ).toHaveCount(5);
+  await expect(dots.locator('[data-nx-stack-top]')).toHaveCount(2);
+  await expect(dots.locator('[data-nx-cause]')).toHaveCount(2);
+  await expect(dots.locator('[data-nx-total="0"]')).toHaveText('5');
+  assert.notEqual(
+    await dots.locator('[data-nx-stack-top="0"]').getAttribute('cx'),
+    await dots.locator('[data-nx-stack-top="1"]').getAttribute('cx'),
+  );
+  const originalY = Number(
+    await fan.locator('[data-nx-launch="0"]').getAttribute('cy'),
+  );
+  for (const [node, mark, expected] of [
+    [fan, '[data-nx-launch="0"]', 'A · W1'],
+    [dots, '[data-nx-stack-top="0"]', 'A — 5 incidents'],
+  ] as const) {
+    await node.scrollIntoViewIfNeeded();
+    await node.locator(mark).hover();
+    const tooltip = node.locator('.recharts-tooltip-wrapper:visible');
+    await expect(tooltip).toHaveText(expected);
+    await page.mouse.move(880, 10);
+    await page.evaluate(
+      () => new Promise<void>((r) => requestAnimationFrame(() => r())),
+    );
+    await node.locator('svg.recharts-surface').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(tooltip).toHaveText(
+      node === fan ? 'A · W6' : 'A — 3 incidents',
+    );
+    await node.evaluate((e) => {
+      const s = (e as HTMLElement).style;
+      s.setProperty('--nx-ink', '#123456');
+      s.setProperty('--nx-grid', '#234567');
+      s.setProperty('--nx-plotFaint', '#234567');
+      s.setProperty('--nx-stroke-mark', '1.4px');
+      s.setProperty('--nx-type-plotValue-size', '34px');
+    });
+    await expect
+      .poll(() => node.locator(mark).evaluate((e) => getComputedStyle(e).fill))
+      .toBe('rgb(18, 52, 86)');
+    const guide = node.locator('[data-nx-floor], [data-nx-week-guide]').first();
+    await expect
+      .poll(() => guide.evaluate((e) => getComputedStyle(e).stroke))
+      .toBe('rgb(35, 69, 103)');
+    await expect
+      .poll(() => guide.evaluate((e) => getComputedStyle(e).strokeWidth))
+      .toBe('1.4px');
+    const width = Number(await node.locator('svg').getAttribute('width'));
+    await node.evaluate((e) => {
+      (e as HTMLElement).style.width = '340px';
+    });
+    await expect
+      .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+      .toBeLessThan(width);
+    await node.evaluate((e) => {
+      (e as HTMLElement).style.width = '';
+    });
+    await expect
+      .poll(async () => Number(await node.locator('svg').getAttribute('width')))
+      .toBe(width);
+  }
+  await expect
+    .poll(() =>
+      dots
+        .locator('[data-nx-total="0"]')
+        .evaluate((e) => getComputedStyle(e).fontSize),
+    )
+    .toBe('18px');
+  assert.notEqual(
+    await page
+      .locator('#timeline-secondary [data-nx-launch="0"]')
+      .evaluate((e) => getComputedStyle(e).fill),
+    'rgb(18, 52, 86)',
+  );
+  await setMode(page, 'revised');
+  await expect(fan.locator('[data-nx-launch-label="0"]')).toHaveText('A · W12');
+  assert(
+    Number(await fan.locator('[data-nx-launch="0"]').getAttribute('cy')) <
+      originalY,
+  );
+  await expect(
+    dots.locator('[data-nx-incident-dot], [data-nx-stack-top]'),
+  ).toHaveCount(7);
+  await setMode(page, 'partial');
+  await expect(fan.locator('[data-nx-launch]')).toHaveCount(1);
+  await expect(fan.locator('[data-nx-spoke]')).toHaveCount(1);
+  await expect(fan.locator('[data-nx-launch-label="1"]')).toHaveText('A · —');
+  await expect(dots.locator('[data-nx-total="1"]')).toHaveText('—');
+  await expect(
+    dots.locator('[data-nx-incident-dot], [data-nx-stack-top]'),
+  ).toHaveCount(3);
+  for (const mode of ['single', 'zero', 'invalid', 'empty']) {
+    await setMode(page, mode);
+    for (const node of [fan, dots]) {
+      if (mode === 'invalid' || mode === 'empty')
+        await expect(node.getByRole('status')).toContainText('available');
+      else await expect(node.locator('svg.recharts-surface')).toHaveCount(1);
+      assert.equal(
+        await node.evaluate((e) => /NaN|Infinity/.test(e.innerHTML)),
+        false,
+      );
+    }
+    if (mode === 'zero') {
+      await expect(fan.locator('[data-nx-launch]')).toHaveCount(2);
+      await expect(fan.locator('[data-nx-spoke]')).toHaveCount(0);
+      await expect(
+        dots.locator('[data-nx-stack-top], [data-nx-incident-dot]'),
+      ).toHaveCount(0);
+      await expect(dots.locator('[data-nx-total="0"]')).toHaveText('0');
+    }
+    if (mode === 'single') {
+      await expect(fan.locator('[data-nx-launch]')).toHaveCount(1);
+      await expect(dots.locator('[data-nx-stack-top]')).toHaveCount(1);
+    }
+  }
+  await setMode(page, 'normal');
 }

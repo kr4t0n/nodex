@@ -8,15 +8,28 @@ export type RuleProps = ComponentPropsWithRef<'hr'> & {
   inset?: boolean;
 };
 
-export function Rule({ tone = 'default', dashed = false, orientation = 'horizontal', inset = false, className = '', ...props }: RuleProps) {
+export function Rule({
+  tone = 'default',
+  dashed = false,
+  orientation = 'horizontal',
+  inset = false,
+  className = '',
+  ...props
+}: RuleProps) {
   return (
     <hr
       {...props}
       aria-orientation={orientation}
       className={[
-        'nx-rule', tone !== 'default' && `nx-rule--${tone}`, dashed && 'nx-rule--dashed',
-        orientation === 'vertical' && 'nx-rule--vertical', inset && 'nx-rule--inset', className,
-      ].filter(Boolean).join(' ')}
+        'nx-rule',
+        tone !== 'default' && `nx-rule--${tone}`,
+        dashed && 'nx-rule--dashed',
+        orientation === 'vertical' && 'nx-rule--vertical',
+        inset && 'nx-rule--inset',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     />
   );
 }

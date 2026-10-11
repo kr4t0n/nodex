@@ -11,5 +11,15 @@ const date = (value: number) => 'Sep ' + value;
 const days = (value: number) => (value > 0 ? '+' : '') + value + 'd';
 
 export function Example({ animate = true }: { animate?: boolean }) {
-  return <NocturnePromiseLanes data={data} unitLabel="Promise lanes" contextLabel="September delivery" valueFormatter={date} deltaFormatter={days} height={460} animate={animate} />;
+  return (
+    <NocturnePromiseLanes
+      data={data}
+      unitLabel="Promise lanes"
+      contextLabel="September delivery"
+      valueFormatter={date}
+      deltaFormatter={days}
+      height={460}
+      animate={animate}
+    />
+  );
 }

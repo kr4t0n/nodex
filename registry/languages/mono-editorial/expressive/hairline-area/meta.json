@@ -7,25 +7,13 @@
   "runtime": "react",
   "density": "glance",
   "aspectRatio": "560/340",
-  "tags": [
-    "live",
-    "ops"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["live", "ops"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "HairlineArea"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["HairlineArea"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

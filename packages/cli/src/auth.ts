@@ -25,7 +25,9 @@ export async function cmdLogin(registry: Registry): Promise<void> {
     out();
     out(`    ${registry.root}`);
     out();
-    out(`  ${dim('Drop --registry, or unset NODEX_REGISTRY, to use the hosted one:')}`);
+    out(
+      `  ${dim('Drop --registry, or unset NODEX_REGISTRY, to use the hosted one:')}`,
+    );
     out(`    ${dim(DEFAULT_REGISTRY)}`);
     out();
     return;

@@ -7,24 +7,13 @@
   "runtime": "react",
   "density": "glance",
   "aspectRatio": "560/300",
-  "tags": [
-    "billing"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["billing"],
+  "dependencies": ["recharts@3.10.1"],
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "RankStrip"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["RankStrip"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

@@ -6,25 +6,14 @@
   "tier": "expressive",
   "runtime": "react",
   "density": "glance",
-  "tags": [
-    "billing"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["billing"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "580/320",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "BarRace"
-  ],
-  "files": [
-    "component.tsx"
-  ],
-  "shared": [
-    "use-chart-motion.ts",
-    "use-reduced-motion.ts"
-  ],
+  "exports": ["BarRace"],
+  "files": ["component.tsx"],
+  "shared": ["use-chart-motion.ts", "use-reduced-motion.ts"],
   "example": {
     "entry": "example.tsx",
     "export": "Example",

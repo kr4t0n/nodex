@@ -41,38 +41,44 @@ export function useScopedLanguageTokens(slugs: string[]): boolean {
     let live = true;
     const ID = 'nx-scoped-language-tokens';
 
-    void loadCatalog().then((catalog) => Promise.all(
-      key.split(',').map(async (slug) => {
-        try {
-          const language = catalog.languages.find((entry) => entry.slug === slug);
-          if (!language) return '';
-          const res = await fetch(tokensUrl(language));
-          if (!res.ok) return '';
-          const css = await res.text();
-          // Skip rather than inject. A template that stopped emitting `:root`
-          // would otherwise ship one language unscoped, and it would silently
-          // override every other language on the page.
-          if (!css.includes(':root')) return '';
-          return css.replace(':root', `[data-nx-scope="${slug}"]`);
-        } catch {
-          return '';
+    void loadCatalog()
+      .then((catalog) =>
+        Promise.all(
+          key.split(',').map(async (slug) => {
+            try {
+              const language = catalog.languages.find(
+                (entry) => entry.slug === slug,
+              );
+              if (!language) return '';
+              const res = await fetch(tokensUrl(language));
+              if (!res.ok) return '';
+              const css = await res.text();
+              // Skip rather than inject. A template that stopped emitting `:root`
+              // would otherwise ship one language unscoped, and it would silently
+              // override every other language on the page.
+              if (!css.includes(':root')) return '';
+              return css.replace(':root', `[data-nx-scope="${slug}"]`);
+            } catch {
+              return '';
+            }
+          }),
+        ),
+      )
+      .then((sheets) => {
+        if (!live) return;
+        let style = document.getElementById(ID);
+        if (!style) {
+          style = document.createElement('style');
+          style.id = ID;
+          document.head.appendChild(style);
         }
-      }),
-    )).then((sheets) => {
-      if (!live) return;
-      let style = document.getElementById(ID);
-      if (!style) {
-        style = document.createElement('style');
-        style.id = ID;
-        document.head.appendChild(style);
-      }
-      style.textContent = sheets.filter(Boolean).join('\n');
-      // Ready even when every fetch failed. This decides whether the page
-      // renders at all, and a tile with no scoped layer inherits the document's
-      // instead — the old behaviour, which is a far better outcome than an
-      // index stuck on its loading state.
-      setReady(true);
-    });
+        style.textContent = sheets.filter(Boolean).join('\n');
+        // Ready even when every fetch failed. This decides whether the page
+        // renders at all, and a tile with no scoped layer inherits the document's
+        // instead — the old behaviour, which is a far better outcome than an
+        // index stuck on its loading state.
+        setReady(true);
+      });
 
     return () => {
       live = false;
@@ -89,14 +95,19 @@ export function useLanguageTokens(slug: string | undefined): boolean {
     if (!slug) return;
     let live = true;
     let link: HTMLLinkElement | null = null;
-    const onLoad = () => { if (live) setReadySlug(slug); };
+    const onLoad = () => {
+      if (live) setReadySlug(slug);
+    };
 
     void loadCatalog().then((catalog) => {
       if (!live) return;
       const language = catalog.languages.find((entry) => entry.slug === slug);
       // Let the view report an unknown language instead of waiting on a token
       // URL that does not exist in the manifest.
-      if (!language) { setReadySlug(slug); return; }
+      if (!language) {
+        setReadySlug(slug);
+        return;
+      }
       const id = 'nx-language-tokens';
       link = document.getElementById(id) as HTMLLinkElement | null;
       if (!link) {

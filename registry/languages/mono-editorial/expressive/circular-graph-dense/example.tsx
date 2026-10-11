@@ -1,4 +1,4 @@
-import {CircularGraphDense} from './component';
+import { CircularGraphDense } from './component';
 const rnd = (i: number, k: number) =>
   (((i * 73856093) ^ (k * 19349663)) % 1000) / 1000;
 
@@ -28,7 +28,6 @@ interface Tie {
 
 /** Above this many contributors a repo earns a label. */
 
-
 /** Generated, because sixty repos and their ties will not read as a literal. */
 function repos(orgs: readonly Org[] = ORGS): Repo[] {
   const out: Repo[] = [];
@@ -36,7 +35,8 @@ function repos(orgs: readonly Org[] = ORGS): Repo[] {
     for (let i = 0; i < count; i++) {
       // A couple of giants per org, then a long tail. That distribution is the
       // finding, so it is generated rather than flattened.
-      const activity = i < 2 ? 30 + rnd(oi + 1, i + 2) * 45 : 4 + rnd(oi + 3, i + 7) * 16;
+      const activity =
+        i < 2 ? 30 + rnd(oi + 1, i + 2) * 45 : 4 + rnd(oi + 3, i + 7) * 16;
       out.push({
         name: `${org}/${org.slice(0, 2)}-${String(i + 1).padStart(2, '0')}`,
         org: oi,
@@ -58,7 +58,12 @@ function ties(all: readonly Repo[]): Tie[] {
       // People move within an org far more than across one.
       const chance = sameOrg ? 0.16 : 0.045;
       if (rnd(i + 1, j + 2) < chance) {
-        out.push({ source: i, target: j, shared: 1 + Math.round(rnd(i + 2, j + 3) * 6), sameOrg });
+        out.push({
+          source: i,
+          target: j,
+          shared: 1 + Math.round(rnd(i + 2, j + 3) * 6),
+          sameOrg,
+        });
       }
     }
   }
@@ -68,6 +73,17 @@ function ties(all: readonly Repo[]): Tie[] {
 const REPOS = repos();
 const TIES = ties(REPOS);
 
-
-const data = REPOS.map(repo=>({repository:repo.name,organizationIndex:repo.org,contributors:repo.contributors}));
-export function Example(){return <CircularGraphDense data={data} ties={TIES} organizations={ORGS.map(org=>org[0])}/>;}
+const data = REPOS.map((repo) => ({
+  repository: repo.name,
+  organizationIndex: repo.org,
+  contributors: repo.contributors,
+}));
+export function Example() {
+  return (
+    <CircularGraphDense
+      data={data}
+      ties={TIES}
+      organizations={ORGS.map((org) => org[0])}
+    />
+  );
+}

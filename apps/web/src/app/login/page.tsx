@@ -64,7 +64,10 @@ export default async function Page({
           {ready ? (
             // A plain link, not a form: this navigates to GitHub, and the round
             // trip is the whole point of OAuth.
-            <a href="/api/auth/github" className="nx-btn nx-btn--solid mt-9 no-underline">
+            <a
+              href="/api/auth/github"
+              className="nx-btn nx-btn--solid mt-9 no-underline"
+            >
               <GithubLogo size={15} weight="fill" aria-hidden />
               Continue with GitHub
             </a>

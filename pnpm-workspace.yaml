@@ -20,9 +20,17 @@ overrides:
   # Bound recursion and rewrite work in minimatch's brace expansion.
   # https://github.com/advisories/GHSA-q2hr-2g5m-vwhr
   brace-expansion: 5.0.12
+  # The JSX plugins' minimatch 3 requires the callable CommonJS API.
+  'minimatch@3>brace-expansion': 1.1.21
   # The 2.5 patch line removes micromatch/braces; 2.5.6 fixes Windows ia32 builds.
   # https://github.com/advisories/GHSA-vfj7-8cjw-p6xm
   '@parcel/watcher': 2.5.6
+
+# These exact plugins run through @eslint/compat's ESLint 10 API adapter.
+peerDependencyRules:
+  allowedVersions:
+    'eslint-plugin-react@7.37.5>eslint': '10.9.0'
+    'eslint-plugin-jsx-a11y@6.10.2>eslint': '10.9.0'
 
 allowBuilds:
   # Use the published platform binaries; no source-build fallback is needed.

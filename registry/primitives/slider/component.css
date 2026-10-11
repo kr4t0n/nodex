@@ -1,5 +1,5 @@
 @layer components {
-/* slider - shared primitive, themed by the active language's tokens.
+  /* slider - shared primitive, themed by the active language's tokens.
 
    A single-value <input type="range">. Native because it brings keyboard
    stepping, touch behaviour, and screen reader semantics that a div and a drag
@@ -13,148 +13,150 @@
    A comma-joined selector list is dropped entirely by any browser that does not
    recognise one of its parts, which would silently unstyle the control. */
 
-.nx-slider {
-  appearance: none;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  /* Room for the thumb to sit centred on a hairline track. */
-  height: 16px;
-}
+  .nx-slider {
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    /* Room for the thumb to sit centred on a hairline track. */
+    height: 16px;
+  }
 
-.nx-slider:focus {
-  outline: none;
-}
+  .nx-slider:focus {
+    outline: none;
+  }
 
-/* Native tracks can lose a sub-pixel height when the browser snaps their
+  /* Native tracks can lose a sub-pixel height when the browser snaps their
    vertical position. Keep a one-pixel floor local to the range control. */
-.nx-slider::-webkit-slider-runnable-track {
-  height: max(1px, var(--nx-stroke-hairline));
-  border-radius: var(--nx-radius-pill);
-  background: var(--nx-grid);
-}
+  .nx-slider::-webkit-slider-runnable-track {
+    height: max(1px, var(--nx-stroke-hairline));
+    border-radius: var(--nx-radius-pill);
+    background: var(--nx-grid);
+  }
 
-.nx-slider::-moz-range-track {
-  height: max(1px, var(--nx-stroke-hairline));
-  border-radius: var(--nx-radius-pill);
-  background: var(--nx-grid);
-}
+  .nx-slider::-moz-range-track {
+    height: max(1px, var(--nx-stroke-hairline));
+    border-radius: var(--nx-radius-pill);
+    background: var(--nx-grid);
+  }
 
-/* Firefox exposes the filled portion natively. It shares the value paint used
+  /* Firefox exposes the filled portion natively. It shares the value paint used
    by progress indicators and the slider thumb. */
-.nx-slider::-moz-range-progress {
-  height: max(1px, var(--nx-stroke-hairline));
-  border-radius: var(--nx-radius-pill);
-  background: var(--nx-valueFill);
-}
+  .nx-slider::-moz-range-progress {
+    height: max(1px, var(--nx-stroke-hairline));
+    border-radius: var(--nx-radius-pill);
+    background: var(--nx-valueFill);
+  }
 
-/* Thumb. A filled circle, the same mark the charts use for a data point. */
-.nx-slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 11px;
-  height: 11px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--nx-valueFill);
-  /* Centre the thumb on the track's effective height, including its floor. */
-  margin-top: calc((max(1px, var(--nx-stroke-hairline)) - 11px) / 2);
-  transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
-}
-
-.nx-slider::-moz-range-thumb {
-  width: 11px;
-  height: 11px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--nx-valueFill);
-  transition: transform var(--nx-motion-mark-duration) var(--nx-motion-mark-easing);
-}
-
-.nx-slider:hover::-webkit-slider-thumb {
-  transform: scale(1.15);
-}
-
-.nx-slider:hover::-moz-range-thumb {
-  transform: scale(1.15);
-}
-
-.nx-slider:focus-visible::-webkit-slider-thumb {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 2px;
-}
-
-.nx-slider:focus-visible::-moz-range-thumb {
-  outline: var(--nx-stroke-hairline) solid var(--nx-ink);
-  outline-offset: 2px;
-}
-
-.nx-slider:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* Hollow thumb, matching how the charts distinguish a weekend from a weekday:
-   same mark, unfilled. */
-.nx-slider--hollow::-webkit-slider-thumb {
-  background: var(--nx-bg);
-  border: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-ink);
-}
-
-.nx-slider--hollow::-moz-range-thumb {
-  background: var(--nx-bg);
-  border: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-ink);
-}
-
-/* Ticks, for a stepped slider. Drawn as a repeating gradient so the count is
-   set with one custom property rather than markup. */
-.nx-slider-ticks {
-  height: 5px;
-  margin-top: var(--nx-space-sliderTickGap);
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--nx-faint) 0,
-    var(--nx-faint) var(--nx-stroke-hairline),
-    transparent var(--nx-stroke-hairline),
-    transparent calc(100% / var(--slider-steps, 10))
-  );
-}
-
-.nx-slider-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--nx-space-sliderFieldGap);
-  width: 100%;
-  font-family: var(--nx-font-sans);
-}
-
-.nx-slider-value {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  font-size: var(--nx-type-caption-size);
-  font-weight: var(--nx-type-caption-weight);
-  letter-spacing: var(--nx-type-caption-tracking);
-  text-transform: uppercase;
-  color: var(--nx-muted);
-}
-
-.nx-slider-value > label {
-  font-family: var(--nx-font-ui);
-  font-size: var(--nx-type-meterLabel-size);
-  font-weight: var(--nx-type-meterLabel-weight);
-  letter-spacing: var(--nx-type-meterLabel-tracking);
-  text-transform: var(--nx-type-meterLabel-transform);
-}
-
-@media (prefers-reduced-motion: reduce) {
+  /* Thumb. A filled circle, the same mark the charts use for a data point. */
   .nx-slider::-webkit-slider-thumb {
-    transition: none;
+    appearance: none;
+    width: 11px;
+    height: 11px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--nx-valueFill);
+    /* Centre the thumb on the track's effective height, including its floor. */
+    margin-top: calc((max(1px, var(--nx-stroke-hairline)) - 11px) / 2);
+    transition: transform var(--nx-motion-mark-duration)
+      var(--nx-motion-mark-easing);
   }
 
   .nx-slider::-moz-range-thumb {
-    transition: none;
+    width: 11px;
+    height: 11px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--nx-valueFill);
+    transition: transform var(--nx-motion-mark-duration)
+      var(--nx-motion-mark-easing);
   }
-}
+
+  .nx-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+
+  .nx-slider:hover::-moz-range-thumb {
+    transform: scale(1.15);
+  }
+
+  .nx-slider:focus-visible::-webkit-slider-thumb {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 2px;
+  }
+
+  .nx-slider:focus-visible::-moz-range-thumb {
+    outline: var(--nx-stroke-hairline) solid var(--nx-ink);
+    outline-offset: 2px;
+  }
+
+  .nx-slider:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* Hollow thumb, matching how the charts distinguish a weekend from a weekday:
+   same mark, unfilled. */
+  .nx-slider--hollow::-webkit-slider-thumb {
+    background: var(--nx-bg);
+    border: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-ink);
+  }
+
+  .nx-slider--hollow::-moz-range-thumb {
+    background: var(--nx-bg);
+    border: calc(var(--nx-stroke-hairline) * 2) solid var(--nx-ink);
+  }
+
+  /* Ticks, for a stepped slider. Drawn as a repeating gradient so the count is
+   set with one custom property rather than markup. */
+  .nx-slider-ticks {
+    height: 5px;
+    margin-top: var(--nx-space-sliderTickGap);
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--nx-faint) 0,
+      var(--nx-faint) var(--nx-stroke-hairline),
+      transparent var(--nx-stroke-hairline),
+      transparent calc(100% / var(--slider-steps, 10))
+    );
+  }
+
+  .nx-slider-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nx-space-sliderFieldGap);
+    width: 100%;
+    font-family: var(--nx-font-sans);
+  }
+
+  .nx-slider-value {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: var(--nx-type-caption-size);
+    font-weight: var(--nx-type-caption-weight);
+    letter-spacing: var(--nx-type-caption-tracking);
+    text-transform: uppercase;
+    color: var(--nx-muted);
+  }
+
+  .nx-slider-value > label {
+    font-family: var(--nx-font-ui);
+    font-size: var(--nx-type-meterLabel-size);
+    font-weight: var(--nx-type-meterLabel-weight);
+    letter-spacing: var(--nx-type-meterLabel-tracking);
+    text-transform: var(--nx-type-meterLabel-transform);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-slider::-webkit-slider-thumb {
+      transition: none;
+    }
+
+    .nx-slider::-moz-range-thumb {
+      transition: none;
+    }
+  }
 }

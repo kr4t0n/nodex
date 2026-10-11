@@ -48,32 +48,91 @@ export function SoftStudioConsumer() {
 `;
 
 const slugs = ['soft-bars', 'soft-area', 'soft-donut', 'soft-heatmap'];
-const chart = (page: Page, slug: string) => page.locator(`#studio-primary [data-nx-chart="${slug}"]`);
-const mode = (page: Page, value: string) => page.evaluate(value => (window as unknown as { nodexStudio: { setMode: (mode: string) => void } }).nodexStudio.setMode(value), value);
+const chart = (page: Page, slug: string) =>
+  page.locator(`#studio-primary [data-nx-chart="${slug}"]`);
+const mode = (page: Page, value: string) =>
+  page.evaluate(
+    (value) =>
+      (
+        window as unknown as {
+          nodexStudio: { setMode: (mode: string) => void };
+        }
+      ).nodexStudio.setMode(value),
+    value,
+  );
 
 async function categoryPaints(page: Page, scope = 'primary') {
-  return page.locator(`#studio-${scope} [data-nx-soft-slice]`).evaluateAll(elements => Object.fromEntries(elements.map(element => [element.getAttribute('data-nx-soft-slice'), getComputedStyle(element).fill])));
+  return page
+    .locator(`#studio-${scope} [data-nx-soft-slice]`)
+    .evaluateAll((elements) =>
+      Object.fromEntries(
+        elements.map((element) => [
+          element.getAttribute('data-nx-soft-slice'),
+          getComputedStyle(element).fill,
+        ]),
+      ),
+    );
 }
 
 export async function checkSoftStudioConsumer(page: Page): Promise<void> {
-  const bars = chart(page, 'soft-bars'); const area = chart(page, 'soft-area');
-  const donut = chart(page, 'soft-donut'); const heat = chart(page, 'soft-heatmap');
+  const bars = chart(page, 'soft-bars');
+  const area = chart(page, 'soft-area');
+  const donut = chart(page, 'soft-donut');
+  const heat = chart(page, 'soft-heatmap');
   await expect(bars.locator('[data-nx-soft-bar]')).toHaveCount(4);
   await expect(area.locator('[data-nx-soft-point]')).toHaveCount(4);
   await expect(area.locator('[data-nx-soft-latest]')).toHaveText('$10');
   await expect(donut.locator('[data-nx-soft-total]')).toHaveText('$100');
   await expect(heat.locator('[data-nx-soft-cell]')).toHaveCount(4);
-  const rectangles = await bars.locator('[data-nx-soft-bar]').evaluateAll(elements => elements.map(element => {
-    const bounds = (element as SVGGraphicsElement).getBBox(); return { height: bounds.height, bottom: bounds.y + bounds.height };
-  }));
-  assert(Math.abs(rectangles[0]!.height / rectangles[3]!.height - 4) < 0.001, 'Rounding must retain exact bar heights');
-  assert(rectangles.every(rect => Math.abs(rect.bottom - rectangles[0]!.bottom) < 0.001), 'Bars must share zero');
-  await expect(bars.locator('[data-nx-soft-bar]').first()).toHaveCSS('rx', '10px');
-  const xs = await area.locator('[data-nx-soft-point]').evaluateAll(elements => elements.map(element => Number(element.getAttribute('cx'))));
-  assert(Math.abs((xs[2]! - xs[0]!) / (xs[1]! - xs[0]!) - 3) < 0.001, 'Numeric intervals must not become equal category spacing');
-  const angles = await donut.locator('[data-nx-soft-slice]').evaluateAll(elements => elements.map(element => Math.abs(Number(element.getAttribute('data-nx-start')) - Number(element.getAttribute('data-nx-end')))));
-  assert.deepEqual(angles.map(Math.round), [144, 108, 72, 36], 'Sector angles must be exact');
-  await expect(heat.locator('[data-nx-soft-intensity]').first()).toHaveAttribute('fill-opacity', '0.4');
+  const rectangles = await bars
+    .locator('[data-nx-soft-bar]')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const bounds = (element as SVGGraphicsElement).getBBox();
+        return { height: bounds.height, bottom: bounds.y + bounds.height };
+      }),
+    );
+  assert(
+    Math.abs(rectangles[0]!.height / rectangles[3]!.height - 4) < 0.001,
+    'Rounding must retain exact bar heights',
+  );
+  assert(
+    rectangles.every(
+      (rect) => Math.abs(rect.bottom - rectangles[0]!.bottom) < 0.001,
+    ),
+    'Bars must share zero',
+  );
+  await expect(bars.locator('[data-nx-soft-bar]').first()).toHaveCSS(
+    'rx',
+    '10px',
+  );
+  const xs = await area
+    .locator('[data-nx-soft-point]')
+    .evaluateAll((elements) =>
+      elements.map((element) => Number(element.getAttribute('cx'))),
+    );
+  assert(
+    Math.abs((xs[2]! - xs[0]!) / (xs[1]! - xs[0]!) - 3) < 0.001,
+    'Numeric intervals must not become equal category spacing',
+  );
+  const angles = await donut
+    .locator('[data-nx-soft-slice]')
+    .evaluateAll((elements) =>
+      elements.map((element) =>
+        Math.abs(
+          Number(element.getAttribute('data-nx-start')) -
+            Number(element.getAttribute('data-nx-end')),
+        ),
+      ),
+    );
+  assert.deepEqual(
+    angles.map(Math.round),
+    [144, 108, 72, 36],
+    'Sector angles must be exact',
+  );
+  await expect(
+    heat.locator('[data-nx-soft-intensity]').first(),
+  ).toHaveAttribute('fill-opacity', '0.4');
 
   for (const [node, first, second] of [
     [bars, 'Same$40 Hours', 'Same$30 Hours'],
@@ -81,42 +140,97 @@ export async function checkSoftStudioConsumer(page: Page): Promise<void> {
     [donut, 'Same$40 · 40%', 'Same$30 · 30%'],
     [heat, 'Focus · Mon40 Minutes', 'Focus · Tue0 Minutes'],
   ] as const) {
-    await node.scrollIntoViewIfNeeded(); await page.mouse.move(880, 10);
+    await node.scrollIntoViewIfNeeded();
+    await page.mouse.move(880, 10);
     await node.locator('svg.recharts-surface').focus();
-    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(first);
+    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+      first,
+    );
     await page.keyboard.press('ArrowRight');
-    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(second);
+    await expect(node.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+      second,
+    );
   }
-  await expect(page.locator('#studio-secondary .recharts-tooltip-wrapper:visible')).toHaveCount(0);
+  await expect(
+    page.locator('#studio-secondary .recharts-tooltip-wrapper:visible'),
+  ).toHaveCount(0);
   await bars.locator('[data-nx-soft-bar="a"]').hover();
-  await expect(bars.locator('.recharts-tooltip-wrapper:visible')).toHaveText('Same$40 Hours');
+  await expect(bars.locator('.recharts-tooltip-wrapper:visible')).toHaveText(
+    'Same$40 Hours',
+  );
 
   const sibling = await categoryPaints(page, 'secondary');
-  await page.locator('#studio-primary').evaluate(element => {
+  await page.locator('#studio-primary').evaluate((element) => {
     const style = (element as HTMLElement).style;
-    for (const name of ['--nx-seriesA', '--nx-trendLine', '--nx-trendFill', '--nx-heatFill']) style.setProperty(name, '#923b61');
+    for (const name of [
+      '--nx-seriesA',
+      '--nx-trendLine',
+      '--nx-trendFill',
+      '--nx-heatFill',
+    ])
+      style.setProperty(name, '#923b61');
     style.setProperty('--nx-radius-bar', '14px');
   });
-  for (const mark of [bars.locator('[data-nx-soft-bar="a"]'), donut.locator('[data-nx-soft-slice="a"]'), area.locator('.recharts-area-area'), heat.locator('[data-nx-soft-intensity]').first()]) {
+  for (const mark of [
+    bars.locator('[data-nx-soft-bar="a"]'),
+    donut.locator('[data-nx-soft-slice="a"]'),
+    area.locator('.recharts-area-area'),
+    heat.locator('[data-nx-soft-intensity]').first(),
+  ]) {
     await expect(mark).toHaveCSS('fill', 'rgb(146, 59, 97)');
   }
-  await expect(area.locator('.recharts-area-curve')).toHaveCSS('stroke', 'rgb(146, 59, 97)');
+  await expect(area.locator('.recharts-area-curve')).toHaveCSS(
+    'stroke',
+    'rgb(146, 59, 97)',
+  );
   await expect(bars.locator('[data-nx-soft-bar="a"]')).toHaveCSS('rx', '14px');
-  assert.deepEqual(await categoryPaints(page, 'secondary'), sibling, 'Scoped paint must not leak');
-  await page.locator('#studio-primary').evaluate(element => element.removeAttribute('style'));
+  assert.deepEqual(
+    await categoryPaints(page, 'secondary'),
+    sibling,
+    'Scoped paint must not leak',
+  );
+  await page
+    .locator('#studio-primary')
+    .evaluate((element) => element.removeAttribute('style'));
   const identities = await categoryPaints(page);
-  await page.evaluate(() => (window as unknown as { nodexStudio: { setRevision: (value: boolean) => void } }).nodexStudio.setRevision(true));
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexStudio: { setRevision: (value: boolean) => void };
+      }
+    ).nodexStudio.setRevision(true),
+  );
   await expect(area.locator('[data-nx-soft-latest]')).toHaveText('$40');
-  assert.deepEqual(await categoryPaints(page), identities, 'Reordering must preserve category colors');
-  await expect(heat.locator('[data-nx-soft-intensity]').first()).toHaveAttribute('fill-opacity', '0.4');
+  assert.deepEqual(
+    await categoryPaints(page),
+    identities,
+    'Reordering must preserve category colors',
+  );
+  await expect(
+    heat.locator('[data-nx-soft-intensity]').first(),
+  ).toHaveAttribute('fill-opacity', '0.4');
 
   await mode(page, 'partial');
   await expect(bars.locator('[data-nx-soft-bar]')).toHaveCount(2);
-  await expect(bars.locator('[data-nx-soft-reading]')).toHaveText(['$40', '—', '$0', '$10']);
+  await expect(bars.locator('[data-nx-soft-reading]')).toHaveText([
+    '$40',
+    '—',
+    '$0',
+    '$10',
+  ]);
   await expect(area.locator('[data-nx-soft-point]')).toHaveCount(3);
-  await expect.poll(() => area.locator('.recharts-area-curve').getAttribute('d').then(d => (d?.match(/M/g) ?? []).length)).toBe(2);
+  await expect
+    .poll(() =>
+      area
+        .locator('.recharts-area-curve')
+        .getAttribute('d')
+        .then((d) => (d?.match(/M/g) ?? []).length),
+    )
+    .toBe(2);
   await expect(donut.locator('[data-nx-soft-slice]')).toHaveCount(0);
-  await expect(donut.getByRole('status')).toHaveText('A complete breakdown is required.');
+  await expect(donut.getByRole('status')).toHaveText(
+    'A complete breakdown is required.',
+  );
   await mode(page, 'last-missing');
   await expect(area.locator('[data-nx-soft-latest]')).toHaveText('—');
   await mode(page, 'zero');
@@ -133,38 +247,91 @@ export async function checkSoftStudioConsumer(page: Page): Promise<void> {
 
   for (const value of ['empty', 'invalid', 'duplicates']) {
     await mode(page, value);
-    for (const slug of slugs) await expect(chart(page, slug).getByRole('status')).toBeVisible();
+    for (const slug of slugs)
+      await expect(chart(page, slug).getByRole('status')).toBeVisible();
     await expect(bars.locator('[data-nx-soft-bar]')).toHaveCount(0);
     await expect(area.locator('[data-nx-soft-point]')).toHaveCount(0);
     await expect(donut.locator('[data-nx-soft-slice]')).toHaveCount(0);
   }
   for (const [value, slug, message] of [
     ['overflow', 'soft-donut', 'A complete breakdown is required.'],
-    ['bad-x', 'soft-area', 'Use unique, nonempty IDs and finite, strictly increasing X coordinates.'],
-    ['bad-maximum', 'soft-heatmap', 'A finite, positive scale maximum is required.'],
-    ['unknown-cell', 'soft-heatmap', 'Use unique axis IDs and one reading per declared row and column pair.'],
+    [
+      'bad-x',
+      'soft-area',
+      'Use unique, nonempty IDs and finite, strictly increasing X coordinates.',
+    ],
+    [
+      'bad-maximum',
+      'soft-heatmap',
+      'A finite, positive scale maximum is required.',
+    ],
+    [
+      'unknown-cell',
+      'soft-heatmap',
+      'Use unique axis IDs and one reading per declared row and column pair.',
+    ],
   ]) {
-    await mode(page, value!); await expect(chart(page, slug!).getByRole('status')).toHaveText(message!);
+    await mode(page, value!);
+    await expect(chart(page, slug!).getByRole('status')).toHaveText(message!);
   }
   await mode(page, 'missing-cells');
   await expect(heat.locator('[data-nx-value="missing"]')).toHaveCount(4);
   await mode(page, 'many');
-  await page.locator('#studio-primary').evaluate(element => (element as HTMLElement).style.width = '280px');
+  await page
+    .locator('#studio-primary')
+    .evaluate((element) => ((element as HTMLElement).style.width = '280px'));
   await expect(bars.locator('[data-nx-soft-bar]')).toHaveCount(18);
   await expect(heat.locator('[data-nx-soft-cell]')).toHaveCount(36);
   for (const slug of slugs) {
-    assert(await chart(page, slug).evaluate(element => element.scrollWidth <= element.clientWidth + 1), `${slug}: overflow must stay inside the plot`);
+    assert(
+      await chart(page, slug).evaluate(
+        (element) => element.scrollWidth <= element.clientWidth + 1,
+      ),
+      `${slug}: overflow must stay inside the plot`,
+    );
   }
   for (const node of [bars, area, heat]) {
-    assert(await node.evaluate(element => [...element.querySelectorAll('div')].some(child => ['auto', 'scroll'].includes(getComputedStyle(child).overflowX) && child.scrollWidth > child.clientWidth)), 'Dense charts must scroll locally');
+    assert(
+      await node.evaluate((element) =>
+        [...element.querySelectorAll('div')].some(
+          (child) =>
+            ['auto', 'scroll'].includes(getComputedStyle(child).overflowX) &&
+            child.scrollWidth > child.clientWidth,
+        ),
+      ),
+      'Dense charts must scroll locally',
+    );
   }
-  await page.locator('#studio-primary').evaluate(element => element.removeAttribute('style'));
+  await page
+    .locator('#studio-primary')
+    .evaluate((element) => element.removeAttribute('style'));
   await mode(page, 'normal');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.evaluate(() => (window as unknown as { nodexStudio: { setAnimate: (value: boolean) => void } }).nodexStudio.setAnimate(true));
-  for (const slug of slugs) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
+  await page.evaluate(() =>
+    (
+      window as unknown as {
+        nodexStudio: { setAnimate: (value: boolean) => void };
+      }
+    ).nodexStudio.setAnimate(true),
+  );
+  for (const slug of slugs)
+    await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'true');
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const slug of slugs) await expect(chart(page, slug)).toHaveAttribute('data-nx-animated', 'false');
-  assert.equal(await page.locator('#studio-primary svg').evaluateAll(elements => elements.some(element => /(?:NaN|Infinity)/.test(element.innerHTML))), false, 'Native geometry must remain finite');
-  console.log('Validated Soft Studio: exact geometry, numeric time, stable identity, missing/zero/invalid data, native inspection, scoped tokens, narrow layouts and reduced motion.');
+  for (const slug of slugs)
+    await expect(chart(page, slug)).toHaveAttribute(
+      'data-nx-animated',
+      'false',
+    );
+  assert.equal(
+    await page
+      .locator('#studio-primary svg')
+      .evaluateAll((elements) =>
+        elements.some((element) => /(?:NaN|Infinity)/.test(element.innerHTML)),
+      ),
+    false,
+    'Native geometry must remain finite',
+  );
+  console.log(
+    'Validated Soft Studio: exact geometry, numeric time, stable identity, missing/zero/invalid data, native inspection, scoped tokens, narrow layouts and reduced motion.',
+  );
 }

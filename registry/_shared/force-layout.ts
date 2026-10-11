@@ -242,53 +242,156 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-export interface ForcePosition { x: number; y: number }
-export interface ForceBounds { left: number; right: number; top: number; bottom: number }
-export interface ForceConnection { source: number; target: number }
-export interface ForceParameters { repulsion: number; distance: number; gravity: number; friction: number }
+export interface ForcePosition {
+  x: number;
+  y: number;
+}
+export interface ForceBounds {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+export interface ForceConnection {
+  source: number;
+  target: number;
+}
+export interface ForceParameters {
+  repulsion: number;
+  distance: number;
+  gravity: number;
+  friction: number;
+}
 
 export function forceBounds(points: readonly ForcePosition[]): ForceBounds {
-  let left = Infinity; let right = -Infinity; let top = Infinity; let bottom = -Infinity;
-  for (const point of points) { left = Math.min(left, point.x); right = Math.max(right, point.x); top = Math.min(top, point.y); bottom = Math.max(bottom, point.y); }
+  let left = Infinity;
+  let right = -Infinity;
+  let top = Infinity;
+  let bottom = -Infinity;
+  for (const point of points) {
+    left = Math.min(left, point.x);
+    right = Math.max(right, point.x);
+    top = Math.min(top, point.y);
+    bottom = Math.max(bottom, point.y);
+  }
   if (!points.length) return { left: 0, right: 1, top: 0, bottom: 1 };
-  if (left === right) { left -= 1; right += 1; } if (top === bottom) { top -= 1; bottom += 1; }
+  if (left === right) {
+    left -= 1;
+    right += 1;
+  }
+  if (top === bottom) {
+    top -= 1;
+    bottom += 1;
+  }
   return { left, right, top, bottom };
 }
 
 /** The preserved spring, gravity, repulsion and friction calculations; no rendering or clock. */
-export function createForceSimulation(initial: readonly ForcePosition[], connections: readonly ForceConnection[], parameters: ForceParameters, bounds = forceBounds(initial)) {
-  const nodes = initial.map(point => ({ ...point, previousX: point.x, previousY: point.y, fixed: false }));
-  const centerX = bounds.left + (bounds.right - bounds.left) / 2; const centerY = bounds.top + (bounds.bottom - bounds.top) / 2;
+export function createForceSimulation(
+  initial: readonly ForcePosition[],
+  connections: readonly ForceConnection[],
+  parameters: ForceParameters,
+  bounds = forceBounds(initial),
+) {
+  const nodes = initial.map((point) => ({
+    ...point,
+    previousX: point.x,
+    previousY: point.y,
+    fixed: false,
+  }));
+  const centerX = bounds.left + (bounds.right - bounds.left) / 2;
+  const centerY = bounds.top + (bounds.bottom - bounds.top) / 2;
   let friction = parameters.friction;
-  const snapshot = (): ForcePosition[] => nodes.map(node => ({ x: node.x, y: node.y }));
+  const snapshot = (): ForcePosition[] =>
+    nodes.map((node) => ({ x: node.x, y: node.y }));
   const step = () => {
     for (const edge of connections) {
-      const a = nodes[edge.source]; const b = nodes[edge.target]; if (!a || !b) continue;
-      const dx = b.x - a.x; const dy = b.y - a.y; const length = Math.sqrt(dx * dx + dy * dy);
-      const correction = length - parameters.distance; const share = parameters.repulsion ? 0.5 : 0;
-      const unitX = length ? dx / length : 0; const unitY = length ? dy / length : 0;
-      if (!a.fixed) { a.x += unitX * (share * correction * friction); a.y += unitY * (share * correction * friction); }
-      if (!b.fixed) { b.x -= unitX * ((1 - share) * correction * friction); b.y -= unitY * ((1 - share) * correction * friction); }
+      const a = nodes[edge.source];
+      const b = nodes[edge.target];
+      if (!a || !b) continue;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      const correction = length - parameters.distance;
+      const share = parameters.repulsion ? 0.5 : 0;
+      const unitX = length ? dx / length : 0;
+      const unitY = length ? dy / length : 0;
+      if (!a.fixed) {
+        a.x += unitX * (share * correction * friction);
+        a.y += unitY * (share * correction * friction);
+      }
+      if (!b.fixed) {
+        b.x -= unitX * ((1 - share) * correction * friction);
+        b.y -= unitY * ((1 - share) * correction * friction);
+      }
     }
-    for (const node of nodes) if (!node.fixed) { node.x += (centerX - node.x) * (parameters.gravity * friction); node.y += (centerY - node.y) * (parameters.gravity * friction); }
-    for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
-      const a = nodes[i]!; const b = nodes[j]!; let dx = b.x - a.x; let dy = b.y - a.y; let distance = Math.sqrt(dx * dx + dy * dy);
-      // The old engine used random repulsion at coincidence; stable directions keep repeat renders deterministic.
-      if (!distance) { const angle = (i * 137.508 + j * 51.43) * Math.PI / 180; dx = Math.cos(angle) / 2; dy = Math.sin(angle) / 2; distance = 1; }
-      const repulsion = parameters.repulsion * 2 / distance / distance;
-      if (!a.fixed) { a.previousX += dx * repulsion; a.previousY += dy * repulsion; }
-      if (!b.fixed) { b.previousX -= dx * repulsion; b.previousY -= dy * repulsion; }
-    }
-    for (const node of nodes) if (!node.fixed) { node.x += (node.x - node.previousX) * friction; node.y += (node.y - node.previousY) * friction; node.previousX = node.x; node.previousY = node.y; }
+    for (const node of nodes)
+      if (!node.fixed) {
+        node.x += (centerX - node.x) * (parameters.gravity * friction);
+        node.y += (centerY - node.y) * (parameters.gravity * friction);
+      }
+    for (let i = 0; i < nodes.length; i++)
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i]!;
+        const b = nodes[j]!;
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        // The old engine used random repulsion at coincidence; stable directions keep repeat renders deterministic.
+        if (!distance) {
+          const angle = ((i * 137.508 + j * 51.43) * Math.PI) / 180;
+          dx = Math.cos(angle) / 2;
+          dy = Math.sin(angle) / 2;
+          distance = 1;
+        }
+        const repulsion = (parameters.repulsion * 2) / distance / distance;
+        if (!a.fixed) {
+          a.previousX += dx * repulsion;
+          a.previousY += dy * repulsion;
+        }
+        if (!b.fixed) {
+          b.previousX -= dx * repulsion;
+          b.previousY -= dy * repulsion;
+        }
+      }
+    for (const node of nodes)
+      if (!node.fixed) {
+        node.x += (node.x - node.previousX) * friction;
+        node.y += (node.y - node.previousY) * friction;
+        node.previousX = node.x;
+        node.previousY = node.y;
+      }
     friction *= 0.992;
     return friction < 0.01;
   };
   return {
-    snapshot, step,
-    get finished() { return friction < 0.01; },
-    warmUp() { friction = parameters.friction * 0.8; },
-    hold(index: number, position: ForcePosition) { const node = nodes[index]; if (node) { node.fixed = true; node.x = position.x; node.y = position.y; } },
-    release(index: number) { const node = nodes[index]; if (node) node.fixed = false; },
-    settle(capture = false) { const frames = capture ? [snapshot()] : []; while (friction >= 0.01) { step(); if (capture) frames.push(snapshot()); } return frames; },
+    snapshot,
+    step,
+    get finished() {
+      return friction < 0.01;
+    },
+    warmUp() {
+      friction = parameters.friction * 0.8;
+    },
+    hold(index: number, position: ForcePosition) {
+      const node = nodes[index];
+      if (node) {
+        node.fixed = true;
+        node.x = position.x;
+        node.y = position.y;
+      }
+    },
+    release(index: number) {
+      const node = nodes[index];
+      if (node) node.fixed = false;
+    },
+    settle(capture = false) {
+      const frames = capture ? [snapshot()] : [];
+      while (friction >= 0.01) {
+        step();
+        if (capture) frames.push(snapshot());
+      }
+      return frames;
+    },
   };
 }

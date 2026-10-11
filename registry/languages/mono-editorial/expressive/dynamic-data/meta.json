@@ -6,22 +6,13 @@
   "tier": "expressive",
   "runtime": "react",
   "density": "glance",
-  "tags": [
-    "live",
-    "ops"
-  ],
-  "dependencies": [
-    "recharts@3.10.1"
-  ],
+  "tags": ["live", "ops"],
+  "dependencies": ["recharts@3.10.1"],
   "aspectRatio": "580/320",
   "library": "recharts",
   "entry": "component.tsx",
-  "exports": [
-    "DynamicData"
-  ],
-  "files": [
-    "component.tsx"
-  ],
+  "exports": ["DynamicData"],
+  "files": ["component.tsx"],
   "shared": [
     "use-chart-motion.ts",
     "use-reduced-motion.ts",
