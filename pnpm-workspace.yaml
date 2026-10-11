@@ -17,6 +17,9 @@ overrides:
   # Bound indexed source-map offsets in PostCSS and Tailwind's source maps.
   # https://github.com/advisories/GHSA-68fv-2mgg-jv7q
   source-map-js: 1.2.2
+  # Bound recursion and rewrite work in minimatch's brace expansion.
+  # https://github.com/advisories/GHSA-q2hr-2g5m-vwhr
+  brace-expansion: 5.0.12
 
 allowBuilds:
   # Use the published platform binaries; no source-build fallback is needed.
