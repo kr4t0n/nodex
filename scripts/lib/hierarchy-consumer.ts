@@ -25,6 +25,8 @@ export async function checkHierarchyConsumer(page: Page): Promise<void> {
   const map = page.locator(
     '#hierarchy-primary [data-nx-chart="nested-treemap"]',
   );
+  await expect(map).toHaveRole('application');
+  await expect(map).toHaveAccessibleDescription(/left\/right arrows/);
   await expect(tree.locator('[data-nx-tree-mark]')).toHaveCount(6);
   await expect(tree.locator('[data-nx-branch]')).toHaveCount(5);
   await expect(tree.locator('[data-nx-tree-label="root"]')).toHaveText(

@@ -11,12 +11,15 @@ export function Link({
   variant = 'default',
   external = false,
   className = '',
+  children,
   ...props
 }: LinkProps) {
   return (
     <a
       {...props}
       className={`nx-link${variant === 'default' ? '' : ` nx-link--${variant}`}${external ? ' nx-link--external' : ''} ${className}`.trim()}
-    />
+    >
+      {children}
+    </a>
   );
 }

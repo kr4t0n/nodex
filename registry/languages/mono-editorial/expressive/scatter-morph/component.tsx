@@ -574,6 +574,8 @@ export function ScatterMorph({
           aria-label={`Showing ${captions[view].toLowerCase()}. Show ${next} instead.`}
           className="pointer-events-none absolute inset-0 z-10 cursor-pointer border-0 bg-transparent p-0 focus:outline-none focus-visible:[outline:var(--nx-stroke-hairline)_solid_var(--nx-ink)] focus-visible:outline-offset-4"
         />
+        {/* The sibling native button owns keyboard view changes; the chart retains its own inspection target. */}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div className="h-full cursor-pointer" onClick={advance}>
           <span
             data-nx-view-caption

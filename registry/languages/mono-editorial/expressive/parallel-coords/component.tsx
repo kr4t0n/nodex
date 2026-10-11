@@ -302,12 +302,16 @@ export function ParallelCoords({
       return { dimensions, ranges: next };
     });
   return (
+    // Escape bubbles from the native chart and brush controls to clear their shared selection.
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       ref={ref}
       className={`nx-parallel-coords flex min-w-0 flex-col rounded-[var(--nx-radius-card)] bg-[var(--nx-bg)] [padding:var(--nx-space-cardPadding)] [font-family:var(--nx-font-sans)] text-[var(--nx-ink)] ${className}`}
       style={{ width: width ?? '100%', height, boxSizing: 'border-box' }}
       data-nx-chart="parallel-coords"
       data-nx-animated={motion.isAnimationActive}
+      role="group"
+      aria-label={label}
       onKeyDown={(event) => {
         if (event.key === 'Escape') setSelection({ dimensions, ranges: {} });
       }}

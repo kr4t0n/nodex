@@ -264,14 +264,18 @@ export function NestedTreemap({
   const active = inspection?.data === data ? inspection.effort : null;
   const inspect = (effort: Effort) => setInspection({ data, effort });
   return (
+    // This chart application owns arrow-key traversal; its description exposes the keys to assistive technology.
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       ref={ref}
       className={`nx-nested-treemap relative flex min-w-0 flex-col rounded-[var(--nx-radius-card)] bg-[var(--nx-bg)] [padding:var(--nx-space-cardPadding)] [font-family:var(--nx-font-sans)] text-[var(--nx-ink)] focus:not-focus-visible:outline-none focus-visible:[outline:var(--nx-stroke-mark)_solid_var(--nx-ink)] ${className}`}
       style={{ width: width ?? '100%', height, boxSizing: 'border-box' }}
       data-nx-chart="nested-treemap"
       data-nx-animated={motion.isAnimationActive}
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- The application is the chart's single keyboard inspection target.
       tabIndex={0}
-      role="group"
+      role="application"
+      aria-roledescription="interactive treemap"
       aria-label={label}
       aria-describedby={`${id}-description`}
       onPointerLeave={() => setInspection(null)}
@@ -315,9 +319,9 @@ export function NestedTreemap({
     >
       <span id={`${id}-description`} className="sr-only">
         Rectangle area shows supplied hours within each area. Parent headings
-        show the area's share of total effort. Use left/right arrows to inspect
-        areas and teams, Home/End for the limits and Escape to clear. The
-        hierarchy remains expanded; zero hours add no rectangle.
+        show the area&apos;s share of total effort. Use left/right arrows to
+        inspect areas and teams, Home/End for the limits and Escape to clear.
+        The hierarchy remains expanded; zero hours add no rectangle.
       </span>
       {!layout.valid ? (
         <div

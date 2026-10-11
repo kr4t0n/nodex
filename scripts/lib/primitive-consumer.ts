@@ -774,6 +774,20 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
   ]) {
     const original = page.locator(`#primitives-${language}-original`);
     const edited = page.locator(`#primitives-${language}-edited`);
+    const externalMark = await original
+      .getByRole('link', { name: 'Return to settings' })
+      .evaluate((link) => {
+        const mark = getComputedStyle(link, '::after');
+        return {
+          display: mark.display,
+          border: Number.parseFloat(mark.borderRightWidth),
+        };
+      });
+    assert.equal(externalMark.display, 'inline-block');
+    assert(
+      externalMark.border > 0,
+      'External link decoration must survive class-fragment formatting',
+    );
     if (language === 'sketchbook') {
       for (const selector of [
         '.nx-card__title',

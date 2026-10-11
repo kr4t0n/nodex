@@ -27,21 +27,29 @@ export type CardLinkProps = ComponentPropsWithRef<'a'> & {
 export function CardLink({
   variant = 'default',
   className = '',
+  children,
   ...props
 }: CardLinkProps) {
   return (
     <a
       {...props}
       className={`${cardClasses(variant)} nx-card--link ${className}`.trim()}
-    />
+    >
+      {children}
+    </a>
   );
 }
 
 export function CardTitle({
   className = '',
+  children,
   ...props
 }: ComponentPropsWithRef<'h3'>) {
-  return <h3 {...props} className={`nx-card__title ${className}`.trim()} />;
+  return (
+    <h3 {...props} className={`nx-card__title ${className}`.trim()}>
+      {children}
+    </h3>
+  );
 }
 
 export function CardSubtitle({
