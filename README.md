@@ -854,6 +854,10 @@ under system `/tmp`, and remove it when the work is complete.
 
 ## Verification
 
+The `ci` workflow runs `verify` on pull requests and pushes to `dev` and `main`,
+with read-only repository contents permission. Pull requests also run `docker-build`
+to build and check the production image without publishing it.
+
 CI scans the full Git history with gitleaks 8.30.1, downloaded from its official
 release and verified against a pinned SHA-256 checksum. Run the same history scan
 locally with `gitleaks git --redact --no-banner`. Keep findings redacted when
