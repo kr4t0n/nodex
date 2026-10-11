@@ -943,6 +943,12 @@ query strings and fragments are rejected. Device start, token polling and
 authenticated `whoami` requests never follow redirects, including same-origin
 redirects. Configure the final API base directly.
 
+`pnpm run test:auth` tests auth boundaries without a database and is included in
+`pnpm test`. `pnpm run test:auth:postgres` requires `DATABASE_URL` pointing to a
+migrated, disposable PostgreSQL database. CI runs that suite against its isolated
+PostgreSQL 17 service, including six synchronized polls of one approval and a
+check that exactly one usable CLI session is created. Never target production.
+
 ## Deploy and publish
 
 ```bash

@@ -18,3 +18,21 @@ test('token route rejects malformed JSON and non-code values before database acc
   assert.deepEqual(await response.json(), { error: 'expired_token' });
   assert.ok(query.mock.callCount() > 0);
 });
+
+test('a stale approved snapshot is insufficient when another poll consumed the row', async (t) => {
+  const auth = await authHarness(t);
+  let available = true;
+  t.mock.method(auth.db.database, 'query', async (sql: string) => {
+    if (sql.startsWith('select user_id')) return [{ user_id: 'test-user', approved_at: new Date(), denied_at: null, expired: false, too_soon: false }];
+    if (sql.includes('delete from cli_auth_requests')) {
+      const consumed = available;
+      available = false;
+      return consumed ? [{ user_id: 'test-user' }] : [];
+    }
+    return [];
+  });
+  const code = randomBytes(32).toString('base64url');
+  const results = await Promise.all(Array.from({ length: 6 }, () => auth.device.poll(code)));
+  assert.equal(results.filter(result => result.status === 'approved').length, 1);
+  assert.equal(results.filter(result => result.status === 'expired').length, 5);
+});

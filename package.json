@@ -27,7 +27,8 @@
     "build": "pnpm run build:registry && pnpm --filter @nodex/web run build",
     "start": "pnpm --filter @nodex/web run start",
     "test": "node --test scripts/registry.test.ts && pnpm run test:auth",
-    "test:auth": "node --test scripts/device-*.test.ts scripts/oauth.test.ts scripts/token-route.test.ts scripts/migrate-errors.test.ts"
+    "test:auth": "node --test scripts/device-*.test.ts scripts/oauth.test.ts scripts/token-route.test.ts scripts/migrate-errors.test.ts",
+    "test:auth:postgres": "node --test scripts/auth-postgres.test.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

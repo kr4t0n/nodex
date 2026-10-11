@@ -809,7 +809,10 @@ Preserve these authentication decisions:
   force-dynamic.
 - Device authorization returns a Nodex CLI session, never a GitHub token.
   Approval is a form POST. Codes use unbiased random selection and avoid
-  ambiguous characters; successful exchange consumes the device request.
+  ambiguous characters; successful exchange consumes the device request through
+  `DELETE ... RETURNING`. Only the deleting poll can mint a session, even when
+  concurrent polls read the same approval. Consumption precedes session creation;
+  a storage failure requires a new sign-in, rather than replaying an approval.
 - `NODEX_API` overrides the registry root for account requests. Every device
   operation validates HTTPS (HTTP only on loopback), rejects embedded credentials,
   queries and fragments, and disables redirects before sending a device code or

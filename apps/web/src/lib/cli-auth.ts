@@ -201,12 +201,21 @@ export async function poll(deviceCode: string): Promise<PollOutcome> {
   }
 
   if (row.approved_at && row.user_id) {
-    // One exchange per request. Deleting here is what stops a replayed poll
-    // minting a second session from the same approval.
-    await query('delete from cli_auth_requests where device_code_hash = $1', [
-      hash,
-    ]);
-    return { status: 'approved', userId: row.user_id };
+    // Only the poll that deletes the row owns its approval. Another poll may
+    // have read the same snapshot before either reached this statement.
+    const consumed = await query<{ user_id: string }>(
+      `delete from cli_auth_requests
+        where device_code_hash = $1
+          and approved_at is not null
+          and user_id is not null
+          and denied_at is null
+          and expires_at > now()
+        returning user_id`,
+      [hash],
+    );
+    return consumed[0]
+      ? { status: 'approved', userId: consumed[0].user_id }
+      : { status: 'expired' };
   }
 
   return { status: 'pending' };
