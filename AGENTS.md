@@ -800,7 +800,10 @@ Preserve these authentication decisions:
 - Cookies contain opaque random session tokens; the database stores SHA-256.
 - OAuth state is httpOnly, compared in constant time and deleted after use.
   Errors redirect with fixed public tokens, never upstream messages that might
-  include request credentials.
+  include request credentials. Post-auth destinations are fixed relative paths;
+  `NEXT_PUBLIC_SITE_URL` configures GitHub's callback and the device verification
+  URL, not the origin of an authenticated browser's redirect. OAuth fetches reject
+  redirects and validate token/profile JSON before using credentials or writing users.
 - `currentUser` touches cookies before checking configuration so prerendering
   cannot cache an unconfigured signed-out result. `/languages` also declares
   force-dynamic.
