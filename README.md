@@ -445,13 +445,13 @@ in a terminal above the chart belt, together in one scene with more generous
 spacing on taller screens. It installs the CLI with `npm install -g @kubitnodes/nodex`,
 types `nodex list`, runs `nodex init signal-console`,
 recalls the command and replaces the language with `neo-brutalism --force`, then
-edits that same third prompt to run `nodex init sketchbook --force`. Each
+edits that same fourth prompt to run `nodex init sketchbook --force`. Each
 completed command applies that language's actual tokens to the whole page and selects its
 charts for the belt. The demonstration plays once while visible, with pause and
 resume controls. Scrolling away preserves the selected language and pauses any
 unfinished typing; returning resumes it.
 
-After that first run, the third prompt becomes editable with
+After that first run, the fourth prompt becomes editable with
 `nodex init sketchbook --force` still in place and an idle blinking cursor.
 Click anywhere in the terminal to focus the command, then edit the language and
 press Enter to change the page and chart belt. Language buttons and text selection

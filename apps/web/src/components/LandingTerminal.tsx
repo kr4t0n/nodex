@@ -178,7 +178,9 @@ export function LandingTerminal({
         .addLabel('installed', '+=0.3')
         .set(cursors[0]!, { opacity: 0 }, 'installed')
         .set(outputs[0]!, { autoAlpha: 1 }, 'installed')
-        .addLabel('list', 'installed+=0.6');
+        // Hold the install result as long as the list output: on phones the
+        // next prompt's scroll-follow takes it out of view.
+        .addLabel('list', 'installed+=1.2');
       showPrompt(1, 'list')
         .add(type(listCommand.current, 'nodex list'), 'list+=0.15')
         .addLabel('listed', '+=0.3')

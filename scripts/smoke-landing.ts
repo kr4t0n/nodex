@@ -183,7 +183,11 @@ async function assertScrollback(page: Page) {
 }
 
 /** Frames of the demo's beats, handoff and focus for review, at both widths. */
-async function captureEvidence(browser: Browser, origin: string) {
+async function captureEvidence(
+  browser: Browser,
+  origin: string,
+  errors: string[],
+) {
   for (const [name, viewport] of [
     ['1366', { width: 1366, height: 768 }],
     ['390', { width: 390, height: 844 }],
@@ -194,6 +198,7 @@ async function captureEvidence(browser: Browser, origin: string) {
       reducedMotion: 'no-preference',
     });
     const page = await context.newPage();
+    page.on('pageerror', (error) => errors.push(error.message));
     const shot = (frame: string) =>
       page.screenshot({
         path: path.join(evidence, `landing-${name}-${frame}.png`),
@@ -238,6 +243,7 @@ async function captureEvidence(browser: Browser, origin: string) {
       reducedMotion: 'reduce',
     });
     const still = await reduced.newPage();
+    still.on('pageerror', (error) => errors.push(error.message));
     await still.goto('/');
     await openTerminal(still);
     await expect(
@@ -725,6 +731,14 @@ async function main() {
     await expect(input).toHaveValue('nodex init sketchbook --force');
     await small.getByText('~/your-app', { exact: true }).tap();
     await expect(input).toBeFocused();
+    await expect(small.locator('[data-terminal-entry]').first()).toHaveText(
+      '$npm install -g @kubitnodes/nodex',
+    );
+    // Recall reaches the install command first typed by the demo, then returns.
+    for (let step = 0; step < 5; step += 1) await input.press('ArrowUp');
+    await expect(input).toHaveValue('npm install -g @kubitnodes/nodex');
+    for (let step = 0; step < 5; step += 1) await input.press('ArrowDown');
+    await expect(input).toHaveValue('nodex init sketchbook --force');
     await small.keyboard.press('Backspace');
     await expect(input).toHaveValue('nodex init sketchbook --forc');
     await small.keyboard.press('e');
@@ -850,12 +864,12 @@ async function main() {
       'mono-editorial',
     );
     await failure.close();
-    assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
-    await captureEvidence(browser, origin);
-    console.log(`Landing evidence: ${evidence}`);
     console.log(
       'Landing failure state: unavailable token stylesheet leaves the default page usable',
     );
+    await captureEvidence(browser, origin, errors);
+    console.log(`Landing evidence: ${evidence}`);
+    assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
   } finally {
     await browser.close();
   }
