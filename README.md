@@ -442,26 +442,28 @@ The website and registry share the same pinned React types.
 The hero tagline and sign-in label share a text baseline across languages and
 screen sizes. The landing page folds its wordmark into the navbar, then demonstrates the CLI
 in a terminal above the chart belt, together in one scene with more generous
-spacing on taller screens. It types `nodex list`, runs `nodex init signal-console`,
+spacing on taller screens. It installs the CLI with `npm install -g @kubitnodes/nodex`,
+types `nodex list`, runs `nodex init signal-console`,
 recalls the command and replaces the language with `neo-brutalism --force`, then
-edits that same third prompt to run `nodex init sketchbook --force`. Each
+edits that same fourth prompt to run `nodex init sketchbook --force`. Each
 completed command applies that language's actual tokens to the whole page and selects its
 charts for the belt. The demonstration plays once while visible, with pause and
 resume controls. Scrolling away preserves the selected language and pauses any
 unfinished typing; returning resumes it.
 
-After that first run, the third prompt becomes editable with
+After that first run, the fourth prompt becomes editable with
 `nodex init sketchbook --force` still in place and an idle blinking cursor.
 Click anywhere in the terminal to focus the command, then edit the language and
 press Enter to change the page and chart belt. Language buttons and text selection
 retain their normal behavior. The command and its output update in place, keeping
-three command rows. Run `nodex list` to
+four command rows. Run `nodex list` to
 see selectable languages; Up/Down recalls the last 20 commands, including all
-four demo commands, without adding visible rows. The handoff does not take focus
+five demo commands, without adding visible rows. The handoff does not take focus
 or open a mobile keyboard. The demo and editor share the same fixed height,
 wrapping and thin, token-colored scrollbar with a transparent track and reserved
 gutter. The shared demo/editor body reserves another line for each language
-beyond the original four. All three prompts fit on desktop; narrow screens scroll locally as commands
+beyond the original four. All three `nodex` prompts fit on desktop, where the
+install line scrolls into the history; narrow screens scroll locally as commands
 wrap. Scrolling and motion-preference changes retain the session and unfinished
 input; the animation never replays during that page visit. Reduced motion opens
 the editor directly when the scene is reached and keeps the idle cursor steady.
@@ -1002,9 +1004,9 @@ not a delivered recipe component.
 
 `smoke:landing` measures the hero wordmark's painted ink from screenshots at
 narrow, short and wide sizes, with overlay and classic scrollbars, after a
-resize and in three language fonts. The ink must sit inside the visible width
-with left and right margins within 1% of that width (at least 4px), and the
-tagline and sign-in must stay on screen. Its frames go to a fresh temporary
+resize, on a slow or blocked font and in three language fonts. The ink must sit
+inside the visible width with left and right margins within 1% of that width
+(at least 4px), and the tagline and sign-in must stay on screen. Its frames go to a fresh temporary
 directory or `NODEX_EVIDENCE_DIR`; CI includes them in `language-mode-evidence`.
 
 Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
