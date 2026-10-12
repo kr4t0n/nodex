@@ -1017,8 +1017,9 @@ not a delivered recipe component.
 
 `smoke:landing` measures the hero wordmark's painted ink from screenshots at
 narrow, short and wide sizes (up to 1920px, past the bar's 1400px container),
-with overlay and classic scrollbars, after a resize, on a slow or blocked font
-and in three language fonts. The ink must sit inside the visible width with left
+with overlay and classic scrollbars, after a resize, in three language fonts,
+and with a late token sheet, a font file that arrives after the first measure,
+or no font at all. The ink must sit inside the visible width with left
 and right margins within 3px of each other, the tagline and sign-in must align
 with its painted edges within 3px, and both must stay on screen. It reports
 every failing size before it fails. Frames go to a fresh temporary directory or
