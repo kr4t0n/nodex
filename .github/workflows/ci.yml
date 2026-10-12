@@ -40,7 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HUSKY: '0'
-      NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
     steps:
       - uses: actions/checkout@v5
         with:
@@ -86,6 +85,7 @@ jobs:
         run: pnpm run smoke:modes
         env:
           NODEX_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
 
       - name: Test registry contracts and read-only validation
         run: pnpm test
@@ -117,6 +117,8 @@ jobs:
 
       - name: Smoke-test gallery loading and preview interaction
         run: pnpm run smoke:gallery
+        env:
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
 
       - name: Retain mode and default-language visual evidence
         if: always()
