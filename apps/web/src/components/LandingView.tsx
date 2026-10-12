@@ -43,8 +43,10 @@ const MARK_LEADING = 0.86;
 const HERO_ROW_GAP = 44;
 /** The bar's row starts this far above the wordmark, to share its baseline. */
 const ROW_LIFT = 3;
-/** Font size for canvas ink metrics, large enough to avoid pixel rounding. */
-const INK_MEASURE_SIZE = 1000;
+/** Font size for drawing a glyph to find its ink, in px. 1px is 1/400 em. */
+const INK_MEASURE_SIZE = 400;
+/** Alpha above which a drawn pixel counts as ink, as in a screenshot. */
+const INK_ALPHA = 64;
 
 /** One card in the run. Fixed, so the loop distance is exact. */
 const RUN_CARD_WIDTH = 340;
@@ -113,7 +115,43 @@ export function LandingView() {
       const markElement = mark.current;
       const rowElement = row.current;
       const signInElement = signIn.current;
-      const measure = document.createElement('canvas').getContext('2d');
+      const canvas = document.createElement('canvas');
+      canvas.width = INK_MEASURE_SIZE * 2;
+      canvas.height = INK_MEASURE_SIZE * 2;
+      const measure = canvas.getContext('2d', { willReadFrequently: true });
+      /**
+       * One glyph's painted extent and advance, in em from its origin.
+       *
+       * Drawn and scanned rather than read from `actualBoundingBox*`: at
+       * large sizes Chromium reports Inter's n about 0.01em wider than it
+       * paints, which shifted the hero and its tagline by several pixels.
+       */
+      const glyphInk = (context: CanvasRenderingContext2D, glyph: string) => {
+        const size = INK_MEASURE_SIZE;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillText(glyph, size / 2, size * 1.5);
+        const pixels = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        ).data;
+        const inked = (column: number) => {
+          for (let row = 0; row < canvas.height; row++)
+            if (pixels[(row * canvas.width + column) * 4 + 3]! > INK_ALPHA)
+              return true;
+          return false;
+        };
+        let left = 0;
+        while (left < canvas.width && !inked(left)) left++;
+        let right = canvas.width;
+        while (right > left && !inked(right - 1)) right--;
+        return {
+          left: (left - size / 2) / size,
+          right: (right - size / 2) / size,
+          advance: context.measureText(glyph).width / size,
+        };
+      };
 
       /**
        * How far scene one is pushed before the bar is assembled. Shared by both
@@ -136,6 +174,14 @@ export function LandingView() {
        * that differ per language font. The box keeps the browser's real
        * advances; the canvas only supplies each end glyph's overhang.
        */
+      // Every function value reads the ink, so draw only when the font changes.
+      let inkCache:
+        | {
+            key: string;
+            first: ReturnType<typeof glyphInk>;
+            last: ReturnType<typeof glyphInk>;
+          }
+        | undefined;
       const markInk = () => {
         const style = getComputedStyle(markElement);
         const width = Number.parseFloat(style.width);
@@ -143,21 +189,28 @@ export function LandingView() {
         if (!measure || !text) return { left: 0, right: width };
         // Canvas rounds small text metrics to whole pixels too, so measure
         // large and scale back down.
-        const em = Number.parseFloat(style.fontSize) / INK_MEASURE_SIZE;
-        measure.font = `${style.fontStyle} ${style.fontWeight} ${INK_MEASURE_SIZE}px ${style.fontFamily}`;
-        const metrics = measure.measureText(text);
+        const em = Number.parseFloat(style.fontSize);
+        const font = `${style.fontStyle} ${style.fontWeight} ${INK_MEASURE_SIZE}px ${style.fontFamily}`;
+        const key = `${font}|${text}`;
+        if (inkCache?.key !== key) {
+          measure.font = font;
+          inkCache = {
+            key,
+            first: glyphInk(measure, text.at(0)!),
+            last: glyphInk(measure, text.at(-1)!),
+          };
+        }
+        const { first, last } = inkCache;
         const tracking = Number.parseFloat(style.letterSpacing) || 0;
-        // The x's ink beyond the box: its own overhang past its advance, plus
-        // the trailing tracking the box already gave back.
-        const overhang =
-          (metrics.actualBoundingBoxRight - metrics.width) * em - tracking;
+        // The last glyph's ink beyond the box: its own overhang past its
+        // advance, plus the trailing tracking the box already gave back.
         return {
-          left: -metrics.actualBoundingBoxLeft * em,
-          right: width + overhang,
+          left: first.left * em,
+          right: width + (last.right - last.advance) * em - tracking,
         };
       };
       // The header is laid out in the client width, which excludes a classic
-      // scrollbar; innerWidth includes it and pushed the x underneath one.
+      // scrollbar; innerWidth includes it and would push the x underneath one.
       const viewportWidth = () => document.documentElement.clientWidth;
       const gutter = () =>
         Number.parseFloat(

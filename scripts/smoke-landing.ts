@@ -187,9 +187,8 @@ async function heroWordmark(page: Page) {
         right = Math.max(right, column + 1);
       }
     const action = document.querySelector('header a')!.getBoundingClientRect();
-    const row = document
-      .querySelector('header p')!
-      .parentElement!.getBoundingClientRect();
+    const tagline = document.querySelector('header p')!;
+    const row = tagline.parentElement!.getBoundingClientRect();
     return {
       visible,
       left,
@@ -200,34 +199,49 @@ async function heroWordmark(page: Page) {
         Number.parseFloat(getComputedStyle(mark).fontSize),
       bottom: Math.max(action.bottom, row.bottom),
       actionRight: action.right,
+      taglineLeft: tagline.getBoundingClientRect().left,
       height: innerHeight,
     };
   }, shot);
 }
 
-/** Ink margins may differ by 1% of the width, and never by less than 4px. */
-async function assertHeroWordmark(page: Page, label: string) {
+/**
+ * Screenshot ink is read to the pixel on each side, so the margins may differ
+ * by 3px. The tagline and sign-in hang from the wordmark's painted edges.
+ */
+const HERO_TOLERANCE = 3;
+
+/** Record every hero failure, so one run shows each size that breaks. */
+async function assertHeroWordmark(
+  page: Page,
+  label: string,
+  failures: string[],
+) {
   await page.evaluate(() => document.fonts.ready);
   await delay(700);
   const mark = await heroWordmark(page);
-  const tolerance = Math.max(4, mark.visible * 0.01);
   console.log(`Hero wordmark ${label}: ${JSON.stringify(mark)}`);
   await page.screenshot({
     path: path.join(evidence, `landing-hero-${label}.png`),
   });
-  assert(
-    mark.left > 0 && mark.right > 0,
-    `${label}: the hero wordmark must paint inside the visible width`,
-  );
-  assert(
-    Math.abs(mark.left - mark.right) <= tolerance,
-    `${label}: the hero wordmark must be centred within ${tolerance}px ` +
-      `(left ${mark.left}px, right ${mark.right}px)`,
-  );
-  assert(
-    mark.actionRight <= mark.visible && mark.bottom <= mark.height,
-    `${label}: the hero sign-in and tagline must stay on screen`,
-  );
+  const fail = (message: string) => failures.push(`${label}: ${message}`);
+  if (!(mark.left > 0 && mark.right > 0))
+    fail('the wordmark must paint inside the visible width');
+  if (Math.abs(mark.left - mark.right) > HERO_TOLERANCE)
+    fail(
+      `the wordmark must be centred within ${HERO_TOLERANCE}px ` +
+        `(left ${mark.left}px, right ${mark.right}px)`,
+    );
+  if (!(mark.actionRight <= mark.visible && mark.bottom <= mark.height))
+    fail('the sign-in and tagline must stay on screen');
+  if (
+    Math.abs(mark.taglineLeft - mark.left) > HERO_TOLERANCE ||
+    Math.abs(mark.visible - mark.right - mark.actionRight) > HERO_TOLERANCE
+  )
+    fail(
+      `the tagline and sign-in must align with the wordmark's ink ` +
+        `(tagline ${mark.taglineLeft}px, sign-in ends ${mark.actionRight}px)`,
+    );
 }
 
 const HERO_SIZES = [
@@ -239,9 +253,14 @@ const HERO_SIZES = [
   [1000, 700],
   [1024, 400],
   [1366, 768],
+  // Wider than about 1480px the bar's 1400px container centres, so the
+  // wordmark's resting origin is no longer the gutter.
+  [1536, 864],
+  [1920, 1080],
 ] as const;
 
 async function checkHeroWordmark(origin: string, errors: string[]) {
+  const failures: string[] = [];
   // A phone's overlay scrollbars, then a desktop's classic ones, which take
   // width from the header but not from innerWidth.
   for (const scrollbars of [false, true]) {
@@ -261,6 +280,7 @@ async function checkHeroWordmark(origin: string, errors: string[]) {
         await assertHeroWordmark(
           page,
           `${width}x${height}${scrollbars ? '-scrollbar' : ''}`,
+          failures,
         );
         await page.close();
       }
@@ -288,7 +308,11 @@ async function checkHeroWordmark(origin: string, errors: string[]) {
           await expect(page.locator('h1')).toHaveCSS('font-family', /Inter/, {
             timeout: 10_000,
           });
-        await assertHeroWordmark(page, `1000x700-scrollbar-font-${font}`);
+        await assertHeroWordmark(
+          page,
+          `1000x700-scrollbar-font-${font}`,
+          failures,
+        );
         await page.close();
       }
 
@@ -297,10 +321,11 @@ async function checkHeroWordmark(origin: string, errors: string[]) {
         baseURL: origin,
         viewport: { width: 1366, height: 768 },
       });
+      resized.on('pageerror', (error) => errors.push(error.message));
       await resized.goto('/');
       await resized.evaluate(() => document.fonts.ready);
       await resized.setViewportSize({ width: 1000, height: 700 });
-      await assertHeroWordmark(resized, '1366-to-1000x700-scrollbar');
+      await assertHeroWordmark(resized, '1366-to-1000x700-scrollbar', failures);
       await resized.close();
 
       // Each language's font has its own side bearings and overhangs; the
@@ -326,13 +351,18 @@ async function checkHeroWordmark(origin: string, errors: string[]) {
           slug,
         );
         await themed.evaluate(() => window.scrollTo(0, 0));
-        await assertHeroWordmark(themed, `1000x700-scrollbar-${slug}`);
+        await assertHeroWordmark(
+          themed,
+          `1000x700-scrollbar-${slug}`,
+          failures,
+        );
       }
       await themed.close();
     } finally {
       await browser.close();
     }
   }
+  assert.deepEqual(failures, [], 'The hero wordmark must fit every size');
   console.log(
     'Landing hero: wordmark centred and on screen at narrow, short and wide sizes',
   );
