@@ -309,8 +309,9 @@ before changing loading behavior. Preserve these boundaries:
   Index chrome uses `OWN_LANGUAGE`; standalone primitive previews explicitly default
   to Mono Editorial. Catalogue order must not choose either surface's language.
 - The hero wordmark is its 16px bar layout magnified twenty to thirty times.
-  Its fold centres the painted glyphs, measured from the font, in the client
-  width; the layout box and `innerWidth` both put the x off narrow screens.
+  Its fold centres the painted glyphs, drawn and measured from the font, in the
+  client width; the layout box and `innerWidth` both put the x off screen, as
+  did anchoring at the gutter once the 1400px bar container centres.
   Geometric text rendering keeps that small layout's advances fractional, so
   whole-pixel hinting is not magnified. Short screens shrink it to keep the row
   visible.
