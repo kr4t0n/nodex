@@ -1,12 +1,18 @@
 /** Browser regression for the landing's terminal, real themes and navigation. */
 import assert from 'node:assert/strict';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
-import { chromium, expect, type Page } from '@playwright/test';
+import { chromium, expect, type Browser, type Page } from '@playwright/test';
 
 import { startSite } from './lib/site.ts';
 
 let site: Awaited<ReturnType<typeof startSite>> | undefined;
+const evidence = process.env.NODEX_EVIDENCE_DIR
+  ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
+  : await mkdtemp(path.join(tmpdir(), 'nodex-landing-evidence-'));
 interface HandoffMeasurement {
   height: number;
   commandHeight: number;
@@ -176,6 +182,89 @@ async function assertScrollback(page: Page) {
   );
 }
 
+/** Frames of the demo's beats, handoff and focus for review, at both widths. */
+async function captureEvidence(
+  browser: Browser,
+  origin: string,
+  errors: string[],
+) {
+  for (const [name, viewport] of [
+    ['1366', { width: 1366, height: 768 }],
+    ['390', { width: 390, height: 844 }],
+  ] as const) {
+    const context = await browser.newContext({
+      baseURL: origin,
+      viewport,
+      reducedMotion: 'no-preference',
+    });
+    const page = await context.newPage();
+    page.on('pageerror', (error) => errors.push(error.message));
+    const shot = (frame: string) =>
+      page.screenshot({
+        path: path.join(evidence, `landing-${name}-${frame}.png`),
+      });
+    await page.goto('/');
+    await openTerminal(page);
+    for (const [index, frame] of [
+      [0, 'first-output'],
+      [1, 'second-output'],
+    ] as const) {
+      await expect(page.locator('[data-cli-output]').nth(index)).toHaveCSS(
+        'opacity',
+        '1',
+        { timeout: 15_000 },
+      );
+      await shot(frame);
+    }
+    await assertTheme(page, 'signal-console');
+    await shot('signal-console');
+    await expect(page.locator('[data-terminal-state]')).toHaveAttribute(
+      'data-terminal-state',
+      'interactive',
+      { timeout: 30_000 },
+    );
+    await shot('handoff');
+    const command = page.getByRole('textbox', { name: 'Terminal command' });
+    await page.getByRole('region', { name: 'Terminal history' }).focus();
+    for (let step = 0; step < 20; step += 1) {
+      if (
+        await command.evaluate((element) => element === document.activeElement)
+      )
+        break;
+      await page.keyboard.press('Tab');
+    }
+    await expect(command).toBeFocused();
+    await shot('keyboard-focus');
+    await context.close();
+
+    const reduced = await browser.newContext({
+      baseURL: origin,
+      viewport,
+      reducedMotion: 'reduce',
+    });
+    const still = await reduced.newPage();
+    still.on('pageerror', (error) => errors.push(error.message));
+    await still.goto('/');
+    await openTerminal(still);
+    await expect(
+      still.getByRole('textbox', { name: 'Terminal command' }),
+    ).toBeEnabled({ timeout: 15_000 });
+    await assertTheme(still, 'sketchbook');
+    await still.screenshot({
+      path: path.join(evidence, `landing-${name}-reduced.png`),
+    });
+    await still
+      .getByRole('region', { name: 'Terminal history' })
+      .evaluate((element) => {
+        element.scrollTop = 0;
+      });
+    await still.screenshot({
+      path: path.join(evidence, `landing-${name}-reduced-history-top.png`),
+    });
+    await reduced.close();
+  }
+}
+
 async function main() {
   const origin = process.argv[2] ?? (site = await startSite()).origin;
   const browser = await chromium.launch({ headless: true });
@@ -207,7 +296,7 @@ async function main() {
     await delay(1600);
     await expect(page.locator('[data-nx-example]')).toHaveCount(0);
 
-    await expect(page.locator('[data-cli-command]')).toHaveCount(3);
+    await expect(page.locator('[data-cli-command]')).toHaveCount(4);
     const samples: string[] = [];
     await page.exposeFunction('recordTerminalCommand', (text: string) => {
       samples.push(text);
@@ -231,7 +320,7 @@ async function main() {
       });
     await openTerminal(page);
     await expect(page.locator('[data-cli-command]').first()).toHaveText(
-      '$nodex list',
+      '$npm install -g @kubitnodes/nodex',
     );
     await returnToHero(page, 'mono-editorial');
     await expect(page.locator('[data-terminal-state]')).toHaveAttribute(
@@ -300,7 +389,7 @@ async function main() {
       measurement.reused,
       'Sketchbook must reuse the Neo-brutalism prompt',
     );
-    assert.equal(measurement.prompts, 3, 'The demo must retain three prompts');
+    assert.equal(measurement.prompts, 4, 'The demo must retain four prompts');
     assert(measurement.visible, 'The final demo prompt must be visible');
     const command = page.getByRole('textbox', {
       name: 'Terminal command',
@@ -348,9 +437,10 @@ async function main() {
       demoHeight,
       'The terminal body must keep its height at handoff',
     );
+    // The install line scrolls into history; every nodex prompt stays in view.
     assert(
       await page.locator('[data-terminal-entry]').evaluateAll((rows) =>
-        rows.every((row) => {
+        rows.slice(1).every((row) => {
           const viewport = row
             .closest('[role="region"]')!
             .getBoundingClientRect();
@@ -358,7 +448,7 @@ async function main() {
           return bounds.top >= viewport.top && bounds.bottom <= viewport.bottom;
         }),
       ),
-      'All three prompts must fit inside the desktop terminal',
+      'All three nodex prompts must fit inside the desktop terminal',
     );
     await assertFits(page);
 
@@ -385,8 +475,8 @@ async function main() {
       .allTextContents();
     assert.equal(
       completedText.length,
-      3,
-      'The editor must retain exactly three visible command rows',
+      4,
+      'The editor must retain exactly four visible command rows',
     );
     await expect(page.locator('[data-terminal-entry]').last()).toContainText(
       'nodex init sketchbook --force',
@@ -458,7 +548,7 @@ async function main() {
     await expect(page.locator('[data-terminal-output]')).toHaveText(
       'Switched to Mono Editorial',
     );
-    await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(page.locator('[data-terminal-entry]')).toHaveCount(4);
     await command.fill('nodex init ');
     await command.press('ArrowUp');
     await expect(command).toHaveValue('nodex init mono-editorial');
@@ -592,14 +682,14 @@ async function main() {
       )
       .toBe(true);
     await expect(page.locator('[data-cli-command]')).toHaveCount(0);
-    await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(page.locator('[data-terminal-entry]')).toHaveCount(4);
     assert.deepEqual(
       (await page.locator('[data-terminal-entry]').allTextContents()).slice(
         0,
-        2,
+        3,
       ),
-      completedText.slice(0, 2),
-      'Edits must preserve the first two command rows',
+      completedText.slice(0, 3),
+      'Edits must preserve the first three command rows',
     );
     assert.equal(
       (await page.locator('[data-terminal-state] > div').last().boundingBox())!
@@ -641,10 +731,18 @@ async function main() {
     await expect(input).toHaveValue('nodex init sketchbook --force');
     await small.getByText('~/your-app', { exact: true }).tap();
     await expect(input).toBeFocused();
+    await expect(small.locator('[data-terminal-entry]').first()).toHaveText(
+      '$npm install -g @kubitnodes/nodex',
+    );
+    // Recall reaches the install command first typed by the demo, then returns.
+    for (let step = 0; step < 5; step += 1) await input.press('ArrowUp');
+    await expect(input).toHaveValue('npm install -g @kubitnodes/nodex');
+    for (let step = 0; step < 5; step += 1) await input.press('ArrowDown');
+    await expect(input).toHaveValue('nodex init sketchbook --force');
     await small.keyboard.press('Backspace');
     await expect(input).toHaveValue('nodex init sketchbook --forc');
     await small.keyboard.press('e');
-    await expect(small.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(small.locator('[data-terminal-entry]')).toHaveCount(4);
     await expect(small.locator('[data-terminal-caret]')).toHaveCSS(
       'animation-name',
       'none',
@@ -745,7 +843,7 @@ async function main() {
         Math.abs(narrowEditor.height - narrowDemo.commandHeight) < 1,
       'The narrow editor must preserve the demo command position and wrapping',
     );
-    await expect(small.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(small.locator('[data-terminal-entry]')).toHaveCount(4);
     await mobile.close();
     console.log(
       'Landing accessibility: narrow viewport, keyboard switching and live reduced-motion changes passed',
@@ -766,10 +864,12 @@ async function main() {
       'mono-editorial',
     );
     await failure.close();
-    assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
     console.log(
       'Landing failure state: unavailable token stylesheet leaves the default page usable',
     );
+    await captureEvidence(browser, origin, errors);
+    console.log(`Landing evidence: ${evidence}`);
+    assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
   } finally {
     await browser.close();
   }
