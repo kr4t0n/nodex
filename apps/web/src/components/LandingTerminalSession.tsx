@@ -17,21 +17,24 @@ type Output = 'languages' | { message: string };
 
 interface LandingTerminalSessionProps {
   languages: readonly Language[];
+  install: { command: string; output: string };
   first: Language;
   second: Language;
   third: Language;
   onLanguageChange: (slug: string) => void;
 }
 
-/** Three visible prompts, with one reusable editor and bounded command recall. */
+/** Four visible prompts, with one reusable editor and bounded command recall. */
 export function LandingTerminalSession({
   languages,
+  install,
   first,
   second,
   third,
   onLanguageChange,
 }: LandingTerminalSessionProps) {
   const [history, setHistory] = useState<string[]>(() => [
+    install.command,
     'nodex list',
     `nodex init ${first.slug}`,
     `nodex init ${second.slug} --force`,
@@ -132,6 +135,15 @@ export function LandingTerminalSession({
         aria-label="Terminal history"
         tabIndex={0}
       >
+        <div data-terminal-entry className="flex items-start gap-3">
+          <span aria-hidden>$</span>
+          <span className="min-w-0 [overflow-wrap:anywhere] whitespace-pre-wrap">
+            {install.command}
+          </span>
+        </div>
+        <div className="mb-4 pl-[calc(1ch+0.75rem)] [@media(min-height:900px)]:mb-6">
+          {install.output}
+        </div>
         <div data-terminal-entry className="flex items-start gap-3">
           <span aria-hidden>$</span>
           <span>nodex list</span>

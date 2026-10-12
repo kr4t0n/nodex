@@ -17,6 +17,13 @@ import type { Language } from '@/lib/registry.ts';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+// Seconds per typed or deleted character in the demo's typing cadence.
+const TYPE_STEP = 0.055;
+const DELETE_STEP = 0.035;
+const INSTALL_TEXT = 'npm install -g @kubitnodes/nodex';
+// The published CLI has no runtime dependencies, so npm adds one package.
+const INSTALL_OUTPUT = 'added 1 package';
+
 interface LandingTerminalProps {
   languages: readonly Language[];
   activeLanguage: string;
@@ -36,6 +43,7 @@ export function LandingTerminal({
   const reduced = usePrefersReducedMotion();
   const section = useRef<HTMLElement>(null);
   const transcript = useRef<HTMLDivElement>(null);
+  const installCommand = useRef<HTMLSpanElement>(null);
   const listCommand = useRef<HTMLSpanElement>(null);
   const firstCommand = useRef<HTMLSpanElement>(null);
   const nextCommand = useRef<HTMLSpanElement>(null);
@@ -82,6 +90,7 @@ export function LandingTerminal({
       const cursors = root.querySelectorAll<HTMLElement>('[data-cli-cursor]');
       const outputs = root.querySelectorAll<HTMLElement>('[data-cli-output]');
       const commands = [
+        installCommand.current,
         listCommand.current,
         firstCommand.current,
         nextCommand.current,
@@ -122,20 +131,31 @@ export function LandingTerminal({
 
       // Discrete text steps avoid React renders on animation frames and require
       // no text-animation plugin. React retains the complete static transcript.
-      const type = (
-        node: HTMLSpanElement | null,
-        text: string,
-        at: number,
-        from = 0,
-      ) => {
+      const type = (node: HTMLSpanElement | null, text: string, from = 0) => {
+        const typing = gsap.timeline();
         for (let length = from; length <= text.length; length += 1) {
-          tl.set(
+          typing.set(
             node,
             { textContent: text.slice(0, length) },
-            at + (length - from) * 0.055,
+            (length - from) * TYPE_STEP,
           );
         }
-        return at + (text.length - from) * 0.055;
+        return typing;
+      };
+      const erase = (
+        node: HTMLSpanElement | null,
+        text: string,
+        to: number,
+      ) => {
+        const deleting = gsap.timeline();
+        for (let length = text.length - 1; length >= to; length -= 1) {
+          deleting.set(
+            node,
+            { textContent: text.slice(0, length) },
+            (text.length - 1 - length) * DELETE_STEP,
+          );
+        }
+        return deleting;
       };
       const followCommand = (index: number) => {
         // Scroll only the transcript, reserving room for this command's output.
@@ -146,35 +166,51 @@ export function LandingTerminal({
           bottom - root.getBoundingClientRect().bottom,
         );
       };
+      const showPrompt = (index: number, label: string) =>
+        tl
+          .set(commandRows[index]!, { autoAlpha: 1 }, label)
+          .set(cursors[index]!, { opacity: 1 }, label)
+          .call(() => followCommand(index), [], label);
 
-      let at = type(listCommand.current, 'nodex list', 0.35) + 0.3;
-      tl.set(cursors[0]!, { opacity: 0 }, at).to(
-        outputs[0]!,
-        { autoAlpha: 1, duration: 0.25 },
-        at,
-      );
-      at += 1.2;
-      tl.set(commandRows[1]!, { autoAlpha: 1 }, at)
-        .set(cursors[1]!, { opacity: 1 }, at)
-        .call(() => followCommand(1), [], at);
-      at = type(firstCommand.current, firstText, at + 0.15) + 0.35;
-      tl.set(cursors[1]!, { opacity: 0 }, at)
-        .set(outputs[1]!, { autoAlpha: 1 }, at)
-        .call(() => onLanguageChange(first.slug), [], at);
+      // Each beat starts at a label placed relative to the previous beat, so a
+      // beat can be added or retimed without recomputing every later time.
+      tl.add(type(installCommand.current, INSTALL_TEXT), 0.35)
+        .addLabel('installed', '+=0.3')
+        .set(cursors[0]!, { opacity: 0 }, 'installed')
+        .set(outputs[0]!, { autoAlpha: 1 }, 'installed')
+        // Hold the install result as long as the list output: on phones the
+        // next prompt's scroll-follow takes it out of view.
+        .addLabel('list', 'installed+=1.2');
+      showPrompt(1, 'list')
+        .add(type(listCommand.current, 'nodex list'), 'list+=0.15')
+        .addLabel('listed', '+=0.3')
+        .set(cursors[1]!, { opacity: 0 }, 'listed')
+        .to(outputs[1]!, { autoAlpha: 1, duration: 0.25 }, 'listed')
+        .addLabel('init', 'listed+=1.2');
+      showPrompt(2, 'init')
+        .add(type(firstCommand.current, firstText), 'init+=0.15')
+        .addLabel('initialised', '+=0.35')
+        .set(cursors[2]!, { opacity: 0 }, 'initialised')
+        .set(outputs[2]!, { autoAlpha: 1 }, 'initialised')
+        .call(() => onLanguageChange(first.slug), [], 'initialised');
 
-      // The third prompt stays in place for both language replacements and the
+      // The last prompt stays in place for both language replacements and the
       // user's edit. Updating its output must not append another command row.
+      const prefixLength = 'nodex init '.length;
       for (const [previousText, text, language] of [
         [firstText, nextText, second],
         [nextText, lastText, third],
       ] as const) {
-        at += 2.1;
-        tl.set(commandRows[2]!, { autoAlpha: 1 }, at)
-          .set(nextCommand.current, { textContent: previousText }, at)
-          .set(cursors[2]!, { opacity: 1 }, at)
-          .call(() => followCommand(2), [], at)
+        const recall = `recall-${language.slug}`;
+        const switched = `switched-${language.slug}`;
+        tl.addLabel(recall, '+=2.1').set(
+          nextCommand.current,
+          { textContent: previousText },
+          recall,
+        );
+        showPrompt(3, recall)
           .to(
-            cursors[2]!,
+            cursors[3]!,
             {
               opacity: 0,
               duration: 0.3,
@@ -182,36 +218,31 @@ export function LandingTerminal({
               yoyo: true,
               ease: 'steps(1)',
             },
-            at,
-          );
-        at += 0.8;
-        const prefixLength = 'nodex init '.length;
-        for (
-          let length = previousText.length - 1;
-          length >= prefixLength;
-          length -= 1
-        ) {
-          tl.set(
-            nextCommand.current,
-            { textContent: previousText.slice(0, length) },
-            at,
-          );
-          at += 0.035;
-        }
-        at = type(nextCommand.current, text, at + 0.2, prefixLength) + 0.35;
-        tl.set(cursors[2]!, { opacity: 0 }, at)
+            recall,
+          )
+          .add(
+            erase(nextCommand.current, previousText, prefixLength),
+            `${recall}+=0.8`,
+          )
+          // The last deletion keeps its keystroke step before the pause.
+          .add(
+            type(nextCommand.current, text, prefixLength),
+            `+=${DELETE_STEP + 0.2}`,
+          )
+          .addLabel(switched, '+=0.35')
+          .set(cursors[3]!, { opacity: 0 }, switched)
           .set(
-            outputs[2]!,
+            outputs[3]!,
             { autoAlpha: 1, textContent: `Initialised ${language.name}` },
-            at,
+            switched,
           )
           .call(
             () => {
-              followCommand(2);
+              followCommand(3);
               onLanguageChange(language.slug);
             },
             [],
-            at,
+            switched,
           );
       }
       tl.to({}, { duration: 0.8 });
@@ -372,6 +403,7 @@ export function LandingTerminal({
             {interactive && first && second && third ? (
               <LandingTerminalSession
                 languages={languages}
+                install={{ command: INSTALL_TEXT, output: INSTALL_OUTPUT }}
                 first={first}
                 second={second}
                 third={third}
@@ -394,6 +426,19 @@ export function LandingTerminal({
                   aria-hidden
                   className={ready ? '' : 'invisible'}
                 >
+                  <div data-cli-command className="flex items-start gap-3">
+                    <span>$</span>
+                    <div className="min-w-0 [overflow-wrap:anywhere] whitespace-pre-wrap">
+                      <span ref={installCommand}>{INSTALL_TEXT}</span>
+                      <Cursor />
+                    </div>
+                  </div>
+                  <div
+                    data-cli-output
+                    className="mb-4 pl-[calc(1ch+0.75rem)] [@media(min-height:900px)]:mb-6"
+                  >
+                    {INSTALL_OUTPUT}
+                  </div>
                   <div data-cli-command className="flex items-start gap-3">
                     <span>$</span>
                     <div className="min-w-0 [overflow-wrap:anywhere] whitespace-pre-wrap">
@@ -435,11 +480,12 @@ export function LandingTerminal({
             )}
           </div>
           <p className="sr-only">
-            CLI example: run nodex list to discover design languages. Run{' '}
-            {firstText} to initialise Signal Console. Recall that command,
-            delete its language name, then run {nextText} to switch to
-            Neo-brutalism. Edit that same line to run {lastText} and switch to
-            Sketchbook, then edit the command yourself.
+            CLI example: install the CLI with {INSTALL_TEXT}, then run nodex
+            list to discover design languages. Run {firstText} to initialise
+            Signal Console. Recall that command, delete its language name, then
+            run {nextText} to switch to Neo-brutalism. Edit that same line to
+            run {lastText} and switch to Sketchbook, then edit the command
+            yourself.
           </p>
           <p
             className="mt-3 mb-0 text-[13px]"
