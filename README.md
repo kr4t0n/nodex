@@ -933,9 +933,21 @@ under system `/tmp`, and remove it when the work is complete.
 
 ## Verification
 
-The `ci` workflow runs `verify` on pull requests and pushes to `dev` and `main`,
-with read-only repository contents permission. Pull requests also run `docker-build`
-to build and check the production image without publishing it.
+The `ci` workflow runs three independent verification jobs on pull requests and
+pushes to `dev` and `main`, with read-only repository contents permission and
+pnpm caching:
+
+- `static`: full-history secret scan, registry tests, shell check, lint, formatting
+  and typecheck.
+- `consumer`: packed CLI, component and CLI smokes.
+- `browser`: mode and Hearth smokes, site build, landing and gallery smokes.
+
+Each job installs Chromium and builds the registry before its checks; tests and
+typechecking also need those generated assets. The required `verify` job waits
+for all three and runs even after a failure, accepting only successful results.
+Failed, cancelled or skipped jobs fail the gate. `auth-postgres` remains separate;
+pull requests also run `docker-build` to check the production image without
+publishing it. Neither is a dependency of `verify`.
 
 CI scans the full Git history with gitleaks 8.30.1, downloaded from its official
 release and verified against a pinned SHA-256 checksum. Run the same history scan
@@ -980,10 +992,11 @@ against `NODEX_BASE_REF` (default: the merge base with `origin/dev`). It reads t
 comparison revision's compiler, tokens and prose CSS through Git without checking
 out another tree. Each mode/gallery check retains screenshots and results in a
 fresh evidence directory under the system temporary directory (normally `/tmp`)
-and prints that location when it finishes. Set `NODEX_EVIDENCE_DIR` to collect both
-checks in one explicit location. CI uses its runner temporary directory and
-uploads `language-mode-evidence`,
-including gallery light/dark fixture screenshots; link that artifact in the PR.
+and prints that location when it finishes. Set `NODEX_EVIDENCE_DIR` to collect
+mode, Hearth, landing and gallery evidence in one explicit location. CI uses
+`nodex-visual-evidence` under its runner temporary directory and uploads
+`visual-evidence` from the `browser` job, including gallery light/dark fixture
+screenshots; link that artifact in the PR.
 No generated review evidence is left in the checkout. No alternate language is
 published by these tests. `smoke:gallery` also checks the mode control, active
 token-panel values and retained specimen state. It mounts the actual index view
@@ -999,7 +1012,7 @@ and zero readings, offline fonts, mode changes, keyboard focus and live reduced
 motion. It captures desktop/mobile cookbook compositions and all 24 primitives
 in both modes, plus the same prose with Mono Editorial as a reference. Evidence
 uses a fresh system temporary directory or `NODEX_EVIDENCE_DIR`; CI includes it
-in `language-mode-evidence`. The cookbook composition is a consumer test fixture,
+in `visual-evidence`. The cookbook composition is a consumer test fixture,
 not a delivered recipe component.
 
 Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
@@ -1026,10 +1039,10 @@ config. Use `oxlint-disable-next-line` for native Oxlint rules and
 `eslint-disable-next-line` for fallback rules. Keep exceptions local, with the
 reason beside the code and browser coverage for the behavior.
 
-`smoke:pack` requires the registry build above and runs in CI's required `verify`
-job. It removes its temporary package and consumer after checking them. Pass an
-empty output directory, `pnpm run smoke:pack /tmp/nodex-pack`, to retain the tested
-tarball. The npm release workflow uses this same check and publishes that exact
+`smoke:pack` requires the registry build above and runs in CI's `consumer` job,
+which gates `verify`. It removes its temporary package and consumer after checking
+them. Pass an empty output directory, `pnpm run smoke:pack /tmp/nodex-pack`, to
+retain the tested tarball. The npm release workflow uses this same check and publishes that exact
 archive without repacking; the check itself never publishes or needs credentials.
 
 The consumer smoke installs packages in a disposable directory and therefore
