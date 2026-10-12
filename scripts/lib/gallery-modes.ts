@@ -70,9 +70,7 @@ export async function checkGalleryModes(browser: Browser, origin: string) {
       const svg = chart.locator('.recharts-surface').first();
       await svg.focus();
       await svg.press('ArrowRight');
-      await expect(chart.getByRole('status')).toContainText('JUN');
-      const selected = await chart.getByRole('status').innerText();
-      assert.match(selected, /JUN 2:/);
+      await expect(chart.getByRole('status')).toContainText('JUN 2:');
       const chartNode = await svg.elementHandle();
       await mode.scrollIntoViewIfNeeded();
       await mode.focus();
