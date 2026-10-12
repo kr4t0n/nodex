@@ -266,14 +266,14 @@ export function NestedTreemap({
   const inspect = (effort: Effort) => setInspection({ data, effort });
   return (
     // This chart application owns arrow-key traversal; its description exposes the keys to assistive technology.
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       ref={ref}
       className={`nx-nested-treemap relative flex min-w-0 flex-col rounded-[var(--nx-radius-card)] bg-[var(--nx-bg)] [padding:var(--nx-space-cardPadding)] [font-family:var(--nx-font-sans)] text-[var(--nx-ink)] focus:not-focus-visible:outline-none focus-visible:[outline:var(--nx-stroke-mark)_solid_var(--nx-ink)] ${className}`}
       style={{ width: width ?? '100%', height, boxSizing: 'border-box' }}
       data-nx-chart="nested-treemap"
       data-nx-animated={motion.isAnimationActive}
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- The application is the chart's single keyboard inspection target.
+      // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- The application is the chart's single keyboard inspection target.
       tabIndex={0}
       role="application"
       aria-roledescription="interactive treemap"

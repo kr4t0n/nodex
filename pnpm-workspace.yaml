@@ -26,11 +26,10 @@ overrides:
   # https://github.com/advisories/GHSA-vfj7-8cjw-p6xm
   '@parcel/watcher': 2.5.6
 
-# These exact plugins run through @eslint/compat's ESLint 10 API adapter.
+# The React deprecation fallback still needs the ESLint 10 API adapter.
 peerDependencyRules:
   allowedVersions:
     'eslint-plugin-react@7.37.5>eslint': '10.9.0'
-    'eslint-plugin-jsx-a11y@6.10.2>eslint': '10.9.0'
 
 allowBuilds:
   # Use the published platform binaries; no source-build fallback is needed.

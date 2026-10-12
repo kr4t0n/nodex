@@ -336,7 +336,7 @@ export function LandingTerminal({
             One command changes the whole page.
           </h2>
           {/* The textarea is the keyboard target; clicking unused transcript space only focuses it. */}
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+          {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
           <div
             className={`nx-card overflow-hidden p-0 ${interactive ? 'cursor-text' : ''}`}
             data-terminal-state={playback}

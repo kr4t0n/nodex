@@ -303,7 +303,7 @@ export function ParallelCoords({
     });
   return (
     // Escape bubbles from the native chart and brush controls to clear their shared selection.
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       ref={ref}
       className={`nx-parallel-coords flex min-w-0 flex-col rounded-[var(--nx-radius-card)] bg-[var(--nx-bg)] [padding:var(--nx-space-cardPadding)] [font-family:var(--nx-font-sans)] text-[var(--nx-ink)] ${className}`}

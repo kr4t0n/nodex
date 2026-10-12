@@ -64,6 +64,7 @@ export default async function Page({
           {ready ? (
             // A plain link, not a form: this navigates to GitHub, and the round
             // trip is the whole point of OAuth.
+            // oxlint-disable-next-line nextjs/no-html-link-for-pages -- OAuth starts with a full navigation to this API endpoint.
             <a
               href="/api/auth/github"
               className="nx-btn nx-btn--solid mt-9 no-underline"
