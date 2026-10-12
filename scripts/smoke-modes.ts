@@ -358,6 +358,10 @@ try {
     );
     for (const width of [1280, 390]) {
       await page.setViewportSize({ width, height: 1000 });
+      // Recharts measures its container after resize; capture the settled layout.
+      await expect
+        .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+        .toBeLessThanOrEqual(width);
       await input.focus();
       await page.screenshot({
         path: path.join(evidence, `consumer-${mode}-${width}.png`),
