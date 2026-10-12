@@ -23,6 +23,7 @@ export interface Language {
   visibility: 'public' | 'restricted';
   density?: Density[];
   featured: string[];
+  modes?: Array<'light' | 'dark'>;
   counts?: { expressive: number; primitives: number };
   files: { tokens: string; tokensJson: string; design: string };
 }
@@ -171,6 +172,14 @@ function readLanguages(value: unknown): Language[] {
       throw new Error('Invalid language description or visibility.');
     }
     strings(language.featured, 'language.featured');
+    if (
+      language.modes !== undefined &&
+      JSON.stringify(language.modes) !== '["light"]' &&
+      JSON.stringify(language.modes) !== '["light","dark"]'
+    )
+      throw new Error(
+        'Invalid language modes: expected light, optionally followed by dark.',
+      );
     const files = record(language.files, 'language.files');
     for (const key of ['tokens', 'tokensJson', 'design']) {
       string(files[key], `language.files.${key}`);

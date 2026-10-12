@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { OWN_LANGUAGE, tokensUrl, type Language } from './registry.ts';
+import { scopeTokenCss } from '../../../../packages/cli/src/tokens.ts';
 
 /** Preload the demo's real token sheets and fonts before any command runs. */
 export function useLandingLanguage(languages: readonly Language[]) {
@@ -30,13 +31,9 @@ export function useLandingLanguage(languages: readonly Language[]) {
           });
           if (!response.ok) throw new Error('Language stylesheet unavailable');
           const css = await response.text();
-          if (!css.includes(':root'))
-            throw new Error('Language stylesheet has no token scope');
-          // As on the language index, only rename the generated root selector.
-          // A page-owned scope lets every switch happen in one paint and avoids
-          // replacing the navigation's stylesheet while it is still downloading.
-          return css.replace(
-            ':root',
+          return scopeTokenCss(
+            css,
+            language.slug,
             `[data-nx-landing-language="${language.slug}"]`,
           );
         }),
@@ -84,6 +81,7 @@ export function useLandingLanguage(languages: readonly Language[]) {
         return;
       document.documentElement.dataset.nxLandingLanguage = next;
       document.documentElement.dataset.nxLanguage = next;
+      document.documentElement.dataset.nxMode = 'light';
       setSlug(next);
     },
     [languages, status],

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { scopeTokenCss } from '../packages/cli/src/tokens.ts';
 import { execFile } from 'node:child_process';
 import {
   mkdtemp,
@@ -539,7 +540,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/signal-tokens.css'),
-      signalTokens.replace(':root', '[data-signal]'),
+      scopeTokenCss(signalTokens, 'signal-console', '[data-signal]'),
     );
     const neoTokens = await run(
       process.execPath,
@@ -548,7 +549,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/neo-tokens.css'),
-      neoTokens.replace(':root', '[data-neo]'),
+      scopeTokenCss(neoTokens, 'neo-brutalism', '[data-neo]'),
     );
     const sketchTokens = await run(
       process.execPath,
@@ -557,7 +558,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/sketchbook-tokens.css'),
-      sketchTokens.replace(':root', '[data-sketchbook]'),
+      scopeTokenCss(sketchTokens, 'sketchbook', '[data-sketchbook]'),
     );
     const studioTokens = await run(
       process.execPath,
@@ -566,7 +567,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/studio-tokens.css'),
-      studioTokens.replace(':root', '[data-studio]'),
+      scopeTokenCss(studioTokens, 'soft-studio', '[data-studio]'),
     );
     const nocturneTokens = await run(
       process.execPath,
@@ -575,7 +576,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/nocturne-tokens.css'),
-      nocturneTokens.replace(':root', '[data-nocturne]'),
+      scopeTokenCss(nocturneTokens, 'nocturne', '[data-nocturne]'),
     );
     await writeFile(
       path.join(fixture, 'src/nocturne-consumer.tsx'),

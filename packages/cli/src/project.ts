@@ -89,6 +89,10 @@ This project uses the \`${config.language}\` design language from nodex.
   that token values cannot express, including the anti-patterns.
 - Tokens live in \`${config.paths.tokens}\`. Reference them as \`var(--nx-*)\`.
   Never hardcode a colour, radius, or stroke width that a token already names.
+- Check supported modes with \`nodex list --json\`. If dark is declared, select it
+  with \`data-nx-language="${config.language}" data-nx-mode="dark"\` on the same
+  ancestor. Omit the mode for the default; switch the attribute without remounting
+  components. Nested language boundaries reset to their own default.
 - Components fetched from nodex land in \`${config.paths.components}\`. They are
   yours to edit; nodex does not update them.
 - **Use Nodex primitives for matching controls and surfaces.** Before implementing

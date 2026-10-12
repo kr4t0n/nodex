@@ -14,9 +14,12 @@ import {
   TopBar,
 } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
+import { LanguageModeControl } from '@/components/LanguageModeControl.tsx';
+import { resolveTokens } from '../../../../packages/cli/src/tokens.ts';
 import { TokenPanel, type LanguageTokens } from '@/components/TokenPanel.tsx';
 import {
   useLanguageTokens,
+  useLanguageMode,
   usePrefersReducedMotion,
   useText,
 } from '@/lib/hooks.ts';
@@ -38,7 +41,8 @@ const THUMB_HEIGHT = 250;
 
 export function LanguageView({ slug }: { slug: string }) {
   const [catalog, setCatalog] = useState<Catalog>();
-  const themed = useLanguageTokens(slug);
+  const { mode, selectMode } = useLanguageMode(slug);
+  const themed = useLanguageTokens(slug, mode);
   const language = catalog?.languages.find((entry) => entry.slug === slug);
   const design = useText(language ? designUrl(language) : undefined);
   const tokensRaw = useText(language ? tokensJsonUrl(language) : undefined);
@@ -72,7 +76,7 @@ export function LanguageView({ slug }: { slug: string }) {
   const expressive = expressiveFor(catalog, slug);
   const primitives = primitivesFor(catalog);
   const tokens: LanguageTokens | undefined = tokensRaw.text
-    ? (JSON.parse(tokensRaw.text) as LanguageTokens)
+    ? (resolveTokens(JSON.parse(tokensRaw.text), mode) as LanguageTokens)
     : undefined;
 
   return (
@@ -81,9 +85,16 @@ export function LanguageView({ slug }: { slug: string }) {
       <PageShell>
         <section className="grid grid-cols-1 gap-10 pt-14 pb-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
           <div>
-            <h1 className="m-0 [font-family:var(--nx-font-heading)] text-[34px] leading-[1.05] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
-              {language.name}
-            </h1>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h1 className="m-0 [font-family:var(--nx-font-heading)] text-[34px] leading-[1.05] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
+                {language.name}
+              </h1>
+              <LanguageModeControl
+                language={language}
+                mode={mode}
+                onChange={selectMode}
+              />
+            </div>
             <p
               className="mt-4 max-w-[54ch] text-[length:var(--nx-type-body-descriptionSize)] leading-[1.7]"
               style={{ color: 'var(--nx-muted)' }}

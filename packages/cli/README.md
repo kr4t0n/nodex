@@ -62,6 +62,16 @@ Sample data, examples, metadata and generated preview documents stay in the
 registry. Required runtime assets and imported helpers are delivered. The app
 owns all copied source; there is no separate Nodex runtime package.
 
+`nodex list --json` reports each language's supported `modes`. If it declares
+dark, select it on the language scope with `data-nx-language="<slug>"` and
+`data-nx-mode="dark"`. The default is `light` (or an omitted mode), retaining
+the language's original palette. Import each language's CSS when combining
+scopes. A nested language boundary starts in its own default mode; ordinary
+descendants inherit. Set the attributes in initial HTML for the first paint and
+change only the mode attribute for later switches, preserving component state.
+`init` and `tokens` deliver the complete stylesheet, including embedded fonts and
+native `color-scheme`; `tokens --json` retains the authored mode overrides.
+
 ## Commands
 
 ```text

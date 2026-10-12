@@ -100,6 +100,24 @@ color keys become `--nx-<role>`, other nested values become
 `--nx-*` names are reserved for language tokens. A local control setting uses a
 different name, such as `--slider-steps`.
 
+Top-level tokens define the default `light` mode, preserving even an inherently
+dark language's existing palette. Optional `modes.dark` contains partial `color`
+overrides of existing roles and a replacement `ramp.steps` array. It cannot
+introduce roles or override typography, geometry or motion. The pure contract in
+`packages/cli/src/tokens.ts` validates and resolves modes for build, CLI and browser
+without adding a runtime workspace dependency to the published CLI. Never flatten
+`modes` into variables. Source JSON retains the declaration; published language
+metadata lists supported modes, and the build checks rendered marks in each mode.
+
+Generated CSS supplies a full default at each `data-nx-language` boundary, then
+dark paint on that same element when `data-nx-mode="dark"`. An unmarked document
+root is the single-language fallback. Explicit nested language boundaries reset
+to their default; descendant overrides remain local. Native `color-scheme`
+follows the selection. Scope transformations use `scopeTokenCss` for every rule,
+never a single `:root` replacement. Index scopes are removed on unmount so they
+cannot reset a later gallery's dark specimens. Gallery mode changes update tokens
+without keying or remounting examples; index and landing selections stay default.
+
 `font.faces` is asset metadata, not CSS variables. Each face declares an exact
 static `@fontsource` or variable `@fontsource-variable` package, WOFF2 file,
 family, weight or weight range and style. The build checks
@@ -159,6 +177,11 @@ uses `onDarkMuted` rather than the supporting text color for paper.
 The language scaffold copies canonical color role names into a neutral palette
 and carries the canonical shadow roles, without a separate primitive-role list.
 
+Prose has shared `type.prose.sectionTransform` and `headingLineHeight` roles.
+Existing languages use `uppercase` and `inherit`, retaining both regular and
+narrow prose. Choose a new language's values deliberately rather than imposing
+one heading treatment in the primitive.
+
 Surface, field, selection, badge and value paints have independent semantic
 roles. Neo-brutalism uses lilac panels, cream fields, mint selections, pink
 solid badges and blue/violet value marks while retaining dark text and outlines.
@@ -184,6 +207,11 @@ repository's package manager. Contributor commands live in README.
 The [contributor setup](README.md#develop-the-registry-and-gallery) owns hooks and
 prerequisites; [verification](README.md#verification) owns commands and CI coverage.
 Do not bypass the staged secret scan or the full-history CI scan.
+
+Generated test evidence belongs in a temporary directory outside the repository,
+never a gitignored folder inside the project. Print its location when the check
+finishes and report results in the PR or task thread. CI uploads screenshots and
+comparison reports from its runner temporary directory for review.
 
 `packages/core` owns schema, taxonomy and source loading. It has browser-safe
 schema/taxonomy entrypoints and a Node-only filesystem loader. The CLI imports

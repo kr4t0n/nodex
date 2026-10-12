@@ -40,6 +40,7 @@
     margin-bottom: 0;
     font-family: var(--nx-font-heading, var(--nx-font-sans));
     letter-spacing: var(--nx-type-prose-headingTracking);
+    line-height: var(--nx-type-prose-headingLineHeight);
   }
 
   .nx-prose h1 {
@@ -47,15 +48,12 @@
     font-weight: var(--nx-type-prose-titleWeight);
   }
 
-  /* Section headings are set as small caps rather than large type. Hierarchy by
-   tracking and colour, not by scale, which is how this language handles it
-   everywhere else. */
   .nx-prose h2 {
     margin-top: var(--nx-space-proseSectionGap);
     font-size: var(--nx-type-prose-sectionSize);
     font-weight: var(--nx-font-weight-bold);
     letter-spacing: var(--nx-type-prose-sectionTracking);
-    text-transform: uppercase;
+    text-transform: var(--nx-type-prose-sectionTransform);
     color: var(--nx-muted);
   }
 

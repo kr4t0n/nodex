@@ -4,8 +4,15 @@ import path from 'node:path';
 import { dependencyPin } from '../../packages/cli/src/install.ts';
 import { rulesFromTokens } from '../../packages/cli/src/lint.ts';
 import { containedPath, registryPath } from '../../packages/cli/src/safety.ts';
+import {
+  resolveTokens,
+  tokenModes,
+  tokenScope,
+  type TokenMode,
+  type Tokens,
+} from '../../packages/cli/src/tokens.ts';
 
-export type Tokens = Record<string, unknown>;
+export type { Tokens } from '../../packages/cli/src/tokens.ts';
 
 export interface TokenFontFace {
   /** Exact package version, also pinned in the repository dependencies. */
@@ -125,7 +132,11 @@ export async function renderFontFaces(
 }
 
 /** One naming convention for authored tokens and their CSS representation. */
-export function tokenVariables(tokens: Tokens): Record<string, string> {
+export function tokenVariables(
+  tokens: Tokens,
+  mode: TokenMode = 'light',
+): Record<string, string> {
+  tokens = resolveTokens(tokens, mode);
   fontFaces(tokens);
   const variables: Record<string, string> = {};
   function walk(value: unknown, parts: string[]) {
@@ -179,11 +190,16 @@ export function renderTokens(
   tokens: Tokens,
   name: string,
   fontCss = '',
+  slug = 'default',
 ): string {
-  const variables = tokenVariables(tokens);
-  return `${fontCss}/* ${name.replace(/\*\//g, '* /')}: generated from the language tokens.json. */\n:root {\n${Object.entries(
-    variables,
-  )
-    .map(([key, value]) => `  ${key}: ${value};`)
-    .join('\n')}\n}\n`;
+  const base = tokenVariables(tokens);
+  const blocks = tokenModes(tokens).map((mode) => {
+    const variables = tokenVariables(tokens, mode);
+    const entries = Object.entries(variables).filter(
+      ([key, value]) => mode === 'light' || value !== base[key],
+    );
+    const selector = `${tokenScope(slug)}${mode === 'dark' ? '[data-nx-mode="dark"]' : ''}`;
+    return `${selector} {\n  color-scheme: ${mode};\n${entries.map(([key, value]) => `  ${key}: ${value};`).join('\n')}\n}`;
+  });
+  return `${fontCss}/* ${name.replace(/\*\//g, '* /')}: generated from the language tokens.json. */\n${blocks.join('\n')}\n`;
 }
