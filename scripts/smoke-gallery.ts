@@ -10,6 +10,7 @@ import type { GalleryRegistry } from '../packages/core/src/schema.ts';
 import { nativePreviewFixture } from './lib/native-preview-fixture.ts';
 import { startSite } from './lib/site.ts';
 import { checkGalleryModes } from './lib/gallery-modes.ts';
+import { checkGalleryDefaults } from './lib/gallery-defaults.ts';
 import { checkStudioPreviewFit } from './lib/studio-preview-fit.ts';
 import { checkChartPreviewFit } from './lib/chart-preview-fit.ts';
 
@@ -96,6 +97,7 @@ async function main() {
     return page;
   }
   try {
+    await checkGalleryDefaults(browser, origin, evidence);
     await checkGalleryModes(browser, origin, evidence);
     const page = await newPage();
     const requests: string[] = [];

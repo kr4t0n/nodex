@@ -87,6 +87,11 @@ jobs:
           NODEX_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
           NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
 
+      - name: Check Hearth consumer rendering and interaction
+        run: pnpm run smoke:hearth
+        env:
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
+
       - name: Test registry contracts and read-only validation
         run: pnpm test
 

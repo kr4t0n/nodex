@@ -32,13 +32,16 @@
     "start": "pnpm --filter @nodex/web run start",
     "test": "node --test scripts/registry.test.ts scripts/lint.test.ts scripts/token-modes.test.ts && pnpm run test:auth",
     "test:auth": "node --test scripts/device-*.test.ts scripts/oauth.test.ts scripts/token-route.test.ts scripts/migrate-errors.test.ts",
-    "test:auth:postgres": "node --test scripts/auth-postgres.test.ts"
+    "test:auth:postgres": "node --test scripts/auth-postgres.test.ts",
+    "smoke:hearth": "node scripts/smoke-hearth.ts"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",
     "@fontsource-variable/inter": "5.3.0",
     "@fontsource-variable/jetbrains-mono": "5.3.0",
     "@fontsource-variable/manrope": "5.3.0",
+    "@fontsource-variable/newsreader": "5.3.0",
+    "@fontsource-variable/source-sans-3": "5.3.1",
     "@fontsource-variable/space-grotesk": "5.3.0",
     "@fontsource/gaegu": "5.3.0",
     "@next/eslint-plugin-next": "16.3.8",

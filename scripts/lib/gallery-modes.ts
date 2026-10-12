@@ -144,7 +144,107 @@ export async function checkGalleryModes(
       await page.close();
     }
   }
+  await checkHearthGallery(browser, origin, evidence);
   console.log(
     'Gallery modes: active shell/palette, retained native/chart state, keyboard selection, mobile and reduced motion',
   );
+}
+
+/** Check the shipped two-mode language without substituting a fixture palette. */
+async function checkHearthGallery(
+  browser: Browser,
+  origin: string,
+  evidence: string,
+) {
+  for (const width of [1365, 390]) {
+    const page = await browser.newPage({
+      baseURL: origin,
+      viewport: { width, height: 900 },
+      reducedMotion: 'reduce',
+    });
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.goto('/l/hearth');
+      const mode = page.getByRole('combobox', { name: 'Color mode' });
+      await expect(mode).toHaveValue('light');
+      await expect(
+        page
+          .getByRole('complementary', { name: 'Language tokens' })
+          .locator('svg line'),
+      ).toHaveCount(2);
+      const inputPreview = page.locator('[data-nx-preview="shared/input"]');
+      await inputPreview.scrollIntoViewIfNeeded();
+      const input = inputPreview.getByRole('searchbox', {
+        name: 'Search components',
+      });
+      await input.fill('Hearth gallery state');
+      const savedInput = await input.elementHandle();
+      const chart = page.locator('[data-nx-preview="hearth/hearth-bars"]');
+      await chart.scrollIntoViewIfNeeded();
+      await expect(chart).toHaveAttribute('data-nx-preview-state', 'ready', {
+        timeout: 20_000,
+      });
+      const svg = chart.locator('.recharts-surface').first();
+      const savedChart = await svg.elementHandle();
+      for (const selection of ['light', 'dark']) {
+        await mode.selectOption(selection);
+        await expect(page.locator('html')).toHaveCSS('color-scheme', selection);
+        await expect(input).toHaveValue('Hearth gallery state');
+        assert(
+          await input.evaluate((node, saved) => node === saved, savedInput),
+        );
+        assert(await svg.evaluate((node, saved) => node === saved, savedChart));
+        const paints = await page.evaluate(() => {
+          const frame = document.querySelector(
+            '[data-nx-chart="hearth-bars"]',
+          )!;
+          return {
+            bg: getComputedStyle(document.body).backgroundColor,
+            chart: getComputedStyle(frame).backgroundColor,
+            ink: getComputedStyle(frame).getPropertyValue('--nx-ink').trim(),
+          };
+        });
+        assert.equal(paints.bg, paints.chart);
+        assert.equal(
+          paints.ink.toUpperCase(),
+          selection === 'light' ? '#352B24' : '#EDE2CF',
+        );
+        await mode.scrollIntoViewIfNeeded();
+        await page.evaluate(() => document.fonts.ready.then(() => undefined));
+        await page.screenshot({
+          path: path.join(evidence, `hearth-gallery-${selection}-${width}.png`),
+        });
+        await chart.scrollIntoViewIfNeeded();
+        await page.mouse.move(0, 0);
+        await page.screenshot({
+          path: path.join(
+            evidence,
+            `hearth-gallery-charts-${selection}-${width}.png`,
+          ),
+        });
+        assert(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+        );
+      }
+      await svg.focus();
+      await svg.press('ArrowLeft');
+      await expect(chart.getByRole('status')).toContainText('Protein');
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await expect(chart.locator('[data-nx-chart]')).toHaveAttribute(
+        'data-nx-animated',
+        'true',
+      );
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(chart.locator('[data-nx-chart]')).toHaveAttribute(
+        'data-nx-animated',
+        'false',
+      );
+      assert.deepEqual(errors, []);
+    } finally {
+      await page.close();
+    }
+  }
 }

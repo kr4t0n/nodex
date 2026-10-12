@@ -1,0 +1,64 @@
+{
+  "slug": "hearth-bars",
+  "title": "A nourishing bowl",
+  "description": "Caller-ordered horizontal amounts with labels above quiet, warm marks.",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthBars"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 500
+  },
+  "tags": ["editorial", "warm", "comparison"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthBarsDatum[]",
+      "required": true,
+      "description": "Caller-ordered { id, label, value, tone? } rows with unique nonempty IDs. Finite nonnegative values are measured amounts; null, negative and non-finite values are unavailable. Zero retains its reading without a bar. Optional tone a\u2013d identifies a category; the default is a. Long labels retain their full text in tooltips."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement heading and tooltip unit. Defaults to Value."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the unit heading."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct readings, numeric-axis ticks and tooltips. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; scoped finite motion honors live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The chart fills its parent; dense plots scroll locally."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect observations through Recharts."
+    }
+  ]
+}

@@ -36,6 +36,7 @@ import {
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const CHECK = process.argv.includes('--check');
+const PRIMITIVE_PREVIEW_LANGUAGE = 'mono-editorial';
 const run = promisify(execFile);
 const escapeHtml = (value: string) =>
   value.replace(
@@ -53,6 +54,7 @@ interface Preview {
   key: string;
   component: LoadedComponent;
   item: RegistryItem;
+  defaultLanguage: string;
   languages: Array<{ slug: string; tokens: Tokens }>;
 }
 
@@ -74,8 +76,25 @@ for (const name of ${scriptJson(preview.component.meta.exports)}) {
 }
 const Example = examples[${JSON.stringify(preview.component.meta.example.export)}];
 if (!isValidElementType(Example)) throw new Error('Invalid declared example export');
+// A query-selected stylesheet loads dynamically; its font faces may not exist
+// yet when this module starts, even though the default stylesheet was blocking.
+// The sheet object can still refer to the old URL while the new one loads.
+const tokenSheet = document.getElementById('nx-tokens');
+if (tokenSheet.sheet?.href !== tokenSheet.href) await new Promise((resolve, reject) => {
+  const finish = (error) => {
+    clearTimeout(timeout);
+    tokenSheet.removeEventListener('load', loaded);
+    tokenSheet.removeEventListener('error', failed);
+    error ? reject(error) : resolve();
+  };
+  const loaded = () => finish();
+  const failed = () => finish(new Error('Preview token stylesheet did not load'));
+  const timeout = setTimeout(failed, 30000);
+  tokenSheet.addEventListener('load', loaded, { once: true });
+  tokenSheet.addEventListener('error', failed, { once: true });
+});
 const fontsByLanguage = ${scriptJson(Object.fromEntries(preview.languages.map((language) => [language.slug, fontFaces(language.tokens)])))};
-const selectedFonts = fontsByLanguage[new URLSearchParams(location.search).get('lang')] ?? fontsByLanguage[${JSON.stringify(preview.languages[0]!.slug)}];
+const selectedFonts = fontsByLanguage[new URLSearchParams(location.search).get('lang')] ?? fontsByLanguage[${JSON.stringify(preview.defaultLanguage)}];
 for (const font of selectedFonts) {
   const loaded = await document.fonts.load(font.style + ' ' + font.weight.split(' ')[0] + ' 14px ' + JSON.stringify(font.family));
   if (!loaded.length) throw new Error('Declared preview font did not load: ' + font.family);
@@ -112,7 +131,6 @@ function previewDocument(
       relative(`registry/languages/${language.slug}/tokens.css`),
     ]),
   );
-  const first = preview.languages[0]!;
   const module = `registry/_preview/${preview.key}.js`;
   const css = `registry/_preview/${preview.key}.css`;
   const themeScript =
@@ -122,7 +140,7 @@ function previewDocument(
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(preview.item.title)}</title>
-<link id="nx-tokens" rel="stylesheet" href="${escapeHtml(tokens[first.slug]!)}">
+<link id="nx-tokens" rel="stylesheet" href="${escapeHtml(tokens[preview.defaultLanguage]!)}">
 ${themeScript}
 <link rel="stylesheet" href="${relative('registry/_preview/styles.css')}">
 ${assets.has(css) ? `<link rel="stylesheet" href="${relative(css)}">` : ''}
@@ -146,6 +164,14 @@ async function main() {
       })),
     );
     const items: RegistryItem[] = [];
+    if (
+      !languages.some(
+        (language) => language.meta.slug === PRIMITIVE_PREVIEW_LANGUAGE,
+      )
+    )
+      throw new Error(
+        `Missing primitive preview language: ${PRIMITIVE_PREVIEW_LANGUAGE}`,
+      );
     const previews: Preview[] = [];
     const publicFiles = new Map<string, string>();
     const findings: string[] = [];
@@ -313,6 +339,8 @@ async function main() {
         key: where,
         component,
         item,
+        defaultLanguage:
+          meta.tier === 'primitive' ? PRIMITIVE_PREVIEW_LANGUAGE : language,
         languages: themes.map((theme) => ({
           slug: theme.meta.slug,
           tokens: theme.tokens,
@@ -438,7 +466,9 @@ async function main() {
               )
             )
               throw new Error(`${preview.key}: rendered no chart marks`);
-            const tokens = preview.languages[0]!.tokens;
+            const tokens = preview.languages.find(
+              (language) => language.slug === preview.defaultLanguage,
+            )!.tokens;
             const modes = tokenModes(tokens);
             for (const mode of modes) {
               if (mode === 'dark')
