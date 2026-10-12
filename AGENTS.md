@@ -113,7 +113,8 @@ Generated CSS supplies a full default at each `data-nx-language` boundary, then
 dark paint on that same element when `data-nx-mode="dark"`. An unmarked document
 root is the single-language fallback. Explicit nested language boundaries reset
 to their default; descendant overrides remain local. Native `color-scheme`
-follows the selection. Scope transformations use `scopeTokenCss` for every rule,
+follows the selection. Hearth is the first shipped language with both modes;
+its type, geometry and motion remain shared. Scope transformations use `scopeTokenCss` for every rule,
 never a single `:root` replacement. Index scopes are removed on unmount so they
 cannot reset a later gallery's dark specimens. Gallery mode changes update tokens
 without keying or remounting examples; index and landing selections stay default.
@@ -162,7 +163,7 @@ tokens and keeps neutral starter paint/system fonts; it must not maintain a seco
 hardcoded primitive-token list. The CLI smoke verifies the scaffold against all
 primitive CSS. Consumer smoke delivers all 24 primitives and tests descendant
 overrides, unaffected sibling scopes, retained form state, native keyboard/modal/
-picker behavior and reduced motion in all six languages.
+picker behavior and reduced motion in all seven languages, including both Hearth modes.
 
 Structural outlines use `color.border`, independently of quiet `color.grid`
 fills. Primary action fill, lettering, border and hover paint have `color.action*`

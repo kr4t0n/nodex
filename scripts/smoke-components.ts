@@ -569,6 +569,15 @@ async function consumerFixture(): Promise<string> {
       path.join(fixture, 'src/styles/studio-tokens.css'),
       scopeTokenCss(studioTokens, 'soft-studio', '[data-studio]'),
     );
+    const hearthTokens = await run(
+      process.execPath,
+      [cli, 'tokens', 'hearth'],
+      fixture,
+    );
+    await writeFile(
+      path.join(fixture, 'src/styles/hearth-tokens.css'),
+      scopeTokenCss(hearthTokens, 'hearth', '[data-hearth]'),
+    );
     const nocturneTokens = await run(
       process.execPath,
       [cli, 'tokens', 'nocturne'],
@@ -631,7 +640,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/main.css'),
-      '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@import "./nocturne-tokens.css";\n@source "../";\n',
+      '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@import "./nocturne-tokens.css";\n@import "./hearth-tokens.css";\n@source "../";\n',
     );
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(
@@ -879,9 +888,15 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await waitForCharts(page);
     const loadedFonts = await page.evaluate(async () => {
       await Promise.all(
-        ['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu', 'Manrope'].map(
-          (family) => document.fonts.load(`12px "${family}"`),
-        ),
+        [
+          'Inter',
+          'JetBrains Mono',
+          'Space Grotesk',
+          'Gaegu',
+          'Manrope',
+          'Newsreader',
+          'Source Sans 3',
+        ].map((family) => document.fonts.load(`12px "${family}"`)),
       );
       await document.fonts.ready;
       return [...document.fonts]
@@ -889,9 +904,15 @@ async function checkConsumer(browser: Browser): Promise<void> {
         .map((face) => face.family.replace(/["']/g, ''));
     });
     assert(
-      ['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu', 'Manrope'].every(
-        (family) => loadedFonts.includes(family),
-      ),
+      [
+        'Inter',
+        'JetBrains Mono',
+        'Space Grotesk',
+        'Gaegu',
+        'Manrope',
+        'Newsreader',
+        'Source Sans 3',
+      ].every((family) => loadedFonts.includes(family)),
       'All delivered design-language fonts must load without an external host',
     );
     await checkPrimitiveConsumer(page);

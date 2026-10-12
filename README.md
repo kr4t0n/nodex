@@ -5,16 +5,16 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains **112 expressive charts** (64 Mono Editorial, nine Signal Console,
-nine Neo-brutalism, nine Sketchbook, nine Soft Studio and twelve Nocturne) and **24 reusable primitives**, delivered as editable React source.
+The registry contains **114 expressive charts** (64 Mono Editorial, nine Signal Console,
+nine Neo-brutalism, nine Sketchbook, nine Soft Studio, twelve Nocturne and two Hearth) and **24 reusable primitives**, delivered as editable React source.
 This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
-Six design languages are available: Mono Editorial, Signal Console,
-**Neo-brutalism**, **Sketchbook**, **Soft Studio** and **Nocturne**. Neo-brutalism starts with all 24 shared primitives, a complete
+Seven design languages are available: Mono Editorial, Signal Console,
+**Neo-brutalism**, **Sketchbook**, **Soft Studio**, **Nocturne** and **Hearth**. Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
 yellow actions, pink badges, mint selections, cream fields and blue value
@@ -48,6 +48,25 @@ previews; the language gallery contains all nine charts.
 The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex implements these through its own semantic tokens and React primitives.
+
+## Hearth
+
+Hearth is available at `/l/hearth`, with light and dark modes, all 24 shared
+primitives and two expressive charts. Cream paper and soft umber, Newsreader
+headings, readable Source Sans 3, and clay, olive, ochre and rosewood accents
+support recipes, journals and long-form reading. The
+[design guide](registry/languages/hearth/DESIGN.md) defines the language beyond
+charts. Both modes keep the same typography and geometry, with 18px prose,
+16px controls and flat surfaces.
+
+- `hearth-bars`: caller-ordered horizontal amounts with labels above their marks.
+- `hearth-line`: ordered readings with numeric spacing and explicit missing-data gaps.
+
+Choose Light or Dark in the language gallery, or set `data-nx-language="hearth"`
+and `data-nx-mode="dark"` on the same consumer scope. The downloaded stylesheet
+contains both palettes and embedded normal/italic fonts. Mode changes retain
+mounted examples, form values and focus. The two featured previews are curated
+explicitly; the language index keeps its default light appearance.
 
 ## Nocturne
 
@@ -921,6 +940,7 @@ pnpm run smoke
 pnpm run smoke:cli
 pnpm run smoke:pack
 pnpm run smoke:modes
+pnpm run smoke:hearth
 pnpm run check:shell
 pnpm run lint
 pnpm run format:check
@@ -930,19 +950,19 @@ pnpm run smoke:landing
 pnpm run smoke:gallery
 ```
 
-| Command                   | Coverage                                                                                                                                                                                                                                                                                                                   |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `build:registry`          | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance                                                                                                                                                                                                     |
-| `check:registry`          | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched                                                                                                                                                                                                                        |
-| `test`                    | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation, lint coverage and warning failures                                                                                                                                                                           |
-| `smoke`                   | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all six languages, stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
-| `smoke:cli`               | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds                                                                                                                                                                  |
-| `smoke:pack`              | Builds and packs the CLI with pnpm, installs the tarball in a fresh npm project outside the workspace, and runs its installed `nodex list` against the built registry                                                                                                                                                      |
-| `check:shell`             | Gallery primitive classes have their curated stylesheets                                                                                                                                                                                                                                                                   |
-| `smoke:landing`           | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets                                                               |
-| `smoke:gallery`           | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout                                   |
-| `lint` / `typecheck`      | Application, registry, CLI and build source                                                                                                                                                                                                                                                                                |
-| `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation                                                                                                                                                                                                                           |
+| Command                   | Coverage                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build:registry`          | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance                                                                                                                                                                                                                                     |
+| `check:registry`          | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched                                                                                                                                                                                                                                                        |
+| `test`                    | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation, lint coverage and warning failures                                                                                                                                                                                                           |
+| `smoke`                   | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all seven languages (including both Hearth modes), stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
+| `smoke:cli`               | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds                                                                                                                                                                                                  |
+| `smoke:pack`              | Builds and packs the CLI with pnpm, installs the tarball in a fresh npm project outside the workspace, and runs its installed `nodex list` against the built registry                                                                                                                                                                                      |
+| `check:shell`             | Gallery primitive classes have their curated stylesheets                                                                                                                                                                                                                                                                                                   |
+| `smoke:landing`           | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets                                                                                               |
+| `smoke:gallery`           | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout                                                                   |
+| `lint` / `typecheck`      | Application, registry, CLI and build source                                                                                                                                                                                                                                                                                                                |
+| `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation                                                                                                                                                                                                                                                           |
 
 `smoke:modes` checks downloaded mode CSS and copied components offline, native
 controls and modal focus, dark first paint, live reduced motion and the two prose
@@ -959,6 +979,14 @@ No generated review evidence is left in the checkout. No alternate language is
 published by these tests. `smoke:gallery` also checks the mode control, active
 token-panel values and retained specimen state; `smoke:pack` exercises mode init,
 JSON delivery and lint through the installed tarball.
+
+`smoke:hearth` checks the copied bar/line contracts, numeric geometry, unavailable
+and zero readings, offline fonts, mode changes, keyboard focus and live reduced
+motion. It captures desktop/mobile cookbook compositions and all 24 primitives
+in both modes, plus the same prose with Mono Editorial as a reference. Evidence
+uses a fresh system temporary directory or `NODEX_EVIDENCE_DIR`; CI includes it
+in `language-mode-evidence`. The cookbook composition is a consumer test fixture,
+not a delivered recipe component.
 
 Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
 stylesheet to sort utilities, including in delivered registry source. Generated

@@ -1,0 +1,64 @@
+{
+  "slug": "hearth-line",
+  "title": "Practice at the table",
+  "description": "Measured preparation times connected by straight segments on a numeric scale.",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthLine"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 460
+  },
+  "tags": ["editorial", "warm", "trend"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthLineDatum[]",
+      "required": true,
+      "description": "Observations { id, label, x, value } with unique nonempty IDs and finite, strictly increasing x. Values may be signed; null and non-finite readings break the line. Numeric x controls spacing. A single observation remains a point; zero remains measured."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement heading and tooltip unit. Defaults to Value."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the unit heading."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct readings, numeric-axis ticks and tooltips. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; scoped finite motion honors live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The chart fills its parent; dense plots scroll locally."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect observations through Recharts."
+    }
+  ]
+}
