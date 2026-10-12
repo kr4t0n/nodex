@@ -1,12 +1,18 @@
 /** Browser regression for the landing's terminal, real themes and navigation. */
 import assert from 'node:assert/strict';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
-import { chromium, expect, type Page } from '@playwright/test';
+import { chromium, expect, type Browser, type Page } from '@playwright/test';
 
 import { startSite } from './lib/site.ts';
 
 let site: Awaited<ReturnType<typeof startSite>> | undefined;
+const evidence = process.env.NODEX_EVIDENCE_DIR
+  ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
+  : await mkdtemp(path.join(tmpdir(), 'nodex-landing-evidence-'));
 interface HandoffMeasurement {
   height: number;
   commandHeight: number;
@@ -174,6 +180,83 @@ async function assertScrollback(page: Page) {
     pageY,
     'History keyboard scrolling must not move the page',
   );
+}
+
+/** Frames of the demo's beats, handoff and focus for review, at both widths. */
+async function captureEvidence(browser: Browser, origin: string) {
+  for (const [name, viewport] of [
+    ['1366', { width: 1366, height: 768 }],
+    ['390', { width: 390, height: 844 }],
+  ] as const) {
+    const context = await browser.newContext({
+      baseURL: origin,
+      viewport,
+      reducedMotion: 'no-preference',
+    });
+    const page = await context.newPage();
+    const shot = (frame: string) =>
+      page.screenshot({
+        path: path.join(evidence, `landing-${name}-${frame}.png`),
+      });
+    await page.goto('/');
+    await openTerminal(page);
+    for (const [index, frame] of [
+      [0, 'first-output'],
+      [1, 'second-output'],
+    ] as const) {
+      await expect(page.locator('[data-cli-output]').nth(index)).toHaveCSS(
+        'opacity',
+        '1',
+        { timeout: 15_000 },
+      );
+      await shot(frame);
+    }
+    await assertTheme(page, 'signal-console');
+    await shot('signal-console');
+    await expect(page.locator('[data-terminal-state]')).toHaveAttribute(
+      'data-terminal-state',
+      'interactive',
+      { timeout: 30_000 },
+    );
+    await shot('handoff');
+    const command = page.getByRole('textbox', { name: 'Terminal command' });
+    await page.getByRole('region', { name: 'Terminal history' }).focus();
+    for (let step = 0; step < 20; step += 1) {
+      if (
+        await command.evaluate((element) => element === document.activeElement)
+      )
+        break;
+      await page.keyboard.press('Tab');
+    }
+    await expect(command).toBeFocused();
+    await shot('keyboard-focus');
+    await context.close();
+
+    const reduced = await browser.newContext({
+      baseURL: origin,
+      viewport,
+      reducedMotion: 'reduce',
+    });
+    const still = await reduced.newPage();
+    await still.goto('/');
+    await openTerminal(still);
+    await expect(
+      still.getByRole('textbox', { name: 'Terminal command' }),
+    ).toBeEnabled({ timeout: 15_000 });
+    await assertTheme(still, 'sketchbook');
+    await still.screenshot({
+      path: path.join(evidence, `landing-${name}-reduced.png`),
+    });
+    await still
+      .getByRole('region', { name: 'Terminal history' })
+      .evaluate((element) => {
+        element.scrollTop = 0;
+      });
+    await still.screenshot({
+      path: path.join(evidence, `landing-${name}-reduced-history-top.png`),
+    });
+    await reduced.close();
+  }
 }
 
 async function main() {
@@ -767,6 +850,8 @@ async function main() {
     );
     await failure.close();
     assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
+    await captureEvidence(browser, origin);
+    console.log(`Landing evidence: ${evidence}`);
     console.log(
       'Landing failure state: unavailable token stylesheet leaves the default page usable',
     );
