@@ -286,28 +286,59 @@ async function checkHeroWordmark(origin: string, errors: string[]) {
       }
       if (!scrollbars) continue;
 
-      // A cold load whose font arrives late, then one where it never does:
-      // the wordmark is measured again when the font swaps in, and the
-      // fallback font must centre as well.
-      for (const font of ['slow', 'blocked'] as const) {
+      // A cold load whose token sheet arrives late, one whose font file
+      // arrives after the page has measured the wordmark in the fallback, and
+      // one where the font never arrives. The wordmark must be measured again
+      // when the font swaps in, and the fallback font must centre as well.
+      for (const font of ['slow', 'late', 'blocked'] as const) {
         const page = await browser.newPage({
           baseURL: origin,
           viewport: { width: 1000, height: 700 },
         });
         page.on('pageerror', (error) => errors.push(error.message));
+        const files: Buffer[] = [];
         await page.route(
           '**/languages/mono-editorial/tokens.css',
           async (route) => {
             if (font === 'blocked') return route.abort();
-            await delay(1500);
-            await route.continue();
+            if (font === 'slow') {
+              await delay(1500);
+              return route.continue();
+            }
+            // Serve the embedded faces as separate files, so the sheet
+            // applies at once and only the font is late.
+            const response = await route.fetch();
+            const css = (await response.text()).replace(
+              /url\("data:font\/woff2;base64,([^"]+)"\)/g,
+              (_, data: string) => {
+                files.push(Buffer.from(data, 'base64'));
+                return `url("/__late-font-${files.length - 1}.woff2")`;
+              },
+            );
+            await route.fulfill({ response, body: css });
           },
         );
-        await page.goto('/');
-        if (font === 'slow')
-          await expect(page.locator('h1')).toHaveCSS('font-family', /Inter/, {
-            timeout: 10_000,
+        await page.route('**/__late-font-*.woff2', async (route) => {
+          await delay(2500);
+          const index = Number(
+            /late-font-(\d+)/.exec(route.request().url())![1],
+          );
+          await route.fulfill({
+            contentType: 'font/woff2',
+            body: files[index]!,
           });
+        });
+        await page.goto('/');
+        if (font !== 'blocked')
+          await page.waitForFunction(
+            () =>
+              [...document.fonts].some(
+                (face) =>
+                  face.family.includes('Inter') && face.status === 'loaded',
+              ),
+            null,
+            { timeout: 10_000 },
+          );
         await assertHeroWordmark(
           page,
           `1000x700-scrollbar-font-${font}`,
