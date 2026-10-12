@@ -290,7 +290,7 @@ async function main() {
     await delay(1600);
     await expect(page.locator('[data-nx-example]')).toHaveCount(0);
 
-    await expect(page.locator('[data-cli-command]')).toHaveCount(3);
+    await expect(page.locator('[data-cli-command]')).toHaveCount(4);
     const samples: string[] = [];
     await page.exposeFunction('recordTerminalCommand', (text: string) => {
       samples.push(text);
@@ -314,7 +314,7 @@ async function main() {
       });
     await openTerminal(page);
     await expect(page.locator('[data-cli-command]').first()).toHaveText(
-      '$nodex list',
+      '$npm install -g @kubitnodes/nodex',
     );
     await returnToHero(page, 'mono-editorial');
     await expect(page.locator('[data-terminal-state]')).toHaveAttribute(
@@ -383,7 +383,7 @@ async function main() {
       measurement.reused,
       'Sketchbook must reuse the Neo-brutalism prompt',
     );
-    assert.equal(measurement.prompts, 3, 'The demo must retain three prompts');
+    assert.equal(measurement.prompts, 4, 'The demo must retain four prompts');
     assert(measurement.visible, 'The final demo prompt must be visible');
     const command = page.getByRole('textbox', {
       name: 'Terminal command',
@@ -431,9 +431,10 @@ async function main() {
       demoHeight,
       'The terminal body must keep its height at handoff',
     );
+    // The install line scrolls into history; every nodex prompt stays in view.
     assert(
       await page.locator('[data-terminal-entry]').evaluateAll((rows) =>
-        rows.every((row) => {
+        rows.slice(1).every((row) => {
           const viewport = row
             .closest('[role="region"]')!
             .getBoundingClientRect();
@@ -441,7 +442,7 @@ async function main() {
           return bounds.top >= viewport.top && bounds.bottom <= viewport.bottom;
         }),
       ),
-      'All three prompts must fit inside the desktop terminal',
+      'All three nodex prompts must fit inside the desktop terminal',
     );
     await assertFits(page);
 
@@ -468,8 +469,8 @@ async function main() {
       .allTextContents();
     assert.equal(
       completedText.length,
-      3,
-      'The editor must retain exactly three visible command rows',
+      4,
+      'The editor must retain exactly four visible command rows',
     );
     await expect(page.locator('[data-terminal-entry]').last()).toContainText(
       'nodex init sketchbook --force',
@@ -541,7 +542,7 @@ async function main() {
     await expect(page.locator('[data-terminal-output]')).toHaveText(
       'Switched to Mono Editorial',
     );
-    await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(page.locator('[data-terminal-entry]')).toHaveCount(4);
     await command.fill('nodex init ');
     await command.press('ArrowUp');
     await expect(command).toHaveValue('nodex init mono-editorial');
@@ -675,14 +676,14 @@ async function main() {
       )
       .toBe(true);
     await expect(page.locator('[data-cli-command]')).toHaveCount(0);
-    await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(page.locator('[data-terminal-entry]')).toHaveCount(4);
     assert.deepEqual(
       (await page.locator('[data-terminal-entry]').allTextContents()).slice(
         0,
-        2,
+        3,
       ),
-      completedText.slice(0, 2),
-      'Edits must preserve the first two command rows',
+      completedText.slice(0, 3),
+      'Edits must preserve the first three command rows',
     );
     assert.equal(
       (await page.locator('[data-terminal-state] > div').last().boundingBox())!
@@ -727,7 +728,7 @@ async function main() {
     await small.keyboard.press('Backspace');
     await expect(input).toHaveValue('nodex init sketchbook --forc');
     await small.keyboard.press('e');
-    await expect(small.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(small.locator('[data-terminal-entry]')).toHaveCount(4);
     await expect(small.locator('[data-terminal-caret]')).toHaveCSS(
       'animation-name',
       'none',
@@ -828,7 +829,7 @@ async function main() {
         Math.abs(narrowEditor.height - narrowDemo.commandHeight) < 1,
       'The narrow editor must preserve the demo command position and wrapping',
     );
-    await expect(small.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(small.locator('[data-terminal-entry]')).toHaveCount(4);
     await mobile.close();
     console.log(
       'Landing accessibility: narrow viewport, keyboard switching and live reduced-motion changes passed',
