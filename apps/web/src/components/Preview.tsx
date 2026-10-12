@@ -108,7 +108,7 @@ function LiveExample({
   if (!Example) throw new Error('No React example in this website build');
   return (
     // Native links emit clicks from Enter too; this ancestor only cancels placeholder navigation.
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       ref={ref}
       data-nx-example

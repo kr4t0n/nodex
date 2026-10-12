@@ -225,14 +225,16 @@ scaled strokes so conformance cannot pass merely because a parser skipped them.
 Preview readiness accepts all supported SVG mark shapes; a chart composed of
 rectangles and lines need not emit a path or circle before it can be inspected.
 
-ESLint and TypeScript include registry code, examples and build scripts. Do not
-reinstate the old registry-wide ESLint ignore. Run the required checks from
+Oxlint and TypeScript include registry code, examples and build scripts. Do not
+add a registry-wide lint ignore. Run the required checks from
 README after changes; consumer smoke is essential after modifying delivery.
 React/JSX accessibility and hook order/dependency rules cover the same authored
 source; Next rules are scoped to the web app. TypeScript owns prop validation,
 and Prettier owns style. Hook lint does not opt the source into React Compiler.
-Warnings fail CI. Keep exceptions local and explain the native keyboard or
-delivery contract that a static rule cannot infer.
+Warnings fail CI. ESLint runs only the React deprecation and Next internal-navigation
+checks missing from Oxlint; its fallback config must not enable overlapping rules.
+Keep exceptions local and explain the native keyboard or delivery contract that a
+static rule cannot infer. Use each linter's own suppression prefix.
 
 Prettier owns formatting and Tailwind utility order, using the web app's v4
 stylesheet entry. Preserve whitespace inside class strings: conditional template

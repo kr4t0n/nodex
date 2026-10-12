@@ -269,7 +269,7 @@ export function BarRace({
             className="pointer-events-none absolute inset-0 z-10 cursor-pointer border-0 bg-transparent p-0 focus:outline-none focus-visible:[outline:var(--nx-stroke-hairline)_solid_var(--nx-ink)] focus-visible:outline-offset-4"
           />
           {/* The sibling native button owns keyboard replay; plot clicks share its action without nesting chart controls in a button. */}
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+          {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
           <div className="h-full cursor-pointer" onClick={replay}>
             {!available ? (
               <div

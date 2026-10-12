@@ -912,7 +912,7 @@ pnpm run smoke:gallery
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `build:registry`          | Explicit metadata, delivery imports, token usage, actual React exports, browser rendering and resolved SVG conformance                                                                                                                                                                                                     |
 | `check:registry`          | The same checks in an OS temporary directory; leaves source and existing public artifacts untouched                                                                                                                                                                                                                        |
-| `test`                    | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation                                                                                                                                                                                                               |
+| `test`                    | Invalid contracts/imports, computed paint and transformed strokes, published addresses, read-only validation, lint coverage and warning failures                                                                                                                                                                           |
 | `smoke`                   | Static and interactive previews; CLI delivery of all primitives and charts into a fresh React/TypeScript/Tailwind consumer; scoped tokens in all six languages, stable sketch geometry, Soft Studio and Nocturne geometry/data semantics, native keyboard/form behavior, offset shadows, button presses and reduced motion |
 | `smoke:cli`               | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds                                                                                                                                                                  |
 | `smoke:pack`              | Builds and packs the CLI with pnpm, installs the tarball in a fresh npm project outside the workspace, and runs its installed `nodex list` against the built registry                                                                                                                                                      |
@@ -929,14 +929,22 @@ skills are excluded in `.prettierignore`. Our authoring and consumer skills rema
 included. Formatting changes source layout and class order; the build still
 delivers editable source and rewrites imports through the same contract.
 
-ESLint checks TypeScript, React's automatic JSX runtime, hook order/dependencies
-and JSX accessibility across application and registry source. Next's recommended
-and Core Web Vitals rules apply only to `apps/web`. Warnings fail `lint`;
-`lint:fix` applies available fixes. `eslint-config-prettier` disables conflicting
-style rules. The JSX plugins use ESLint's official `@eslint/compat` adapter on
-ESLint 10, with version-specific peer allowances; React Compiler validation is
-not enabled. Keep any rule exception
-local, with the reason beside the code and browser coverage for the behavior.
+Oxlint checks JavaScript, TypeScript, React's automatic JSX runtime, hook
+order/dependencies and JSX accessibility across application and registry source.
+The explicit rule set lives in `.oxlintrc.json`; Next's recommended and Core Web
+Vitals rules apply only to `apps/web`. The nursery rules `no-undef`,
+`no-useless-assignment` and `react/require-render-return` preserve existing checks;
+TypeScript owns undefined names in TS files. React Compiler validation is not enabled.
+
+`lint` runs Oxlint first, then an ESLint fallback containing only
+`react/no-deprecated` and `@next/next/no-location-assign-relative-destination`.
+The fallback in `eslint.config.mjs` retains the TypeScript parser and React's
+ESLint 10 compatibility adapter; do not add overlapping presets. Warnings from
+either linter fail the command. `lint:fix` applies their available fixes.
+Prettier still owns formatting; this rule set needs no Prettier compatibility
+config. Use `oxlint-disable-next-line` for native Oxlint rules and
+`eslint-disable-next-line` for fallback rules. Keep exceptions local, with the
+reason beside the code and browser coverage for the behavior.
 
 `smoke:pack` requires the registry build above and runs in CI's required `verify`
 job. It removes its temporary package and consumer after checking them. Pass an
