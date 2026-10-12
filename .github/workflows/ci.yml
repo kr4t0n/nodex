@@ -36,7 +36,7 @@ jobs:
       - run: pnpm run db:migrate
       - run: pnpm run test:auth:postgres
 
-  verify:
+  static:
     runs-on: ubuntu-latest
     env:
       HUSKY: '0'
@@ -70,34 +70,12 @@ jobs:
       - name: Install preview browser
         run: pnpm exec playwright install --with-deps chromium
 
-      # Build before consumers run: check:registry intentionally emits nothing.
+      # Tests read public/ and typecheck syncs generated registry imports.
       - name: Build registry
         run: pnpm run build:registry
 
-      - name: Smoke-test the packed CLI in a fresh npm consumer
-        run: pnpm run smoke:pack
-
-      # Exercise built previews and a fresh React app with real CLI installation.
-      - name: Smoke-test components
-        run: pnpm run smoke
-
-      - name: Check mode delivery and capture default-mode comparisons
-        run: pnpm run smoke:modes
-        env:
-          NODEX_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
-          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
-
-      - name: Check Hearth consumer rendering and interaction
-        run: pnpm run smoke:hearth
-        env:
-          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
-
       - name: Test registry contracts and read-only validation
         run: pnpm test
-
-      # Check conflicts, dependency managers, addresses and authenticated paths.
-      - name: Smoke-test the CLI
-        run: pnpm run smoke:cli
 
       # Keep the shell's curated primitive stylesheet list synchronized.
       - name: Check the shell loads what it uses
@@ -112,6 +90,76 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
+  consumer:
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install preview browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Build before consumers run: check:registry intentionally emits nothing.
+      - name: Build registry
+        run: pnpm run build:registry
+
+      - name: Smoke-test the packed CLI in a fresh npm consumer
+        run: pnpm run smoke:pack
+
+      # Exercise built previews and a fresh React app with real CLI installation.
+      - name: Smoke-test components
+        run: pnpm run smoke
+
+      # Check conflicts, dependency managers, addresses and authenticated paths.
+      - name: Smoke-test the CLI
+        run: pnpm run smoke:cli
+
+  browser:
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: '0'
+    steps:
+      # Mode comparisons read the PR base (or previous push) through Git.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install preview browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build registry
+        run: pnpm run build:registry
+
+      - name: Check mode delivery and capture default-mode comparisons
+        run: pnpm run smoke:modes
+        env:
+          NODEX_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-visual-evidence
+
+      - name: Check Hearth consumer rendering and interaction
+        run: pnpm run smoke:hearth
+        env:
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-visual-evidence
+
       # Prerendering every route reads the manifest, so a build failure here
       # also catches a manifest the app can no longer make sense of.
       - name: Build the site
@@ -120,20 +168,31 @@ jobs:
       - name: Smoke-test landing animation and language switching
         run: pnpm run smoke:landing
         env:
-          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-visual-evidence
 
       - name: Smoke-test gallery loading and preview interaction
         run: pnpm run smoke:gallery
         env:
-          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-visual-evidence
 
-      - name: Retain mode and default-language visual evidence
+      - name: Retain visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: language-mode-evidence
-          path: ${{ runner.temp }}/nodex-mode-evidence/
+          name: visual-evidence
+          path: ${{ runner.temp }}/nodex-visual-evidence/
           if-no-files-found: ignore
+
+  verify:
+    if: always()
+    needs: [static, consumer, browser]
+    runs-on: ubuntu-latest
+    steps:
+      # A skipped or cancelled dependency must not satisfy the required check.
+      - name: Require every verification job to succeed
+        env:
+          JOB_RESULTS: ${{ toJSON(needs) }}
+        run: jq --exit-status 'all(.[]; .result == "success")' <<< "$JOB_RESULTS"
 
   docker-build:
     if: github.event_name == 'pull_request'
