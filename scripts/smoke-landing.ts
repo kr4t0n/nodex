@@ -9,11 +9,46 @@ import { startSite } from './lib/site.ts';
 let site: Awaited<ReturnType<typeof startSite>> | undefined;
 interface HandoffMeasurement {
   height: number;
+  commandHeight: number;
   x: number;
   y: number;
   reused: boolean;
   prompts: number;
   visible: boolean;
+}
+
+async function observeTerminalHandoff(page: Page) {
+  // Capture in the browser when the final theme applies. A network assertion
+  // can otherwise outlast the brief final frame and read a detached demo.
+  await page
+    .locator('[data-cli-command]')
+    .last()
+    .evaluate((element) => {
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.nxLanguage !== 'sketchbook')
+          return;
+        const body = document.querySelector('[data-terminal-body]')!;
+        const bounds = element.querySelector('div')!.getBoundingClientRect();
+        const prompts = document.querySelectorAll('[data-cli-command]');
+        (
+          window as typeof window & { terminalHandoff?: HandoffMeasurement }
+        ).terminalHandoff = {
+          height: body.getBoundingClientRect().height,
+          commandHeight: bounds.height,
+          x: bounds.x,
+          y: bounds.y,
+          reused:
+            element.isConnected && prompts[prompts.length - 1] === element,
+          prompts: prompts.length,
+          visible: bounds.top >= 0 && bounds.bottom <= innerHeight,
+        };
+        observer.disconnect();
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-nx-language'],
+      });
+    });
 }
 
 async function openTerminal(page: Page) {
@@ -241,36 +276,7 @@ async function main() {
     );
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await assertTheme(page, 'neo-brutalism');
-    // Capture in the browser when the final theme applies. A network assertion
-    // can otherwise outlast the brief final frame and read a detached demo.
-    await page
-      .locator('[data-cli-command]')
-      .last()
-      .evaluate((element) => {
-        const observer = new MutationObserver(() => {
-          if (document.documentElement.dataset.nxLanguage !== 'sketchbook')
-            return;
-          const body = document.querySelector('[data-terminal-body]')!;
-          const bounds = element.querySelector('div')!.getBoundingClientRect();
-          const prompts = document.querySelectorAll('[data-cli-command]');
-          (
-            window as typeof window & { terminalHandoff?: HandoffMeasurement }
-          ).terminalHandoff = {
-            height: body.getBoundingClientRect().height,
-            x: bounds.x,
-            y: bounds.y,
-            reused:
-              element.isConnected && prompts[prompts.length - 1] === element,
-            prompts: prompts.length,
-            visible: bounds.top >= 0 && bounds.bottom <= innerHeight,
-          };
-          observer.disconnect();
-        });
-        observer.observe(document.documentElement, {
-          attributes: true,
-          attributeFilter: ['data-nx-language'],
-        });
-      });
+    await observeTerminalHandoff(page);
     await expect(page.locator('[data-nx-preview]').first()).toHaveAttribute(
       'data-nx-preview',
       /^neo-brutalism\//,
@@ -714,24 +720,29 @@ async function main() {
     }
     await small.emulateMedia({ reducedMotion: 'no-preference' });
     await small.goto('/');
+    await observeTerminalHandoff(small);
     await openTerminal(small);
     await expect(small.locator('[data-cli-command]').last()).toHaveText(
       '$nodex init sketchbook --force',
       { timeout: 30_000 },
     );
     await assertTheme(small, 'sketchbook');
-    const narrowDemo = (await small
-      .locator('[data-cli-command]')
-      .last()
-      .locator('div')
-      .boundingBox())!;
     await expect(input).toHaveValue('nodex init sketchbook --force');
     await expect(input).not.toBeFocused();
+    // Read the captured frame after handoff, when the demo nodes are gone.
+    await expect(small.locator('[data-cli-command]')).toHaveCount(0);
+    const narrowDemo = await small.evaluate(
+      () =>
+        (window as typeof window & { terminalHandoff?: HandoffMeasurement })
+          .terminalHandoff,
+    );
+    assert(narrowDemo, 'The narrow demo frame must be observed before handoff');
+    assert(narrowDemo.reused, 'The narrow demo must retain its final prompt');
     const narrowEditor = (await input.boundingBox())!;
     assert(
       Math.abs(narrowEditor.x - narrowDemo.x) < 1 &&
         Math.abs(narrowEditor.y - narrowDemo.y) < 1 &&
-        Math.abs(narrowEditor.height - narrowDemo.height) < 1,
+        Math.abs(narrowEditor.height - narrowDemo.commandHeight) < 1,
       'The narrow editor must preserve the demo command position and wrapping',
     );
     await expect(small.locator('[data-terminal-entry]')).toHaveCount(3);
