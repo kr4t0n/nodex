@@ -191,7 +191,8 @@ export function LandingView() {
         // large and scale back down.
         const em = Number.parseFloat(style.fontSize);
         const font = `${style.fontStyle} ${style.fontWeight} ${INK_MEASURE_SIZE}px ${style.fontFamily}`;
-        const key = `${font}|${text}`;
+        // The same font string names the fallback until the webfont loads.
+        const key = `${font}|${text}|${document.fonts.check(font, text)}`;
         if (inkCache?.key !== key) {
           measure.font = font;
           inkCache = {
