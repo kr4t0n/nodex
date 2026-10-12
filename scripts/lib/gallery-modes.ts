@@ -162,6 +162,8 @@ async function checkHearthGallery(
       viewport: { width, height: 900 },
       reducedMotion: 'reduce',
     });
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
     try {
       await page.goto('/l/hearth');
       const mode = page.getByRole('combobox', { name: 'Color mode' });
@@ -240,6 +242,7 @@ async function checkHearthGallery(
         'data-nx-animated',
         'false',
       );
+      assert.deepEqual(errors, []);
     } finally {
       await page.close();
     }

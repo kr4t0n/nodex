@@ -306,6 +306,8 @@ before changing loading behavior. Preserve these boundaries:
 - The shell owns layout and behavior; scoped language tokens own visual treatment.
   There is no independent gallery dark mode. Keep `SHELL_PRIMITIVES` synchronized.
   The token panel reads canonical tokens; its labels must not define a second palette.
+  Index chrome uses `OWN_LANGUAGE`; standalone primitive previews explicitly default
+  to Mono Editorial. Catalogue order must not choose either surface's language.
 - The landing demo plays once and hands off to its existing prompt without stealing
   focus or reopening on scroll/theme changes. Its parser changes page tokens;
   it never executes a shell. GSAP is app-only. Background/offscreen playback pauses;

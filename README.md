@@ -68,6 +68,12 @@ contains both palettes and embedded normal/italic fonts. Mode changes retain
 mounted examples, form values and focus. The two featured previews are curated
 explicitly; the language index keeps its default light appearance.
 
+Newsreader retains both its weight and optical-size axes. With normal and italic
+faces embedded, Hearth's token stylesheet is about 468 KB uncompressed. The
+language index loads every language's stylesheet to render its scoped tiles;
+the fonts require no additional network host. The index chrome and standalone
+primitive previews keep Mono Editorial as their explicit default.
+
 ## Nocturne
 
 Nocturne is available at `/l/nocturne`, with all 24 shared primitives and twelve
@@ -570,8 +576,9 @@ Import the token stylesheet once after Tailwind in your application stylesheet:
 
 Languages may declare an optional dark mode; `nodex list --json` reports their
 `modes`, and `nodex tokens <language> --json` includes the authored overrides.
-The six existing languages retain their default palettes and do not declare an
-alternate mode. A default palette may itself be dark, as in Nocturne.
+Hearth declares `light` and `dark`. The six original languages retain their
+default palettes without an alternate mode. A default palette may itself be
+dark, as in Nocturne.
 
 For a language with both modes, set `data-nx-language="<language-slug>"` and
 `data-nx-mode="dark"` on the same element, including `<html>` for a whole app.
@@ -977,7 +984,12 @@ uploads `language-mode-evidence`,
 including gallery light/dark fixture screenshots; link that artifact in the PR.
 No generated review evidence is left in the checkout. No alternate language is
 published by these tests. `smoke:gallery` also checks the mode control, active
-token-panel values and retained specimen state; `smoke:pack` exercises mode init,
+token-panel values and retained specimen state. It mounts the actual index view
+in a browser fixture, keeping authentication outside that check, and verifies
+Mono Editorial chrome beside language-scoped tiles at desktop/mobile sizes.
+All 24 standalone primitive previews retain Mono Editorial with and without
+JavaScript; an explicit language query still selects another palette.
+`smoke:pack` exercises mode init,
 JSON delivery and lint through the installed tarball.
 
 `smoke:hearth` checks the copied bar/line contracts, numeric geometry, unavailable
