@@ -149,6 +149,225 @@ async function returnToHero(page: Page, slug: string) {
   );
 }
 
+/**
+ * The hero wordmark as painted: the screenshot's ink columns, not the layout
+ * box. The box hides the leading side bearing and the x's overhang, which is
+ * what pushed the x off narrow screens. Columns under a classic scrollbar are
+ * not visible, so they count as outside the viewport.
+ */
+async function heroWordmark(page: Page) {
+  const shot = (await page.screenshot()).toString('base64');
+  return page.evaluate(async (shot) => {
+    const mark = document.querySelector('h1')!;
+    const bounds = mark.getBoundingClientRect();
+    const image = new Image();
+    image.src = `data:image/png;base64,${shot}`;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(image, 0, 0);
+    const visible = document.documentElement.clientWidth;
+    const top = Math.max(0, Math.floor(bounds.top));
+    const height = Math.min(image.height, Math.ceil(bounds.bottom)) - top;
+    const pixels = context.getImageData(0, top, visible, height).data;
+    const ground = pixels.slice(0, 3);
+    let left = Infinity;
+    let right = -Infinity;
+    for (let row = 0; row < height; row++)
+      for (let column = 0; column < visible; column++) {
+        const index = (row * visible + column) * 4;
+        const difference =
+          Math.abs(pixels[index]! - ground[0]!) +
+          Math.abs(pixels[index + 1]! - ground[1]!) +
+          Math.abs(pixels[index + 2]! - ground[2]!);
+        if (difference <= 120) continue;
+        left = Math.min(left, column);
+        right = Math.max(right, column + 1);
+      }
+    const action = document.querySelector('header a')!.getBoundingClientRect();
+    const tagline = document.querySelector('header p')!;
+    const row = tagline.parentElement!.getBoundingClientRect();
+    return {
+      visible,
+      left,
+      right: visible - right,
+      width: right - left,
+      fontSize:
+        (bounds.width / Number.parseFloat(getComputedStyle(mark).width)) *
+        Number.parseFloat(getComputedStyle(mark).fontSize),
+      bottom: Math.max(action.bottom, row.bottom),
+      actionRight: action.right,
+      taglineLeft: tagline.getBoundingClientRect().left,
+      height: innerHeight,
+    };
+  }, shot);
+}
+
+/**
+ * Screenshot ink is read to the pixel on each side, so the margins may differ
+ * by 3px. The tagline and sign-in hang from the wordmark's painted edges.
+ */
+const HERO_TOLERANCE = 3;
+
+/** Record every hero failure, so one run shows each size that breaks. */
+async function assertHeroWordmark(
+  page: Page,
+  label: string,
+  failures: string[],
+) {
+  await page.evaluate(() => document.fonts.ready);
+  await delay(700);
+  const mark = await heroWordmark(page);
+  console.log(`Hero wordmark ${label}: ${JSON.stringify(mark)}`);
+  await page.screenshot({
+    path: path.join(evidence, `landing-hero-${label}.png`),
+  });
+  const fail = (message: string) => failures.push(`${label}: ${message}`);
+  if (!(mark.left > 0 && mark.right > 0))
+    fail('the wordmark must paint inside the visible width');
+  if (Math.abs(mark.left - mark.right) > HERO_TOLERANCE)
+    fail(
+      `the wordmark must be centred within ${HERO_TOLERANCE}px ` +
+        `(left ${mark.left}px, right ${mark.right}px)`,
+    );
+  if (!(mark.actionRight <= mark.visible && mark.bottom <= mark.height))
+    fail('the sign-in and tagline must stay on screen');
+  if (
+    Math.abs(mark.taglineLeft - mark.left) > HERO_TOLERANCE ||
+    Math.abs(mark.visible - mark.right - mark.actionRight) > HERO_TOLERANCE
+  )
+    fail(
+      `the tagline and sign-in must align with the wordmark's ink ` +
+        `(tagline ${mark.taglineLeft}px, sign-in ends ${mark.actionRight}px)`,
+    );
+}
+
+const HERO_SIZES = [
+  [320, 568],
+  [390, 844],
+  [568, 320],
+  [844, 390],
+  [768, 1024],
+  [1000, 700],
+  [1024, 400],
+  [1366, 768],
+  // Wider than about 1480px the bar's 1400px container centres, so the
+  // wordmark's resting origin is no longer the gutter.
+  [1536, 864],
+  [1920, 1080],
+] as const;
+
+async function checkHeroWordmark(origin: string, errors: string[]) {
+  const failures: string[] = [];
+  // A phone's overlay scrollbars, then a desktop's classic ones, which take
+  // width from the header but not from innerWidth.
+  for (const scrollbars of [false, true]) {
+    const browser: Browser = await chromium.launch({
+      headless: true,
+      ...(scrollbars ? { ignoreDefaultArgs: ['--hide-scrollbars'] } : {}),
+    });
+    try {
+      for (const [width, height] of HERO_SIZES) {
+        const page = await browser.newPage({
+          baseURL: origin,
+          viewport: { width, height },
+          reducedMotion: 'no-preference',
+        });
+        page.on('pageerror', (error) => errors.push(error.message));
+        await page.goto('/');
+        await assertHeroWordmark(
+          page,
+          `${width}x${height}${scrollbars ? '-scrollbar' : ''}`,
+          failures,
+        );
+        await page.close();
+      }
+      if (!scrollbars) continue;
+
+      // A cold load whose font arrives late, then one where it never does:
+      // the wordmark is measured again when the font swaps in, and the
+      // fallback font must centre as well.
+      for (const font of ['slow', 'blocked'] as const) {
+        const page = await browser.newPage({
+          baseURL: origin,
+          viewport: { width: 1000, height: 700 },
+        });
+        page.on('pageerror', (error) => errors.push(error.message));
+        await page.route(
+          '**/languages/mono-editorial/tokens.css',
+          async (route) => {
+            if (font === 'blocked') return route.abort();
+            await delay(1500);
+            await route.continue();
+          },
+        );
+        await page.goto('/');
+        if (font === 'slow')
+          await expect(page.locator('h1')).toHaveCSS('font-family', /Inter/, {
+            timeout: 10_000,
+          });
+        await assertHeroWordmark(
+          page,
+          `1000x700-scrollbar-font-${font}`,
+          failures,
+        );
+        await page.close();
+      }
+
+      // Resizing after load, from a wide window down to a narrow one.
+      const resized = await browser.newPage({
+        baseURL: origin,
+        viewport: { width: 1366, height: 768 },
+      });
+      resized.on('pageerror', (error) => errors.push(error.message));
+      await resized.goto('/');
+      await resized.evaluate(() => document.fonts.ready);
+      await resized.setViewportSize({ width: 1000, height: 700 });
+      await assertHeroWordmark(resized, '1366-to-1000x700-scrollbar', failures);
+      await resized.close();
+
+      // Each language's font has its own side bearings and overhangs; the
+      // demo's command applies them to the wordmark too. Reduced motion
+      // reaches the editor directly and exercises the jump cut back to the hero.
+      const themed = await browser.newPage({
+        baseURL: origin,
+        viewport: { width: 1000, height: 700 },
+        reducedMotion: 'reduce',
+      });
+      themed.on('pageerror', (error) => errors.push(error.message));
+      await themed.goto('/');
+      for (const slug of ['hearth', 'sketchbook', 'neo-brutalism']) {
+        await openTerminal(themed);
+        const input = themed.getByRole('textbox', {
+          name: 'Terminal command',
+        });
+        await expect(input).toBeEnabled();
+        await input.fill(`nodex init ${slug}`);
+        await input.press('Enter');
+        await expect(themed.locator('html')).toHaveAttribute(
+          'data-nx-language',
+          slug,
+        );
+        await themed.evaluate(() => window.scrollTo(0, 0));
+        await assertHeroWordmark(
+          themed,
+          `1000x700-scrollbar-${slug}`,
+          failures,
+        );
+      }
+      await themed.close();
+    } finally {
+      await browser.close();
+    }
+  }
+  assert.deepEqual(failures, [], 'The hero wordmark must fit every size');
+  console.log(
+    'Landing hero: wordmark centred and on screen at narrow, short and wide sizes',
+  );
+}
+
 async function assertScrollback(page: Page) {
   const history = page.getByRole('region', { name: 'Terminal history' });
   await expect(history).toHaveCSS('scrollbar-width', 'thin');
@@ -867,6 +1086,7 @@ async function main() {
     console.log(
       'Landing failure state: unavailable token stylesheet leaves the default page usable',
     );
+    await checkHeroWordmark(origin, errors);
     await captureEvidence(browser, origin, errors);
     console.log(`Landing evidence: ${evidence}`);
     assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
