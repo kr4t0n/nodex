@@ -40,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HUSKY: '0'
+      NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
     steps:
       - uses: actions/checkout@v5
         with:
@@ -122,7 +123,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: language-mode-evidence
-          path: artifacts/modes/
+          path: ${{ runner.temp }}/nodex-mode-evidence/
           if-no-files-found: ignore
 
   docker-build:

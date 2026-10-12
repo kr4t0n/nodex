@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, type Browser } from '@playwright/test';
 import { resolveTokens } from '../../packages/cli/src/tokens.ts';
@@ -16,9 +17,10 @@ export async function checkGalleryModes(browser: Browser, origin: string) {
     await renderFontFaces(tokens, path.resolve(import.meta.dirname, '../..')),
     'mono-editorial',
   );
-  const evidence = path.resolve(
-    process.env.NODEX_EVIDENCE_DIR ?? 'artifacts/modes',
-  );
+  const evidence = process.env.NODEX_EVIDENCE_DIR
+    ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
+    : await mkdtemp(path.join(tmpdir(), 'nodex-gallery-evidence-'));
+  console.log(`Gallery mode evidence: ${evidence}`);
   await mkdir(evidence, { recursive: true });
   for (const width of [1365, 390]) {
     const page = await browser.newPage({

@@ -949,9 +949,12 @@ controls and modal focus, dark first paint, live reduced motion and the two pros
 roles. It compares the six existing default palettes at desktop/mobile sizes
 against `NODEX_BASE_REF` (default: the merge base with `origin/dev`). It reads the
 comparison revision's compiler, tokens and prose CSS through Git without checking
-out another tree. Before/after PNGs and results go to ignored `artifacts/modes/`
-(override with `NODEX_EVIDENCE_DIR`). CI retains them as `language-mode-evidence`,
-along with gallery light/dark fixture screenshots. No alternate language is
+out another tree. Each mode/gallery check prints a fresh evidence directory under
+the system temporary directory (normally `/tmp`), retaining screenshots and results
+there for review. Set `NODEX_EVIDENCE_DIR` to collect both checks in one explicit
+location. CI uses its runner temporary directory and uploads `language-mode-evidence`,
+including gallery light/dark fixture screenshots; link that artifact in the PR.
+No generated review evidence is left in the checkout. No alternate language is
 published by these tests. `smoke:gallery` also checks the mode control, active
 token-panel values and retained specimen state; `smoke:pack` exercises mode init,
 JSON delivery and lint through the installed tarball.

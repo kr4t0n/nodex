@@ -23,9 +23,10 @@ import { serveDirectory } from './lib/browser.ts';
 
 const run = promisify(execFile);
 const root = path.resolve(import.meta.dirname, '..');
-const evidence = path.resolve(
-  process.env.NODEX_EVIDENCE_DIR ?? 'artifacts/modes',
-);
+const evidence = process.env.NODEX_EVIDENCE_DIR
+  ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
+  : await mkdtemp(path.join(tmpdir(), 'nodex-mode-evidence-'));
+console.log(`Mode evidence: ${evidence}`);
 const temp = await mkdtemp(path.join(tmpdir(), 'nodex-modes-'));
 const browser = await chromium.launch();
 let server: Awaited<ReturnType<typeof serveDirectory>> | undefined;
@@ -237,7 +238,7 @@ try {
   await initial.close();
 
   // Read the comparison revision's actual compiler and prose CSS, without checking
-  // out or mutating another tree. Evidence is emitted only to ignored artifacts.
+  // out or mutating another tree. Evidence is retained outside the worktree.
   const base =
     process.env.NODEX_BASE_REF ??
     (
