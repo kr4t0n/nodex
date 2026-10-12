@@ -119,6 +119,8 @@ jobs:
 
       - name: Smoke-test landing animation and language switching
         run: pnpm run smoke:landing
+        env:
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-mode-evidence
 
       - name: Smoke-test gallery loading and preview interaction
         run: pnpm run smoke:gallery
