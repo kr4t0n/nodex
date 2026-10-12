@@ -100,6 +100,24 @@ color keys become `--nx-<role>`, other nested values become
 `--nx-*` names are reserved for language tokens. A local control setting uses a
 different name, such as `--slider-steps`.
 
+Top-level tokens define the default `light` mode, preserving even an inherently
+dark language's existing palette. Optional `modes.dark` contains partial `color`
+overrides of existing roles and a replacement `ramp.steps` array. It cannot
+introduce roles or override typography, geometry or motion. The pure contract in
+`packages/cli/src/tokens.ts` validates and resolves modes for build, CLI and browser
+without adding a runtime workspace dependency to the published CLI. Never flatten
+`modes` into variables. Source JSON retains the declaration; published language
+metadata lists supported modes, and the build checks rendered marks in each mode.
+
+Generated CSS supplies a full default at each `data-nx-language` boundary, then
+dark paint on that same element when `data-nx-mode="dark"`. An unmarked document
+root is the single-language fallback. Explicit nested language boundaries reset
+to their default; descendant overrides remain local. Native `color-scheme`
+follows the selection. Scope transformations use `scopeTokenCss` for every rule,
+never a single `:root` replacement. Index scopes are removed on unmount so they
+cannot reset a later gallery's dark specimens. Gallery mode changes update tokens
+without keying or remounting examples; index and landing selections stay default.
+
 `font.faces` is asset metadata, not CSS variables. Each face declares an exact
 static `@fontsource` or variable `@fontsource-variable` package, WOFF2 file,
 family, weight or weight range and style. The build checks
@@ -158,6 +176,11 @@ and disabled actions do not respond to hover or press. Inverted secondary text
 uses `onDarkMuted` rather than the supporting text color for paper.
 The language scaffold copies canonical color role names into a neutral palette
 and carries the canonical shadow roles, without a separate primitive-role list.
+
+Prose has shared `type.prose.sectionTransform` and `headingLineHeight` roles.
+Existing languages use `uppercase` and `inherit`, retaining both regular and
+narrow prose. Choose a new language's values deliberately rather than imposing
+one heading treatment in the primitive.
 
 Surface, field, selection, badge and value paints have independent semantic
 roles. Neo-brutalism uses lilac panels, cream fields, mint selections, pink

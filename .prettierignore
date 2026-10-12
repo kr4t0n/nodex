@@ -11,6 +11,7 @@ apps/web/public/
 apps/web/src/generated/
 apps/web/next-env.d.ts
 pnpm-lock.yaml
+artifacts/
 
 # Imported third-party skills; keep our authoring and consumer skills formatted.
 .agents/skills/*

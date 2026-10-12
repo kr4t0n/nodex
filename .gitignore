@@ -21,6 +21,7 @@ public/registry/
 *.log
 .turbo/
 .argus/
+artifacts/
 
 # next
 apps/web/.next/

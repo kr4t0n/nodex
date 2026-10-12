@@ -3,28 +3,21 @@
 import { useEffect, useState } from 'react';
 
 import { loadCatalog, tokensUrl } from './registry.ts';
+import {
+  scopeTokenCss,
+  type TokenMode,
+} from '../../../../packages/cli/src/tokens.ts';
 
-/**
- * Swap the active language's token layer.
- *
- * This is what makes the shell re-theme: every colour, face, radius, and
- * hairline in the app resolves through `--nx-*`, so replacing one stylesheet
- * restyles the entire interface. It also dogfoods the token system, since a
- * broken primitive is immediately visible in the app's own chrome.
- */
 /**
  * Applies several languages' token layers at once, each scoped to its own
  * subtree, so more than one can be shown honestly on the same page.
  *
- * `useLanguageTokens` swaps a single `:root` layer for the whole document. That
+ * `useLanguageTokens` swaps the token layer for the whole document. That
  * is right on a page showing one language and impossible on the index, where
  * several sit on screen together and the last one loaded would win.
  *
- * The generated `tokens.css` has one `:root` token block and embedded font faces.
- * Re-pointing that selector at an attribute produces the same values bound to
- * an element instead of the document. Deliberately a rename of the build's own
- * output rather than a second artifact or a client-side reimplementation of its
- * flattening: there is no third place for the two to drift apart.
+ * Retarget all generated mode rules together, keeping embedded font faces.
+ * No browser-side flattening or independently maintained token stylesheet.
  *
  * Custom properties inherit, but inherited *values* do not re-resolve. An
  * element inside the scope still shows the document's colour unless it declares
@@ -53,11 +46,7 @@ export function useScopedLanguageTokens(slugs: string[]): boolean {
               const res = await fetch(tokensUrl(language));
               if (!res.ok) return '';
               const css = await res.text();
-              // Skip rather than inject. A template that stopped emitting `:root`
-              // would otherwise ship one language unscoped, and it would silently
-              // override every other language on the page.
-              if (!css.includes(':root')) return '';
-              return css.replace(':root', `[data-nx-scope="${slug}"]`);
+              return scopeTokenCss(css, slug, `[data-nx-scope="${slug}"]`);
             } catch {
               return '';
             }
@@ -82,21 +71,30 @@ export function useScopedLanguageTokens(slugs: string[]): boolean {
 
     return () => {
       live = false;
+      // Index-only scopes must not reset dark specimens after navigation.
+      document.getElementById(ID)?.remove();
     };
   }, [key]);
 
   return ready;
 }
 
-export function useLanguageTokens(slug: string | undefined): boolean {
+export function useLanguageTokens(
+  slug: string | undefined,
+  mode: TokenMode = 'light',
+): boolean {
   const [readySlug, setReadySlug] = useState<string>();
 
   useEffect(() => {
     if (!slug) return;
     let live = true;
     let link: HTMLLinkElement | null = null;
+    let supportedMode: TokenMode = 'light';
     const onLoad = () => {
-      if (live) setReadySlug(slug);
+      if (!live) return;
+      document.documentElement.dataset.nxLanguage = slug;
+      document.documentElement.dataset.nxMode = supportedMode;
+      setReadySlug(slug);
     };
 
     void loadCatalog().then((catalog) => {
@@ -117,9 +115,11 @@ export function useLanguageTokens(slug: string | undefined): boolean {
         document.head.appendChild(link);
       }
       const href = tokensUrl(language);
-      document.documentElement.dataset.nxLanguage = slug;
+      supportedMode = language.modes?.some((entry) => entry === mode)
+        ? mode
+        : 'light';
       if (link.getAttribute('href') === href && link.sheet) {
-        setReadySlug(slug);
+        onLoad();
         return;
       }
       link.addEventListener('load', onLoad, { once: true });
@@ -130,9 +130,22 @@ export function useLanguageTokens(slug: string | undefined): boolean {
       live = false;
       link?.removeEventListener('load', onLoad);
     };
-  }, [slug]);
+  }, [slug, mode]);
 
   return slug !== undefined && readySlug === slug;
+}
+
+/** Route-local selection; changing it never keys or replaces a specimen tree. */
+export function useLanguageMode(slug: string) {
+  const [selection, setSelection] = useState<{ slug: string; mode: TokenMode }>(
+    { slug, mode: 'light' },
+  );
+  const mode = selection.slug === slug ? selection.mode : 'light';
+  const selectMode = (next: TokenMode) => {
+    document.documentElement.dataset.nxMode = next;
+    setSelection({ slug, mode: next });
+  };
+  return { mode, selectMode };
 }
 
 /** Fetch text once per URL, with loading and error states surfaced. */

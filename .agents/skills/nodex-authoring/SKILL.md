@@ -39,6 +39,22 @@ language; keep the role names consumed by primitives.
 The build generates tokens under `public/registry/languages/<slug>/`; never
 create generated styles or preview documents beside source.
 
+Top-level tokens are the default `light` mode. To support a second mode, add
+`modes.dark` with a partial `color` object using existing role names and a complete
+`ramp: { steps: [...] }` with at least two colors. Unchanged colors inherit from
+the default; typography, geometry and motion cannot vary. The build validates
+both resolved palettes and emits all CSS rules, with `color-scheme` following the
+selection. Do not author a second stylesheet or `--nx-modes-*` variables.
+The scaffold starts with one mode and inherits shared prose roles from canonical
+tokens. Set `type.prose.sectionTransform` and `headingLineHeight` for the language's
+reading hierarchy; `inherit` leading preserves the regular/narrow prose ratio.
+Document each palette's relationships in DESIGN.md, while keeping mode selection
+procedures here and in the consumer guide.
+
+Exercise `data-nx-language="<slug>" data-nx-mode="dark"` on the same scope, light
+and dark siblings, nested boundaries, local overrides, native controls and live
+switching. Mode changes must preserve mounted charts, focus and form values.
+
 Declare downloadable fonts in a `font.faces` array. Each face names an exact
 `@fontsource-variable/<family>@<version>` or static `@fontsource/<family>@<version>`
 package, package-relative WOFF2 file, CSS family, weight or weight range and
@@ -178,11 +194,15 @@ pnpm run build:registry
 pnpm test
 pnpm run smoke
 pnpm run smoke:cli
+pnpm run smoke:pack
+pnpm run smoke:modes
 pnpm run check:shell
 pnpm run lint
 pnpm run format:check
 pnpm run typecheck
 pnpm --filter @nodex/web run build
+pnpm run smoke:landing
+pnpm run smoke:gallery
 ```
 
 Install the browser once with `pnpm exec playwright install --with-deps chromium`.

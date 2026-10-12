@@ -147,6 +147,12 @@ export const languageFilesSchema = z.object({
 });
 
 export const publishedLanguageSchema = languageMetaSchema.extend({
+  modes: z
+    .union([
+      z.tuple([z.literal('light')]),
+      z.tuple([z.literal('light'), z.literal('dark')]),
+    ])
+    .default(['light']),
   files: languageFilesSchema,
   counts: z.object({
     expressive: z.number().int().nonnegative(),

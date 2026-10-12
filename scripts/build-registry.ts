@@ -23,6 +23,7 @@ import {
   lintSource,
   rulesFromTokens,
 } from '../packages/cli/src/lint.ts';
+import { tokenModes } from '../packages/cli/src/tokens.ts';
 import { renderedMarks, serveDirectory } from './lib/browser.ts';
 import { prepareDelivery } from './lib/delivery.ts';
 import {
@@ -151,6 +152,7 @@ async function main() {
     const publishedLanguages = languages.map((language) =>
       publishedLanguageSchema.parse({
         ...language.meta,
+        modes: tokenModes(language.tokens),
         files: {
           tokens: `registry/languages/${language.meta.slug}/tokens.css`,
           tokensJson: `registry/languages/${language.meta.slug}/tokens.json`,
@@ -174,6 +176,7 @@ async function main() {
           language.tokens,
           language.meta.name,
           await renderFontFaces(language.tokens, ROOT),
+          language.meta.slug,
         ),
       );
       await put(
@@ -435,15 +438,27 @@ async function main() {
               )
             )
               throw new Error(`${preview.key}: rendered no chart marks`);
-            const problems = lintRendered(
-              marks,
-              rulesFromTokens(preview.languages[0]!.tokens),
-              { strokeAsArea: preview.item.meta.strokeAsArea },
-            );
-            if (problems.length)
-              throw new Error(
-                `${preview.key}: ${problems.map((problem) => problem.message).join('; ')}`,
+            const tokens = preview.languages[0]!.tokens;
+            const modes = tokenModes(tokens);
+            for (const mode of modes) {
+              if (mode === 'dark')
+                await page.evaluate(() => {
+                  document.documentElement.dataset.nxMode = 'dark';
+                });
+              const problems = lintRendered(
+                mode === 'light' ? marks : await renderedMarks(page),
+                rulesFromTokens(tokens, mode),
+                { strokeAsArea: preview.item.meta.strokeAsArea },
               );
+              if (problems.length)
+                throw new Error(
+                  `${preview.key} (${mode}): ${problems.map((problem) => problem.message).join('; ')}`,
+                );
+            }
+            if (modes.includes('dark'))
+              await page.evaluate(() => {
+                document.documentElement.dataset.nxMode = 'light';
+              });
           }
           if (errors.length)
             throw new Error(`${preview.key}: ${errors.join('; ')}`);

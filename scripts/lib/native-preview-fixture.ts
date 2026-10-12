@@ -40,7 +40,9 @@ export async function nativePreviewFixture(site: string) {
             <Preview item={{ ...find('shared', 'radio'), name: 'unavailable' }} language="mono-editorial" />
           </main>;
         }
-        createRoot(document.getElementById('root')).render(<App />);
+        const mount = createRoot(document.getElementById('root'));
+        window.addEventListener('nodex:test-unmount', () => mount.unmount(), { once: true });
+        mount.render(<App />);
       `,
         loader: 'tsx',
         resolveDir: root,

@@ -81,6 +81,11 @@ jobs:
       - name: Smoke-test components
         run: pnpm run smoke
 
+      - name: Check mode delivery and capture default-mode comparisons
+        run: pnpm run smoke:modes
+        env:
+          NODEX_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+
       - name: Test registry contracts and read-only validation
         run: pnpm test
 
@@ -111,6 +116,14 @@ jobs:
 
       - name: Smoke-test gallery loading and preview interaction
         run: pnpm run smoke:gallery
+
+      - name: Retain mode and default-language visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: language-mode-evidence
+          path: artifacts/modes/
+          if-no-files-found: ignore
 
   docker-build:
     if: github.event_name == 'pull_request'

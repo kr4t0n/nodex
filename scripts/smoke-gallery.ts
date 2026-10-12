@@ -6,6 +6,7 @@ import { chromium, expect, type Locator, type Page } from '@playwright/test';
 import type { GalleryRegistry } from '../packages/core/src/schema.ts';
 import { nativePreviewFixture } from './lib/native-preview-fixture.ts';
 import { startSite } from './lib/site.ts';
+import { checkGalleryModes } from './lib/gallery-modes.ts';
 import { checkStudioPreviewFit } from './lib/studio-preview-fit.ts';
 import { checkChartPreviewFit } from './lib/chart-preview-fit.ts';
 
@@ -89,6 +90,7 @@ async function main() {
     return page;
   }
   try {
+    await checkGalleryModes(browser, origin);
     const page = await newPage();
     const requests: string[] = [];
     page.on('request', (request) =>
@@ -520,6 +522,11 @@ async function main() {
         'Repeated examples must retain independent IDs in one document',
       );
       await expect(scoped.locator('iframe')).toHaveCount(0);
+      await expect(scoped.locator('#nx-scoped-language-tokens')).toHaveCount(1);
+      await scoped.evaluate(() =>
+        window.dispatchEvent(new Event('nodex:test-unmount')),
+      );
+      await expect(scoped.locator('#nx-scoped-language-tokens')).toHaveCount(0);
     } finally {
       await scoped.close();
       await fixture.close();

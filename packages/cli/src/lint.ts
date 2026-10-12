@@ -1,3 +1,5 @@
+import { resolveTokens, type TokenMode } from './tokens.ts';
+
 /** Pure checks shared by the registry build and the dependency-free CLI. */
 export interface LanguageRules {
   palette: string[];
@@ -213,7 +215,9 @@ export function lintRendered(
 /** Uses the same token naming convention as the generated CSS layer. */
 export function rulesFromTokens(
   tokens: Record<string, unknown>,
+  mode: TokenMode = 'light',
 ): LanguageRules {
+  tokens = resolveTokens(tokens, mode);
   const palette = new Set<string>();
   const tokenNames = new Set<string>();
   const walk = (value: unknown, prefix: string): void => {

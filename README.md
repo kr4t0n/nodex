@@ -549,6 +549,27 @@ Import the token stylesheet once after Tailwind in your application stylesheet:
 @import './nodex-tokens.css';
 ```
 
+Languages may declare an optional dark mode; `nodex list --json` reports their
+`modes`, and `nodex tokens <language> --json` includes the authored overrides.
+The six existing languages retain their default palettes and do not declare an
+alternate mode. A default palette may itself be dark, as in Nocturne.
+
+For a language with both modes, set `data-nx-language="<language-slug>"` and
+`data-nx-mode="dark"` on the same element, including `<html>` for a whole app.
+Omit `data-nx-mode` or use `light` for the default. Set these attributes in the
+initial HTML to select the first paint; subsequent switches only change the
+attribute, preserving component state and focus. Each language stylesheet must
+be imported when several languages coexist. Nested language boundaries reset to
+their own default; ordinary descendants inherit their containing scope and can
+override individual variables. Native `color-scheme` follows the selected mode.
+
+The gallery shows a Light/Dark selector only for languages with an alternate
+mode. Shell, specimens and token-panel values switch together; index thumbnails
+always show the default palette. There is no independent gallery theme.
+Prose section headings use `--nx-type-prose-sectionTransform`, and heading leading
+uses `--nx-type-prose-headingLineHeight`; the existing languages preserve uppercase
+sections and inherited leading, including narrow prose.
+
 Ensure Tailwind scans the configured component destination. Its default
 `src/components/nodex` location is inside the application's source tree. If
 using a custom location outside automatic detection, add a Tailwind `@source`
@@ -899,6 +920,7 @@ pnpm test
 pnpm run smoke
 pnpm run smoke:cli
 pnpm run smoke:pack
+pnpm run smoke:modes
 pnpm run check:shell
 pnpm run lint
 pnpm run format:check
@@ -921,6 +943,18 @@ pnpm run smoke:gallery
 | `smoke:gallery`           | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout                                   |
 | `lint` / `typecheck`      | Application, registry, CLI and build source                                                                                                                                                                                                                                                                                |
 | `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation                                                                                                                                                                                                                           |
+
+`smoke:modes` checks downloaded mode CSS and copied components offline, native
+controls and modal focus, dark first paint, live reduced motion and the two prose
+roles. It compares the six existing default palettes at desktop/mobile sizes
+against `NODEX_BASE_REF` (default: the merge base with `origin/dev`). It reads the
+comparison revision's compiler, tokens and prose CSS through Git without checking
+out another tree. Before/after PNGs and results go to ignored `artifacts/modes/`
+(override with `NODEX_EVIDENCE_DIR`). CI retains them as `language-mode-evidence`,
+along with gallery light/dark fixture screenshots. No alternate language is
+published by these tests. `smoke:gallery` also checks the mode control, active
+token-panel values and retained specimen state; `smoke:pack` exercises mode init,
+JSON delivery and lint through the installed tarball.
 
 Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
 stylesheet to sort utilities, including in delivered registry source. Generated
