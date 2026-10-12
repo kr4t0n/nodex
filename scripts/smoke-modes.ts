@@ -26,7 +26,6 @@ const root = path.resolve(import.meta.dirname, '..');
 const evidence = process.env.NODEX_EVIDENCE_DIR
   ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
   : await mkdtemp(path.join(tmpdir(), 'nodex-mode-evidence-'));
-console.log(`Mode evidence: ${evidence}`);
 const temp = await mkdtemp(path.join(tmpdir(), 'nodex-modes-'));
 const browser = await chromium.launch();
 let server: Awaited<ReturnType<typeof serveDirectory>> | undefined;
@@ -411,4 +410,5 @@ try {
   await browser.close();
   await server?.close();
   await rm(temp, { recursive: true, force: true });
+  console.log(`Mode evidence: ${evidence}`);
 }

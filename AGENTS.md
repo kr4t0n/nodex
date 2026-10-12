@@ -208,6 +208,11 @@ The [contributor setup](README.md#develop-the-registry-and-gallery) owns hooks a
 prerequisites; [verification](README.md#verification) owns commands and CI coverage.
 Do not bypass the staged secret scan or the full-history CI scan.
 
+Generated test evidence belongs in a temporary directory outside the repository,
+never a gitignored folder inside the project. Print its location when the check
+finishes and report results in the PR or task thread. CI uploads screenshots and
+comparison reports from its runner temporary directory for review.
+
 `packages/core` owns schema, taxonomy and source loading. It has browser-safe
 schema/taxonomy entrypoints and a Node-only filesystem loader. The CLI imports
 its types only so the published command stays independent of the monorepo.

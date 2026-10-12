@@ -1,5 +1,8 @@
 /** Browser checks for native examples, bounded startup and retained interaction. */
 import assert from 'node:assert/strict';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { chromium, expect, type Locator, type Page } from '@playwright/test';
 
@@ -72,6 +75,9 @@ async function blockExamples(page: Page) {
 }
 
 let site: Awaited<ReturnType<typeof startSite>> | undefined;
+const evidence = process.env.NODEX_EVIDENCE_DIR
+  ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
+  : await mkdtemp(path.join(tmpdir(), 'nodex-gallery-evidence-'));
 
 async function main() {
   const origin = process.argv[2] ?? (site = await startSite()).origin;
@@ -90,7 +96,7 @@ async function main() {
     return page;
   }
   try {
-    await checkGalleryModes(browser, origin);
+    await checkGalleryModes(browser, origin, evidence);
     const page = await newPage();
     const requests: string[] = [];
     page.on('request', (request) =>
@@ -544,4 +550,5 @@ try {
   await main();
 } finally {
   await site?.close();
+  console.log(`Gallery mode evidence: ${evidence}`);
 }

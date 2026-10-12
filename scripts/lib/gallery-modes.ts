@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { expect, type Browser } from '@playwright/test';
 import { resolveTokens } from '../../packages/cli/src/tokens.ts';
@@ -8,7 +7,11 @@ import { modeFixture } from './mode-fixture.ts';
 import { renderFontFaces, renderTokens } from './tokens.ts';
 
 /** Serve a test-only variation through the real gallery's manifest and assets. */
-export async function checkGalleryModes(browser: Browser, origin: string) {
+export async function checkGalleryModes(
+  browser: Browser,
+  origin: string,
+  evidence: string,
+) {
   const tokens = await modeFixture();
   const dark = resolveTokens(tokens, 'dark').color as Record<string, string>;
   const css = renderTokens(
@@ -17,10 +20,6 @@ export async function checkGalleryModes(browser: Browser, origin: string) {
     await renderFontFaces(tokens, path.resolve(import.meta.dirname, '../..')),
     'mono-editorial',
   );
-  const evidence = process.env.NODEX_EVIDENCE_DIR
-    ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
-    : await mkdtemp(path.join(tmpdir(), 'nodex-gallery-evidence-'));
-  console.log(`Gallery mode evidence: ${evidence}`);
   await mkdir(evidence, { recursive: true });
   for (const width of [1365, 390]) {
     const page = await browser.newPage({
