@@ -277,7 +277,11 @@ export function TerminalLanguages({
   onSelect?: (slug: string) => void;
 }) {
   return languages.map((language) => (
-    <div key={language.slug} className="flex flex-wrap justify-between gap-x-6">
+    <div
+      key={language.slug}
+      data-terminal-language={language.slug}
+      className="flex flex-wrap justify-between gap-x-6"
+    >
       {onSelect ? (
         <button
           type="button"

@@ -64,6 +64,10 @@ test(
       );
       await mkdir(language, { recursive: true });
       await writeFile(
+        path.join(directory, 'registry/languages.json'),
+        JSON.stringify(['mono-editorial']),
+      );
+      await writeFile(
         path.join(language, 'tokens.json'),
         JSON.stringify(tokens),
       );

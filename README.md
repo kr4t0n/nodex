@@ -5,16 +5,184 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains **121 expressive charts** (64 Mono Editorial, nine Signal Console,
-nine Neo-brutalism, nine Sketchbook, nine Soft Studio, twelve Nocturne and nine Hearth) and **24 reusable primitives**, delivered as editable React source.
+The registry contains **121 expressive charts** (64 Mono Editorial, nine Sketchbook,
+nine Soft Studio, nine Neo-brutalism, nine Hearth, nine Signal Console and twelve Nocturne) and **24 reusable primitives**, delivered as editable React source.
 This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
 current catalogue. The previous implementations remain in Git
 history at `099f1ef`; there is no legacy HTML/mount-function compatibility path.
 
-Seven design languages are available: Mono Editorial, Signal Console,
-**Neo-brutalism**, **Sketchbook**, **Soft Studio**, **Nocturne** and **Hearth**. Neo-brutalism starts with all 24 shared primitives, a complete
+The design languages appear in this order throughout the catalogue:
+
+1. [Mono Editorial](registry/languages/mono-editorial/DESIGN.md)
+2. [Sketchbook](registry/languages/sketchbook/DESIGN.md)
+3. [Soft Studio](registry/languages/soft-studio/DESIGN.md)
+4. [Neo-brutalism](registry/languages/neo-brutalism/DESIGN.md)
+5. [Hearth](registry/languages/hearth/DESIGN.md)
+6. [Signal Console](registry/languages/signal-console/DESIGN.md)
+7. [Nocturne](registry/languages/nocturne/DESIGN.md)
+
+[`registry/languages.json`](registry/languages.json) owns this sequence. The build
+publishes it in `r/languages.json`; the index tiles, terminal lists and language
+buttons, CLI `list` and `list --json` preserve that order. Mono Editorial is first.
+The shell and standalone primitive previews also explicitly default to Mono
+Editorial. The landing's scripted theme demonstration remains Signal Console →
+Neo-brutalism → Sketchbook; direct language routes keep the requested language.
+
+## Sketchbook
+
+Sketchbook is available at `/l/sketchbook`, with all 24 shared primitives and
+nine charts covering the [roughViz catalogue](https://www.jwilber.me/roughviz/).
+All use native Recharts geometry and inspection with seeded Rough.js decoration.
+
+| roughViz chart | Nodex component          | Encoding                                                 |
+| -------------- | ------------------------ | -------------------------------------------------------- |
+| Bar            | `sketch-bars`            | Vertical category bars from zero                         |
+| BarH           | `sketch-bars-horizontal` | Horizontal category bars from zero                       |
+| StackedBar     | `sketch-stacked-bars`    | Absolute vertical stacks with complete totals            |
+| Line           | `sketch-line`            | Multiple series on a numeric X axis                      |
+| Scatter        | `sketch-scatter`         | Equal-size marks on numeric X/Y axes                     |
+| Pie            | `sketch-pie`             | Exact sector shares of a complete total                  |
+| Donut          | `sketch-donut`           | Exact sector shares with a central total                 |
+| Force          | `sketch-force`           | Collision-positioned bubbles, area proportional to value |
+| Network        | `sketch-network`         | Area-scaled nodes with explicit undirected links         |
+
+Gaegu supplies headings, chart annotations, short UI text, paragraphs, editable
+values and dense tables; commands remain monospace. Its regular and bold faces
+are embedded for offline delivery. Reading text is enlarged by 2px: body text and
+form values use 16px, prose uses 14.5px, and gallery descriptions use 15px.
+Supporting copy follows the same increase. Headings, actions, code and spacing
+retain their existing values. Uneven corners, faint second outlines and small corner hatching
+on framed cards and primary actions extend the sketch treatment to the interface.
+Native hit targets, focus rings and keyboard behavior remain stable.
+
+The [design guide](registry/languages/sketchbook/DESIGN.md) defines the complete
+interface language. The [provenance record](registry/languages/sketchbook/PROVENANCE.md)
+pins the roughViz reference and separates extracted colors/drawing defaults from
+Nodex's surface, control, spacing and motion decisions.
+
+```bash
+nodex init sketchbook
+nodex add sketchbook/sketch-bars
+nodex add sketchbook/sketch-line sketchbook/sketch-network
+```
+
+`SketchBars` accepts caller-owned `{ id, label, value, tone? }` observations.
+IDs must be unique and nonempty; repeated labels are allowed. Values are
+nonnegative; null, negative and non-finite readings are unavailable. Zero keeps
+its label without a bar. Colors identify categories, and native bar height
+encodes magnitude. Hatching is clipped to those exact bounds; thin bar outlines
+render separately so scaled gallery previews retain all four edges. Category IDs seed
+the drawing, so reordering and interaction preserve each category's texture.
+Narrow containers scroll their plot locally. Tooltips support keyboard inspection.
+
+Horizontal bars, pie, donut, force and network accept the same observation shape.
+Stacks and lines accept `series: { id, label, tone? }[]` and observations with
+`values: Record<string, number | null>` keyed by series ID. Lines also require a
+finite, strictly increasing numeric `x`; signed Y values are supported and missing
+readings break each series independently. Scatter accepts `{ id, label, x, y, tone? }`
+and reports omitted coordinate pairs. An incomplete stack is unavailable as a whole;
+pie and donut require a complete, finite total before displaying shares.
+
+Force has no links. Network additionally requires
+`links: { id, source, target }[]` referencing node IDs, with no self-links or duplicate
+undirected pairs. Both use a stopped, deterministic `d3-force@3.0.0` solver on cloned
+data; node area encodes value relative to the current dataset. Zero and missing
+values retain text markers without implying positive area. Recharts owns rendering,
+keyboard inspection and finite transitions; the solver never runs an animation
+loop. The CLI installs the exact layout package and its TypeScript declarations.
+The language index features bars, line, donut and network; its gallery contains all nine.
+
+Override `--nx-sketch-roughness`, `--nx-sketch-axisRoughness`,
+`--nx-sketch-bowing`, `--nx-sketch-fillStyle`, `--nx-sketch-fillWeight`,
+`--nx-sketch-hachureAngle` and `--nx-sketch-hachureGap` in a chart scope to change
+the drawing. These numeric geometry tokens are unitless (gap and weight are
+interpreted as pixels); paint and rendered stroke widths remain CSS variables.
+Hachure, cross-hatch and solid fills are supported. Scope/style changes refresh
+geometry; CSSOM-only changes can dispatch `nodex:tokens-changed`. Invalid settings
+retain observations as plain token-painted marks. Drawing is finite and respects
+live reduced-motion changes.
+
+`font.heading` supplies Card, Dialog, Empty State and Prose headings. `font.ui`
+supplies short UI text, with `type.uiLabel` and `type.choice` sizing independent
+of dense labels and editable values. `texture.*` controls decorative outlines and
+corner hatching; set `texture.outlineOpacity` and `texture.hatchOpacity` to zero
+to remove them. Plain cards and quiet actions stay untextured. Other languages
+retain their existing fonts and have zero texture opacity. Override font roles
+separately from `font.sans` when changing a descendant scope's typography.
+Embedded font metadata accepts pinned static `@fontsource` and variable
+`@fontsource-variable` WOFF2 packages with their OFL notices.
+
+## Soft Studio
+
+Soft Studio is available at `/l/soft-studio`, with all 24 shared primitives and
+nine expressive charts. Embedded Manrope, cool off-white pages, white surfaces,
+cobalt actions, tinted fields and contextual rounding create a calm product
+interface. Fields and badges stay flat; framed surfaces use subtle diffuse
+elevation. Body copy is 15px and editable values are 16px. The
+[design guide](registry/languages/soft-studio/DESIGN.md) covers the complete UI.
+
+| Chart               | Type        | Reading                                                                                         |
+| ------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| `soft-bars`         | Bar         | Rounded category bars with direct values and an exact zero baseline                             |
+| `soft-area`         | Area        | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps   |
+| `soft-donut`        | Donut       | Exact shares of a complete total, a generous opening and a responsive key                       |
+| `soft-heatmap`      | Heatmap     | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
+| `soft-line`         | Line        | Independent monotone series on a numeric timeline, preserving each series' gaps                 |
+| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals                   |
+| `soft-scatter`      | Scatter     | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted               |
+| `soft-dumbbell`     | Dumbbell    | Open and filled endpoints compare readings, including decreases, ties and missing partners      |
+| `soft-gauge`        | Gauge       | Exact progress across a half-circle against an explicit positive target                         |
+
+```bash
+nodex init soft-studio
+nodex add soft-studio/soft-bars soft-studio/soft-area
+nodex add soft-studio/soft-donut soft-studio/soft-heatmap button card
+nodex add soft-studio/soft-line soft-studio/soft-stacked-bars
+nodex add soft-studio/soft-scatter soft-studio/soft-dumbbell soft-studio/soft-gauge
+```
+
+Bars and donut accept `{ id, label, value, tone? }` records. IDs must be unique
+and nonempty; repeated labels are allowed. Values are finite and nonnegative,
+with `null` or invalid readings unavailable. Explicit tones `a`–`d` or stable
+identity choose category colors. Zero never acquires a visible bar or sector.
+A missing part or overflowing total suppresses the entire donut allocation.
+
+Area observations also require a finite, strictly increasing numeric `x`. The
+headline always refers to the final supplied observation, even when missing.
+The heatmap takes explicit `{ id, label }` rows and columns, `{ rowId, columnId,
+value }` readings and a finite positive `maxValue`. Undeclared or duplicate
+pairs reject the dataset. Missing, negative and above-scale readings retain an
+inspectable cross; zero uses a dot. The categorical palette is never an intensity
+ramp.
+
+Lines and stacks accept ordered `series: { id, label, tone? }[]` and observations
+with `values` keyed by series ID. Lines also require strictly increasing numeric
+`x` and support signed readings; missing values break each curve independently.
+Stacks require nonnegative parts and complete finite totals. Scatter takes
+`{ id, label, x, y, tone? }`; dumbbell takes `{ id, label, before, after }` and
+preserves available endpoints when a partner is missing. Both support signed
+coordinates. The gauge requires `{ value, target }`, with a finite positive
+target and progress between zero and that target; invalid input is unavailable,
+never clamped. Zero and full progress keep their exact angles.
+The gauge measures its aspect ratio through Recharts and positions its reading
+inside the same SVG, keeping the arc and labels together as the container resizes.
+
+All nine charts support native keyboard inspection, scoped tokens and live
+reduced-motion changes. Their gallery specimens fit completely without scrollbars:
+logical dimensions include the full plot, key and padding before preview scaling.
+Dense caller data can still scroll locally in constrained consumer containers.
+
+The language index retains bars, area, donut and heatmap as its four curated
+previews; the gallery and selected landing belt discover all nine charts. The landing terminal lists Soft
+Studio and accepts `nodex init soft-studio`; its automatic sequence still ends
+with Sketchbook. Manrope's pinned Fontsource package and OFL notice are embedded
+in the delivered token stylesheet, so consumers need no font host or font package.
+
+## Neo-brutalism
+
+Neo-brutalism starts with all 24 shared primitives, a complete
 token set and a [design guide](registry/languages/neo-brutalism/DESIGN.md).
 It uses embedded Space Grotesk and JetBrains Mono, warm ivory, lilac panels,
 yellow actions, pink badges, mint selections, cream fields and blue value
@@ -92,6 +260,42 @@ faces embedded, Hearth's token stylesheet is about 468 KB uncompressed. The
 language index loads every language's stylesheet to render its scoped tiles;
 the fonts require no additional network host. The index chrome and standalone
 primitive previews keep Mono Editorial as their explicit default.
+
+## Signal Console charts
+
+Signal Console has nine charts at `/l/signal-console`, using its existing dark
+surfaces, JetBrains Mono, compact instrument layout and semantic status colors.
+
+| Chart                | Type        | Reading                                                          |
+| -------------------- | ----------- | ---------------------------------------------------------------- |
+| `endpoint-latency`   | Bar         | Routes ranked by P99 latency against an objective                |
+| `request-throughput` | Area        | Request rate across equal-duration windows                       |
+| `latency-trend`      | Line        | P50/P95/P99 patterns and P99 objective breaches                  |
+| `response-codes`     | Stacked bar | Complete HTTP response counts by status class                    |
+| `latency-histogram`  | Histogram   | Counts in equal-width latency buckets                            |
+| `service-health`     | Heatmap     | Healthy, degraded, down and unavailable service windows          |
+| `capacity-ring`      | Donut       | Exact used/available capacity with an optional warning threshold |
+| `saturation-scatter` | Scatter     | Host CPU and latency against two explicit limits                 |
+| `trace-spans`        | Range bar   | Actual start/end offsets, preserving concurrent spans            |
+
+Each chart accepts application data, provides keyboard inspection and supports
+scoped tokens and reduced motion. Missing data stays distinct from zero; partial
+response counts cannot produce a complete stack, and incomplete capacity cannot
+produce a share. Source, time window and freshness text come from the caller.
+Dense plots scroll within narrow containers. The index features four previews;
+the gallery and landing terminal discover all nine from the built manifest.
+
+Endpoint Latency pairs slim ranked bars with single-line route labels and an
+aligned P99 column. A dashed objective and red `!` markers make breaches explicit;
+hover or keyboard inspection shows the full route and its distance above the SLO.
+Rows retain their spacing as the route count grows, with local scrolling when
+the chart's width or height is constrained. Compact bands and a wide specimen
+keep its overview preview at a comparable scale to the other Signal Console charts.
+
+```bash
+nodex init signal-console
+nodex add signal-console/request-throughput signal-console/service-health
+```
 
 ## Nocturne
 
@@ -229,192 +433,6 @@ bars, line, ring and the scatterplot matrix; the gallery and selected landing be
 all twelve. The landing terminal accepts `nodex init nocturne` and
 selects its actual chart belt. The automatic demonstration still ends with
 Sketchbook. Fonts and their license travel inside the token stylesheet.
-
-## Soft Studio
-
-Soft Studio is available at `/l/soft-studio`, with all 24 shared primitives and
-nine expressive charts. Embedded Manrope, cool off-white pages, white surfaces,
-cobalt actions, tinted fields and contextual rounding create a calm product
-interface. Fields and badges stay flat; framed surfaces use subtle diffuse
-elevation. Body copy is 15px and editable values are 16px. The
-[design guide](registry/languages/soft-studio/DESIGN.md) covers the complete UI.
-
-| Chart               | Type        | Reading                                                                                         |
-| ------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
-| `soft-bars`         | Bar         | Rounded category bars with direct values and an exact zero baseline                             |
-| `soft-area`         | Area        | A monotone trend on numeric X coordinates, retaining unequal intervals and missing-value gaps   |
-| `soft-donut`        | Donut       | Exact shares of a complete total, a generous opening and a responsive key                       |
-| `soft-heatmap`      | Heatmap     | Rounded cells on a fixed caller-owned scale, with different marks for zero and missing readings |
-| `soft-line`         | Line        | Independent monotone series on a numeric timeline, preserving each series' gaps                 |
-| `soft-stacked-bars` | Stacked bar | Absolute horizontal contributions with stable series colors and direct totals                   |
-| `soft-scatter`      | Scatter     | Equal-size circles on two numeric axes, with incomplete pairs omitted and counted               |
-| `soft-dumbbell`     | Dumbbell    | Open and filled endpoints compare readings, including decreases, ties and missing partners      |
-| `soft-gauge`        | Gauge       | Exact progress across a half-circle against an explicit positive target                         |
-
-```bash
-nodex init soft-studio
-nodex add soft-studio/soft-bars soft-studio/soft-area
-nodex add soft-studio/soft-donut soft-studio/soft-heatmap button card
-nodex add soft-studio/soft-line soft-studio/soft-stacked-bars
-nodex add soft-studio/soft-scatter soft-studio/soft-dumbbell soft-studio/soft-gauge
-```
-
-Bars and donut accept `{ id, label, value, tone? }` records. IDs must be unique
-and nonempty; repeated labels are allowed. Values are finite and nonnegative,
-with `null` or invalid readings unavailable. Explicit tones `a`–`d` or stable
-identity choose category colors. Zero never acquires a visible bar or sector.
-A missing part or overflowing total suppresses the entire donut allocation.
-
-Area observations also require a finite, strictly increasing numeric `x`. The
-headline always refers to the final supplied observation, even when missing.
-The heatmap takes explicit `{ id, label }` rows and columns, `{ rowId, columnId,
-value }` readings and a finite positive `maxValue`. Undeclared or duplicate
-pairs reject the dataset. Missing, negative and above-scale readings retain an
-inspectable cross; zero uses a dot. The categorical palette is never an intensity
-ramp.
-
-Lines and stacks accept ordered `series: { id, label, tone? }[]` and observations
-with `values` keyed by series ID. Lines also require strictly increasing numeric
-`x` and support signed readings; missing values break each curve independently.
-Stacks require nonnegative parts and complete finite totals. Scatter takes
-`{ id, label, x, y, tone? }`; dumbbell takes `{ id, label, before, after }` and
-preserves available endpoints when a partner is missing. Both support signed
-coordinates. The gauge requires `{ value, target }`, with a finite positive
-target and progress between zero and that target; invalid input is unavailable,
-never clamped. Zero and full progress keep their exact angles.
-The gauge measures its aspect ratio through Recharts and positions its reading
-inside the same SVG, keeping the arc and labels together as the container resizes.
-
-All nine charts support native keyboard inspection, scoped tokens and live
-reduced-motion changes. Their gallery specimens fit completely without scrollbars:
-logical dimensions include the full plot, key and padding before preview scaling.
-Dense caller data can still scroll locally in constrained consumer containers.
-
-The language index retains bars, area, donut and heatmap as its four curated
-previews; the gallery and selected landing belt discover all nine charts. The landing terminal lists Soft
-Studio and accepts `nodex init soft-studio`; its automatic sequence still ends
-with Sketchbook. Manrope's pinned Fontsource package and OFL notice are embedded
-in the delivered token stylesheet, so consumers need no font host or font package.
-
-## Sketchbook
-
-Sketchbook is available at `/l/sketchbook`, with all 24 shared primitives and
-nine charts covering the [roughViz catalogue](https://www.jwilber.me/roughviz/).
-All use native Recharts geometry and inspection with seeded Rough.js decoration.
-
-| roughViz chart | Nodex component          | Encoding                                                 |
-| -------------- | ------------------------ | -------------------------------------------------------- |
-| Bar            | `sketch-bars`            | Vertical category bars from zero                         |
-| BarH           | `sketch-bars-horizontal` | Horizontal category bars from zero                       |
-| StackedBar     | `sketch-stacked-bars`    | Absolute vertical stacks with complete totals            |
-| Line           | `sketch-line`            | Multiple series on a numeric X axis                      |
-| Scatter        | `sketch-scatter`         | Equal-size marks on numeric X/Y axes                     |
-| Pie            | `sketch-pie`             | Exact sector shares of a complete total                  |
-| Donut          | `sketch-donut`           | Exact sector shares with a central total                 |
-| Force          | `sketch-force`           | Collision-positioned bubbles, area proportional to value |
-| Network        | `sketch-network`         | Area-scaled nodes with explicit undirected links         |
-
-Gaegu supplies headings, chart annotations, short UI text, paragraphs, editable
-values and dense tables; commands remain monospace. Its regular and bold faces
-are embedded for offline delivery. Reading text is enlarged by 2px: body text and
-form values use 16px, prose uses 14.5px, and gallery descriptions use 15px.
-Supporting copy follows the same increase. Headings, actions, code and spacing
-retain their existing values. Uneven corners, faint second outlines and small corner hatching
-on framed cards and primary actions extend the sketch treatment to the interface.
-Native hit targets, focus rings and keyboard behavior remain stable.
-
-The [design guide](registry/languages/sketchbook/DESIGN.md) defines the complete
-interface language. The [provenance record](registry/languages/sketchbook/PROVENANCE.md)
-pins the roughViz reference and separates extracted colors/drawing defaults from
-Nodex's surface, control, spacing and motion decisions.
-
-```bash
-nodex init sketchbook
-nodex add sketchbook/sketch-bars
-nodex add sketchbook/sketch-line sketchbook/sketch-network
-```
-
-`SketchBars` accepts caller-owned `{ id, label, value, tone? }` observations.
-IDs must be unique and nonempty; repeated labels are allowed. Values are
-nonnegative; null, negative and non-finite readings are unavailable. Zero keeps
-its label without a bar. Colors identify categories, and native bar height
-encodes magnitude. Hatching is clipped to those exact bounds; thin bar outlines
-render separately so scaled gallery previews retain all four edges. Category IDs seed
-the drawing, so reordering and interaction preserve each category's texture.
-Narrow containers scroll their plot locally. Tooltips support keyboard inspection.
-
-Horizontal bars, pie, donut, force and network accept the same observation shape.
-Stacks and lines accept `series: { id, label, tone? }[]` and observations with
-`values: Record<string, number | null>` keyed by series ID. Lines also require a
-finite, strictly increasing numeric `x`; signed Y values are supported and missing
-readings break each series independently. Scatter accepts `{ id, label, x, y, tone? }`
-and reports omitted coordinate pairs. An incomplete stack is unavailable as a whole;
-pie and donut require a complete, finite total before displaying shares.
-
-Force has no links. Network additionally requires
-`links: { id, source, target }[]` referencing node IDs, with no self-links or duplicate
-undirected pairs. Both use a stopped, deterministic `d3-force@3.0.0` solver on cloned
-data; node area encodes value relative to the current dataset. Zero and missing
-values retain text markers without implying positive area. Recharts owns rendering,
-keyboard inspection and finite transitions; the solver never runs an animation
-loop. The CLI installs the exact layout package and its TypeScript declarations.
-The language index features bars, line, donut and network; its gallery contains all nine.
-
-Override `--nx-sketch-roughness`, `--nx-sketch-axisRoughness`,
-`--nx-sketch-bowing`, `--nx-sketch-fillStyle`, `--nx-sketch-fillWeight`,
-`--nx-sketch-hachureAngle` and `--nx-sketch-hachureGap` in a chart scope to change
-the drawing. These numeric geometry tokens are unitless (gap and weight are
-interpreted as pixels); paint and rendered stroke widths remain CSS variables.
-Hachure, cross-hatch and solid fills are supported. Scope/style changes refresh
-geometry; CSSOM-only changes can dispatch `nodex:tokens-changed`. Invalid settings
-retain observations as plain token-painted marks. Drawing is finite and respects
-live reduced-motion changes.
-
-`font.heading` supplies Card, Dialog, Empty State and Prose headings. `font.ui`
-supplies short UI text, with `type.uiLabel` and `type.choice` sizing independent
-of dense labels and editable values. `texture.*` controls decorative outlines and
-corner hatching; set `texture.outlineOpacity` and `texture.hatchOpacity` to zero
-to remove them. Plain cards and quiet actions stay untextured. Other languages
-retain their existing fonts and have zero texture opacity. Override font roles
-separately from `font.sans` when changing a descendant scope's typography.
-Embedded font metadata accepts pinned static `@fontsource` and variable
-`@fontsource-variable` WOFF2 packages with their OFL notices.
-
-## Signal Console charts
-
-Signal Console has nine charts at `/l/signal-console`, using its existing dark
-surfaces, JetBrains Mono, compact instrument layout and semantic status colors.
-
-| Chart                | Type        | Reading                                                          |
-| -------------------- | ----------- | ---------------------------------------------------------------- |
-| `endpoint-latency`   | Bar         | Routes ranked by P99 latency against an objective                |
-| `request-throughput` | Area        | Request rate across equal-duration windows                       |
-| `latency-trend`      | Line        | P50/P95/P99 patterns and P99 objective breaches                  |
-| `response-codes`     | Stacked bar | Complete HTTP response counts by status class                    |
-| `latency-histogram`  | Histogram   | Counts in equal-width latency buckets                            |
-| `service-health`     | Heatmap     | Healthy, degraded, down and unavailable service windows          |
-| `capacity-ring`      | Donut       | Exact used/available capacity with an optional warning threshold |
-| `saturation-scatter` | Scatter     | Host CPU and latency against two explicit limits                 |
-| `trace-spans`        | Range bar   | Actual start/end offsets, preserving concurrent spans            |
-
-Each chart accepts application data, provides keyboard inspection and supports
-scoped tokens and reduced motion. Missing data stays distinct from zero; partial
-response counts cannot produce a complete stack, and incomplete capacity cannot
-produce a share. Source, time window and freshness text come from the caller.
-Dense plots scroll within narrow containers. The index features four previews;
-the gallery and landing terminal discover all nine from the built manifest.
-
-Endpoint Latency pairs slim ranked bars with single-line route labels and an
-aligned P99 column. A dashed objective and red `!` markers make breaches explicit;
-hover or keyboard inspection shows the full route and its distance above the SLO.
-Rows retain their spacing as the route count grows, with local scrolling when
-the chart's width or height is constrained. Compact bands and a wide specimen
-keep its overview preview at a comparable scale to the other Signal Console charts.
-
-```bash
-nodex init signal-console
-nodex add signal-console/request-throughput signal-console/service-health
-```
 
 ## Develop the registry and gallery
 
@@ -913,6 +931,7 @@ Search results and type filters retain this order.
 
 ```text
 registry/
+  languages.json                   display order, one entry per language
   _shared/                         copied support modules, declared per item
   primitives/<slug>/
     component.tsx                  reusable API, types and private helpers
@@ -1021,6 +1040,9 @@ published by these tests. `smoke:gallery` also checks the mode control, active
 token-panel values and retained specimen state. It mounts the actual index view
 in a browser fixture, keeping authentication outside that check, and verifies
 Mono Editorial chrome beside language-scoped tiles at desktop/mobile sizes.
+Tile order, scripted terminal rows, selectable terminal buttons and packed CLI
+text/JSON are checked against the published language index; registry tests also
+check the README list against the authored order.
 All 24 standalone primitive previews retain Mono Editorial with and without
 JavaScript; an explicit language query still selects another palette.
 `smoke:pack` exercises mode init,
@@ -1211,5 +1233,8 @@ Read [AGENTS.md](AGENTS.md) for architecture and
 procedure. `node packages/cli/src/index.ts new-language <slug>` scaffolds a new
 language with all shared primitive roles, seeded from the checkout's canonical
 Mono Editorial values while retaining neutral paint and system fonts. Customize
-those roles in the new language's `tokens.json`. Components are discovered from source metadata; routes and delivery
+those roles in the new language's `tokens.json`, then add its slug to
+`registry/languages.json` at the intended display position. The build requires
+every language directory exactly once and rejects unknown or duplicate entries.
+Components are discovered from source metadata; routes and delivery
 addresses come from the generated manifests.

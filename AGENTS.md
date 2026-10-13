@@ -35,6 +35,15 @@ The manifest is the catalogue, not the folder layout. A slug names the item;
 `component` names its cross-language type. Types describe marks and encoding,
 not animation or business domain. Taxonomy lives in `packages/core/src/taxonomy.ts`.
 
+`registry/languages.json` is the sole authored language order. The source loader
+requires each language directory exactly once, rejecting missing, duplicate and
+unknown entries. The build preserves it in `r/languages.json` and expressive
+groups in both registry manifests; browser and CLI consumers retain that order.
+Keep documentation lists in step with it. Mono Editorial leads the catalogue.
+The explicit shell/primitive default remains Mono Editorial, and the landing's
+curated playback remains Signal Console → Neo-brutalism → Sketchbook; neither
+derives its identity from catalogue position.
+
 The language gallery sorts charts by `component`, then title, then slug for ties.
 Search and type filters retain that order. Featured lists keep their authored order.
 The language index takes up to four previews from `meta.json`'s `featured` list;
