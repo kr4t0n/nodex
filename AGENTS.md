@@ -128,9 +128,11 @@ never a single `:root` replacement. Index scopes are removed on unmount so they
 cannot reset a later gallery's dark specimens. Gallery mode changes update tokens
 without keying or remounting examples; index and landing selections stay default.
 Language and component views share a Dark mode switch only when dark mode is
-supported. Its accessible name stays fixed while `aria-checked`, the visible
-Light/Dark label and thumb position reflect the mode. Native button activation
-provides Space and Enter; focus and reduced-motion styling use shell tokens.
+supported. Its accessible name stays fixed while `aria-checked`, the thumb
+position and its decorative sun/moon symbol reflect the mode. No mode words are
+visible. Icons stay hidden from the accessibility tree and visible in forced
+colors. Native button activation provides Space and Enter; focus and
+reduced-motion styling use shell tokens.
 
 `font.faces` is asset metadata, not CSS variables. Each face declares an exact
 static `@fontsource` or variable `@fontsource-variable` package, WOFF2 file,

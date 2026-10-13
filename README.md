@@ -630,9 +630,9 @@ override individual variables. Native `color-scheme` follows the selected mode.
 
 The language and component galleries show a Dark mode switch only for languages
 with an alternate mode. Click it or focus it with Tab and press Space or Enter;
-the visible Light/Dark label shows the current mode. Shell, specimens and
-token-panel values switch together; index thumbnails always show the default
-palette. There is no independent gallery theme.
+the moving thumb shows a sun in light mode and a moon in dark mode. Shell,
+specimens and token-panel values switch together; index thumbnails always show
+the default palette. There is no independent gallery theme.
 Prose section headings use `--nx-type-prose-sectionTransform`, and heading leading
 uses `--nx-type-prose-headingLineHeight`; the existing languages preserve uppercase
 sections and inherited leading, including narrow prose.
@@ -1042,9 +1042,10 @@ published by these tests. `smoke:gallery` also checks the mode switch's browser
 accessibility tree, keyboard activation and focus, active token-panel values and
 retained specimen state. Switch screenshots and accessibility records cover
 language and component views at desktop/mobile sizes in both modes.
-Hearth chart headers also retain the prior control's footprint at common phone
-widths and immediately around each title's wrap point; the evidence includes
-their layout measurements, screenshots and forced-colors frames.
+Hearth chart headers are compared with the prior select at common phone widths
+and immediately around each title's wrap point. Checks reject new wrapping or
+movement outside the control, a stuck thumb or symbol, visible mode text, and
+invisible forced-colors icons; evidence includes layout measurements and frames.
 It mounts the actual index view in a browser fixture, keeping authentication
 outside that check, and verifies Mono Editorial chrome beside language-scoped
 tiles at desktop/mobile sizes.

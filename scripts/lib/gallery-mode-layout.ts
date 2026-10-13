@@ -4,7 +4,7 @@ import path from 'node:path';
 import { expect, type Browser } from '@playwright/test';
 import type { GalleryRegistry } from '../../packages/core/src/schema.ts';
 
-/** Pin the old select's header footprint, including title-specific wrap points. */
+/** Compare icon-switch layout with the base select, including title wrap points. */
 export async function checkGalleryModeLayout(
   browser: Browser,
   origin: string,
@@ -53,7 +53,7 @@ export async function checkGalleryModeLayout(
           412,
           414,
           1365,
-          // Dark's label is 2px narrower; straddle both modes' wrap points.
+          // Base's dark control is 2px narrower; straddle both wrap points.
           boundary - 3,
           boundary - 2,
           boundary - 1,
@@ -68,26 +68,59 @@ export async function checkGalleryModeLayout(
         for (const selection of ['light', 'dark'] as const) {
           const controlWidth = controlWidths[selection];
           await mode.setChecked(selection === 'dark');
-          const layout = await heading.evaluate((title) => {
+          const comparison = await heading.evaluate((title, selection) => {
             const row = title.parentElement!;
             const button = row.querySelector('[role="switch"]')!;
-            return {
+            const measure = (control: Element) => ({
               title: title.getBoundingClientRect().toJSON(),
               row: row.getBoundingClientRect().toJSON(),
-              control: button.getBoundingClientRect().toJSON(),
-              gap: parseFloat(getComputedStyle(row).columnGap),
-            };
-          });
+              next: row.nextElementSibling!.getBoundingClientRect().toJSON(),
+              control: control.getBoundingClientRect().toJSON(),
+              overflow: document.documentElement.scrollWidth > innerWidth,
+            });
+            const actual = measure(button);
+            // Base 84284e8's exact control markup, using the unchanged shell CSS.
+            // Restore synchronously so React retains its mounted switch node.
+            const select = document.createElement('select');
+            select.className = 'nx-select nx-select--auto';
+            for (const value of ['light', 'dark']) {
+              select.add(
+                new Option(value === 'light' ? 'Light' : 'Dark', value),
+              );
+            }
+            select.value = selection;
+            button.replaceWith(select);
+            try {
+              return { actual, reference: measure(select) };
+            } finally {
+              select.replaceWith(button);
+            }
+          }, selection);
+          const { actual, reference } = comparison;
           const context = `${item.name}, ${width}px, ${selection}`;
-          assert(Math.abs(layout.control.width - controlWidth) < 0.1, context);
-          assert.equal(layout.control.height, controlHeight, context);
-          const fits =
-            layout.title.width + layout.gap + controlWidth <= layout.row.width;
-          const height = fits
-            ? Math.max(layout.title.height, controlHeight)
-            : layout.title.height + layout.gap + controlHeight;
-          assert(Math.abs(layout.row.height - height) < 0.1, context);
-          results.push({ item: item.name, width, mode: selection, ...layout });
+          assert(
+            Math.abs(reference.control.width - controlWidth) < 0.1,
+            context,
+          );
+          assert(
+            actual.control.width <= reference.control.width + 0.1,
+            context,
+          );
+          assert.equal(actual.control.height, controlHeight, context);
+          for (const part of ['title', 'row', 'next', 'overflow'] as const) {
+            assert.deepEqual(
+              actual[part],
+              reference[part],
+              `${context}: ${part}`,
+            );
+          }
+          assert.equal(actual.overflow, false, context);
+          results.push({
+            item: item.name,
+            width,
+            mode: selection,
+            ...comparison,
+          });
           if (
             width === 390 ||
             (width === 360 && item.name === 'hearth-bars') ||

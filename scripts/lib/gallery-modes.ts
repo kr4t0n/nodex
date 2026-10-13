@@ -7,27 +7,46 @@ import { checkGalleryModeLayout } from './gallery-mode-layout.ts';
 import { modeFixture } from './mode-fixture.ts';
 import { renderFontFaces, renderTokens } from './tokens.ts';
 
+const iconShapes = new WeakMap<Page, Partial<Record<'sun' | 'moon', string>>>();
+
 async function checkModeSwitch(page: Page, checked: boolean, output: string) {
   const mode = page.getByRole('switch', { name: 'Dark mode', exact: true });
   await expect(mode).toBeChecked({ checked });
-  await expect(
-    mode.getByText(checked ? 'Dark' : 'Light', { exact: true }),
-  ).toBeVisible();
-  await expect(
-    mode.getByText(checked ? 'Light' : 'Dark', { exact: true }),
-  ).toBeHidden();
-  const label = await mode
-    .getByText(checked ? 'Dark' : 'Light', { exact: true })
-    .boundingBox();
-  const track = await mode.locator(':scope > span').first().boundingBox();
-  const thumb = await mode
-    .locator(':scope > span > span')
-    .first()
-    .boundingBox();
-  assert(label && track && thumb);
+  const symbol = checked ? 'moon' : 'sun';
+  const icon = mode.locator(`[data-mode-icon="${symbol}"]`);
+  await expect(mode.locator('svg')).toHaveCount(1);
+  await expect(icon).toBeVisible();
+  await expect(icon).toHaveAttribute('aria-hidden', 'true');
+  await expect(icon).toHaveAttribute('focusable', 'false');
+  await expect(mode.getByText(/^(Light|Dark)$/)).toBeHidden();
+  const shape = await icon.evaluate((svg) => svg.innerHTML);
   assert(
-    Math.abs(label.y + label.height / 2 - track.y - track.height / 2) < 1,
-    'The visible label stays vertically centered beside the switch track',
+    shape.includes('<path'),
+    'The mode icon must contain painted geometry',
+  );
+  const shapes = iconShapes.get(page) ?? {};
+  assert.notEqual(
+    shape,
+    shapes[checked ? 'sun' : 'moon'],
+    'The sun and moon must have different geometry, not just different attributes',
+  );
+  shapes[symbol] = shape;
+  iconShapes.set(page, shapes);
+  const iconBox = await icon.boundingBox();
+  const track = await mode.locator('[data-mode-track]').boundingBox();
+  const thumb = await mode.locator('[data-mode-thumb]').boundingBox();
+  assert(iconBox && track && thumb);
+  assert(
+    iconBox.x >= thumb.x &&
+      iconBox.y >= thumb.y &&
+      iconBox.x + iconBox.width <= thumb.x + thumb.width &&
+      iconBox.y + iconBox.height <= thumb.y + thumb.height,
+    'The mode symbol stays inside the moving thumb',
+  );
+  assert(
+    Math.abs(iconBox.x + iconBox.width / 2 - thumb.x - thumb.width / 2) < 1 &&
+      Math.abs(iconBox.y + iconBox.height / 2 - thumb.y - thumb.height / 2) < 1,
+    'The symbol stays centered in the thumb',
   );
   assert(
     thumb.x > track.x && thumb.x + thumb.width < track.x + track.width,
@@ -59,6 +78,17 @@ async function checkModeSwitch(page: Page, checked: boolean, output: string) {
         entry.role?.value === 'switch' && entry.name?.value === 'Dark mode',
     );
     assert(node, 'The browser accessibility tree must expose the mode switch');
+    const descendants = [...(node.childIds ?? [])];
+    while (descendants.length) {
+      const id = descendants.pop();
+      const child = nodes.find((entry) => entry.nodeId === id);
+      if (!child) continue;
+      assert(
+        child.ignored,
+        'Decorative icons and sizing text must not be exposed',
+      );
+      descendants.push(...(child.childIds ?? []));
+    }
     const state = node.properties?.find((entry) => entry.name === 'checked')
       ?.value.value;
     assert.equal(state, String(checked));
@@ -69,7 +99,8 @@ async function checkModeSwitch(page: Page, checked: boolean, output: string) {
           role: node.role?.value,
           name: node.name?.value,
           checked: state,
-          visibleLabel: checked ? 'Dark' : 'Light',
+          visibleSymbol: symbol,
+          iconShape: shape,
           thumbCenter,
           trackWidth: track.width,
           focus,
@@ -380,7 +411,7 @@ async function checkHearthGallery(
             ),
           });
         }
-        const thumb = mode.locator('[aria-hidden="true"] > span').first();
+        const thumb = mode.locator('[data-mode-thumb]');
         await page.emulateMedia({ reducedMotion: 'no-preference' });
         await expect(thumb).toHaveCSS('transition-duration', '0.14s');
         await expect(thumb).not.toHaveCSS('transition-property', 'none');
@@ -396,17 +427,31 @@ async function checkHearthGallery(
             thumb: getComputedStyle(node).backgroundColor,
             track: getComputedStyle(node.parentElement!).backgroundColor,
             text: getComputedStyle(node.closest('button')!).color,
+            icon: getComputedStyle(node.querySelector('svg')!).fill,
           }));
           assert.notEqual(colors.thumb, colors.track);
           assert.notEqual(colors.thumb, 'rgba(0, 0, 0, 0)');
           assert.equal(colors.thumb, colors.text);
+          assert.notEqual(colors.icon, colors.thumb);
+          assert.equal(colors.icon, colors.track);
+          await mode.focus();
+          await page.keyboard.press('Shift+Tab');
+          await page.keyboard.press('Tab');
+          await checkModeSwitch(
+            page,
+            checked,
+            path.join(
+              evidence,
+              `hearth-${slug}-forced-colors-${checked ? 'dark' : 'light'}-${width}.json`,
+            ),
+          );
+          await page.screenshot({
+            path: path.join(
+              evidence,
+              `hearth-${slug}-forced-colors-${checked ? 'dark' : 'light'}-${width}.png`,
+            ),
+          });
         }
-        await page.screenshot({
-          path: path.join(
-            evidence,
-            `hearth-${slug}-forced-colors-${width}.png`,
-          ),
-        });
         await page.emulateMedia({ forcedColors: 'none' });
       }
       assert.deepEqual(errors, []);
