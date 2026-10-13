@@ -45,8 +45,8 @@ export function Example({ animate = true }: { animate?: boolean }) {
     <HearthShares
       data={data}
       parts={parts}
-      unitLabel="Where the basket goes"
-      contextLabel="Four weeks of shopping"
+      unitLabel="Weekly spend"
+      contextLabel="Where the basket goes, over four weeks"
       valueFormatter={(value) => pounds.format(value)}
       aria-label="Illustrative weekly grocery spend by kind of food"
       animate={animate}

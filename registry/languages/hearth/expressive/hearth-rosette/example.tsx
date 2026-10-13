@@ -26,8 +26,8 @@ export function Example({ animate = true }: { animate?: boolean }) {
   return (
     <HearthRosette
       data={data}
-      unitLabel="The baking year"
-      contextLabel="Loaves baked each month"
+      unitLabel="Loaves baked"
+      contextLabel="Each month of one year"
       aria-label="Illustrative number of loaves baked in each month of one year"
       animate={animate}
     />

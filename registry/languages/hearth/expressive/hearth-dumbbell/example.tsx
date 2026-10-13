@@ -14,8 +14,8 @@ export function Example({ animate = true }: { animate?: boolean }) {
       data={data}
       startLabel="First time"
       endLabel="Tenth time"
-      unitLabel="First time, tenth time"
-      contextLabel="Hands-on minutes"
+      unitLabel="Hands-on minutes"
+      contextLabel="Five recipes, first and tenth time"
       valueFormatter={(value) => `${value} min`}
       aria-label="Illustrative hands-on minutes for five recipes, first and tenth attempt"
       animate={animate}

@@ -51,7 +51,7 @@ interface Row {
   index: number;
   start: number | null;
   end: number | null;
-  /** Low and high reading for the library's range bar; null unless both are available. */
+  /** Low and high reading for the library's range bar; one reading spans no width. */
   range: [number, number] | null;
 }
 
@@ -63,7 +63,34 @@ interface Row {
 function Pair({ y, width, height, payload }: BarShapeProps) {
   const scale = useXAxisScale();
   const row = payload as Row;
-  if (row.start === null || row.end === null || !scale) return <g />;
+  if (!scale) return <g />;
+  if (row.start === null || row.end === null) {
+    // A lone reading keeps its own mark, with no connector to an absent one.
+    const value = row.start ?? row.end;
+    const x = value === null ? undefined : scale(value);
+    if (x === undefined) return <g />;
+    return row.end === null ? (
+      <circle
+        cx={x}
+        cy={y + height / 2}
+        r={5}
+        fill="var(--nx-paper)"
+        stroke="var(--nx-muted)"
+        strokeWidth="var(--nx-stroke-mark)"
+        data-nx-hearth-start={row.id}
+        data-nx-value={row.start!}
+      />
+    ) : (
+      <circle
+        cx={x}
+        cy={y + height / 2}
+        r={6}
+        fill="var(--nx-seriesA)"
+        data-nx-hearth-end={row.id}
+        data-nx-value={row.end}
+      />
+    );
+  }
   const from = scale(row.start);
   const to = scale(row.end);
   if (from === undefined || to === undefined) return <g />;
@@ -192,9 +219,12 @@ export function HearthDumbbell({
         start,
         end,
         range:
-          start === null || end === null
+          start === null && end === null
             ? null
-            : [Math.min(start, end), Math.max(start, end)],
+            : [
+                Math.min(start ?? end!, end ?? start!),
+                Math.max(start ?? end!, end ?? start!),
+              ],
       };
     });
     return { rows, valid, minimum, maximum };
@@ -204,7 +234,7 @@ export function HearthDumbbell({
     : !rows.length
       ? 'No rows to compare.'
       : !rows.some((row) => row.range)
-        ? 'No complete pairs available.'
+        ? 'No readings available.'
         : null;
   const low = Math.min(0, minimum);
   const high = maximum > low ? 'auto' : low + 1;

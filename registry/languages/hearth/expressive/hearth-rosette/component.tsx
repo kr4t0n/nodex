@@ -43,13 +43,20 @@ interface Petal {
   label: string;
   value: number | null;
   weight: number;
-  /** Area share of the largest value; radius follows its square root. */
+  /** Share of the largest value; the petal's area outside the hub follows it. */
   share: number;
 }
 
 const inner = 6;
 const reach = 66;
 const rim = 84;
+
+/**
+ * A sector's area grows with r² − hub², not r², so the hub would inflate small
+ * petals if radius alone followed the square root of the share.
+ */
+const petalRadius = (share: number) =>
+  Math.sqrt(inner ** 2 + (reach ** 2 - inner ** 2) * share);
 const openOut: Keyframe[] = [
   { clipPath: 'circle(0% at 50% 50%)' },
   { clipPath: 'circle(71% at 50% 50%)' },
@@ -111,7 +118,7 @@ function RimLabel(
   );
 }
 
-/** Equal angles for each period of a cycle; petal area, not radius, is proportional to the amount. */
+/** Equal angles for each period of a cycle; petal area outside the hub, not radius, is proportional to the amount. */
 export function HearthRosette({
   data,
   unitLabel = 'Value',
@@ -189,7 +196,7 @@ export function HearthRosette({
       </div>
       <div
         ref={opening}
-        className="mx-auto mt-[var(--nx-space-cardBodyGap)] aspect-square w-full max-w-[440px] min-w-[260px]"
+        className="mx-auto mt-[var(--nx-space-cardBodyGap)] aspect-square w-full max-w-[440px] min-w-0"
       >
         <ResponsiveContainer
           width="100%"
@@ -199,7 +206,7 @@ export function HearthRosette({
           <PieChart
             accessibilityLayer
             title={label}
-            desc={`Each period has an equal angle, clockwise from the top. Petal area is proportional to ${unitLabel}, so radius grows with its square root. Values are written at the rim; a dash means unavailable. Use Left and Right Arrow to inspect periods.`}
+            desc={`Each period has an equal angle, clockwise from the top. Petal area is proportional to ${unitLabel}, measured outside the central hub. Values are written at the rim; a dash means unavailable. Use Left and Right Arrow to inspect periods.`}
             margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
             className={hearthChartFocus}
           >
@@ -227,9 +234,7 @@ export function HearthRosette({
               startAngle={90}
               endAngle={-270}
               innerRadius={`${inner}%`}
-              outerRadius={(petal: Petal) =>
-                `${inner + (reach - inner) * Math.sqrt(petal.share)}%`
-              }
+              outerRadius={(petal: Petal) => `${petalRadius(petal.share)}%`}
               shape={PetalMark}
               label={(props: PieLabelRenderProps) =>
                 RimLabel(props, valueFormatter)

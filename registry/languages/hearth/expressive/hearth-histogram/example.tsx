@@ -16,8 +16,8 @@ export function Example({ animate = true }: { animate?: boolean }) {
       data={data}
       binWidth={10}
       binStart={770}
-      unitLabel="A month of loaves"
-      contextLabel="Finished weight, grams"
+      unitLabel="Finished weight"
+      contextLabel="A month of loaves"
       countLabel="loaves"
       valueFormatter={(value) => `${value} g`}
       aria-label="Illustrative finished weights of thirty loaves"

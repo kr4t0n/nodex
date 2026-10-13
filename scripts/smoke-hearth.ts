@@ -94,13 +94,13 @@ function App() {
    </div>
   </section>
   <section data-catalogue className="mt-8 grid min-w-0 gap-6 md:grid-cols-2">
-   <div data-hearth-chart="hearth-shares" className="min-w-0"><HearthShares data={weeks} parts={parts} unitLabel="Where the basket goes" valueFormatter={(value)=>'£'+value} /></div>
-   <div data-hearth-chart="hearth-histogram" className="min-w-0"><HearthHistogram data={[...weights,{id:'unweighed',value:null}]} binWidth={10} binStart={770} unitLabel="A month of loaves" countLabel="loaves" valueFormatter={(value)=>value+' g'} /></div>
-   <div data-hearth-chart="hearth-scatter" className="min-w-0"><HearthScatter data={[...bakes,{id:'lost',label:'Lost note',group:'rye',x:null,y:12}]} groups={flours} xLabel="Hydration" yLabel="Oven spring" unitLabel="Water and rise" /></div>
-   <div data-hearth-chart="hearth-dumbbell" className="min-w-0"><HearthDumbbell data={[...attempts,{id:'bread',label:'Bread',start:null,end:40}]} startLabel="First time" endLabel="Tenth time" unitLabel="First time, tenth time" valueFormatter={(value)=>value+' min'} /></div>
-   <div data-hearth-chart="hearth-seasons" className="min-w-0"><HearthSeasons data={seasons.filter((cell)=>!(cell.rowId==='leeks'&&cell.columnId==='jun'))} rows={produce} columns={months} levels={levels} unitLabel="In season" /></div>
-   <div data-hearth-chart="hearth-carton" className="min-w-0"><HearthCarton data={eggs} emptyLabel="Still in the box" unitLabel="A dozen eggs" /></div>
-   <div data-hearth-chart="hearth-rosette" className="min-w-0"><HearthRosette data={[...loaves.slice(0,6),{...loaves[6]!,value:0},{...loaves[7]!,value:null},...loaves.slice(8)]} unitLabel="The baking year" /></div>
+   <div data-hearth-chart="hearth-shares" className="min-w-0"><HearthShares data={weeks} parts={parts} unitLabel="Weekly spend" contextLabel="Where the basket goes" valueFormatter={(value)=>'£'+value} /></div>
+   <div data-hearth-chart="hearth-histogram" className="min-w-0"><HearthHistogram data={[...weights,{id:'unweighed',value:null}]} binWidth={10} binStart={770} unitLabel="Finished weight" contextLabel="A month of loaves" countLabel="loaves" valueFormatter={(value)=>value+' g'} /></div>
+   <div data-hearth-chart="hearth-scatter" className="min-w-0"><HearthScatter data={[...bakes,{id:'lost',label:'Lost note',group:'rye',x:null,y:12}]} groups={flours} xLabel="Hydration" yLabel="Oven spring" unitLabel="Oven spring by hydration" contextLabel="Water and rise" /></div>
+   <div data-hearth-chart="hearth-dumbbell" className="min-w-0"><HearthDumbbell data={[...attempts,{id:'bread',label:'Bread',start:null,end:40}]} startLabel="First time" endLabel="Tenth time" unitLabel="Hands-on minutes" contextLabel="First time, tenth time" valueFormatter={(value)=>value+' min'} /></div>
+   <div data-hearth-chart="hearth-seasons" className="min-w-0"><HearthSeasons data={seasons.filter((cell)=>!(cell.rowId==='leeks'&&cell.columnId==='jun'))} rows={produce} columns={months} levels={levels} unitLabel="Produce by month" contextLabel="In season" /></div>
+   <div data-hearth-chart="hearth-carton" className="min-w-0"><HearthCarton data={eggs} emptyLabel="Still in the box" unitLabel="Eggs by use" contextLabel="A dozen eggs" /></div>
+   <div data-hearth-chart="hearth-rosette" className="min-w-0"><HearthRosette data={[...loaves.slice(0,6),{...loaves[6]!,value:0},{...loaves[7]!,value:null},...loaves.slice(8)]} unitLabel="Loaves baked" contextLabel="The baking year" /></div>
   </section>
   <section data-controls className="mt-8"><PrimitiveScope id="hearth-primitives" /></section>
   <section data-edge-cases className="grid gap-6">
@@ -114,6 +114,8 @@ function App() {
    <div id="line-invalid"><HearthLine data={[{id:'a',label:'A',x:2,value:1},{id:'b',label:'B',x:1,value:2}]} /></div>
    <div id="shares-partial"><HearthShares data={[{id:'whole',label:'Whole',values:{a:1,b:3}},{id:'partial',label:'Partial',values:{a:1,b:null}},{id:'zero',label:'Zero',values:{a:0,b:0}}]} parts={[{id:'a',label:'A'},{id:'b',label:'B'}]} /></div>
    <div id="shares-too-many"><HearthShares data={[]} parts={['a','b','c','d','e'].map((id)=>({id,label:id}))} /></div>
+   <div id="histogram-decimal"><HearthHistogram data={[0.1,0.2,0.3,0.3,0.6,0.7,0.9,1.0].map((value,i)=>({id:'r'+i,value}))} binWidth={0.1} /></div>
+   <div id="rosette-ratio"><HearthRosette data={[{id:'one',label:'One',value:1},{id:'four',label:'Four',value:4},{id:'sixteen',label:'Sixteen',value:16}]} /></div>
    <div id="histogram-invalid"><HearthHistogram data={[{id:'a',value:1}]} binWidth={0} /></div>
    <div id="histogram-empty"><HearthHistogram data={[{id:'a',value:NaN}]} binWidth={1} /></div>
    <div id="scatter-undeclared"><HearthScatter data={[{id:'a',label:'A',group:'missing',x:1,y:1}]} groups={[{id:'g',label:'G'}]} /></div>
@@ -451,8 +453,12 @@ try {
   await expect(
     partial.locator('[data-nx-hearth-reading="partial"]'),
   ).toHaveText('—');
+  // A measured zero whole reads 0 with no bar; it is not unavailable.
   await expect(partial.locator('[data-nx-hearth-reading="zero"]')).toHaveText(
-    '—',
+    '0',
+  );
+  await expect(partial.locator('[data-nx-hearth-share^="zero:"]')).toHaveCount(
+    0,
   );
   await expect(page.locator('#shares-too-many')).toContainText(
     'one to four parts',
@@ -470,6 +476,21 @@ try {
   await expect(chart('hearth-histogram')).toContainText('Median 811.5 g');
   await expect(chart('hearth-histogram')).toContainText(
     '20 loaves · 1 unavailable',
+  );
+  // Readings on decimal bin edges start their own bin: 0.3 / 0.1 is 2.9999… in floating point.
+  assert.deepEqual(
+    await numbers(
+      page.locator('#histogram-decimal [data-nx-hearth-bin]'),
+      'data-nx-value',
+    ),
+    [1, 1, 2, 1, 1, 1, 1],
+  );
+  assert.deepEqual(
+    await numbers(
+      page.locator('#histogram-decimal [data-nx-hearth-bin]'),
+      'data-nx-hearth-bin',
+    ),
+    [0, 1, 2, 5, 6, 8, 9],
   );
   await expect(page.locator('#histogram-invalid')).toContainText(
     'positive bin width',
@@ -528,6 +549,8 @@ try {
   await expect(
     dumbbell.locator('[data-nx-hearth-reading="bread"]'),
   ).toContainText('—');
+  // A lone reading keeps its own dot.
+  await expect(dumbbell.locator('[data-nx-hearth-end="bread"]')).toHaveCount(1);
 
   // Seasons: every declared pair has a cell; an omitted pair is unrecorded, not a level.
   const seasonsChart = chart('hearth-seasons');
@@ -574,6 +597,20 @@ try {
     '—',
   );
   await expect(rosette.getByRole('table')).toContainText('Dec16');
+  // Petal area outside the hub is proportional to the value: 1 : 4 : 16.
+  const areas = await page
+    .locator('#rosette-ratio path[data-nx-hearth-petal]')
+    .evaluateAll((paths) =>
+      paths.map((path) => {
+        const radii = [
+          ...(path.getAttribute('d') ?? '').matchAll(/A\s*([\d.]+)/g),
+        ].map((match) => Number(match[1]));
+        return Math.max(...radii) ** 2 - Math.min(...radii) ** 2;
+      }),
+    );
+  assert.equal(areas.length, 3);
+  assert(Math.abs(areas[1]! / areas[0]! - 4) < 0.05, `areas ${areas}`);
+  assert(Math.abs(areas[2]! / areas[0]! - 16) < 0.2, `areas ${areas}`);
   await expect(page.locator('#rosette-short')).toContainText(
     'three to twenty-four',
   );
@@ -587,7 +624,7 @@ try {
     ['hearth-dumbbell', 'ArrowLeft', 'First time'],
     ['hearth-seasons', 'ArrowRight', 'Rhubarb'],
     ['hearth-carton', 'ArrowRight', 'Baking'],
-    ['hearth-rosette', 'ArrowRight', 'The baking year'],
+    ['hearth-rosette', 'ArrowRight', 'Loaves baked'],
   ] as const) {
     const surface = chart(slug).locator('.recharts-surface').first();
     await surface.focus();

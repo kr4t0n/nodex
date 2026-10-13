@@ -44,7 +44,7 @@ export function Example({ animate = true }: { animate?: boolean }) {
       groups={groups}
       xLabel="Hydration"
       yLabel="Oven spring"
-      unitLabel="Water and rise"
+      unitLabel="Oven spring by hydration"
       contextLabel="Fifteen bakes this spring"
       xFormatter={(value) => `${value}%`}
       yFormatter={(value) => `${value} mm`}

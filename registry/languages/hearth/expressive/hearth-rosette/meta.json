@@ -1,7 +1,7 @@
 {
   "slug": "hearth-rosette",
   "title": "The baking year",
-  "description": "Equal-angle petals for each period of a cycle, with area proportional to the amount and values at the rim.",
+  "description": "Equal-angle petals for each period of a cycle, with petal area outside the hub proportional to the amount and values at the rim.",
   "component": "polar-area",
   "tier": "expressive",
   "runtime": "react",
@@ -28,7 +28,7 @@
       "name": "data",
       "type": "readonly HearthRosetteDatum[]",
       "required": true,
-      "description": "Three to twenty-four { id, label, value } periods in cycle order, clockwise from the top, with unique nonempty IDs. Finite nonnegative values are amounts; null, negative and non-finite values are unavailable and keep a dash at the rim. Zero has no petal. Petal radius follows the square root of the value, so area is proportional."
+      "description": "Three to twenty-four { id, label, value } periods in cycle order, clockwise from the top, with unique nonempty IDs. Finite nonnegative values are amounts; null, negative and non-finite values are unavailable and keep a dash at the rim. Zero has no petal. Each petal's area outside the small central hub is proportional to its value."
     },
     {
       "name": "unitLabel",

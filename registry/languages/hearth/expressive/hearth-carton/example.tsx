@@ -11,7 +11,7 @@ export function Example({ animate = true }: { animate?: boolean }) {
     <HearthCarton
       data={data}
       emptyLabel="Still in the box"
-      unitLabel="A dozen eggs"
+      unitLabel="Eggs by use"
       contextLabel="One carton, one week"
       aria-label="Illustrative uses of a dozen eggs over one week"
       animate={animate}

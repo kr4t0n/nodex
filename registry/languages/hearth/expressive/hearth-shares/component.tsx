@@ -59,7 +59,7 @@ interface Row {
   id: string;
   label: string;
   index: number;
-  /** Null when any part is unavailable or the whole is zero. */
+  /** Null when any part is unavailable. A measured zero whole has no shares or bar. */
   total: number | null;
   amounts: Record<string, number>;
   shares: Record<string, number>;
@@ -73,7 +73,7 @@ const percent = new Intl.NumberFormat('en-US', {
 
 function Segment({ x, y, width, height, payload, paint, part }: SegmentProps) {
   const row = payload as Row;
-  if (row.total === null || width <= 0 || height <= 0) return <g />;
+  if (!row.total || width <= 0 || height <= 0) return <g />;
   return (
     <rect
       x={x}
@@ -134,7 +134,7 @@ function Readings({
                 </span>
               </div>
             </foreignObject>
-            {row.total !== null &&
+            {!!row.total &&
               parts.map((part) => {
                 const share = row.shares[part.id]!;
                 const left = x(start) ?? plot.x;
@@ -194,7 +194,7 @@ export function HearthShares({
         id: datum.id,
         label: datum.label,
         index,
-        total: whole ? total : null,
+        total: available ? total : null,
         amounts,
         shares: Object.fromEntries(
           parts.map((part) => [part.id, whole ? amounts[part.id]! / total : 0]),
@@ -262,7 +262,7 @@ export function HearthShares({
               layout="vertical"
               accessibilityLayer
               title={label}
-              desc={`Each row divides its ${unitLabel} into ${parts.map((part) => part.label).join(', ')}, left to right, as shares of the row's total. The total sits above each bar; a dash means a part is unavailable. Left Arrow moves to the next row; Right Arrow moves back.`}
+              desc={`Each row divides its ${unitLabel} into ${parts.map((part) => part.label).join(', ')}, left to right, as shares of the row's total. The total sits above each bar; a zero total has no bar, and a dash means a part is unavailable. Left Arrow moves to the next row; Right Arrow moves back.`}
               margin={{ top: 22, right: 8, bottom: 6, left: 8 }}
               barSize={12}
               className={hearthChartFocus}
@@ -285,7 +285,8 @@ export function HearthShares({
                           {parts.map((part) => (
                             <li key={part.id} className="tabular-nums">
                               {part.label}:{' '}
-                              {percent.format(row.shares[part.id]!)} ·{' '}
+                              {row.total! > 0 &&
+                                `${percent.format(row.shares[part.id]!)} · `}
                               {valueFormatter(row.amounts[part.id]!)}
                             </li>
                           ))}

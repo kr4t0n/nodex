@@ -28,7 +28,7 @@
       "name": "data",
       "type": "readonly HearthSharesDatum[]",
       "required": true,
-      "description": "Caller-ordered { id, label, values } rows with unique nonempty IDs. values maps each part ID to a finite, nonnegative amount. A row with any unavailable part, or a zero total, keeps its label with a dash and no bar."
+      "description": "Caller-ordered { id, label, values } rows with unique nonempty IDs. values maps each part ID to a finite, nonnegative amount. A row with any unavailable part keeps its label with a dash and no bar; a measured zero total reads 0 with no bar."
     },
     {
       "name": "parts",

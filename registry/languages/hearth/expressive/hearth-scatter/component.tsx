@@ -237,7 +237,7 @@ export function HearthScatter({
         {yLabel}
       </p>
       <div className="mt-1 overflow-x-auto">
-        <div style={{ minWidth: 300, height: 300 }}>
+        <div style={{ minWidth: 280, height: 300 }}>
           <ResponsiveContainer
             width="100%"
             height="100%"

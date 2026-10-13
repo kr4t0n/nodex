@@ -239,8 +239,8 @@ charts. Both modes keep the same typography and geometry, with 18px prose,
 - `hearth-seasons`: a seasonal table of ordered levels, keeping absence, levels
   and unrecorded cells distinct.
 - `hearth-carton`: whole units in fixed places, such as a dozen eggs by use.
-- `hearth-rosette`: equal-angle petals through a cycle, with area proportional
-  to the amount and a hidden table for screen readers.
+- `hearth-rosette`: equal-angle petals through a cycle, with petal area outside
+  the central hub proportional to the amount and a hidden table for screen readers.
 
 Each chart accepts caller data and provides keyboard inspection, scoped tokens
 and reduced motion. Unavailable readings stay visible as dashes, outlines or

@@ -53,6 +53,13 @@ interface Bin {
 
 const maximumBins = 60;
 
+/**
+ * Whole bin steps in a span. Decimal widths divide inexactly (0.3 / 0.1 is
+ * 2.9999…), which would put a reading on a bin edge into the bin below.
+ */
+const steps = (span: number, width: number) =>
+  Math.floor(Math.round((span / width) * 1e9) / 1e9);
+
 /** Recharts places a numeric-axis bar by its centre; the true bin edges come from the scale. */
 function BinMark({ y, height, payload }: BarShapeProps) {
   const scale = useXAxisScale();
@@ -115,8 +122,8 @@ export function HearthHistogram({
     const first =
       binStart !== undefined && Number.isFinite(binStart) && binStart <= low
         ? binStart
-        : Math.floor(low / binWidth) * binWidth;
-    const count = Math.max(1, Math.floor((high - first) / binWidth) + 1);
+        : steps(low, binWidth) * binWidth;
+    const count = Math.max(1, steps(high - first, binWidth) + 1);
     if (count > maximumBins)
       return { validIds, values, bins: [] as Bin[], middle: null };
     const bins = Array.from({ length: count }, (_, index): Bin => {
@@ -130,8 +137,7 @@ export function HearthHistogram({
       };
     });
     for (const value of values)
-      bins[Math.min(count - 1, Math.floor((value - first) / binWidth))]!
-        .count++;
+      bins[Math.min(count - 1, steps(value - first, binWidth))]!.count++;
     return { validIds, values, bins, middle: median(values) };
   }, [data, binWidth, binStart]);
   const { bins, values, middle } = result;
@@ -174,7 +180,7 @@ export function HearthHistogram({
               data={bins}
               accessibilityLayer
               title={label}
-              desc={`Each bar counts ${countLabel} from ${valueFormatter(first)} to ${valueFormatter(last)} ${unitLabel} in bins of ${valueFormatter(binWidth)}. Height starts at zero. The labelled rule marks the median. Use Left and Right Arrow to inspect bins.`}
+              desc={`Each bar counts ${countLabel} by ${unitLabel}, in bins of ${valueFormatter(binWidth)} from ${valueFormatter(first)} to ${valueFormatter(last)}. Height starts at zero. The labelled rule marks the median. Use Left and Right Arrow to inspect bins.`}
               margin={{ top: 36, right: 16, bottom: 4, left: 0 }}
               barCategoryGap={0}
               className={hearthChartFocus}
@@ -222,7 +228,7 @@ export function HearthHistogram({
                   const bin = payload?.[0]?.payload as Bin | undefined;
                   return active && bin ? (
                     <HearthChartTooltip
-                      title={`${valueFormatter(bin.start)}–${valueFormatter(bin.end)} ${unitLabel}`}
+                      title={`${valueFormatter(bin.start)}–${valueFormatter(bin.end)}`}
                     >
                       {bin.count} {countLabel}
                     </HearthChartTooltip>

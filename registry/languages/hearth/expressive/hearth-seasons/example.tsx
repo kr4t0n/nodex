@@ -56,7 +56,7 @@ export function Example({ animate = true }: { animate?: boolean }) {
         'In season',
         'At its best',
       ]}
-      unitLabel="In season"
+      unitLabel="Produce by month"
       contextLabel="A kitchen garden year"
       aria-label="Illustrative seasonal calendar for eight kinds of produce"
       animate={animate}

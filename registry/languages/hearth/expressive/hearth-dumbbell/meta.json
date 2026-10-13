@@ -28,7 +28,7 @@
       "name": "data",
       "type": "readonly HearthDumbbellDatum[]",
       "required": true,
-      "description": "Caller-ordered { id, label, start, end } rows with unique nonempty IDs. Readings may be signed; null and non-finite values are unavailable. A row needs both readings to draw its pair; otherwise it keeps its label and a dash."
+      "description": "Caller-ordered { id, label, start, end } rows with unique nonempty IDs. Readings may be signed; null and non-finite values are unavailable and read as a dash. A row with both readings draws its connected pair; a row with one draws only that reading's dot."
     },
     {
       "name": "startLabel",
