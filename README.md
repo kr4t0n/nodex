@@ -250,10 +250,10 @@ library's draw. Dense plots scroll locally.
 
 Toggle the Dark mode switch in the language gallery, or set
 `data-nx-language="hearth"` and `data-nx-mode="dark"` on the same consumer scope.
-The downloaded stylesheet contains both palettes and embedded normal/italic fonts. Mode changes retain
-mounted examples, form values and focus. The language index shows bars, line,
-seasons and rosette as its four curated previews, in its default light
-appearance; the language gallery contains all nine charts.
+The downloaded stylesheet contains both palettes and embedded normal/italic
+fonts. Mode changes retain mounted examples, form values and focus. The language
+index shows bars, line, seasons and rosette as its four curated previews, in its
+default light appearance; the language gallery contains all nine charts.
 
 Newsreader retains both its weight and optical-size axes. With normal and italic
 faces embedded, Hearth's token stylesheet is about 468 KB uncompressed. The
@@ -1042,9 +1042,12 @@ published by these tests. `smoke:gallery` also checks the mode switch's browser
 accessibility tree, keyboard activation and focus, active token-panel values and
 retained specimen state. Switch screenshots and accessibility records cover
 language and component views at desktop/mobile sizes in both modes.
+Hearth chart headers also retain the prior control's footprint at common phone
+widths and immediately around each title's wrap point; the evidence includes
+their layout measurements, screenshots and forced-colors frames.
 It mounts the actual index view in a browser fixture, keeping authentication
-outside that check, and verifies
-Mono Editorial chrome beside language-scoped tiles at desktop/mobile sizes.
+outside that check, and verifies Mono Editorial chrome beside language-scoped
+tiles at desktop/mobile sizes.
 Tile order, scripted terminal rows, selectable terminal buttons and packed CLI
 text/JSON are checked against the published language index; registry tests also
 check the README list against the authored order.

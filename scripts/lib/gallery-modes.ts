@@ -3,6 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { expect, type Browser, type Page } from '@playwright/test';
 import { resolveTokens } from '../../packages/cli/src/tokens.ts';
+import { checkGalleryModeLayout } from './gallery-mode-layout.ts';
 import { modeFixture } from './mode-fixture.ts';
 import { renderFontFaces, renderTokens } from './tokens.ts';
 
@@ -12,14 +13,30 @@ async function checkModeSwitch(page: Page, checked: boolean, output: string) {
   await expect(
     mode.getByText(checked ? 'Dark' : 'Light', { exact: true }),
   ).toBeVisible();
+  await expect(
+    mode.getByText(checked ? 'Light' : 'Dark', { exact: true }),
+  ).toBeHidden();
   const label = await mode
     .getByText(checked ? 'Dark' : 'Light', { exact: true })
     .boundingBox();
   const track = await mode.locator(':scope > span').first().boundingBox();
-  assert(label && track);
+  const thumb = await mode
+    .locator(':scope > span > span')
+    .first()
+    .boundingBox();
+  assert(label && track && thumb);
   assert(
     Math.abs(label.y + label.height / 2 - track.y - track.height / 2) < 1,
     'The visible label stays vertically centered beside the switch track',
+  );
+  assert(
+    thumb.x > track.x && thumb.x + thumb.width < track.x + track.width,
+    'The thumb stays inside the track',
+  );
+  const thumbCenter = thumb.x + thumb.width / 2 - track.x;
+  assert(
+    checked ? thumbCenter > track.width / 2 : thumbCenter < track.width / 2,
+    `The thumb must occupy the ${checked ? 'right' : 'left'} half in ${checked ? 'dark' : 'light'} mode`,
   );
   await expect(mode).toBeFocused();
   const focus = await mode.evaluate((button) => {
@@ -52,6 +69,9 @@ async function checkModeSwitch(page: Page, checked: boolean, output: string) {
           role: node.role?.value,
           name: node.name?.value,
           checked: state,
+          visibleLabel: checked ? 'Dark' : 'Light',
+          thumbCenter,
+          trackWidth: track.width,
           focus,
         },
         null,
@@ -217,6 +237,7 @@ export async function checkGalleryModes(
     }
   }
   await checkHearthGallery(browser, origin, evidence);
+  await checkGalleryModeLayout(browser, origin, evidence);
   console.log(
     'Gallery modes: active shell/palette, retained native/chart state, keyboard selection, mobile and reduced motion',
   );
@@ -368,6 +389,25 @@ async function checkHearthGallery(
         await mode.click();
         await expect(mode).not.toBeChecked();
         await expect(preview).toHaveCSS('color-scheme', 'light');
+        await page.emulateMedia({ forcedColors: 'active' });
+        for (const checked of [false, true]) {
+          if (checked) await mode.click();
+          const colors = await thumb.evaluate((node) => ({
+            thumb: getComputedStyle(node).backgroundColor,
+            track: getComputedStyle(node.parentElement!).backgroundColor,
+            text: getComputedStyle(node.closest('button')!).color,
+          }));
+          assert.notEqual(colors.thumb, colors.track);
+          assert.notEqual(colors.thumb, 'rgba(0, 0, 0, 0)');
+          assert.equal(colors.thumb, colors.text);
+        }
+        await page.screenshot({
+          path: path.join(
+            evidence,
+            `hearth-${slug}-forced-colors-${width}.png`,
+          ),
+        });
+        await page.emulateMedia({ forcedColors: 'none' });
       }
       assert.deepEqual(errors, []);
     } finally {
