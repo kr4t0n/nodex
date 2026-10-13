@@ -14,6 +14,8 @@ import { useChartMotion } from '../../../../_shared/use-chart-motion';
 import {
   HearthChartFrame,
   HearthChartTooltip,
+  formatHearthNumber,
+  hearthChartFocus,
 } from '../../../../_shared/hearth-chart-frame';
 
 export interface HearthLineDatum {
@@ -33,8 +35,6 @@ export interface HearthLineProps {
   className?: string;
   'aria-label'?: string;
 }
-const numbers = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
-const formatNumber = (value: number) => numbers.format(value);
 
 function Observation({ props }: { props: unknown }) {
   const { cx, cy, payload } = props as {
@@ -70,7 +70,7 @@ export function HearthLine({
   data,
   unitLabel = 'Value',
   contextLabel,
-  valueFormatter = formatNumber,
+  valueFormatter = formatHearthNumber,
   animate = true,
   className,
   'aria-label': label = 'Ordered observations',
@@ -136,7 +136,7 @@ export function HearthLine({
               title={label}
               desc={`Height shows ${unitLabel}; horizontal distance follows numeric X coordinates. Missing readings break the line. Use Left and Right Arrow to inspect observations.`}
               margin={{ top: 12, right: 16, bottom: 4, left: 0 }}
-              className="[&_[tabindex]:focus-visible]:[outline:var(--nx-stroke-mark)_solid_var(--nx-ink)] [&_[tabindex]:focus-visible]:[outline-offset:calc(-1*var(--nx-stroke-mark))] [&_[tabindex]:focus:not(:focus-visible)]:outline-none"
+              className={hearthChartFocus}
             >
               <CartesianGrid
                 vertical={false}

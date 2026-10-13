@@ -1,6 +1,75 @@
-import type { ReactNode, Ref } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type ReactNode,
+  type Ref,
+} from 'react';
+import { useReducedMotion } from './use-reduced-motion';
 
-/** Hearth's two charts share a reading edge, unit heading and quiet context. */
+/** Stable category identities; they never encode rank or intensity. */
+export type HearthTone = 'a' | 'b' | 'c' | 'd';
+export const hearthTones: Record<HearthTone, string> = {
+  a: 'var(--nx-seriesA)',
+  b: 'var(--nx-seriesB)',
+  c: 'var(--nx-seriesC)',
+  d: 'var(--nx-seriesD)',
+};
+
+const numbers = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+export const formatHearthNumber = (value: number) => numbers.format(value);
+
+/** Recharts focuses its SVG and pie sectors; only keyboard focus shows the ink ring. */
+export const hearthChartFocus =
+  '[&_[tabindex]:focus-visible]:[outline:var(--nx-stroke-mark)_solid_var(--nx-ink)] [&_[tabindex]:focus-visible]:[outline-offset:calc(-1*var(--nx-stroke-mark))] [&_[tabindex]:focus:not(:focus-visible)]:outline-none';
+
+function durationInMs(value: string): number {
+  const match = /^([\d.]+)(ms|s)$/.exec(value.trim());
+  const duration = match ? Number(match[1]) * (match[2] === 's' ? 1000 : 1) : 0;
+  return Number.isFinite(duration) ? duration : 0;
+}
+
+/**
+ * A one-time entrance for charts whose reveal is not a Recharts mark animation:
+ * the cells of a table appear together, a rosette opens from its centre. It plays
+ * on the container at mount, so the resting state is the default paint and needs
+ * no script. A live reduced-motion change finishes it in place.
+ */
+export function useHearthEntrance(
+  animate: boolean,
+  role: 'draw' | 'fade',
+  keyframes: Keyframe[],
+) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const enabled = animate && !reduced;
+  const initial = useRef({ enabled, role, keyframes });
+  useLayoutEffect(() => {
+    const node = ref.current;
+    const { enabled, role, keyframes } = initial.current;
+    if (!node || !enabled || typeof node.animate !== 'function') return;
+    const style = getComputedStyle(node);
+    const duration = durationInMs(
+      style.getPropertyValue(`--nx-motion-${role}-duration`),
+    );
+    if (!duration) return;
+    const animation = node.animate(keyframes, {
+      duration,
+      easing:
+        style.getPropertyValue(`--nx-motion-${role}-easing`).trim() ||
+        'ease-out',
+    });
+    return () => animation.cancel();
+  }, []);
+  useEffect(() => {
+    if (!enabled)
+      for (const animation of ref.current?.getAnimations() ?? [])
+        animation.finish();
+  }, [enabled]);
+  return ref;
+}
+
+/** Hearth's charts share a reading edge, unit heading and quiet context. */
 export function HearthChartFrame({
   ref,
   name,

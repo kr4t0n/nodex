@@ -1,0 +1,74 @@
+{
+  "slug": "hearth-dumbbell",
+  "title": "First time, tenth time",
+  "description": "Each row joins an earlier and a later reading on one shared scale, with both values written above.",
+  "component": "dumbbell",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthDumbbell"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 500
+  },
+  "tags": ["editorial", "warm", "comparison", "change"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthDumbbellDatum[]",
+      "required": true,
+      "description": "Caller-ordered { id, label, start, end } rows with unique nonempty IDs. Readings may be signed; null and non-finite values are unavailable. A row needs both readings to draw its pair; otherwise it keeps its label and a dash."
+    },
+    {
+      "name": "startLabel",
+      "type": "string",
+      "description": "Name of the earlier, hollow reading. Defaults to Before."
+    },
+    {
+      "name": "endLabel",
+      "type": "string",
+      "description": "Name of the later, filled reading. Defaults to After."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement heading and tooltip unit. Defaults to Value."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the heading."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats direct readings, axis ticks and tooltips. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; each connector draws from the earlier reading to the later one and honors live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The chart fills its parent; narrow containers scroll locally."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect rows through Recharts."
+    }
+  ]
+}

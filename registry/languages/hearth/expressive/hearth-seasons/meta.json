@@ -1,0 +1,77 @@
+{
+  "slug": "hearth-seasons",
+  "title": "In season",
+  "description": "A seasonal table of ordered levels by row and column, with absence, levels and unrecorded cells kept distinct.",
+  "component": "heatmap",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthSeasons"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 520
+  },
+  "tags": ["editorial", "warm", "seasonal", "calendar"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthSeasonsDatum[]",
+      "required": true,
+      "description": "{ rowId, columnId, level } readings, at most one per declared row and column pair. level is an integer index into levels; null, an omitted pair or any other value means not recorded, drawn as a dashed outline rather than a level."
+    },
+    {
+      "name": "rows",
+      "type": "readonly HearthSeasonsAxis[]",
+      "required": true,
+      "description": "Caller-ordered { id, label } rows with unique nonempty IDs."
+    },
+    {
+      "name": "columns",
+      "type": "readonly HearthSeasonsAxis[]",
+      "required": true,
+      "description": "Caller-ordered { id, label } columns with unique nonempty IDs, labelled above the table."
+    },
+    {
+      "name": "levels",
+      "type": "readonly string[]",
+      "required": true,
+      "description": "Two to five ordered level names, lowest first. The first level means absence and keeps an empty field; higher levels fill and outline more deeply."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned chart heading. Defaults to Levels."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the heading."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; the table fades in once as a whole and honors live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The chart fills its parent; narrow containers scroll the table locally."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect cells through Recharts."
+    }
+  ]
+}
