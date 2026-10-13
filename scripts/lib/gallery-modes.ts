@@ -1,10 +1,67 @@
 import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { expect, type Browser } from '@playwright/test';
+import { expect, type Browser, type Page } from '@playwright/test';
 import { resolveTokens } from '../../packages/cli/src/tokens.ts';
 import { modeFixture } from './mode-fixture.ts';
 import { renderFontFaces, renderTokens } from './tokens.ts';
+
+async function checkModeSwitch(page: Page, checked: boolean, output: string) {
+  const mode = page.getByRole('switch', { name: 'Dark mode', exact: true });
+  await expect(mode).toBeChecked({ checked });
+  await expect(
+    mode.getByText(checked ? 'Dark' : 'Light', { exact: true }),
+  ).toBeVisible();
+  const label = await mode
+    .getByText(checked ? 'Dark' : 'Light', { exact: true })
+    .boundingBox();
+  const track = await mode.locator(':scope > span').first().boundingBox();
+  assert(label && track);
+  assert(
+    Math.abs(label.y + label.height / 2 - track.y - track.height / 2) < 1,
+    'The visible label stays vertically centered beside the switch track',
+  );
+  await expect(mode).toBeFocused();
+  const focus = await mode.evaluate((button) => {
+    const style = getComputedStyle(button);
+    return {
+      visible: button.matches(':focus-visible'),
+      color: style.outlineColor,
+      width: style.outlineWidth,
+      style: style.outlineStyle,
+    };
+  });
+  assert(
+    focus.visible && parseFloat(focus.width) > 0 && focus.style === 'solid',
+  );
+  const session = await page.context().newCDPSession(page);
+  try {
+    const { nodes } = await session.send('Accessibility.getFullAXTree');
+    const node = nodes.find(
+      (entry) =>
+        entry.role?.value === 'switch' && entry.name?.value === 'Dark mode',
+    );
+    assert(node, 'The browser accessibility tree must expose the mode switch');
+    const state = node.properties?.find((entry) => entry.name === 'checked')
+      ?.value.value;
+    assert.equal(state, String(checked));
+    await writeFile(
+      output,
+      JSON.stringify(
+        {
+          role: node.role?.value,
+          name: node.name?.value,
+          checked: state,
+          focus,
+        },
+        null,
+        2,
+      ) + '\n',
+    );
+  } finally {
+    await session.detach();
+  }
+}
 
 /** Serve a test-only variation through the real gallery's manifest and assets. */
 export async function checkGalleryModes(
@@ -50,8 +107,8 @@ export async function checkGalleryModes(
         (route) => route.fulfill({ json: tokens }),
       );
       await page.goto('/l/mono-editorial');
-      const mode = page.getByRole('combobox', { name: 'Color mode' });
-      await expect(mode).toHaveValue('light');
+      const mode = page.getByRole('switch', { name: 'Dark mode', exact: true });
+      await expect(mode).not.toBeChecked();
       await expect(page.locator('html')).toHaveCSS('color-scheme', 'light');
       const inputPreview = page.locator('[data-nx-preview="shared/input"]');
       await inputPreview.scrollIntoViewIfNeeded();
@@ -75,14 +132,25 @@ export async function checkGalleryModes(
       const chartNode = await svg.elementHandle();
       await mode.scrollIntoViewIfNeeded();
       await mode.focus();
+      await checkModeSwitch(
+        page,
+        false,
+        path.join(evidence, `gallery-switch-light-${width}.json`),
+      );
       await page.screenshot({
         path: path.join(evidence, `gallery-light-${width}.png`),
       });
       await page.keyboard.press('Space');
-      await page.keyboard.press('ArrowDown');
+      await checkModeSwitch(
+        page,
+        true,
+        path.join(evidence, `gallery-switch-dark-${width}.json`),
+      );
       await page.keyboard.press('Enter');
-      await expect(mode).toHaveValue('dark');
-      await expect(mode).toBeFocused();
+      await expect(mode).not.toBeChecked();
+      await expect(page.locator('html')).toHaveCSS('color-scheme', 'light');
+      await page.keyboard.press('Space');
+      await expect(mode).toBeChecked();
       await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark');
       assert(await input.evaluate((node, saved) => node === saved, inputNode));
       assert(await svg.evaluate((node, saved) => node === saved, chartNode));
@@ -108,7 +176,7 @@ export async function checkGalleryModes(
       await chart.scrollIntoViewIfNeeded();
       await svg.focus();
       // Recharts hides its tooltip on blur; the next arrow reveals whether its
-      // keyboard index survived while focus moved to the native mode selector.
+      // keyboard index survived while focus moved to the mode switch.
       await svg.press('ArrowRight');
       await expect(chart.getByRole('status')).toContainText('JUN 3:');
       await page.screenshot({
@@ -126,8 +194,9 @@ export async function checkGalleryModes(
         ),
       );
       await page.goto('/l/mono-editorial/input');
-      await expect(mode).toHaveValue('light');
-      await mode.selectOption('dark');
+      await expect(mode).not.toBeChecked();
+      await mode.click();
+      await expect(mode).toBeChecked();
       await expect(page.locator('[data-nx-preview="shared/input"]')).toHaveCSS(
         'color-scheme',
         'dark',
@@ -139,6 +208,9 @@ export async function checkGalleryModes(
         'data-nx-mode',
         'light',
       );
+      await page.goto('/l/nocturne/input');
+      await expect(page.locator('h1').first()).toHaveText('Input');
+      await expect(mode).toHaveCount(0);
       assert.deepEqual(errors, []);
     } finally {
       await page.close();
@@ -166,8 +238,8 @@ async function checkHearthGallery(
     page.on('pageerror', (error) => errors.push(error.message));
     try {
       await page.goto('/l/hearth');
-      const mode = page.getByRole('combobox', { name: 'Color mode' });
-      await expect(mode).toHaveValue('light');
+      const mode = page.getByRole('switch', { name: 'Dark mode', exact: true });
+      await expect(mode).not.toBeChecked();
       await expect(
         page
           .getByRole('complementary', { name: 'Language tokens' })
@@ -188,7 +260,16 @@ async function checkHearthGallery(
       const svg = chart.locator('.recharts-surface').first();
       const savedChart = await svg.elementHandle();
       for (const selection of ['light', 'dark']) {
-        await mode.selectOption(selection);
+        await mode.scrollIntoViewIfNeeded();
+        await mode.focus();
+        await page.keyboard.press('Shift+Tab');
+        await page.keyboard.press('Tab');
+        if (selection === 'dark') await page.keyboard.press('Space');
+        await checkModeSwitch(
+          page,
+          selection === 'dark',
+          path.join(evidence, `hearth-switch-${selection}-${width}.json`),
+        );
         await expect(page.locator('html')).toHaveCSS('color-scheme', selection);
         await expect(input).toHaveValue('Hearth gallery state');
         assert(
@@ -242,6 +323,52 @@ async function checkHearthGallery(
         'data-nx-animated',
         'false',
       );
+      for (const slug of ['input', 'hearth-bars']) {
+        await page.goto(`/l/hearth/${slug}`);
+        const preview = page.locator('[data-nx-preview]').first();
+        await expect(preview).toHaveAttribute('data-nx-preview-state', 'ready');
+        const content =
+          slug === 'input'
+            ? preview.getByRole('searchbox', { name: 'Search components' })
+            : preview.locator('.recharts-surface').first();
+        if (slug === 'input') await content.fill('Hearth component state');
+        const specimen = await content.elementHandle();
+        for (const selection of ['light', 'dark']) {
+          await mode.focus();
+          await page.keyboard.press('Shift+Tab');
+          await page.keyboard.press('Tab');
+          if (selection === 'dark') await page.keyboard.press('Enter');
+          await checkModeSwitch(
+            page,
+            selection === 'dark',
+            path.join(
+              evidence,
+              `hearth-${slug}-switch-${selection}-${width}.json`,
+            ),
+          );
+          await expect(preview).toHaveCSS('color-scheme', selection);
+          assert(
+            await content.evaluate((node, saved) => node === saved, specimen),
+          );
+          if (slug === 'input')
+            await expect(content).toHaveValue('Hearth component state');
+          await page.screenshot({
+            path: path.join(
+              evidence,
+              `hearth-${slug}-${selection}-${width}.png`,
+            ),
+          });
+        }
+        const thumb = mode.locator('[aria-hidden="true"] > span').first();
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await expect(thumb).toHaveCSS('transition-duration', '0.14s');
+        await expect(thumb).not.toHaveCSS('transition-property', 'none');
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await expect(thumb).toHaveCSS('transition-property', 'none');
+        await mode.click();
+        await expect(mode).not.toBeChecked();
+        await expect(preview).toHaveCSS('color-scheme', 'light');
+      }
       assert.deepEqual(errors, []);
     } finally {
       await page.close();
