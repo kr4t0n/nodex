@@ -577,7 +577,7 @@ async function cmdNewLanguage(slug: string, explicit?: string): Promise<void> {
   heading(`Scaffolded ${title}`);
   for (const file of files) out(`  ${file.relative}`);
   out(
-    `\n  Author component.tsx, example.tsx and explicit meta.json under ${base}/expressive/<slug>/.\n  Run pnpm run build:registry.\n`,
+    `\n  Add ${slug} to registry/languages.json at its display position.\n  Author component.tsx, example.tsx and explicit meta.json under ${base}/expressive/<slug>/.\n  Run pnpm run build:registry.\n`,
   );
 }
 
