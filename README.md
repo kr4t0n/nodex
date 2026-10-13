@@ -980,7 +980,7 @@ pnpm run smoke:gallery
 | `smoke:cli`               | Delivery conflicts, dependency-manager commands, explicit addresses, path boundaries, authentication routing, source lint and complete language scaffolds                                                                                                                                                                                                  |
 | `smoke:pack`              | Builds and packs the CLI with pnpm, installs the tarball in a fresh npm project outside the workspace, and runs its installed `nodex list` against the built registry                                                                                                                                                                                      |
 | `check:shell`             | Gallery primitive classes have their curated stylesheets                                                                                                                                                                                                                                                                                                   |
-| `smoke:landing`           | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, reduced motion and unavailable token assets                                                                                               |
+| `smoke:landing`           | Starts the built site on a temporary local port; checks single-run typing/deletion, interactive commands and history, actual page themes, the chart belt, scroll persistence, navigation cleanup, mobile layout, hero wordmark fit, reduced motion and unavailable token assets                                                                            |
 | `smoke:gallery`           | Native rendering of every example, lightweight discovery, deferred imports, bounded startup, scroll prioritization, navigation cleanup, timeout/fallback progress, retained controls, scaled chart inspection, simultaneous token scopes, contained errors, unique IDs and mobile layout                                                                   |
 | `lint` / `typecheck`      | Application, registry, CLI and build source                                                                                                                                                                                                                                                                                                                |
 | `format` / `format:check` | Write or check Prettier formatting and Tailwind class order in authored source and documentation                                                                                                                                                                                                                                                           |
@@ -1014,6 +1014,16 @@ in both modes, plus the same prose with Mono Editorial as a reference. Evidence
 uses a fresh system temporary directory or `NODEX_EVIDENCE_DIR`; CI includes it
 in `visual-evidence`. The cookbook composition is a consumer test fixture,
 not a delivered recipe component.
+
+`smoke:landing` measures the hero wordmark's painted ink from screenshots at
+narrow, short and wide sizes (up to 1920px, past the bar's 1400px container),
+with overlay and classic scrollbars, after a resize, in three language fonts,
+and with a late token sheet, a font file that arrives after the first measure,
+or no font at all. The ink must sit inside the visible width with left
+and right margins within 3px of each other, the tagline and sign-in must align
+with its painted edges within 3px, and both must stay on screen. It reports
+every failing size before it fails. Frames go to a fresh temporary directory or
+`NODEX_EVIDENCE_DIR`; CI includes them in `visual-evidence`.
 
 Run `pnpm run format` before committing. Prettier uses the web app's Tailwind v4
 stylesheet to sort utilities, including in delivered registry source. Generated
