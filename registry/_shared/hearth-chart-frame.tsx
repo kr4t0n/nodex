@@ -7,14 +7,12 @@ import {
 } from 'react';
 import { useReducedMotion } from './use-reduced-motion';
 
-/** Stable category identities; they never encode rank or intensity. */
+/**
+ * Stable category identities; they never encode rank or intensity. Each chart
+ * maps them to Hearth's series paints itself: this module is shared across
+ * languages, so it names no language-specific token.
+ */
 export type HearthTone = 'a' | 'b' | 'c' | 'd';
-export const hearthTones: Record<HearthTone, string> = {
-  a: 'var(--nx-seriesA)',
-  b: 'var(--nx-seriesB)',
-  c: 'var(--nx-seriesC)',
-  d: 'var(--nx-seriesD)',
-};
 
 const numbers = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 export const formatHearthNumber = (value: number) => numbers.format(value);

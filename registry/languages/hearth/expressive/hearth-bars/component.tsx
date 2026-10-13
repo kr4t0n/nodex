@@ -19,9 +19,15 @@ import {
   HearthChartTooltip,
   formatHearthNumber,
   hearthChartFocus,
-  hearthTones,
   type HearthTone,
 } from '../../../../_shared/hearth-chart-frame';
+
+const hearthTones: Record<HearthTone, string> = {
+  a: 'var(--nx-seriesA)',
+  b: 'var(--nx-seriesB)',
+  c: 'var(--nx-seriesC)',
+  d: 'var(--nx-seriesD)',
+};
 
 export interface HearthBarsDatum {
   id: string;
