@@ -22,10 +22,10 @@ export async function checkGalleryDefaults(
   const languages = (await fetch(`${origin}/r/languages.json`).then(
     (response) => response.json(),
   )) as PublishedLanguage[];
-  assert.notEqual(
+  assert.equal(
     languages[0]!.slug,
     'mono-editorial',
-    'Exercise a catalogue whose first language differs from the default',
+    'Mono Editorial leads the published catalogue',
   );
   const fixture = await nativePreviewFixture(origin, 'index');
   try {
@@ -63,11 +63,19 @@ export async function checkGalleryDefaults(
           'rgb(245, 240, 230)',
         );
         await expect(hearth).toHaveCSS('font-family', /Source Sans 3/);
-        await expect(
-          hearth.locator('[data-nx-preview]').first(),
-        ).toHaveAttribute('data-nx-preview-state', 'ready', {
-          timeout: 30_000,
-        });
+        // Only visible specimens start; later language tiles remain deferred.
+        const previews = tiles.first().locator('[data-nx-preview]');
+        for (const preview of width === 1365
+          ? await previews.all()
+          : [previews.first()]) {
+          await expect(preview).toHaveAttribute(
+            'data-nx-preview-state',
+            'ready',
+            {
+              timeout: 30_000,
+            },
+          );
+        }
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
         assert(
           await page.evaluate(
@@ -77,6 +85,27 @@ export async function checkGalleryDefaults(
         await page.screenshot({
           path: path.join(evidence, `index-mono-default-${width}.png`),
         });
+        // A differently curated manifest must change the tiles, not the chrome.
+        const reversed = [...languages].reverse();
+        await page.route('**/r/languages.json', (route) =>
+          route.fulfill({ json: reversed }),
+        );
+        await page.reload();
+        await expect(tiles).toHaveCount(reversed.length);
+        assert.deepEqual(
+          await tiles.evaluateAll((nodes) =>
+            nodes.map((node) => node.getAttribute('data-nx-scope')),
+          ),
+          reversed.map((language) => language.slug),
+        );
+        await expect(page.locator('html')).toHaveAttribute(
+          'data-nx-language',
+          'mono-editorial',
+        );
+        await expect(page.locator('body')).toHaveCSS(
+          'background-color',
+          'rgb(240, 239, 235)',
+        );
         assert.deepEqual(errors, []);
       } finally {
         await page.close();

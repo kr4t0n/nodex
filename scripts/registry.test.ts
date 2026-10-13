@@ -34,6 +34,11 @@ import { renderedMarks } from './lib/browser.ts';
 import { prepareDelivery } from './lib/delivery.ts';
 import { galleryExamples } from './lib/gallery-examples.ts';
 import {
+  componentParams,
+  languageSlugs,
+  readCatalog,
+} from '../apps/web/src/lib/manifest.server.ts';
+import {
   fontFaces,
   renderFontFaces,
   renderTokens,
@@ -49,6 +54,92 @@ const tokens = JSON.parse(
   ),
 );
 const rules = rulesFromTokens(tokens);
+
+test('language order is explicit, complete and independent of directory names', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'nodex-language-order-'));
+  const orderFile = path.join(root, 'languages.json');
+  try {
+    for (const slug of ['alpha', 'zulu']) {
+      const directory = path.join(root, 'languages', slug);
+      await mkdir(directory, { recursive: true });
+      await writeFile(
+        path.join(directory, 'meta.json'),
+        JSON.stringify({ slug, name: slug, description: 'Order fixture' }),
+      );
+    }
+    await writeFile(orderFile, JSON.stringify(['zulu', 'alpha']));
+    assert.deepEqual(
+      (await loadSource(root)).languages.map((language) => language.meta.slug),
+      ['zulu', 'alpha'],
+    );
+    for (const order of [
+      ['alpha'],
+      ['alpha', 'zulu', 'unknown'],
+      ['alpha', 'zulu', 'alpha'],
+      ['../escape', 'alpha'],
+      [],
+      { alpha: 1 },
+    ]) {
+      await writeFile(orderFile, JSON.stringify(order));
+      await assert.rejects(loadSource(root), /languages.json/);
+    }
+    await rm(orderFile);
+    await assert.rejects(loadSource(root), /languages.json/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('published indexes and documentation preserve the authored language order', async () => {
+  const order = JSON.parse(
+    await readFile(path.join(ROOT, 'registry/languages.json'), 'utf8'),
+  );
+  const languages = JSON.parse(
+    await readFile(path.join(ROOT, 'public/r/languages.json'), 'utf8'),
+  );
+  assert.deepEqual(
+    languages.map((language: { slug: string }) => language.slug),
+    order,
+  );
+  assert.deepEqual(await languageSlugs(), order);
+  assert.deepEqual(
+    (await readCatalog()).languages.map((language) => language.slug),
+    order,
+  );
+  assert.deepEqual(
+    [...new Set((await componentParams()).map((params) => params.slug))],
+    order,
+  );
+  for (const file of ['registry.json', 'gallery.json']) {
+    const registry = registrySchema.parse(
+      JSON.parse(await readFile(path.join(ROOT, 'public/r', file), 'utf8')),
+    );
+    assert.deepEqual(
+      [
+        ...new Set(
+          registry.items
+            .filter((item) => item.meta.tier === 'expressive')
+            .map((item) => item.meta.language),
+        ),
+      ],
+      languages
+        .filter(
+          (language: { counts: { expressive: number } }) =>
+            language.counts.expressive > 0,
+        )
+        .map((language: { slug: string }) => language.slug),
+    );
+  }
+  const readme = await readFile(path.join(ROOT, 'README.md'), 'utf8');
+  assert.deepEqual(
+    [
+      ...readme.matchAll(
+        /^\d+\. \[[^\]]+\]\(registry\/languages\/([^/]+)\/DESIGN\.md\)/gm,
+      ),
+    ].map((match) => match[1]),
+    order,
+  );
+});
 
 test('authored contracts reject legacy metadata, ambiguous entrypoints and unsafe addresses', () => {
   const valid = {

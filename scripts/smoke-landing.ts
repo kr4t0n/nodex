@@ -8,6 +8,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { chromium, expect, type Browser, type Page } from '@playwright/test';
 
 import { startSite } from './lib/site.ts';
+import type { PublishedLanguage } from '../packages/core/src/schema.ts';
 
 let site: Awaited<ReturnType<typeof startSite>> | undefined;
 const evidence = process.env.NODEX_EVIDENCE_DIR
@@ -517,6 +518,9 @@ async function captureEvidence(
 
 async function main() {
   const origin = process.argv[2] ?? (site = await startSite()).origin;
+  const languages = (await fetch(`${origin}/r/languages.json`).then(
+    (response) => response.json(),
+  )) as PublishedLanguage[];
   const browser = await chromium.launch({ headless: true });
   const errors: string[] = [];
   try {
@@ -547,6 +551,15 @@ async function main() {
     await expect(page.locator('[data-nx-example]')).toHaveCount(0);
 
     await expect(page.locator('[data-cli-command]')).toHaveCount(4);
+    assert.deepEqual(
+      await page
+        .locator('[data-cli-output] [data-terminal-language]')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute('data-terminal-language')),
+        ),
+      languages.map((language) => language.slug),
+      'The scripted terminal list must preserve published language order',
+    );
     const samples: string[] = [];
     await page.exposeFunction('recordTerminalCommand', (text: string) => {
       samples.push(text);
@@ -1030,20 +1043,25 @@ async function main() {
     await assertTheme(small, 'mono-editorial');
     await input.fill('nodex list');
     await input.press('Enter');
+    await expect(
+      small.locator('[data-terminal-output] [data-terminal-language]'),
+    ).toHaveCount(languages.length);
+    assert.deepEqual(
+      await small
+        .locator('[data-terminal-output] [data-terminal-language]')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute('data-terminal-language')),
+        ),
+      languages.map((language) => language.slug),
+      'The terminal picker must preserve published language order',
+    );
     await small
       .locator('[data-terminal-output]')
       .getByRole('button', { name: 'Apply Neo-brutalism' })
       .click();
     await assertTheme(small, 'neo-brutalism');
     await assertFits(small);
-    for (const [language, name] of [
-      ['mono-editorial', 'Mono Editorial'],
-      ['signal-console', 'Signal Console'],
-      ['neo-brutalism', 'Neo-brutalism'],
-      ['sketchbook', 'Sketchbook'],
-      ['soft-studio', 'Soft Studio'],
-      ['nocturne', 'Nocturne'],
-    ]) {
+    for (const { slug: language, name } of languages) {
       await small.goto(`/l/${language}/button`);
       await expect(
         small.getByRole('heading', { name: 'Button', exact: true }),

@@ -15,8 +15,10 @@ usage instructions.
 node packages/cli/src/index.ts new-language <slug>
 ```
 
-Fill the generated `meta.json`, `tokens.json` and `DESIGN.md`. Languages are
-found by directory; there is no additional registration list.
+Fill the generated `meta.json`, `tokens.json` and `DESIGN.md`. Add the slug to
+`registry/languages.json` at its intended display position. That ordered list
+must contain every language directory exactly once; the build rejects missing,
+duplicate and unknown entries. Update the README's language list to match.
 The scaffold seeds shared roles from the checkout's canonical Mono Editorial
 tokens, with neutral paint and system fonts. Customize their values in the new
 language; keep the role names consumed by primitives.

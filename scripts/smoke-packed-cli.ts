@@ -54,11 +54,30 @@ try {
     stdio: 'inherit',
   });
   // Invoke the installed bin directly: a missing bin must never fall back to npx.
-  execFileSync(
-    path.join(consumer, 'node_modules/.bin/nodex'),
-    ['list', '--registry', path.join(root, 'public')],
-    { cwd: consumer, stdio: 'inherit' },
-  );
+  const languages = JSON.parse(
+    await readFile(path.join(root, 'public/r/languages.json'), 'utf8'),
+  ) as Array<{ slug: string }>;
+  for (const json of [false, true]) {
+    const listed = execFileSync(
+      path.join(consumer, 'node_modules/.bin/nodex'),
+      [
+        'list',
+        '--registry',
+        path.join(root, 'public'),
+        ...(json ? ['--json'] : []),
+      ],
+      { cwd: consumer, encoding: 'utf8' },
+    );
+    assert.deepEqual(
+      json
+        ? JSON.parse(listed).map((language: { slug: string }) => language.slug)
+        : [...listed.matchAll(/^ {2}([a-z0-9-]+) — /gm)].map(
+            (match) => match[1],
+          ),
+      languages.map((language) => language.slug),
+      `Packed CLI list${json ? ' --json' : ''} must preserve published language order`,
+    );
+  }
 
   const modeRoot = path.join(temp, 'mode-registry');
   const fixture = await modeRegistry(modeRoot);
