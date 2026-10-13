@@ -1,0 +1,85 @@
+{
+  "slug": "hearth-scatter",
+  "title": "Water and rise",
+  "description": "Two measurements per observation, with color and form naming the group and italic notes on selected readings.",
+  "component": "scatter",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthScatter"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 500
+  },
+  "tags": ["editorial", "warm", "relationship"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthScatterDatum[]",
+      "required": true,
+      "description": "{ id, label, group, x, y, note? } observations with unique nonempty IDs and a declared group. Null and non-finite coordinates are unavailable: they are counted below the plot, never drawn. An optional short note is written beside the point."
+    },
+    {
+      "name": "groups",
+      "type": "readonly HearthScatterGroup[]",
+      "required": true,
+      "description": "One to four { id, label, tone? } groups with unique nonempty IDs. Each group has its own point form (circle, square, diamond, triangle) as well as a color; omitted tones follow the group order."
+    },
+    {
+      "name": "xLabel",
+      "type": "string",
+      "description": "Horizontal measurement name for the axis title and tooltips. Defaults to X."
+    },
+    {
+      "name": "yLabel",
+      "type": "string",
+      "description": "Vertical measurement name for the axis title and tooltips. Defaults to Y."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned chart heading. Defaults to Relationship."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the heading."
+    },
+    {
+      "name": "xFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats horizontal ticks and tooltips. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "yFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats vertical ticks and tooltips. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; scoped finite motion honors live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The chart fills its parent; dense plots scroll locally."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect observations through Recharts."
+    }
+  ]
+}

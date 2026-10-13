@@ -154,6 +154,11 @@ system preference changes, and cleans up its observers. CSSOM-only mutations can
 announce `nodex:tokens-changed`. Reduced motion is conservative during server
 rendering; the initial motion duration is zero. Do not branch structural markup
 on an after-mount motion preference.
+A whole-chart entrance that is not a library mark animation, such as Hearth's
+seasonal table fading in or its rosette opening, plays once on the chart's
+container through the Web Animations API with the language's motion tokens.
+Its resting state is the default paint, so snapshots and script-free previews
+need nothing; a live reduced-motion change finishes it in place.
 
 All 24 primitives consume type, spacing, radius and interaction-motion roles in
 addition to paint, fonts and strokes. Reuse the role's meaning, not just an equal

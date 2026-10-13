@@ -4,5 +4,5 @@
   "description": "Warm paper, quiet umber and serif-led reading. A considered editorial language for everyday rituals, in light and dark.",
   "visibility": "public",
   "density": ["close-read"],
-  "featured": ["hearth-bars", "hearth-line"]
+  "featured": ["hearth-bars", "hearth-line", "hearth-seasons", "hearth-rosette"]
 }

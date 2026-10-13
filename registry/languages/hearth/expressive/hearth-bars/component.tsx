@@ -17,7 +17,17 @@ import { useChartMotion } from '../../../../_shared/use-chart-motion';
 import {
   HearthChartFrame,
   HearthChartTooltip,
+  formatHearthNumber,
+  hearthChartFocus,
+  type HearthTone,
 } from '../../../../_shared/hearth-chart-frame';
+
+const hearthTones: Record<HearthTone, string> = {
+  a: 'var(--nx-seriesA)',
+  b: 'var(--nx-seriesB)',
+  c: 'var(--nx-seriesC)',
+  d: 'var(--nx-seriesD)',
+};
 
 export interface HearthBarsDatum {
   id: string;
@@ -25,7 +35,7 @@ export interface HearthBarsDatum {
   /** Finite, nonnegative amount. Null and invalid values remain unavailable. */
   value: number | null;
   /** Stable category identity; omitted tones use the primary series. */
-  tone?: 'a' | 'b' | 'c' | 'd';
+  tone?: HearthTone;
 }
 
 export interface HearthBarsProps {
@@ -42,14 +52,6 @@ interface Row extends HearthBarsDatum {
   index: number;
   paint: string;
 }
-const tones = {
-  a: 'var(--nx-seriesA)',
-  b: 'var(--nx-seriesB)',
-  c: 'var(--nx-seriesC)',
-  d: 'var(--nx-seriesD)',
-};
-const numbers = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
-const formatNumber = (value: number) => numbers.format(value);
 const matchObservation = matchByDataKey('id');
 
 function Amount({ x, y, width, height, payload }: BarShapeProps) {
@@ -119,7 +121,7 @@ export function HearthBars({
   data,
   unitLabel = 'Value',
   contextLabel,
-  valueFormatter = formatNumber,
+  valueFormatter = formatHearthNumber,
   animate = true,
   className,
   'aria-label': label = 'Amounts by category',
@@ -141,7 +143,7 @@ export function HearthBars({
           datum.value >= 0
             ? datum.value
             : null,
-        paint: tones[datum.tone ?? 'a'],
+        paint: hearthTones[datum.tone ?? 'a'],
       };
     });
     return {
@@ -193,7 +195,7 @@ export function HearthBars({
               desc={`Bar length shows ${unitLabel} from zero, in the supplied order. A dash means unavailable; zero has a label without a bar. Left Arrow moves to the next category; Right Arrow moves back.`}
               margin={{ top: 14, right: 8, bottom: 0, left: 8 }}
               maxBarSize={10}
-              className="[&_[tabindex]:focus-visible]:[outline:var(--nx-stroke-mark)_solid_var(--nx-ink)] [&_[tabindex]:focus-visible]:[outline-offset:calc(-1*var(--nx-stroke-mark))] [&_[tabindex]:focus:not(:focus-visible)]:outline-none"
+              className={hearthChartFocus}
             >
               <XAxis
                 type="number"

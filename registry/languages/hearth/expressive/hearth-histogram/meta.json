@@ -1,0 +1,80 @@
+{
+  "slug": "hearth-histogram",
+  "title": "A month of loaves",
+  "description": "Equal-width bins count readings from zero, with the median written beside its rule.",
+  "component": "histogram",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthHistogram"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 460
+  },
+  "tags": ["editorial", "warm", "distribution"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthHistogramDatum[]",
+      "required": true,
+      "description": "{ id, value } readings with unique nonempty IDs. Null and non-finite values are unavailable: they are counted in the caption, never binned."
+    },
+    {
+      "name": "binWidth",
+      "type": "number",
+      "required": true,
+      "description": "Positive, finite bin width in the measurement's unit. At most 60 bins are drawn."
+    },
+    {
+      "name": "binStart",
+      "type": "number",
+      "description": "Left edge of the first bin, at or below the lowest reading. Defaults to the lowest reading rounded down to a multiple of binWidth."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement heading and tooltip unit. Defaults to Value."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the heading."
+    },
+    {
+      "name": "countLabel",
+      "type": "string",
+      "description": "Plural noun for what is counted, used in the caption and tooltips. Defaults to readings."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats bin edges, the median and tooltips. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; scoped finite motion honors live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The chart fills its parent; dense plots scroll locally."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect bins through Recharts."
+    }
+  ]
+}
