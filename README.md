@@ -5,8 +5,8 @@ receive its tokens and written design rules, and copy components into your app.
 Expressive charts belong to a language because their geometry carries its
 identity. Primitives share one implementation and change appearance through tokens.
 
-The registry contains **114 expressive charts** (64 Mono Editorial, nine Signal Console,
-nine Neo-brutalism, nine Sketchbook, nine Soft Studio, twelve Nocturne and two Hearth) and **24 reusable primitives**, delivered as editable React source.
+The registry contains **121 expressive charts** (64 Mono Editorial, nine Signal Console,
+nine Neo-brutalism, nine Sketchbook, nine Soft Studio, twelve Nocturne and nine Hearth) and **24 reusable primitives**, delivered as editable React source.
 This includes the complete original 65-chart catalogue. Nine initial
 charts validated the source-delivery and token contract; the remaining specimens
 now use the same workflow. Run `nodex list` against the built registry for the
@@ -52,7 +52,7 @@ Nodex implements these through its own semantic tokens and React primitives.
 ## Hearth
 
 Hearth is available at `/l/hearth`, with light and dark modes, all 24 shared
-primitives and two expressive charts. Cream paper and soft umber, Newsreader
+primitives and nine expressive charts. Cream paper and soft umber, Newsreader
 headings, readable Source Sans 3, and clay, olive, ochre and rosewood accents
 support recipes, journals and long-form reading. The
 [design guide](registry/languages/hearth/DESIGN.md) defines the language beyond
@@ -61,12 +61,31 @@ charts. Both modes keep the same typography and geometry, with 18px prose,
 
 - `hearth-bars`: caller-ordered horizontal amounts with labels above their marks.
 - `hearth-line`: ordered readings with numeric spacing and explicit missing-data gaps.
+- `hearth-shares`: rows dividing one whole into the same one to four parts, with
+  totals above and shares below.
+- `hearth-histogram`: equal-width bins counted from zero, with the median written
+  beside its rule.
+- `hearth-scatter`: two measurements per observation; color and point form both
+  name the group, and italic notes explain selected readings.
+- `hearth-dumbbell`: an earlier and a later reading per row on one scale.
+- `hearth-seasons`: a seasonal table of ordered levels, keeping absence, levels
+  and unrecorded cells distinct.
+- `hearth-carton`: whole units in fixed places, such as a dozen eggs by use.
+- `hearth-rosette`: equal-angle petals through a cycle, with area proportional
+  to the amount and a hidden table for screen readers.
+
+Each chart accepts caller data and provides keyboard inspection, scoped tokens
+and reduced motion. Unavailable readings stay visible as dashes, outlines or
+counted notes rather than synthetic values. The seasonal table fades in and the
+rosette opens from its centre once, as a whole; the other charts use their
+library's draw. Dense plots scroll locally.
 
 Choose Light or Dark in the language gallery, or set `data-nx-language="hearth"`
 and `data-nx-mode="dark"` on the same consumer scope. The downloaded stylesheet
 contains both palettes and embedded normal/italic fonts. Mode changes retain
-mounted examples, form values and focus. The two featured previews are curated
-explicitly; the language index keeps its default light appearance.
+mounted examples, form values and focus. The language index shows bars, line,
+seasons and rosette as its four curated previews, in its default light
+appearance; the language gallery contains all nine charts.
 
 Newsreader retains both its weight and optical-size axes. With normal and italic
 faces embedded, Hearth's token stylesheet is about 468 KB uncompressed. The
@@ -1007,10 +1026,11 @@ JavaScript; an explicit language query still selects another palette.
 `smoke:pack` exercises mode init,
 JSON delivery and lint through the installed tarball.
 
-`smoke:hearth` checks the copied bar/line contracts, numeric geometry, unavailable
-and zero readings, offline fonts, mode changes, keyboard focus and live reduced
-motion. It captures desktop/mobile cookbook compositions and all 24 primitives
-in both modes, plus the same prose with Mono Editorial as a reference. Evidence
+`smoke:hearth` checks the copied contracts of all nine charts, numeric geometry,
+unavailable and zero readings, offline fonts, mode changes, keyboard inspection
+of every chart, the one-time entrance and live reduced motion. It captures
+desktop/mobile cookbook compositions, each newer chart and all 24 primitives in
+both modes, plus the same prose with Mono Editorial as a reference. Evidence
 uses a fresh system temporary directory or `NODEX_EVIDENCE_DIR`; CI includes it
 in `visual-evidence`. The cookbook composition is a consumer test fixture,
 not a delivered recipe component.

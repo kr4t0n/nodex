@@ -288,7 +288,10 @@ async function checkPreviews(browser: Browser): Promise<void> {
           );
           if (item.meta.language === 'soft-studio')
             await checkStudioPreviewFit(page.locator('[data-nx-chart]'));
-          if (item.meta.language === 'nocturne')
+          if (
+            item.meta.language === 'nocturne' ||
+            item.meta.language === 'hearth'
+          )
             await checkChartPreviewFit(page.locator('[data-nx-chart]'));
           if (item.name === 'force-graph')
             await checkForceFit(page.locator('[data-nx-chart="force-graph"]'));

@@ -22,6 +22,18 @@ import { serveDirectory } from './lib/browser.ts';
 import { resolveTokens, type Tokens } from '../packages/cli/src/tokens.ts';
 
 const run = promisify(execFile);
+const HEARTH_CHARTS = [
+  'hearth-bars',
+  'hearth-line',
+  'hearth-shares',
+  'hearth-histogram',
+  'hearth-scatter',
+  'hearth-dumbbell',
+  'hearth-seasons',
+  'hearth-carton',
+  'hearth-rosette',
+];
+const CATALOGUE = HEARTH_CHARTS.slice(2);
 const root = path.resolve(import.meta.dirname, '..');
 const temp = await mkdtemp(path.join(tmpdir(), 'nodex-hearth-consumer-'));
 const evidence = process.env.NODEX_EVIDENCE_DIR
@@ -32,6 +44,13 @@ const source = String.raw`
 import { createRoot } from 'react-dom/client';
 import { HearthBars } from './components/nodex/hearth-bars/component';
 import { HearthLine } from './components/nodex/hearth-line/component';
+import { HearthShares } from './components/nodex/hearth-shares/component';
+import { HearthHistogram } from './components/nodex/hearth-histogram/component';
+import { HearthScatter } from './components/nodex/hearth-scatter/component';
+import { HearthDumbbell } from './components/nodex/hearth-dumbbell/component';
+import { HearthSeasons } from './components/nodex/hearth-seasons/component';
+import { HearthCarton } from './components/nodex/hearth-carton/component';
+import { HearthRosette } from './components/nodex/hearth-rosette/component';
 import { Prose } from './components/nodex/prose/component';
 import { Button } from './components/nodex/button/component';
 import { Checkbox } from './components/nodex/checkbox/component';
@@ -39,6 +58,18 @@ import { Input } from './components/nodex/input/component';
 import { PrimitiveScope } from './primitive-consumer';
 const amounts = [{id:'carb',label:'Carbohydrate',value:42,tone:'a'},{id:'protein',label:'Protein',value:18,tone:'b'},{id:'fat',label:'Fat',value:11,tone:'c'},{id:'fibre',label:'Fibre',value:9,tone:'d'}] as const;
 const readings = [24,21,23,18,19].map((value,index)=>({id:String(index),label:'Batch '+(index+1),x:index+1,value}));
+const parts = [{id:'produce',label:'Produce',tone:'b'},{id:'pantry',label:'Pantry',tone:'c'},{id:'dairy',label:'Dairy',tone:'d'},{id:'bakery',label:'Bakery',tone:'a'}] as const;
+const weeks = [[24,18,12,8],[28,9,14,9],[31,22,11,7],[21,12,13,12]].map((values,index)=>({id:'week-'+(index+1),label:'Week '+(index+1),values:Object.fromEntries(parts.map((part,p)=>[part.id,values[p]!]))}));
+const weights = [812,798,826,804,790,835,818,809,776,821,842,803,815,797,828,811,784,819,806,833].map((value,index)=>({id:'loaf-'+index,value}));
+const flours = [{id:'white',label:'White'},{id:'wholemeal',label:'Wholemeal'},{id:'rye',label:'Rye'}];
+const bakes = [['white',65,31],['white',70,37],['white',74,41],['white',78,22,'Overproofed'],['wholemeal',70,24],['wholemeal',75,29],['rye',72,14],['rye',78,18]].map(([group,x,y,note],index)=>({id:'bake-'+index,label:'Bake '+(index+1),group:group as string,x:x as number,y:y as number,note:note as string|undefined}));
+const attempts = [{id:'risotto',label:'Risotto',start:55,end:35},{id:'pastry',label:'Pastry',start:48,end:22},{id:'omelette',label:'Omelette',start:12,end:6}];
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((label)=>({id:label.toLowerCase(),label}));
+const produce = [['Rhubarb','122333100000'],['Tomatoes','000001333210'],['Leeks','332100000233']].map(([label,levels])=>({id:label!.toLowerCase(),label:label!,levels:levels!}));
+const seasons = produce.flatMap((row)=>months.map((month,index)=>({rowId:row.id,columnId:month.id,level:Number(row.levels[index])})));
+const levels = ['Out of season','Arriving or leaving','In season','At its best'];
+const eggs = [{id:'baking',label:'Baking',count:5,tone:'c'},{id:'breakfast',label:'Breakfast',count:3,tone:'a'},{id:'custard',label:'A custard',count:2,tone:'b'}] as const;
+const loaves = [6,7,9,10,8,5,3,4,8,11,13,16].map((value,index)=>({id:months[index]!.id,label:months[index]!.label,value}));
 function App() {
  return <main className="mx-auto max-w-[1120px] [padding:var(--nx-space-pagePadding)]">
   <section data-showcase>
@@ -62,6 +93,15 @@ function App() {
     <HearthLine data={readings} unitLabel="Minutes of preparation" contextLabel="Five kitchen afternoons" />
    </div>
   </section>
+  <section data-catalogue className="mt-8 grid min-w-0 gap-6 md:grid-cols-2">
+   <div data-hearth-chart="hearth-shares" className="min-w-0"><HearthShares data={weeks} parts={parts} unitLabel="Where the basket goes" valueFormatter={(value)=>'£'+value} /></div>
+   <div data-hearth-chart="hearth-histogram" className="min-w-0"><HearthHistogram data={[...weights,{id:'unweighed',value:null}]} binWidth={10} binStart={770} unitLabel="A month of loaves" countLabel="loaves" valueFormatter={(value)=>value+' g'} /></div>
+   <div data-hearth-chart="hearth-scatter" className="min-w-0"><HearthScatter data={[...bakes,{id:'lost',label:'Lost note',group:'rye',x:null,y:12}]} groups={flours} xLabel="Hydration" yLabel="Oven spring" unitLabel="Water and rise" /></div>
+   <div data-hearth-chart="hearth-dumbbell" className="min-w-0"><HearthDumbbell data={[...attempts,{id:'bread',label:'Bread',start:null,end:40}]} startLabel="First time" endLabel="Tenth time" unitLabel="First time, tenth time" valueFormatter={(value)=>value+' min'} /></div>
+   <div data-hearth-chart="hearth-seasons" className="min-w-0"><HearthSeasons data={seasons.filter((cell)=>!(cell.rowId==='leeks'&&cell.columnId==='jun'))} rows={produce} columns={months} levels={levels} unitLabel="In season" /></div>
+   <div data-hearth-chart="hearth-carton" className="min-w-0"><HearthCarton data={eggs} emptyLabel="Still in the box" unitLabel="A dozen eggs" /></div>
+   <div data-hearth-chart="hearth-rosette" className="min-w-0"><HearthRosette data={[...loaves.slice(0,6),{...loaves[6]!,value:0},{...loaves[7]!,value:null},...loaves.slice(8)]} unitLabel="The baking year" /></div>
+  </section>
   <section data-controls className="mt-8"><PrimitiveScope id="hearth-primitives" /></section>
   <section data-edge-cases className="grid gap-6">
    <div id="bars-zero"><HearthBars data={[{id:'zero',label:'Zero',value:0},{id:'missing',label:'Missing',value:null},{id:'negative',label:'Invalid negative',value:-1},{id:'nan',label:'Invalid number',value:NaN},{id:'half',label:'Half',value:5},{id:'whole',label:'Whole',value:10}]} /></div>
@@ -72,6 +112,15 @@ function App() {
    <div id="line-single"><HearthLine data={[{id:'only',label:'Only',x:5,value:0}]} /></div>
    <div id="line-empty"><HearthLine data={[]} /></div>
    <div id="line-invalid"><HearthLine data={[{id:'a',label:'A',x:2,value:1},{id:'b',label:'B',x:1,value:2}]} /></div>
+   <div id="shares-partial"><HearthShares data={[{id:'whole',label:'Whole',values:{a:1,b:3}},{id:'partial',label:'Partial',values:{a:1,b:null}},{id:'zero',label:'Zero',values:{a:0,b:0}}]} parts={[{id:'a',label:'A'},{id:'b',label:'B'}]} /></div>
+   <div id="shares-too-many"><HearthShares data={[]} parts={['a','b','c','d','e'].map((id)=>({id,label:id}))} /></div>
+   <div id="histogram-invalid"><HearthHistogram data={[{id:'a',value:1}]} binWidth={0} /></div>
+   <div id="histogram-empty"><HearthHistogram data={[{id:'a',value:NaN}]} binWidth={1} /></div>
+   <div id="scatter-undeclared"><HearthScatter data={[{id:'a',label:'A',group:'missing',x:1,y:1}]} groups={[{id:'g',label:'G'}]} /></div>
+   <div id="dumbbell-rising"><HearthDumbbell data={[{id:'up',label:'Up',start:2,end:8}]} /></div>
+   <div id="seasons-duplicate"><HearthSeasons data={[{rowId:'r',columnId:'c',level:1},{rowId:'r',columnId:'c',level:2}]} rows={[{id:'r',label:'R'}]} columns={[{id:'c',label:'C'}]} levels={['None','Some']} /></div>
+   <div id="carton-over"><HearthCarton data={[{id:'a',label:'A',count:9},{id:'b',label:'B',count:4}]} /></div>
+   <div id="rosette-short"><HearthRosette data={[{id:'a',label:'A',value:1},{id:'b',label:'B',value:2}]} /></div>
    <div id="line-unavailable"><HearthLine data={[{id:'a',label:'A',x:0,value:NaN}]} /></div>
   </section>
  </main>;
@@ -128,13 +177,7 @@ try {
       )
     ).stdout;
   await cli(['init', 'hearth']);
-  await cli([
-    'add',
-    ...PRIMITIVE_SLUGS,
-    'hearth-bars',
-    'hearth-line',
-    '--no-install',
-  ]);
+  await cli(['add', ...PRIMITIVE_SLUGS, ...HEARTH_CHARTS, '--no-install']);
   await cli(['lint']);
   await writeFile(path.join(temp, 'src/app.tsx'), source);
   await writeFile(
@@ -286,6 +329,10 @@ try {
       await page.locator('[data-controls]').screenshot({
         path: path.join(evidence, `hearth-primitives-${mode}-${width}.png`),
       });
+      for (const slug of CATALOGUE)
+        await page.locator(`[data-hearth-chart="${slug}"]`).screenshot({
+          path: path.join(evidence, `${slug}-${mode}-${width}.png`),
+        });
     }
   }
   await page.setViewportSize({ width: 1280, height: 1000 });
@@ -376,6 +423,180 @@ try {
     ) < 0.001,
     'X spacing must remain numeric',
   );
+  const chart = (slug: string) => page.locator(`[data-hearth-chart="${slug}"]`);
+  const numbers = (locator: ReturnType<typeof page.locator>, name: string) =>
+    locator.evaluateAll(
+      (marks, name) => marks.map((mark) => Number(mark.getAttribute(name))),
+      name,
+    );
+
+  // Shares: every complete row divides one whole; incomplete rows keep a dash and no bar.
+  await expect(
+    chart('hearth-shares').locator('[data-nx-hearth-share]'),
+  ).toHaveCount(16);
+  for (const week of ['week-1', 'week-4']) {
+    const shares = await numbers(
+      chart('hearth-shares').locator(`[data-nx-hearth-share^="${week}:"]`),
+      'data-nx-value',
+    );
+    assert(Math.abs(shares.reduce((sum, share) => sum + share, 0) - 1) < 1e-9);
+  }
+  const partial = page.locator('#shares-partial');
+  await expect(partial.locator('[data-nx-hearth-share^="whole:"]')).toHaveCount(
+    2,
+  );
+  await expect(
+    partial.locator('[data-nx-hearth-share^="partial:"]'),
+  ).toHaveCount(0);
+  await expect(
+    partial.locator('[data-nx-hearth-reading="partial"]'),
+  ).toHaveText('—');
+  await expect(partial.locator('[data-nx-hearth-reading="zero"]')).toHaveText(
+    '—',
+  );
+  await expect(page.locator('#shares-too-many')).toContainText(
+    'one to four parts',
+  );
+
+  // Histogram: bins count every available reading once; the median is written.
+  const bins = await numbers(
+    chart('hearth-histogram').locator('[data-nx-hearth-bin]'),
+    'data-nx-value',
+  );
+  assert.equal(
+    bins.reduce((sum, count) => sum + count, 0),
+    20,
+  );
+  await expect(chart('hearth-histogram')).toContainText('Median 811.5 g');
+  await expect(chart('hearth-histogram')).toContainText(
+    '20 loaves · 1 unavailable',
+  );
+  await expect(page.locator('#histogram-invalid')).toContainText(
+    'positive bin width',
+  );
+  await expect(page.locator('#histogram-empty')).toContainText(
+    'No observations available.',
+  );
+
+  // Scatter: one mark per complete observation, a distinct form per group, written notes.
+  await expect(
+    chart('hearth-scatter').locator('[data-nx-hearth-dot]'),
+  ).toHaveCount(8);
+  assert.deepEqual(
+    [
+      ...new Set(
+        await chart('hearth-scatter')
+          .locator('[data-nx-hearth-dot]')
+          .evaluateAll((marks) =>
+            marks.map((mark) => mark.getAttribute('data-nx-hearth-form')),
+          ),
+      ),
+    ],
+    ['circle', 'square', 'diamond'],
+  );
+  await expect(
+    chart('hearth-scatter').locator('[data-nx-hearth-note]'),
+  ).toHaveText('Overproofed');
+  await expect(chart('hearth-scatter')).toContainText(
+    '1 unavailable, not shown',
+  );
+  await expect(page.locator('#scatter-undeclared')).toContainText(
+    'declared group',
+  );
+
+  // Dumbbell: the filled end sits at the later reading, whichever way the change runs.
+  const dumbbell = chart('hearth-dumbbell');
+  await expect(dumbbell.locator('[data-nx-hearth-pair]')).toHaveCount(3);
+  const [start] = await numbers(
+    dumbbell.locator('[data-nx-hearth-start="pastry"]'),
+    'cx',
+  );
+  const [end] = await numbers(
+    dumbbell.locator('[data-nx-hearth-end="pastry"]'),
+    'cx',
+  );
+  assert(end! < start!, 'A falling time ends to the left');
+  const [riseStart] = await numbers(
+    page.locator('#dumbbell-rising [data-nx-hearth-start]'),
+    'cx',
+  );
+  const [riseEnd] = await numbers(
+    page.locator('#dumbbell-rising [data-nx-hearth-end]'),
+    'cx',
+  );
+  assert(riseEnd! > riseStart!, 'A rising reading ends to the right');
+  await expect(
+    dumbbell.locator('[data-nx-hearth-reading="bread"]'),
+  ).toContainText('—');
+
+  // Seasons: every declared pair has a cell; an omitted pair is unrecorded, not a level.
+  const seasonsChart = chart('hearth-seasons');
+  await expect(seasonsChart.locator('[data-nx-hearth-cell]')).toHaveCount(36);
+  await expect(seasonsChart.locator('[data-nx-value="missing"]')).toHaveCount(
+    1,
+  );
+  await expect(seasonsChart.locator('[data-nx-value="0"]')).toHaveCount(15);
+  await expect(page.locator('#seasons-duplicate')).toContainText(
+    'one reading per declared',
+  );
+
+  // Carton: groups fill consecutive places and the rest stay empty.
+  const places = await chart('hearth-carton')
+    .locator('[data-nx-hearth-unit]')
+    .evaluateAll((marks) =>
+      marks.map((mark) => mark.getAttribute('data-nx-value')),
+    );
+  assert.deepEqual(places, [
+    '0',
+    '0',
+    '0',
+    '0',
+    '0',
+    '1',
+    '1',
+    '1',
+    '2',
+    '2',
+    'empty',
+    'empty',
+  ]);
+  await expect(page.locator('#carton-over')).toContainText(
+    'more than the 12 places',
+  );
+
+  // Rosette: zero and unavailable periods have no petal, and a hidden table reads every period.
+  const rosette = chart('hearth-rosette');
+  await expect(rosette.locator('path[data-nx-hearth-petal]')).toHaveCount(10);
+  await expect(rosette.locator('[data-nx-hearth-rim="jul"]')).toContainText(
+    '0',
+  );
+  await expect(rosette.locator('[data-nx-hearth-rim="aug"]')).toContainText(
+    '—',
+  );
+  await expect(rosette.getByRole('table')).toContainText('Dec16');
+  await expect(page.locator('#rosette-short')).toContainText(
+    'three to twenty-four',
+  );
+
+  // Keyboard inspection reaches each new chart through the library's own focus target.
+  await page.mouse.move(0, 0);
+  for (const [slug, key, text] of [
+    ['hearth-shares', 'ArrowLeft', 'Week'],
+    ['hearth-histogram', 'ArrowRight', 'loaves'],
+    ['hearth-scatter', 'ArrowRight', 'Bake'],
+    ['hearth-dumbbell', 'ArrowLeft', 'First time'],
+    ['hearth-seasons', 'ArrowRight', 'Rhubarb'],
+    ['hearth-carton', 'ArrowRight', 'Baking'],
+    ['hearth-rosette', 'ArrowRight', 'The baking year'],
+  ] as const) {
+    const surface = chart(slug).locator('.recharts-surface').first();
+    await surface.focus();
+    await surface.press(key);
+    await expect(chart(slug).getByRole('status')).toContainText(text);
+    await expect(surface).toHaveCSS('outline-width', '2px');
+    await surface.blur();
+  }
+
   await page.mouse.move(0, 0);
   const barSvg = page.locator(
     '[data-showcase] [data-nx-chart="hearth-bars"] .recharts-surface',
@@ -423,6 +644,35 @@ try {
     siblingPaint,
   );
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+  // The rosette and the seasonal table play their one-time entrance on the
+  // container, and a live reduced-motion change finishes it in place.
+  const moving = await browser.newPage({
+    viewport: { width: 1280, height: 1000 },
+  });
+  // A long draw token keeps the entrance observable; the route only adds that override.
+  await moving.route(`${server.origin}/`, async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      body: (await response.text()).replace(
+        '</head>',
+        '<style>:root{--nx-motion-draw-duration:60s!important}</style></head>',
+      ),
+    });
+  });
+  await moving.goto(server.origin);
+  const opening = moving.locator(
+    '[data-hearth-chart="hearth-rosette"] .aspect-square',
+  );
+  await expect
+    .poll(() => opening.evaluate((node) => node.getAnimations().length))
+    .toBe(1);
+  await moving.emulateMedia({ reducedMotion: 'reduce' });
+  await expect
+    .poll(() => opening.evaluate((node) => node.getAnimations().length))
+    .toBe(0);
+  await expect(opening).toHaveCSS('clip-path', 'none');
+  await moving.close();
   await expect(
     page.locator('[data-showcase] [data-nx-chart]').first(),
   ).toHaveAttribute('data-nx-animated', 'true');
@@ -437,7 +687,7 @@ try {
   assert.equal(ids.length, new Set(ids).size);
   assert.deepEqual(errors, []);
   comparisons.push(
-    'Passed: copied source, fonts offline, all 24 primitives in both modes, desktop/mobile fit, retained focus/state, keyboard chart inspection, zero/missing/invalid/single data, numeric geometry, scoped paint and live reduced motion.',
+    'Passed: copied source for all nine charts, fonts offline, all 24 primitives in both modes, desktop/mobile fit with per-chart frames, retained focus/state, keyboard inspection of every chart, zero/missing/invalid/single data, numeric geometry, scoped paint, the one-time entrance and live reduced motion.',
   );
   await writeFile(
     path.join(evidence, 'hearth-checks.txt'),
