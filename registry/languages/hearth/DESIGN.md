@@ -67,6 +67,8 @@ Newsreader supplies headings and short editorial emphasis. Source Sans 3 supplie
 reading text, controls, labels and values. Normal and italic faces support true
 emphasis without synthetic slanting. Code alone uses system monospace. The
 heading, reading and UI stacks remain independent token roles.
+Newsreader deliberately retains both its weight and optical-size axes in the
+embedded normal and italic faces.
 
 Page titles range from 32px in narrow compositions to 40px, with weight 500 and
 slightly tightened tracking. Section headings use 28px, grouped headings 24px,

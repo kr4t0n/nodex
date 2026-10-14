@@ -13,7 +13,7 @@
       "name": "data",
       "type": "readonly NocturneMarginDatum[]",
       "required": true,
-      "description": "Caller-owned { id, label, target, value, range } rows. All measurements must share one unit. Target and value are finite numbers or null; range is a complete finite ordered [low, high] pair or null. IDs must be unique and nonempty. Current value and expected range render independently after subtracting a valid target. Zero remains a true point or tick. No percentage normalization or confidence estimate is inferred."
+      "description": "Caller-owned { id, label, target, value, range } rows. All measurements must share one unit. Target and value are finite numbers or null; range is a complete finite ordered [low, high] pair or null. IDs must be unique and nonempty. Current value and expected range render independently after subtracting a valid target, on a shared symmetric deviation scale. Zero remains a true point or tick. No percentage normalization or confidence estimate is inferred."
     },
     {
       "name": "unitLabel",

@@ -2,7 +2,8 @@
 
 Architecture and reasoning for nodex. This root document is the project's high
 level source of truth. Procedures live in the [authoring skill](.agents/skills/nodex-authoring/SKILL.md);
-setup, commands and contribution flow live in [README.md](README.md). Update them
+the reader's guide lives in [README.md](README.md), and setup, verification and
+release steps live in [CONTRIBUTING.md](CONTRIBUTING.md). Update the owning guide
 alongside architectural or usage changes.
 
 ## Design languages determine form
@@ -225,10 +226,10 @@ project-local virtual store so font package realpaths remain under
 The workspace preserves pre/post scripts for web asset synchronization and
 explicitly allows only required dependency builds. CLI consumer manager
 detection and the disposable npm consumer fixture remain independent of the
-repository's package manager. Contributor commands live in README.
+repository's package manager. Contributor commands live in CONTRIBUTING.md.
 
-The [contributor setup](README.md#develop-the-registry-and-gallery) owns hooks and
-prerequisites; [verification](README.md#verification) owns commands and CI coverage.
+The [contributor setup](CONTRIBUTING.md#develop-the-registry-and-gallery) owns hooks and
+prerequisites; [verification](CONTRIBUTING.md#verification) owns commands and CI coverage.
 Do not bypass the staged secret scan or the full-history CI scan.
 
 Generated test evidence belongs in a temporary directory outside the repository,
@@ -278,7 +279,7 @@ rectangles and lines need not emit a path or circle before it can be inspected.
 
 Oxlint and TypeScript include registry code, examples and build scripts. Do not
 add a registry-wide lint ignore. Run the required checks from
-README after changes; consumer smoke is essential after modifying delivery.
+CONTRIBUTING.md after changes; consumer smoke is essential after modifying delivery.
 React/JSX accessibility and hook order/dependency rules cover the same authored
 source; Next rules are scoped to the web app. TypeScript owns prop validation,
 and Prettier owns style. Hook lint does not opt the source into React Compiler.
@@ -447,7 +448,7 @@ Next's standalone trace must retain its root link and pnpm dependency closure.
 The Docker CI check resolves it from the migration script in the final image.
 Helm uses an external database and migration Job.
 
-Contribution and release steps live in [README.md](README.md#contribution-flow).
+Contribution and release steps live in [CONTRIBUTING.md](CONTRIBUTING.md#contribution-flow).
 Ordinary branches target `dev`; releases go from `dev` to `main` only when requested.
 Never commit directly to either long-lived branch. Preserve the publishing invariants:
 

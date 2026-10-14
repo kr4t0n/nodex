@@ -19,7 +19,7 @@
       "name": "limits",
       "type": "NocturneControlLimits | null",
       "required": true,
-      "description": "Caller-supplied finite ordered { lower, center, upper } statistical control limits, or null. Invalid limits are unavailable while measured observations remain visible. These are not business targets. No process model or run rules are inferred."
+      "description": "Caller-supplied finite ordered { lower, center, upper } statistical control limits, or null. Invalid limits are unavailable while measured observations remain visible. These are separate from business targets and specification limits. No process model, run rules or overall stability verdict are inferred."
     },
     {
       "name": "events",
