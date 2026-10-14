@@ -131,7 +131,9 @@ Language and component views share a Dark mode switch only when dark mode is
 supported. Its accessible name stays fixed while `aria-checked`, the thumb
 position and its decorative sun/moon symbol reflect the mode. No mode words are
 visible. Icons stay hidden from the accessibility tree and visible in forced
-colors. Native button activation provides Space and Enter; focus and
+colors. The compact track sizes around its thumb, independent of mode words;
+the button retains a minimum 24px hit area in both dimensions.
+Native button activation provides Space and Enter; focus and
 reduced-motion styling use shell tokens.
 
 `font.faces` is asset metadata, not CSS variables. Each face declares an exact

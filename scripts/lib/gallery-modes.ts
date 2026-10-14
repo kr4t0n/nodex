@@ -33,9 +33,26 @@ async function checkModeSwitch(page: Page, checked: boolean, output: string) {
   shapes[symbol] = shape;
   iconShapes.set(page, shapes);
   const iconBox = await icon.boundingBox();
+  const target = await mode.boundingBox();
   const track = await mode.locator('[data-mode-track]').boundingBox();
   const thumb = await mode.locator('[data-mode-thumb]').boundingBox();
-  assert(iconBox && track && thumb);
+  assert(iconBox && target && track && thumb);
+  const fontSize = await mode.evaluate((button) =>
+    parseFloat(getComputedStyle(button).fontSize),
+  );
+  assert(target.width >= 24 && target.height >= 24);
+  for (const [actual, expected] of [
+    [target.width, Math.max(24, 2.75 * fontSize)],
+    [target.height, Math.max(24, 1.5 * fontSize)],
+    [track.width, 2.75 * fontSize],
+    [track.height, 1.5 * fontSize],
+    [thumb.width, 1.125 * fontSize],
+    [thumb.height, 1.125 * fontSize],
+    [iconBox.width, 0.875 * fontSize],
+    [iconBox.height, 0.875 * fontSize],
+  ] as const) {
+    assert(Math.abs(actual - expected) < 0.1, 'Compact switch geometry');
+  }
   assert(
     iconBox.x >= thumb.x &&
       iconBox.y >= thumb.y &&
@@ -83,10 +100,7 @@ async function checkModeSwitch(page: Page, checked: boolean, output: string) {
       const id = descendants.pop();
       const child = nodes.find((entry) => entry.nodeId === id);
       if (!child) continue;
-      assert(
-        child.ignored,
-        'Decorative icons and sizing text must not be exposed',
-      );
+      assert(child.ignored, 'Decorative icons must not be exposed');
       descendants.push(...(child.childIds ?? []));
     }
     const state = node.properties?.find((entry) => entry.name === 'checked')
@@ -102,7 +116,10 @@ async function checkModeSwitch(page: Page, checked: boolean, output: string) {
           visibleSymbol: symbol,
           iconShape: shape,
           thumbCenter,
-          trackWidth: track.width,
+          target,
+          track,
+          thumb,
+          icon: iconBox,
           focus,
         },
         null,
