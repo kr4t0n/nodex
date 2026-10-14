@@ -1,6 +1,6 @@
 name: helm-publish
 
-# Publishing configuration and release steps: CONTRIBUTING.md, "Deploy and publish".
+# Publishing setup: helm/nodex/README.md. Release flow: AGENTS.md.
 
 on:
   push:
