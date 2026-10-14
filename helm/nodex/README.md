@@ -23,11 +23,7 @@ docker run -p 4180:4180 --env-file .env nodex
 The dependency stage caches Chromium and its OS libraries; the build renders the
 registry and builds Next. Runtime contains Next's standalone output and migrations,
 without Chromium. Run `node scripts/migrate.mjs` inside the container to apply the
-schema. Omit `--env-file .env` when running without accounts. For a registry CDN:
-
-```bash
-docker build --build-arg NEXT_PUBLIC_REGISTRY_URL=https://cdn.example.com -t nodex .
-```
+schema. Omit `--env-file .env` when running without accounts.
 
 ## Accounts are optional
 

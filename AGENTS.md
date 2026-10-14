@@ -607,8 +607,8 @@ branches from current `dev`, publish as `<type>/<short-slug>` (e.g.
 `docs/developer-guides`) and open PRs with explicit `--base dev`. Use Conventional
 Commits with one logical change each. Never commit or push directly to `dev`/`main`.
 Run [verification](#verification), describe the change and validation in the PR,
-and include before/after screenshots for visual changes. Merge commits require
-independent review and green CI. Release only when requested, including manual
+and include before/after screenshots for visual changes. Merge with a merge commit
+after independent review and green CI. Release only when requested, including manual
 publication. Preserve the publishing invariants:
 
 - CLI version and release tag must match; app and migration images share the Helm

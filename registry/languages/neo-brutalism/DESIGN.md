@@ -8,7 +8,7 @@ This language applies to complete interfaces, including navigation, forms,
 controls, prose and data displays. The tokens are the authority for values;
 this document defines the relationships between them.
 
-The visual reference is [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
+The visual refinement draws on [ng-brutalism](https://github.com/khangtrannn/ng-brutalism/tree/76f9640d3dad8c43bb300149d78a77ce7e43954d):
 compact radii, generous control sizing, punchy accents and a small badge shadow.
 Nodex expresses these relationships through its own semantic tokens and React primitives.
 

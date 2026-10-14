@@ -34,7 +34,7 @@ Each guide explains the language. This is the catalogue order:
 7. [Nocturne](registry/languages/nocturne/DESIGN.md) — graphite surfaces, proportional type and restrained accents.
 
 Run `npx @kubitnodes/nodex list` for languages and counts, or `npx @kubitnodes/nodex search`
-for components. Browse the [chart gallery](https://nodex.kubitnodes.com/languages).
+for components. Browse the [chart gallery](https://nodex.kubitnodes.com/l/mono-editorial), starting with Mono Editorial.
 
 ## Prerequisites
 
