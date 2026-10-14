@@ -191,10 +191,12 @@ published by these tests. `smoke:gallery` also checks the mode switch's browser
 accessibility tree, keyboard activation and focus, active token-panel values and
 retained specimen state. Switch screenshots and accessibility records cover
 language and component views at desktop/mobile sizes in both modes.
-Hearth chart headers are compared with the prior select at common phone widths
-and immediately around each title's wrap point. Checks reject new wrapping or
-movement outside the control, a stuck thumb or symbol, visible mode text, and
-invisible forced-colors icons; evidence includes layout measurements and frames.
+Hearth chart headers are compared with the select's layout budget at common phone
+widths and immediately around each title's wrap point. Checks pin the compact
+switch dimensions and minimum 24px hit area, allowing fewer wraps and shorter
+headers while rejecting new wraps or downward movement. They also reject a stuck
+thumb or symbol, visible mode text, and invisible forced-colors icons; evidence
+includes layout measurements and frames.
 It mounts the actual index view in a browser fixture, keeping authentication
 outside that check, and verifies Mono Editorial chrome beside language-scoped
 tiles at desktop/mobile sizes.

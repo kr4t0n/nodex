@@ -4,7 +4,7 @@ import path from 'node:path';
 import { expect, type Browser } from '@playwright/test';
 import type { GalleryRegistry } from '../../packages/core/src/schema.ts';
 
-/** Compare icon-switch layout with the base select, including title wrap points. */
+/** Keep compact headers within the select's layout budget at title wrap points. */
 export async function checkGalleryModeLayout(
   browser: Browser,
   origin: string,
@@ -106,14 +106,39 @@ export async function checkGalleryModeLayout(
             actual.control.width <= reference.control.width + 0.1,
             context,
           );
-          assert.equal(actual.control.height, controlHeight, context);
-          for (const part of ['title', 'row', 'next', 'overflow'] as const) {
-            assert.deepEqual(
-              actual[part],
-              reference[part],
-              `${context}: ${part}`,
+          assert.equal(actual.control.width, 44, context);
+          assert.equal(actual.control.height, 24, context);
+          assert.equal(reference.control.height, controlHeight, context);
+          for (const part of ['title', 'row', 'next'] as const) {
+            for (const dimension of ['x', 'width'] as const) {
+              assert.equal(
+                actual[part][dimension],
+                reference[part][dimension],
+                `${context}: ${part}.${dimension}`,
+              );
+            }
+            assert(
+              actual[part].y <= reference[part].y,
+              `${context}: ${part} must not move down`,
             );
           }
+          for (const part of ['title', 'next'] as const) {
+            assert.equal(
+              actual[part].height,
+              reference[part].height,
+              `${context}: ${part}.height`,
+            );
+          }
+          assert(
+            actual.row.height <= reference.row.height,
+            `${context}: no taller header`,
+          );
+          const wraps = (layout: typeof actual) =>
+            layout.control.y >= layout.title.bottom;
+          assert(
+            !wraps(actual) || wraps(reference),
+            `${context}: no new header wrap`,
+          );
           assert.equal(actual.overflow, false, context);
           results.push({
             item: item.name,
