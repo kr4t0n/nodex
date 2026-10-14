@@ -176,7 +176,7 @@ pnpm run smoke:gallery
 
 `smoke:modes` checks downloaded mode CSS and copied components offline, native
 controls and modal focus, dark first paint, live reduced motion and the two prose
-roles. It compares the six existing default palettes at desktop/mobile sizes
+roles. It compares the seven existing default palettes at desktop/mobile sizes
 against `NODEX_BASE_REF` (default: the merge base with `origin/dev`). It reads the
 comparison revision's compiler, tokens and prose CSS through Git without checking
 out another tree. Each mode/gallery check retains screenshots and results in a
@@ -251,9 +251,18 @@ reason beside the code and browser coverage for the behavior.
 
 `smoke:pack` requires the registry build above and runs in CI's `consumer` job,
 which gates `verify`. It removes its temporary package and consumer after checking
-them. Pass a fresh output directory, `pnpm run smoke:pack "$(mktemp -d)"`, to
-retain the tested tarball, then remove it after review. The npm release workflow uses this same check and publishes that exact
-archive without repacking; the check itself never publishes or needs credentials.
+them. To retain the tested tarball, pass an empty output directory and keep its
+path for review:
+
+```bash
+nodex_pack_dir="$(mktemp -d)"
+pnpm run smoke:pack "$nodex_pack_dir"
+printf 'Tested tarball directory: %s\n' "$nodex_pack_dir"
+```
+
+Remove it with `rm -r "$nodex_pack_dir"` after review. The npm release workflow
+uses this same check and publishes that exact archive without repacking; the
+check itself never publishes or needs credentials.
 
 The consumer smoke installs packages in a disposable directory and therefore
 needs npm network access. Build previews bundle dependencies locally; rendered
@@ -286,7 +295,7 @@ root `.env` and restart the site. `pnpm run db:down` stops local Postgres.
 | ------------------------------------------ | --------------------------------------------------------------------- |
 | `DATABASE_URL`                             | Runtime account database connection                                   |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Runtime GitHub OAuth configuration                                    |
-| `NEXT_PUBLIC_SITE_URL`                     | Runtime public origin used by server-side OAuth                       |
+| `NEXT_PUBLIC_SITE_URL`                     | Runtime public origin for OAuth and device authorization              |
 | `NEXT_PUBLIC_REGISTRY_URL`                 | Registry CDN root, baked into the browser bundle at build time        |
 | `NODEX_REGISTRY`                           | CLI registry override; flag and project config take precedence        |
 | `NODEX_API`                                | Optional CLI account API base; defaults to the selected registry root |
@@ -295,7 +304,8 @@ root `.env` and restart the site. `pnpm run db:down` stops local Postgres.
 
 `.env` is gitignored and Next explicitly loads the root file. CLI variables
 come from the process environment; see [registry and credentials](packages/cli/README.md#registry-and-credentials)
-for precedence, private storage, transport constraints and session commands.
+for precedence, private storage and transport constraints, and [commands](packages/cli/README.md#commands)
+for `login`, `logout` and `whoami`.
 
 `pnpm run test:auth` tests auth boundaries without a database and is included in
 `pnpm test`. `pnpm run test:auth:postgres` requires `DATABASE_URL` pointing to a
@@ -348,11 +358,14 @@ the packed artifact before publishing. Build and pack with pnpm so workspace
 references become ordinary versions, then publish that exact tarball with npm:
 
 ```bash
-pnpm run build:cli
-nodex_pack_dir="$(mktemp -d)"
-pnpm --filter @kubitnodes/nodex pack --pack-destination "$nodex_pack_dir"
-npm publish --dry-run --force "$nodex_pack_dir"/*.tgz
-rm -r "$nodex_pack_dir"
+(
+  set -e
+  nodex_pack_dir="$(mktemp -d)"
+  trap 'rm -rf "$nodex_pack_dir"' EXIT
+  pnpm run build:cli
+  pnpm --filter @kubitnodes/nodex pack --pack-destination "$nodex_pack_dir"
+  npm publish --dry-run --force "$nodex_pack_dir"/*.tgz
+)
 ```
 
 The dry run does not publish; `--force` skips the local already-published-version

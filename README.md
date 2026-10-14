@@ -33,8 +33,8 @@ Each guide explains the language. This is the catalogue order:
 6. [Signal Console](registry/languages/signal-console/DESIGN.md) — dense operational layouts, monospace and status color.
 7. [Nocturne](registry/languages/nocturne/DESIGN.md) — graphite surfaces, proportional type and restrained accents.
 
-Run `npx @kubitnodes/nodex list` for the registry's current catalogue, or browse
-the [chart reference](CONTRIBUTING.md#catalogue-reference).
+Run `npx @kubitnodes/nodex list` for languages and counts, or `npx @kubitnodes/nodex search`
+for components. Browse the [chart reference](CONTRIBUTING.md#catalogue-reference).
 
 ## Prerequisites
 

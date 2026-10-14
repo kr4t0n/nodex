@@ -28,7 +28,7 @@
       "name": "data",
       "type": "readonly SoftDonutDatum[]",
       "required": true,
-      "description": "Complete { id, label, value, tone? } allocation with unique nonempty IDs and finite nonnegative values. One missing reading or an overflowing total suppresses the whole ring. Zero keeps a key entry without a sector. Identity or explicit tone a–d determines color; caller order is preserved. The key stacks below the plot in narrow containers."
+      "description": "Complete { id, label, value, tone? } allocation with unique nonempty IDs and finite nonnegative values. Repeated display labels are allowed. One missing reading or an overflowing total suppresses the whole ring. Zero keeps a key entry without a sector. Identity or explicit tone a–d determines color; caller order is preserved. The key stacks below the plot in narrow containers."
     },
     {
       "name": "unitLabel",

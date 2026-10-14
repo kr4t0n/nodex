@@ -64,7 +64,8 @@ owns all copied source; there is no separate Nodex runtime package.
 
 `nodex list --json` reports each language's supported `modes`. If it declares
 dark, select it on the language scope with `data-nx-language="<slug>"` and
-`data-nx-mode="dark"`. The default is `light` (or an omitted mode), retaining
+`data-nx-mode="dark"`. Use `<html>` as the scope for a whole application.
+The default is `light` (or an omitted mode), retaining
 the language's original palette. Import each language's CSS when combining
 scopes. A nested language boundary starts in its own default mode; ordinary
 descendants inherit. Set the attributes in initial HTML for the first paint and
@@ -106,6 +107,8 @@ theme its subtree. Circular marks and native-control geometry stay local.
 Fonts and their Open Font License notices travel in the token stylesheet.
 Current faces use Latin subsets; the declared platform stacks supply other
 glyphs. No font host or additional font package is needed in the consumer.
+Hearth's stylesheet is about 468 KB uncompressed with its normal and italic
+faces embedded; `init hearth` copies the complete stylesheet into the app.
 
 Components target the web DOM/SVG, not the React Native mobile framework.
 Recharts does not emit chart marks during server rendering. The registry's
@@ -132,6 +135,9 @@ References can be language-qualified (`signal-console/endpoint-latency`) or bare
 (`button`) when `nodex.json` or `--design` supplies a language. Search filters are
 `--design`, `--type`, `--tag`, `--tier` and `--density`. Run any command with
 `--help` for its arguments.
+
+Text output disables ANSI styling when stdout is not a TTY or either `NO_COLOR`
+or `CI` has a nonempty value.
 
 When combining expressive components from different languages, supply each
 language's token layer in the appropriate scope. Adding a component does not

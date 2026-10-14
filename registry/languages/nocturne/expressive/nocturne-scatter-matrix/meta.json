@@ -13,7 +13,7 @@
       "name": "data",
       "type": "readonly NocturneMatrixDatum[]",
       "required": true,
-      "description": "Observations with globally unique nonempty id, label, declared cohortId and values keyed by declared dimension IDs. Finite signed values retain exact numeric positions. Null, missing or non-finite coordinates are omitted and counted independently in each pair and marginal distribution. Repeated labels are allowed; unknown dimension keys and cohorts reject the input."
+      "description": "Observations with globally unique nonempty id, label, declared cohortId and values keyed by declared dimension IDs. Finite signed values retain exact numeric positions. Null, missing or non-finite coordinates are omitted and counted independently in each pair and marginal distribution. Repeated labels are allowed; unknown dimension keys and cohorts reject the input. No model fit or correlation coefficient is inferred."
     },
     {
       "name": "dimensions",
