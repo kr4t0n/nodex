@@ -248,12 +248,12 @@ counted notes rather than synthetic values. The seasonal table fades in and the
 rosette opens from its centre once, as a whole; the other charts use their
 library's draw. Dense plots scroll locally.
 
-Choose Light or Dark in the language gallery, or set `data-nx-language="hearth"`
-and `data-nx-mode="dark"` on the same consumer scope. The downloaded stylesheet
-contains both palettes and embedded normal/italic fonts. Mode changes retain
-mounted examples, form values and focus. The language index shows bars, line,
-seasons and rosette as its four curated previews, in its default light
-appearance; the language gallery contains all nine charts.
+Toggle the Dark mode switch in the language gallery, or set
+`data-nx-language="hearth"` and `data-nx-mode="dark"` on the same consumer scope.
+The downloaded stylesheet contains both palettes and embedded normal/italic
+fonts. Mode changes retain mounted examples, form values and focus. The language
+index shows bars, line, seasons and rosette as its four curated previews, in its
+default light appearance; the language gallery contains all nine charts.
 
 Newsreader retains both its weight and optical-size axes. With normal and italic
 faces embedded, Hearth's token stylesheet is about 468 KB uncompressed. The
@@ -628,9 +628,11 @@ be imported when several languages coexist. Nested language boundaries reset to
 their own default; ordinary descendants inherit their containing scope and can
 override individual variables. Native `color-scheme` follows the selected mode.
 
-The gallery shows a Light/Dark selector only for languages with an alternate
-mode. Shell, specimens and token-panel values switch together; index thumbnails
-always show the default palette. There is no independent gallery theme.
+The language and component galleries show a Dark mode switch only for languages
+with an alternate mode. Click it or focus it with Tab and press Space or Enter;
+the moving thumb shows a sun in light mode and a moon in dark mode. Shell,
+specimens and token-panel values switch together; index thumbnails always show
+the default palette. There is no independent gallery theme.
 Prose section headings use `--nx-type-prose-sectionTransform`, and heading leading
 uses `--nx-type-prose-headingLineHeight`; the existing languages preserve uppercase
 sections and inherited leading, including narrow prose.
@@ -1036,10 +1038,17 @@ mode, Hearth, landing and gallery evidence in one explicit location. CI uses
 `visual-evidence` from the `browser` job, including gallery light/dark fixture
 screenshots; link that artifact in the PR.
 No generated review evidence is left in the checkout. No alternate language is
-published by these tests. `smoke:gallery` also checks the mode control, active
-token-panel values and retained specimen state. It mounts the actual index view
-in a browser fixture, keeping authentication outside that check, and verifies
-Mono Editorial chrome beside language-scoped tiles at desktop/mobile sizes.
+published by these tests. `smoke:gallery` also checks the mode switch's browser
+accessibility tree, keyboard activation and focus, active token-panel values and
+retained specimen state. Switch screenshots and accessibility records cover
+language and component views at desktop/mobile sizes in both modes.
+Hearth chart headers are compared with the prior select at common phone widths
+and immediately around each title's wrap point. Checks reject new wrapping or
+movement outside the control, a stuck thumb or symbol, visible mode text, and
+invisible forced-colors icons; evidence includes layout measurements and frames.
+It mounts the actual index view in a browser fixture, keeping authentication
+outside that check, and verifies Mono Editorial chrome beside language-scoped
+tiles at desktop/mobile sizes.
 Tile order, scripted terminal rows, selectable terminal buttons and packed CLI
 text/JSON are checked against the published language index; registry tests also
 check the README list against the authored order.
