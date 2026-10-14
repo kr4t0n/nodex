@@ -89,6 +89,9 @@ than shrinking labels. Use spacing roles for padding and related groups.
 textures when content rerenders. Hatching must not extend a measured boundary,
 and roughness must never turn a zero reading into a positive mark.
 
+The generated `--nx-sketch-*` geometry variables are unitless; gap and weight
+are interpreted as pixels. Paint and rendered stroke widths use separate tokens.
+
 ## Content and interaction
 
 **Useful wording.** Labels describe the action or value. Keep field labels

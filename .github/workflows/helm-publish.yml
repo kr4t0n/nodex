@@ -1,6 +1,6 @@
 name: helm-publish
 
-# Publishing configuration and release steps: README.md, "Deploy and publish".
+# Publishing configuration and release steps: CONTRIBUTING.md, "Deploy and publish".
 
 on:
   push:
