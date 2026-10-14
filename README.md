@@ -34,7 +34,7 @@ Each guide explains the language. This is the catalogue order:
 7. [Nocturne](registry/languages/nocturne/DESIGN.md) — graphite surfaces, proportional type and restrained accents.
 
 Run `npx @kubitnodes/nodex list` for languages and counts, or `npx @kubitnodes/nodex search`
-for components. Browse the [chart reference](CONTRIBUTING.md#catalogue-reference).
+for components. Browse the [chart gallery](https://nodex.kubitnodes.com/l/mono-editorial), starting with Mono Editorial.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ Install your app's dependencies first; Nodex preserves its platform packages.
 
 To work on this repository, use **Node 22.22+**, the **pnpm** version pinned in
 [`package.json`](package.json), Playwright Chromium and **gitleaks 8.30.1**.
-[Contributor setup](CONTRIBUTING.md#develop-the-registry-and-gallery) covers these
+[Local setup](AGENTS.md#local-development) covers these
 tools and the commit hook. Public builds need no database or credentials.
 
 ## Quick start
@@ -130,7 +130,7 @@ lives in the root `.env`; [`.env.example`](.env.example) lists the server settin
 
 All current languages are public. GitHub sign-in gates the gallery index;
 registry downloads remain public. Paid entitlements are not implemented.
-See [account setup](CONTRIBUTING.md#accounts-and-configuration) or
+See [account setup](AGENTS.md#local-accounts) or
 [CLI registry and credentials](packages/cli/README.md#registry-and-credentials).
 
 ## Repository layout
@@ -151,11 +151,11 @@ skills/nodex/          downstream consumer skill
 
 The registry build generates `public/r/` manifests and `public/registry/` sources,
 tokens and previews. The gallery copies these assets into its own public directory.
-See the [source and build map](CONTRIBUTING.md#source-and-build-layout) for details.
+See the [source and build details](AGENTS.md#source-layout).
 
 ## Develop locally
 
-After installing the [prerequisites and commit hook](CONTRIBUTING.md#develop-the-registry-and-gallery):
+After installing the [prerequisites and commit hook](AGENTS.md#local-development):
 
 ```bash
 pnpm install --frozen-lockfile
@@ -167,14 +167,14 @@ pnpm run dev
 Open [localhost:4180](http://localhost:4180). Rebuild the registry after changing
 its source. For a production build, run `pnpm run build`, then `pnpm start`.
 Run `pnpm test` after building the registry; the
-[verification guide](CONTRIBUTING.md#verification) covers lint, formatting,
+[verification guide](AGENTS.md#verification) covers lint, formatting,
 typechecking, consumer checks and browser checks required before a PR.
 
-Deploy with [Docker](CONTRIBUTING.md#deploy-and-publish) or the
+Deploy with [Docker](helm/nodex/README.md#docker) or the
 [Helm chart](helm/nodex/README.md). Registry downloads can also be served as static
 files from a CDN; publish the matching manifests, assets and website together.
 
-Contributing? [CONTRIBUTING.md](CONTRIBUTING.md) covers setup, checks and release
-steps. [AGENTS.md](AGENTS.md) explains architecture and gotchas; the
+For work on nodex itself, [AGENTS.md](AGENTS.md) covers setup, checks, architecture,
+gotchas and release conventions; the
 [authoring skill](.agents/skills/nodex-authoring/SKILL.md) covers registry changes.
 Ordinary PRs target `dev`. Releases go from `dev` to `main` only when requested.

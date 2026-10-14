@@ -226,7 +226,7 @@ Review live previews at `http://localhost:4180` for geometry, responsive layout,
 readability, keyboard tooltips and runtime token changes. Source lint detects
 explicit violations; browser tests and design review cover what it cannot infer.
 `lint` runs Oxlint plus the two-rule ESLint fallback documented in
-[CONTRIBUTING.md](../../../CONTRIBUTING.md#verification).
+[AGENTS.md](../../../AGENTS.md#verification).
 Use `oxlint-disable-next-line` for native rules and `eslint-disable-next-line`
 only for fallback rules. Explain the native behavior beside each narrow exception;
 do not disable accessibility checks across a component or the registry.

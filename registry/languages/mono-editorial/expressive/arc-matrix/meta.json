@@ -22,7 +22,7 @@
     {
       "name": "data",
       "type": "readonly ArcMatrixDatum[]",
-      "description": "Application observations. Samples are kept in the registry example.",
+      "description": "Paying-account counts by product and city. Bubbles follow bowed product rows across city columns; each product/city pair is one observation. Zero is measured absence, while omitted pairs are missing.",
       "required": true
     },
     {

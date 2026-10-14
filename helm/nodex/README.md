@@ -11,6 +11,20 @@ helm upgrade --install nodex nodex/nodex --version 0.3.0 --set siteUrl=https://n
 Chart `0.3.0` defaults to `docker.io/kr4t0n/nodex:0.3.0` for both the app
 and migration Job. Set `image.tag` to override that release explicitly.
 
+## Docker
+
+Build from the repository root and run on port 4180:
+
+```bash
+docker build -t nodex .
+docker run -p 4180:4180 --env-file .env nodex
+```
+
+The dependency stage caches Chromium and its OS libraries; the build renders the
+registry and builds Next. Runtime contains Next's standalone output and migrations,
+without Chromium. Run `node scripts/migrate.mjs` inside the container to apply the
+schema. Omit `--env-file .env` when running without accounts.
+
 ## Accounts are optional
 
 Without a database the site serves every public page and the CLI reads it
@@ -47,3 +61,19 @@ including `siteUrl`, is runtime configuration and one image serves any hostname.
 
 See `values.yaml`, which is commented. The ones that matter most are `siteUrl`,
 `image.tag`, `database.url` or `database.existingSecret`, and `ingress`.
+
+## Publishing setup
+
+Publish only for a requested release; follow [the release flow](../../AGENTS.md#change-and-release-flow).
+The [Docker workflow](../../.github/workflows/docker.yml) publishes amd64 images on
+`main`, `v*` tags or manual runs. Configure `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN` secrets; optional variables are `DOCKERHUB_REPOSITORY` and
+`NEXT_PUBLIC_REGISTRY_URL`. Missing credentials skip publication, so check the
+published image as well as workflow status.
+
+Enable GitHub Pages for the `gh-pages` branch in repository settings. The
+[chart workflow](../../.github/workflows/helm-publish.yml) creates that branch if
+needed and serves packages from `helm/`. It runs when chart/workflow files change
+on `main`, or manually. Published chart versions are immutable: bump
+[`Chart.yaml`](Chart.yaml)'s `version` for changed content. `appVersion` pins the
+default image for both the app and migration Job; `image.tag` overrides it.
