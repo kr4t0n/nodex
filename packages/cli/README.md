@@ -12,7 +12,7 @@ npx @kubitnodes/nodex add hairline-line arc-matrix button
 ## Requirements
 
 The published CLI runs on Node 20 or newer and has no runtime package dependencies.
-The consuming app supplies React 19, React DOM 19, TypeScript and Tailwind. The
+The consuming app supplies React 19, React DOM 19, TypeScript and Tailwind CSS 4. The
 components use React 19 ref-as-prop support; this prerequisite applies to
 primitives and to `--no-install` delivery too. Nodex does
 not install or replace those platform packages.
@@ -71,6 +71,46 @@ descendants inherit. Set the attributes in initial HTML for the first paint and
 change only the mode attribute for later switches, preserving component state.
 `init` and `tokens` deliver the complete stylesheet, including embedded fonts and
 native `color-scheme`; `tokens --json` retains the authored mode overrides.
+
+## Styling components
+
+Import the token stylesheet after Tailwind in your application stylesheet:
+
+```css
+@import 'tailwindcss';
+@import './nodex-tokens.css';
+```
+
+Adjust the relative path if that stylesheet is not in `src/styles`. Tailwind must
+scan the configured component destination. The default `src/components/nodex`
+is inside the source tree; add a Tailwind `@source` entry for custom destinations
+outside automatic detection. Primitive modules import their own required CSS.
+
+Use semantic roles directly on the element being styled. Structural outlines
+use `--nx-border`, independently of quiet `--nx-grid` fills. Actions use
+`--nx-action*`; panels and fields use `--nx-surfaceFill` and `--nx-fieldFill`.
+Selection, badge and value paints have separate roles. Shadow tokens contain
+geometry and combine with scoped `--nx-ink` at each primitive. Button press
+travel follows `--nx-motion-press-x` and `--nx-motion-press-y`; reduced motion
+retains the resting position and shadow.
+
+Typography, spacing, radii and interaction timing are tokenized too. Card and
+Dialog titles use `--nx-type-cardTitle-size`, Card padding uses
+`--nx-space-cardPadding`, and controls use their own type and spacing roles.
+`--nx-motion-control-duration` and `--nx-motion-control-easing` govern control
+feedback independently of chart drawing.
+Prose section casing uses `--nx-type-prose-sectionTransform`; heading leading
+uses `--nx-type-prose-headingLineHeight`. Override variables on an ancestor to
+theme its subtree. Circular marks and native-control geometry stay local.
+
+Fonts and their Open Font License notices travel in the token stylesheet.
+Current faces use Latin subsets; the declared platform stacks supply other
+glyphs. No font host or additional font package is needed in the consumer.
+
+Components target the web DOM/SVG, not the React Native mobile framework.
+Recharts does not emit chart marks during server rendering. The registry's
+standalone snapshots do not add server-rendered marks to consumer applications.
+Source lint cannot replace browser checks of your edited components.
 
 ## Commands
 
@@ -171,6 +211,19 @@ These CLI variables are read from the process environment. Keep tokens out of
 `r/registry.json`, `r/languages.json` and the file addresses declared by those
 manifests. Public content is static. Language token and design addresses also
 come from the manifest, so guarded assets do not need CLI path conventions.
+
+To try an unpublished checkout, use Node 22.22+ and run its source CLI from your
+consumer app with absolute paths:
+
+```bash
+node /path/to/nodex/packages/cli/src/index.ts init mono-editorial --registry /path/to/nodex/public
+node /path/to/nodex/packages/cli/src/index.ts add hairline-line arc-matrix button
+```
+
+The installed CLI uses the same commands, but the hosted registry may be at a
+different revision. Use `--registry` explicitly for a local build. Older manifests
+without entry, file-target and language-asset fields are rejected rather than
+having their paths guessed.
 
 Remote registries use HTTPS; HTTP is supported for loopback development servers.
 Credentials are stored in `~/.nodex/auth.json`, mode `0600`, keyed by origin.

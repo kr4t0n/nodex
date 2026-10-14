@@ -1,6 +1,6 @@
 name: npm
 
-# Trusted publishing setup and release steps: README.md, "Deploy and publish".
+# Trusted publishing setup and release steps: CONTRIBUTING.md, "Deploy and publish".
 
 on:
   push:
