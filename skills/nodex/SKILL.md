@@ -126,6 +126,13 @@ conventions; delivered interactive entries already carry `use client`.
   correct token layer in each ancestor scope; adding a chart does not switch the
   default theme selected by `init`.
 - Keep reduced-motion handling and effect cleanup when editing components.
+- `nodex list --json` lists supported `modes`. For a language that declares dark,
+  set `data-nx-language="<slug>" data-nx-mode="dark"` on the same ancestor;
+  omit the mode or use `light` for its default palette. Import each language's
+  stylesheet when scopes coexist. A nested language boundary resets to its own
+  default. Set the attributes in initial HTML for the first paint, then switch
+  only the mode attribute so charts, focus and form state survive. Do not add
+  React keys based on mode. Native `color-scheme` follows the selected mode.
 - Preserve native labels, refs, keyboard behavior and unique IDs across instances.
   A CSS tooltip is a visual hint; use an appropriate headless behavior layer
   when richer accessible tooltip interaction is needed.

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { scopeTokenCss } from '../packages/cli/src/tokens.ts';
 import { execFile } from 'node:child_process';
 import {
   mkdtemp,
@@ -287,7 +288,10 @@ async function checkPreviews(browser: Browser): Promise<void> {
           );
           if (item.meta.language === 'soft-studio')
             await checkStudioPreviewFit(page.locator('[data-nx-chart]'));
-          if (item.meta.language === 'nocturne')
+          if (
+            item.meta.language === 'nocturne' ||
+            item.meta.language === 'hearth'
+          )
             await checkChartPreviewFit(page.locator('[data-nx-chart]'));
           if (item.name === 'force-graph')
             await checkForceFit(page.locator('[data-nx-chart="force-graph"]'));
@@ -539,7 +543,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/signal-tokens.css'),
-      signalTokens.replace(':root', '[data-signal]'),
+      scopeTokenCss(signalTokens, 'signal-console', '[data-signal]'),
     );
     const neoTokens = await run(
       process.execPath,
@@ -548,7 +552,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/neo-tokens.css'),
-      neoTokens.replace(':root', '[data-neo]'),
+      scopeTokenCss(neoTokens, 'neo-brutalism', '[data-neo]'),
     );
     const sketchTokens = await run(
       process.execPath,
@@ -557,7 +561,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/sketchbook-tokens.css'),
-      sketchTokens.replace(':root', '[data-sketchbook]'),
+      scopeTokenCss(sketchTokens, 'sketchbook', '[data-sketchbook]'),
     );
     const studioTokens = await run(
       process.execPath,
@@ -566,7 +570,16 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/studio-tokens.css'),
-      studioTokens.replace(':root', '[data-studio]'),
+      scopeTokenCss(studioTokens, 'soft-studio', '[data-studio]'),
+    );
+    const hearthTokens = await run(
+      process.execPath,
+      [cli, 'tokens', 'hearth'],
+      fixture,
+    );
+    await writeFile(
+      path.join(fixture, 'src/styles/hearth-tokens.css'),
+      scopeTokenCss(hearthTokens, 'hearth', '[data-hearth]'),
     );
     const nocturneTokens = await run(
       process.execPath,
@@ -575,7 +588,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/nocturne-tokens.css'),
-      nocturneTokens.replace(':root', '[data-nocturne]'),
+      scopeTokenCss(nocturneTokens, 'nocturne', '[data-nocturne]'),
     );
     await writeFile(
       path.join(fixture, 'src/nocturne-consumer.tsx'),
@@ -630,7 +643,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/main.css'),
-      '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@import "./nocturne-tokens.css";\n@source "../";\n',
+      '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@import "./nocturne-tokens.css";\n@import "./hearth-tokens.css";\n@source "../";\n',
     );
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(
@@ -878,9 +891,15 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await waitForCharts(page);
     const loadedFonts = await page.evaluate(async () => {
       await Promise.all(
-        ['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu', 'Manrope'].map(
-          (family) => document.fonts.load(`12px "${family}"`),
-        ),
+        [
+          'Inter',
+          'JetBrains Mono',
+          'Space Grotesk',
+          'Gaegu',
+          'Manrope',
+          'Newsreader',
+          'Source Sans 3',
+        ].map((family) => document.fonts.load(`12px "${family}"`)),
       );
       await document.fonts.ready;
       return [...document.fonts]
@@ -888,9 +907,15 @@ async function checkConsumer(browser: Browser): Promise<void> {
         .map((face) => face.family.replace(/["']/g, ''));
     });
     assert(
-      ['Inter', 'JetBrains Mono', 'Space Grotesk', 'Gaegu', 'Manrope'].every(
-        (family) => loadedFonts.includes(family),
-      ),
+      [
+        'Inter',
+        'JetBrains Mono',
+        'Space Grotesk',
+        'Gaegu',
+        'Manrope',
+        'Newsreader',
+        'Source Sans 3',
+      ].every((family) => loadedFonts.includes(family)),
       'All delivered design-language fonts must load without an external host',
     );
     await checkPrimitiveConsumer(page);

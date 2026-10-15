@@ -4,6 +4,7 @@ import path from 'node:path';
 import {
   componentMetaSchema,
   languageMetaSchema,
+  languageOrderSchema,
   registrySchema,
   type ComponentMeta,
   type LanguageMeta,
@@ -81,8 +82,19 @@ export async function loadSource(registryDir: string): Promise<LoadedSource> {
   );
 
   const languagesDir = path.join(registryDir, 'languages');
+  const order = await readJson(
+    path.join(registryDir, 'languages.json'),
+    (value) => languageOrderSchema.parse(value),
+  );
+  const directories = await listDirs(languagesDir);
+  const missing = directories.filter((slug) => !order.includes(slug));
+  const unknown = order.filter((slug) => !directories.includes(slug));
+  if (missing.length || unknown.length)
+    throw new Error(
+      `languages.json must list every language directory exactly once (unlisted: ${missing.join(', ') || 'none'}; unknown: ${unknown.join(', ') || 'none'})`,
+    );
   const languages = await Promise.all(
-    (await listDirs(languagesDir)).map(async (slug) => {
+    order.map(async (slug) => {
       const dir = path.join(languagesDir, slug);
       const meta = await readJson(path.join(dir, 'meta.json'), (value) =>
         languageMetaSchema.parse(value),

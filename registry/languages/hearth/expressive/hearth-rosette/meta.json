@@ -1,0 +1,64 @@
+{
+  "slug": "hearth-rosette",
+  "title": "The baking year",
+  "description": "Equal-angle petals for each period of a cycle, with petal area outside the hub proportional to the amount and values at the rim.",
+  "component": "polar-area",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthRosette"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 600
+  },
+  "tags": ["editorial", "warm", "cyclical", "seasonal"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthRosetteDatum[]",
+      "required": true,
+      "description": "Three to twenty-four { id, label, value } periods in cycle order, clockwise from the top, with unique nonempty IDs. Finite nonnegative values are amounts; null, negative and non-finite values are unavailable and keep a dash at the rim. Zero has no petal. Each petal's area outside the small central hub is proportional to its value."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned measurement heading and tooltip unit. Defaults to Value."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the heading."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats rim readings, tooltips and the screen-reader table. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; the rosette opens once from its centre and honors live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The rosette stays square, at most 440px wide."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect periods through Recharts."
+    }
+  ]
+}

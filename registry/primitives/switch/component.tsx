@@ -28,6 +28,7 @@ export function Switch({
         {...props}
         className={`nx-switch ${className}`.trim()}
         type="checkbox"
+        // oxlint-disable-next-line jsx-a11y/role-has-required-aria-props -- The native checkbox exposes its checked state for role="switch".
         role="switch"
         disabled={disabled}
       />

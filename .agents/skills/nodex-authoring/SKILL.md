@@ -15,8 +15,10 @@ usage instructions.
 node packages/cli/src/index.ts new-language <slug>
 ```
 
-Fill the generated `meta.json`, `tokens.json` and `DESIGN.md`. Languages are
-found by directory; there is no additional registration list.
+Fill the generated `meta.json`, `tokens.json` and `DESIGN.md`. Add the slug to
+`registry/languages.json` at its intended display position. That ordered list
+must contain every language directory exactly once; the build rejects missing,
+duplicate and unknown entries. Update the README's language list to match.
 The scaffold seeds shared roles from the checkout's canonical Mono Editorial
 tokens, with neutral paint and system fonts. Customize their values in the new
 language; keep the role names consumed by primitives.
@@ -38,6 +40,22 @@ language; keep the role names consumed by primitives.
 
 The build generates tokens under `public/registry/languages/<slug>/`; never
 create generated styles or preview documents beside source.
+
+Top-level tokens are the default `light` mode. To support a second mode, add
+`modes.dark` with a partial `color` object using existing role names and a complete
+`ramp: { steps: [...] }` with at least two colors. Unchanged colors inherit from
+the default; typography, geometry and motion cannot vary. The build validates
+both resolved palettes and emits all CSS rules, with `color-scheme` following the
+selection. Do not author a second stylesheet or `--nx-modes-*` variables.
+The scaffold starts with one mode and inherits shared prose roles from canonical
+tokens. Set `type.prose.sectionTransform` and `headingLineHeight` for the language's
+reading hierarchy; `inherit` leading preserves the regular/narrow prose ratio.
+Document each palette's relationships in DESIGN.md, while keeping mode selection
+procedures here and in the consumer guide.
+
+Exercise `data-nx-language="<slug>" data-nx-mode="dark"` on the same scope, light
+and dark siblings, nested boundaries, local overrides, native controls and live
+switching. Mode changes must preserve mounted charts, focus and form values.
 
 Declare downloadable fonts in a `font.faces` array. Each face names an exact
 `@fontsource-variable/<family>@<version>` or static `@fontsource/<family>@<version>`
@@ -178,11 +196,15 @@ pnpm run build:registry
 pnpm test
 pnpm run smoke
 pnpm run smoke:cli
+pnpm run smoke:pack
+pnpm run smoke:modes
 pnpm run check:shell
 pnpm run lint
 pnpm run format:check
 pnpm run typecheck
 pnpm --filter @nodex/web run build
+pnpm run smoke:landing
+pnpm run smoke:gallery
 ```
 
 Install the browser once with `pnpm exec playwright install --with-deps chromium`.
@@ -203,4 +225,9 @@ instances in every language, and exercises native controls and reduced motion.
 Review live previews at `http://localhost:4180` for geometry, responsive layout,
 readability, keyboard tooltips and runtime token changes. Source lint detects
 explicit violations; browser tests and design review cover what it cannot infer.
-Update README and root AGENTS for architectural or usage changes.
+`lint` runs Oxlint plus the two-rule ESLint fallback documented in
+[AGENTS.md](../../../AGENTS.md#verification).
+Use `oxlint-disable-next-line` for native rules and `eslint-disable-next-line`
+only for fallback rules. Explain the native behavior beside each narrow exception;
+do not disable accessibility checks across a component or the registry.
+Update README, root AGENTS and the owning guide for architectural or usage changes.

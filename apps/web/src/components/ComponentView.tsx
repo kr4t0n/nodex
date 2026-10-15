@@ -11,7 +11,8 @@ import {
   TopBar,
 } from '@/components/Chrome.tsx';
 import { Preview } from '@/components/Preview.tsx';
-import { useLanguageTokens } from '@/lib/hooks.ts';
+import { LanguageModeControl } from '@/components/LanguageModeControl.tsx';
+import { useLanguageTokens, useLanguageMode } from '@/lib/hooks.ts';
 import {
   addCommand,
   findItem,
@@ -21,7 +22,8 @@ import {
 
 export function ComponentView({ slug, name }: { slug: string; name: string }) {
   const [catalog, setCatalog] = useState<Catalog>();
-  const themed = useLanguageTokens(slug);
+  const { mode, selectMode } = useLanguageMode(slug);
+  const themed = useLanguageTokens(slug, mode);
 
   useEffect(() => {
     void loadCatalog().then(setCatalog);
@@ -82,9 +84,16 @@ export function ComponentView({ slug, name }: { slug: string; name: string }) {
       <PageShell>
         <div className="grid grid-cols-1 gap-10 pt-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14">
           <div>
-            <h1 className="m-0 text-[26px] leading-[1.15] font-extrabold tracking-[-0.025em] sm:text-[32px]">
-              {item.title}
-            </h1>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h1 className="m-0 text-[26px] leading-[1.15] font-extrabold tracking-[-0.025em] sm:text-[32px]">
+                {item.title}
+              </h1>
+              <LanguageModeControl
+                language={language}
+                mode={mode}
+                onChange={selectMode}
+              />
+            </div>
             {/* The type, not the description. Every surface that names a
                 component names it the same way — title, then type — so the
                 grid, the index and this page read as one thing. The

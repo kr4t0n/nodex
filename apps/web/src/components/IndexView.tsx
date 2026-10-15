@@ -9,6 +9,7 @@ import { Preview } from '@/components/Preview.tsx';
 import { useLanguageTokens, useScopedLanguageTokens } from '@/lib/hooks.ts';
 import {
   loadCatalog,
+  OWN_LANGUAGE,
   type Catalog,
   type Item,
   type Language,
@@ -28,10 +29,9 @@ export function IndexView({
   user?: { login: string; avatarUrl: string | null };
 }) {
   const [catalog, setCatalog] = useState<Catalog>();
-  const first = catalog?.languages[0]?.slug;
-  const themed = useLanguageTokens(first);
+  const themed = useLanguageTokens(OWN_LANGUAGE);
 
-  // The page chrome wears the first language; each tile then wears its own.
+  // Catalogue order changes as languages are added; the chrome keeps its identity.
   const slugs = useMemo(
     () => catalog?.languages.map((l) => l.slug) ?? [],
     [catalog],

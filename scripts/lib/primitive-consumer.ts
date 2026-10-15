@@ -58,7 +58,7 @@ import { Table, TableCaption, TableHeader, TableBody, TableRow, TableHead, Table
 import { Textarea } from './components/nodex/textarea/component';
 import { Tooltip, TooltipTrigger } from './components/nodex/tooltip/component';
 
-function PrimitiveScope({ id }: { id: string }) {
+export function PrimitiveScope({ id }: { id: string }) {
   const [submitted, setSubmitted] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   return <section id={id} data-primitive-scope className="flex min-w-0 flex-col gap-5 p-4">
@@ -103,6 +103,8 @@ export function PrimitiveConsumer() {
     <div data-primitive-language="sketchbook" data-sketchbook className="grid grid-cols-2"><PrimitiveScope id="primitives-sketchbook-original" /><PrimitiveScope id="primitives-sketchbook-edited" /></div>
     <div data-primitive-language="soft-studio" data-studio className="grid grid-cols-2"><PrimitiveScope id="primitives-soft-studio-original" /><PrimitiveScope id="primitives-soft-studio-edited" /></div>
     <div data-primitive-language="nocturne" data-nocturne className="grid grid-cols-2"><PrimitiveScope id="primitives-nocturne-original" /><PrimitiveScope id="primitives-nocturne-edited" /></div>
+    <div data-primitive-language="hearth" data-hearth className="grid grid-cols-2"><PrimitiveScope id="primitives-hearth-original" /><PrimitiveScope id="primitives-hearth-edited" /></div>
+    <div data-primitive-language="hearth-dark" data-hearth data-nx-mode="dark" className="grid grid-cols-2"><PrimitiveScope id="primitives-hearth-dark-original" /><PrimitiveScope id="primitives-hearth-dark-edited" /></div>
   </section>;
 }
 `;
@@ -771,6 +773,8 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
     'sketchbook',
     'soft-studio',
     'nocturne',
+    'hearth',
+    'hearth-dark',
   ]) {
     const original = page.locator(`#primitives-${language}-original`);
     const edited = page.locator(`#primitives-${language}-edited`);
@@ -1058,6 +1062,6 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
       );
   }
   console.log(
-    'Validated all 24 CLI-delivered primitives in all six languages: scoped paint/type/UI fonts/texture/spacing/radius/shadows/motion, Sketchbook typography and stable targets, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.',
+    'Validated all 24 CLI-delivered primitives in all seven languages, including both Hearth modes: scoped paint/type/UI fonts/texture/spacing/radius/shadows/motion, Sketchbook typography and stable targets, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.',
   );
 }

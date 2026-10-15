@@ -146,7 +146,21 @@ export const languageFilesSchema = z.object({
   design: relativePathSchema,
 });
 
+export const languageOrderSchema = z
+  .array(languageMetaSchema.shape.slug)
+  .min(1)
+  .refine(
+    (slugs) => new Set(slugs).size === slugs.length,
+    'Language order must not contain duplicate slugs',
+  );
+
 export const publishedLanguageSchema = languageMetaSchema.extend({
+  modes: z
+    .union([
+      z.tuple([z.literal('light')]),
+      z.tuple([z.literal('light'), z.literal('dark')]),
+    ])
+    .default(['light']),
   files: languageFilesSchema,
   counts: z.object({
     expressive: z.number().int().nonnegative(),

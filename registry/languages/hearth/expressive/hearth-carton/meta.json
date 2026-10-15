@@ -1,0 +1,74 @@
+{
+  "slug": "hearth-carton",
+  "title": "A dozen eggs",
+  "description": "Whole units in fixed places: each group fills consecutive places and the rest stay outlined.",
+  "component": "unit-chart",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthCarton"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 380
+  },
+  "tags": ["editorial", "warm", "part-to-whole", "count"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthCartonDatum[]",
+      "required": true,
+      "description": "One to four { id, label, count, tone? } groups with unique nonempty IDs and whole, nonnegative counts, filled in order. Counts may not add up to more than capacity. Omitted tones follow the group order."
+    },
+    {
+      "name": "capacity",
+      "type": "number",
+      "description": "Whole number of places, from 1 to 48. Defaults to 12."
+    },
+    {
+      "name": "columns",
+      "type": "number",
+      "description": "Places per row, from 1 to 12. Defaults to 6."
+    },
+    {
+      "name": "emptyLabel",
+      "type": "string",
+      "description": "Name for unfilled places, shown in the key and tooltips. Defaults to Empty."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned chart heading. Defaults to Count."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the heading."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; the places fill in one pass and honor live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The key moves below the places in narrow containers."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect places through Recharts."
+    }
+  ]
+}

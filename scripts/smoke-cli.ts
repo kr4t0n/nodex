@@ -625,6 +625,14 @@ try {
     await cli(project, ['lint', ...nocturneCharts, '--design', 'nocturne']),
     /0 errors/,
   );
+  const hearthCharts = charts
+    .filter((item) => item.meta.language === 'hearth')
+    .map((item) => config.paths.components + '/' + item.name);
+  assert.equal(hearthCharts.length, 9, 'Hearth must deliver all nine charts');
+  assert.match(
+    await cli(project, ['lint', ...hearthCharts, '--design', 'hearth']),
+    /0 errors/,
+  );
   for (const [type, name] of [
     ['paired-range', 'nocturne-promise-lanes'],
     ['interval-dot', 'nocturne-margin-lanes'],

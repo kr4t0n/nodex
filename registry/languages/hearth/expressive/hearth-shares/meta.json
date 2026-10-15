@@ -1,0 +1,70 @@
+{
+  "slug": "hearth-shares",
+  "title": "Where the basket goes",
+  "description": "Each row divides one whole into the same ordered parts, with totals above and shares below.",
+  "component": "stacked-bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["HearthShares"],
+  "files": ["component.tsx"],
+  "shared": [
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "hearth-chart-frame.tsx"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 720,
+    "height": 500
+  },
+  "tags": ["editorial", "warm", "part-to-whole"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly HearthSharesDatum[]",
+      "required": true,
+      "description": "Caller-ordered { id, label, values } rows with unique nonempty IDs. values maps each part ID to a finite, nonnegative amount. A row with any unavailable part keeps its label with a dash and no bar; a measured zero total reads 0 with no bar."
+    },
+    {
+      "name": "parts",
+      "type": "readonly HearthSharesPart[]",
+      "required": true,
+      "description": "One to four { id, label, tone? } parts in stacking order, with unique nonempty IDs. Optional tone a–d identifies a part; omitted tones follow the part order."
+    },
+    {
+      "name": "unitLabel",
+      "type": "string",
+      "description": "Caller-owned heading for the whole being divided. Defaults to Value."
+    },
+    {
+      "name": "contextLabel",
+      "type": "string",
+      "description": "Optional caller-owned context beside the heading."
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "description": "Formats row totals and tooltip amounts. Shares always read as whole percentages. Defaults to en-US numbers with at most two decimal places."
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "description": "Defaults to true; the parts draw left to right within the chart's draw duration and honor live reduced-motion changes."
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "description": "Additional container classes. The chart fills its parent; narrow containers scroll locally."
+    },
+    {
+      "name": "aria-label",
+      "type": "string",
+      "description": "Accessible chart title. Arrow keys inspect rows through Recharts."
+    }
+  ]
+}

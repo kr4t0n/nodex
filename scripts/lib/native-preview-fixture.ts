@@ -1,4 +1,4 @@
-/** Exercise the real Preview in simultaneous token scopes without an auth session. */
+/** Exercise the real Preview or IndexView without crossing the server auth boundary. */
 import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -6,7 +6,10 @@ import { build } from 'esbuild';
 
 import { serveDirectory } from './browser.ts';
 
-export async function nativePreviewFixture(site: string) {
+export async function nativePreviewFixture(
+  site: string,
+  view: 'previews' | 'index' = 'previews',
+) {
   const root = path.resolve(import.meta.dirname, '../..');
   const directory = await mkdtemp(
     path.join(tmpdir(), 'nodex-native-preview-test-'),
@@ -22,7 +25,14 @@ export async function nativePreviewFixture(site: string) {
       .join('\n');
     await build({
       stdin: {
-        contents: `
+        contents:
+          view === 'index'
+            ? `
+        import { createRoot } from 'react-dom/client';
+        import { IndexView } from './apps/web/src/components/IndexView.tsx';
+        createRoot(document.getElementById('root')).render(<IndexView />);
+        `
+            : `
         import { createRoot } from 'react-dom/client';
         import { Preview } from './apps/web/src/components/Preview.tsx';
         import { useScopedLanguageTokens } from './apps/web/src/lib/hooks.ts';
@@ -40,7 +50,9 @@ export async function nativePreviewFixture(site: string) {
             <Preview item={{ ...find('shared', 'radio'), name: 'unavailable' }} language="mono-editorial" />
           </main>;
         }
-        createRoot(document.getElementById('root')).render(<App />);
+        const mount = createRoot(document.getElementById('root'));
+        window.addEventListener('nodex:test-unmount', () => mount.unmount(), { once: true });
+        mount.render(<App />);
       `,
         loader: 'tsx',
         resolveDir: root,
@@ -54,7 +66,27 @@ export async function nativePreviewFixture(site: string) {
       minify: true,
       logLevel: 'silent',
       alias: { '@': path.join(root, 'apps/web/src') },
+      plugins: [
+        {
+          name: 'unexercised-server-action',
+          setup(build) {
+            // IndexView imports TopBar's server action. This fixture checks the
+            // real client view and tokens, not authentication or form submission.
+            build.onResolve({ filter: /app\/login\/actions\.ts$/ }, (args) => ({
+              path: args.path,
+              namespace: 'fixture-action',
+            }));
+            build.onLoad({ filter: /.*/, namespace: 'fixture-action' }, () => ({
+              contents:
+                'export async function signOut() { throw new Error("Sign-out is outside this browser fixture"); }',
+              loader: 'js',
+            }));
+          },
+        },
+      ],
       define: {
+        // Next's Link reads optional compile-time flags even outside its router.
+        'process.env': '{}',
         'process.env.NODE_ENV': '"production"',
         'process.env.NEXT_PUBLIC_REGISTRY_URL': '""',
       },
@@ -66,7 +98,7 @@ export async function nativePreviewFixture(site: string) {
       );
     await writeFile(
       path.join(directory, 'index.html'),
-      `<!doctype html><html lang="en"><head><meta charset="utf-8">${styles}<link rel="stylesheet" href="fixture.css"></head><body><div id="root"></div><script type="module" src="fixture.js"></script></body></html>`,
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${styles}<link rel="stylesheet" href="fixture.css"></head><body><div id="root"></div><script type="module" src="fixture.js"></script></body></html>`,
     );
     server = await serveDirectory(directory);
     return {

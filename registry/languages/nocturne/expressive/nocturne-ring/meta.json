@@ -13,7 +13,7 @@
       "name": "data",
       "type": "readonly NocturneRingDatum[]",
       "required": true,
-      "description": "Caller-owned { id, label, value, tone? } categories with unique, nonempty IDs. Values are finite and nonnegative. Missing values or an overflowing total suppress the full allocation. Zero entries remain in the key without sectors. Explicit tones a–d or stable identity select colors."
+      "description": "Caller-owned { id, label, value, tone? } categories with unique, nonempty IDs. Repeated display labels are allowed. Values are finite and nonnegative. Missing values or an overflowing total suppress the full allocation. Zero entries remain in the key without sectors. Explicit tones a–d or stable identity select colors."
     },
     {
       "name": "unitLabel",

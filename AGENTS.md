@@ -1,9 +1,10 @@
 # AGENTS.md
 
-Architecture and reasoning for nodex. This root document is the project's high
-level source of truth. Procedures live in the [authoring skill](.agents/skills/nodex-authoring/SKILL.md);
-setup, commands and contribution flow live in [README.md](README.md). Update them
-alongside architectural or usage changes.
+Architecture, local development and release conventions for nodex. This root
+document is the project's high level source of truth. Registry procedures live in
+the [authoring skill](.agents/skills/nodex-authoring/SKILL.md), the reader's guide in
+[README.md](README.md), and deployment setup in the [Helm README](helm/nodex/README.md).
+Update the owning guide alongside architectural or usage changes.
 
 ## Design languages determine form
 
@@ -34,6 +35,15 @@ language's visual authority.
 The manifest is the catalogue, not the folder layout. A slug names the item;
 `component` names its cross-language type. Types describe marks and encoding,
 not animation or business domain. Taxonomy lives in `packages/core/src/taxonomy.ts`.
+
+`registry/languages.json` is the sole authored language order. The source loader
+requires each language directory exactly once, rejecting missing, duplicate and
+unknown entries. The build preserves it in `r/languages.json` and expressive
+groups in both registry manifests; browser and CLI consumers retain that order.
+Keep documentation lists in step with it. Mono Editorial leads the catalogue.
+The explicit shell/primitive default remains Mono Editorial, and the landing's
+curated playback remains Signal Console → Neo-brutalism → Sketchbook; neither
+derives its identity from catalogue position.
 
 The language gallery sorts charts by `component`, then title, then slug for ties.
 Search and type filters retain that order. Featured lists keep their authored order.
@@ -100,6 +110,33 @@ color keys become `--nx-<role>`, other nested values become
 `--nx-*` names are reserved for language tokens. A local control setting uses a
 different name, such as `--slider-steps`.
 
+Top-level tokens define the default `light` mode, preserving even an inherently
+dark language's existing palette. Optional `modes.dark` contains partial `color`
+overrides of existing roles and a replacement `ramp.steps` array. It cannot
+introduce roles or override typography, geometry or motion. The pure contract in
+`packages/cli/src/tokens.ts` validates and resolves modes for build, CLI and browser
+without adding a runtime workspace dependency to the published CLI. Never flatten
+`modes` into variables. Source JSON retains the declaration; published language
+metadata lists supported modes, and the build checks rendered marks in each mode.
+
+Generated CSS supplies a full default at each `data-nx-language` boundary, then
+dark paint on that same element when `data-nx-mode="dark"`. An unmarked document
+root is the single-language fallback. Explicit nested language boundaries reset
+to their default; descendant overrides remain local. Native `color-scheme`
+follows the selection. Hearth is the first shipped language with both modes;
+its type, geometry and motion remain shared. Scope transformations use `scopeTokenCss` for every rule,
+never a single `:root` replacement. Index scopes are removed on unmount so they
+cannot reset a later gallery's dark specimens. Gallery mode changes update tokens
+without keying or remounting examples; index and landing selections stay default.
+Language and component views share a Dark mode switch only when dark mode is
+supported. Its accessible name stays fixed while `aria-checked`, the thumb
+position and its decorative sun/moon symbol reflect the mode. No mode words are
+visible. Icons stay hidden from the accessibility tree and visible in forced
+colors. The compact track sizes around its thumb, independent of mode words;
+the button retains a minimum 24px hit area in both dimensions.
+Native button activation provides Space and Enter; focus and
+reduced-motion styling use shell tokens.
+
 `font.faces` is asset metadata, not CSS variables. Each face declares an exact
 static `@fontsource` or variable `@fontsource-variable` package, WOFF2 file,
 family, weight or weight range and style. The build checks
@@ -126,6 +163,11 @@ system preference changes, and cleans up its observers. CSSOM-only mutations can
 announce `nodex:tokens-changed`. Reduced motion is conservative during server
 rendering; the initial motion duration is zero. Do not branch structural markup
 on an after-mount motion preference.
+A whole-chart entrance that is not a library mark animation, such as Hearth's
+seasonal table fading in or its rosette opening, plays once on the chart's
+container through the Web Animations API with the language's motion tokens.
+Its resting state is the default paint, so snapshots and script-free previews
+need nothing; a live reduced-motion change finishes it in place.
 
 All 24 primitives consume type, spacing, radius and interaction-motion roles in
 addition to paint, fonts and strokes. Reuse the role's meaning, not just an equal
@@ -144,7 +186,7 @@ tokens and keeps neutral starter paint/system fonts; it must not maintain a seco
 hardcoded primitive-token list. The CLI smoke verifies the scaffold against all
 primitive CSS. Consumer smoke delivers all 24 primitives and tests descendant
 overrides, unaffected sibling scopes, retained form state, native keyboard/modal/
-picker behavior and reduced motion in all six languages.
+picker behavior and reduced motion in all seven languages, including both Hearth modes.
 
 Structural outlines use `color.border`, independently of quiet `color.grid`
 fills. Primary action fill, lettering, border and hover paint have `color.action*`
@@ -158,6 +200,11 @@ and disabled actions do not respond to hover or press. Inverted secondary text
 uses `onDarkMuted` rather than the supporting text color for paper.
 The language scaffold copies canonical color role names into a neutral palette
 and carries the canonical shadow roles, without a separate primitive-role list.
+
+Prose has shared `type.prose.sectionTransform` and `headingLineHeight` roles.
+Existing languages use `uppercase` and `inherit`, retaining both regular and
+narrow prose. Choose a new language's values deliberately rather than imposing
+one heading treatment in the primitive.
 
 Surface, field, selection, badge and value paints have independent semantic
 roles. Neo-brutalism uses lilac panels, cream fields, mint selections, pink
@@ -179,11 +226,47 @@ project-local virtual store so font package realpaths remain under
 The workspace preserves pre/post scripts for web asset synchronization and
 explicitly allows only required dependency builds. CLI consumer manager
 detection and the disposable npm consumer fixture remain independent of the
-repository's package manager. Contributor commands live in README.
+repository's package manager.
 
-The [contributor setup](README.md#develop-the-registry-and-gallery) owns hooks and
-prerequisites; [verification](README.md#verification) owns commands and CI coverage.
-Do not bypass the staged secret scan or the full-history CI scan.
+### Local development
+
+Use Node **22.22+** (CI and Docker use 24), pnpm **12.10.1**, Playwright Chromium
+and the standalone [gitleaks **8.30.1** binary](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1)
+on `PATH`; confirm with `gitleaks version`. Corepack users may use `corepack pnpm`.
+No database or credentials are needed to build. Follow [README setup](README.md#develop-locally)
+for installation and localhost:4180. When switching an npm checkout, remove root
+and workspace `node_modules` before installing. Security overrides and advisory
+links live in `pnpm-workspace.yaml`; before removing one, check the resolved
+version, run `pnpm audit` and repeat [verification](#verification), including the
+Docker image check for Next/native dependency changes.
+
+`pnpm install` runs Husky's `prepare` hook. Commits scan staged changes with
+gitleaks, redact findings and fail for secrets or a missing binary. Run manually:
+`gitleaks git --pre-commit --staged --redact --no-banner`. Remove secrets before
+committing and rotate exposed credentials if shared. CI and Docker set `HUSKY=0`;
+CI runs its own pinned scan before dependency installation. Do not bypass either scan.
+
+`pnpm run build` then `pnpm start` serves production. The web build sets
+`NODE_ENV=production` even if the calling shell exports `development`.
+Rebuild the registry after source edits: the gallery reads built metadata.
+Web `dev`/build synchronize public assets and lazy example imports; component
+and example edits use Next's development reload, while catalogue metadata changes
+require rebuilding the registry and restarting dev. Keep web/registry React types aligned.
+
+### Source layout
+
+The [README map](README.md#repository-layout) locates the main packages. Language
+`meta.json` owns identity, visibility, featured charts and density; item files are
+described under [React authoring](#react-authoring-and-delivery). `scripts/lib/`
+holds delivery/token/browser build utilities, `styles/` shared website/preview
+scrollbars, and `apps/web/migrations/` SQL account migrations. Generated files
+never sit beside authored components. `.dockerignore` excludes local agent
+artifacts, compiled packages and TypeScript caches from the image build context.
+
+Generated test evidence belongs in a temporary directory outside the repository,
+never a gitignored folder inside the project (`mktemp -d`). Print its location
+when the check finishes, report results in the PR, and remove temporary output
+when the work is complete. CI uploads screenshots and comparison reports for review.
 
 `packages/core` owns schema, taxonomy and source loading. It has browser-safe
 schema/taxonomy entrypoints and a Node-only filesystem loader. The CLI imports
@@ -225,14 +308,16 @@ scaled strokes so conformance cannot pass merely because a parser skipped them.
 Preview readiness accepts all supported SVG mark shapes; a chart composed of
 rectangles and lines need not emit a path or circle before it can be inspected.
 
-ESLint and TypeScript include registry code, examples and build scripts. Do not
-reinstate the old registry-wide ESLint ignore. Run the required checks from
-README after changes; consumer smoke is essential after modifying delivery.
+Oxlint and TypeScript include registry code, examples and build scripts. Do not
+add a registry-wide lint ignore. Run [verification](#verification) after changes;
+consumer smoke is essential after modifying delivery.
 React/JSX accessibility and hook order/dependency rules cover the same authored
-source; Next rules are scoped to the web app. TypeScript owns prop validation,
+source; Next's recommended/Core Web Vitals rules are scoped to the web app. TypeScript owns prop validation,
 and Prettier owns style. Hook lint does not opt the source into React Compiler.
-Warnings fail CI. Keep exceptions local and explain the native keyboard or
-delivery contract that a static rule cannot infer.
+Warnings fail CI. ESLint runs only the React deprecation and Next internal-navigation
+checks missing from Oxlint; its fallback config must not enable overlapping rules.
+Keep exceptions local and explain the native keyboard or delivery contract that a
+static rule cannot infer. Use each linter's own suppression prefix.
 
 Prettier owns formatting and Tailwind utility order, using the web app's v4
 stylesheet entry. Preserve whitespace inside class strings: conditional template
@@ -241,6 +326,109 @@ Format authored registry source, including delivered modules;
 never format generated build artifacts or imported third-party skills. The
 repository's authoring and consumer skills remain in scope. Keep a mechanical
 formatting baseline separate from behavioral fixes so review can distinguish them.
+
+### Verification
+
+Run these from the repository root, building assets before tests/typecheck and
+the site before landing/gallery checks:
+
+```bash
+pnpm run build:registry
+pnpm test
+pnpm run smoke
+pnpm run smoke:cli
+pnpm run smoke:pack
+pnpm run smoke:modes
+pnpm run smoke:hearth
+pnpm run check:shell
+pnpm run lint
+pnpm run format:check
+pnpm run typecheck
+pnpm --filter @nodex/web run build
+pnpm run smoke:landing
+pnpm run smoke:gallery
+```
+
+The [ci workflow](.github/workflows/ci.yml) runs on PRs and pushes to `dev`/`main`,
+with read-only contents permission and pnpm caching. Its independent `static`
+(history scan, registry tests, shell check, lint, format, types), `consumer`
+(packed CLI, component and CLI smokes) and `browser` (modes, Hearth, site build,
+landing, gallery) jobs each install Chromium and build the registry. `verify`
+always runs and accepts only success from all three, rejecting failures, skips
+and cancellations. Separate `auth-postgres` and PR-only `docker-build` checks are
+not dependencies of `verify`; the latter builds/tests the image without publishing.
+CI verifies the official gitleaks 8.30.1 archive's pinned SHA-256 and scans full
+history. Run locally with `gitleaks git --redact --no-banner`; share only redacted
+findings and allowlist only reviewed false positives.
+
+- `build:registry`/`check:registry` and their read-only boundary are described above.
+  `test` covers invalid contracts/imports, computed paint, transformed strokes,
+  published addresses, unchanged content/mtimes, lint coverage and warning failures.
+- `smoke` covers static/interactive previews and all charts/primitives copied into
+  a fresh React/TypeScript/Tailwind app: seven-language scoped tokens (both Hearth
+  modes), stable sketch geometry, Soft Studio/Nocturne geometry and data semantics,
+  native forms/keyboard behavior, shadows, button presses and reduced motion.
+  Its disposable consumer installs packages over npm; offline previews need no
+  CDN scripts or data fetches. Chromium belongs only to build/test environments.
+- `smoke:cli` covers conflicts, dependency-manager commands, addresses, path/auth
+  boundaries, source lint and complete language scaffolds. `smoke:pack` builds and
+  packs with pnpm, installs in an isolated npm consumer and checks the installed
+  `nodex list` (text/JSON order), mode init, JSON delivery and lint against the
+  built registry. It cleans up and needs no credentials or publication. To keep
+  its tested archive, pass an empty directory: `nodex_pack_dir="$(mktemp -d)"`,
+  then `pnpm run smoke:pack "$nodex_pack_dir"`; print/retain the path for review
+  and remove it afterward with `rm -r "$nodex_pack_dir"`. npm releases publish
+  this exact archive without repacking.
+- `check:shell` checks curated primitive stylesheets. `lint`/`typecheck` cover
+  app, registry, CLI and build source. `.oxlintrc.json` owns explicit rules,
+  including automatic JSX and nursery `no-undef`, `no-useless-assignment` and
+  `react/require-render-return`; TS owns undefined names in TS files. The fallback
+  `eslint.config.mjs` retains the TS parser and ESLint 10 React adapter, enabling
+  only `react/no-deprecated` and `@next/next/no-location-assign-relative-destination`.
+  `lint:fix` applies both linters' fixes. Exceptions need local rationale and
+  browser coverage. Run `pnpm run format` before committing; `.prettierignore`
+  excludes generated output, pnpm lockfile, Helm templates and imported skills.
+  No Prettier compatibility lint config is needed; formatting does not change
+  the source-delivery/import-rewrite contract.
+- `smoke:modes` checks downloaded CSS/copied components offline, native controls,
+  modal focus, dark first paint, live reduced motion and prose roles. Desktop/mobile
+  default-palette comparisons use `NODEX_BASE_REF` (default: merge base with
+  `origin/dev`), reading that revision's compiler, tokens and prose CSS through Git
+  without another checkout. Tests publish no alternate language.
+- `smoke:hearth` checks all nine copied chart contracts, numeric geometry, zero
+  and unavailable readings, offline fonts, mode changes, each chart's keyboard
+  inspection, one-time entrances and live reduced motion. Desktop/mobile frames
+  cover cookbook compositions, each newer chart and all primitives in both modes,
+  plus prose against Mono Editorial. The cookbook is a test fixture, not a recipe.
+- `smoke:landing` starts the built site on a temporary port and checks one-run
+  typing/deletion, commands/history, actual themes, chart belt, scroll persistence,
+  navigation cleanup, mobile layout, reduced motion and unavailable token assets.
+  Painted hero ink must fit, center within 3px and align tagline/sign-in edges
+  within 3px, keeping both visible. Sizes cover narrow/short/wide (through 1920px,
+  beyond the 1400px bar), classic/overlay scrollbars, resize, three fonts, late
+  token/font loading and no font. It reports every failing size.
+- `smoke:gallery` checks every native example, lightweight discovery, deferred
+  imports, bounded/viewport startup, scroll priority, cleanup, timeout/fallback
+  progress, retained controls, scaled inspection, simultaneous token scopes,
+  contained errors, unique IDs and mobile layout. Mode checks cover accessibility
+  trees, keyboard/focus, token-panel values and retained state in language/component
+  views, desktop/mobile, both modes. Hearth headers use the select's layout budget
+  at common phone sizes and title wrap boundaries; compact dimensions and a 24px
+  minimum target permit fewer wraps/shorter headers but reject new wraps or downward
+  movement, stuck thumbs/symbols, visible mode text and invisible forced-colors icons.
+  Frames, accessibility records and layout measurements are retained. The actual
+  index fixture excludes authentication and checks Mono Editorial chrome beside
+  language-scoped tiles at both sizes. Index tiles, scripted/selectable terminal
+  rows and packed CLI text/JSON follow the published order; registry tests check
+  README against authored order. All 24 standalone primitives default to Mono
+  Editorial with/without JS; explicit language queries still choose another palette.
+
+Landing/gallery checks also accept an existing URL, e.g.
+`pnpm run smoke:gallery http://localhost:4180`. Mode, Hearth, landing and gallery
+checks print fresh system-temporary evidence paths; set `NODEX_EVIDENCE_DIR` to
+collect them together. CI's `browser` job uploads `visual-evidence` from its runner
+temporary `nodex-visual-evidence` directory, including light/dark gallery fixtures.
+Link the artifact in the PR; keep generated evidence outside the checkout.
 
 ## Gallery and preview runtime
 
@@ -275,6 +463,15 @@ before changing loading behavior. Preserve these boundaries:
 - The shell owns layout and behavior; scoped language tokens own visual treatment.
   There is no independent gallery dark mode. Keep `SHELL_PRIMITIVES` synchronized.
   The token panel reads canonical tokens; its labels must not define a second palette.
+  Index chrome uses `OWN_LANGUAGE`; standalone primitive previews explicitly default
+  to Mono Editorial. Catalogue order must not choose either surface's language.
+- The hero wordmark is its 16px bar layout magnified twenty to thirty times.
+  Its fold centres the painted glyphs, drawn and measured from the font, in the
+  client width; the layout box and `innerWidth` both put the x off screen, as
+  did anchoring at the gutter once the 1400px bar container centres.
+  Geometric text rendering keeps that small layout's advances fractional, so
+  whole-pixel hinting is not magnified. Short screens shrink it to keep the row
+  visible.
 - The landing demo plays once and hands off to its existing prompt without stealing
   focus or reopening on scroll/theme changes. Its parser changes page tokens;
   it never executes a shell. GSAP is app-only. Background/offscreen playback pauses;
@@ -286,7 +483,8 @@ before changing loading behavior. Preserve these boundaries:
 
 ## Static distribution and CLI ownership
 
-Public downloads bypass application handlers. The gallery copies built
+Public downloads bypass application handlers. Serve `public/r/` and
+`public/registry/` at the same registry root. The gallery copies built
 `public/r/` and `public/registry/` into `apps/web/public/` before dev/build;
 that directory is generated and must never be edited. CDN hosting exposes the
 same paths with no server runtime. The sync also generates the website's lazy
@@ -340,6 +538,22 @@ type imports and no runtime workspace dependency; repo tooling needs Node 22.22+
 
 ## Accounts and deployment constraints
 
+### Local accounts
+
+Accounts are optional: copy `.env.example` to `.env`, run `pnpm run db:up`, then
+`pnpm run db:migrate`. Register a GitHub OAuth app with homepage
+`http://localhost:4180` and callback `http://localhost:4180/api/auth/github/callback`,
+fill the root `.env` credentials and restart the site. `pnpm run db:down` stops
+local Postgres. [README configuration](README.md#configuration) lists variables;
+CLI variables come from the process environment, with precedence/storage in the
+[CLI guide](packages/cli/README.md#registry-and-credentials) and `login`/`logout`/`whoami`
+in its [commands](packages/cli/README.md#commands).
+
+`pnpm run test:auth` needs no database and is part of `pnpm test`.
+`pnpm run test:auth:postgres` requires a migrated, disposable `DATABASE_URL`, never
+production. CI uses PostgreSQL 17 and checks six synchronized polls of one approval
+produce exactly one usable CLI session.
+
 GitHub OAuth and browser/CLI sessions are implemented, while all current
 languages are public. Accounts sequence the gallery; no paid entitlements or
 content restriction backend exists yet. A future restriction must protect the
@@ -371,7 +585,7 @@ Preserve these authentication decisions:
   queries and fragments, and disables redirects before sending a device code or
   bearer token. Validation belongs at the transport boundary as well as selection.
 
-The monorepo has one root `.env`, explicitly loaded by Next. It is optional for
+The monorepo has one gitignored root `.env`, explicitly loaded by Next. It is optional for
 public builds. Database, OAuth credentials and `NEXT_PUBLIC_SITE_URL` are read by
 server code at runtime. `NEXT_PUBLIC_REGISTRY_URL` is read in client code and is
 therefore baked into the browser bundle; Docker exposes it as a build argument.
@@ -383,11 +597,19 @@ retain their monorepo path in the image because the migration runner resolves
 relative to its own location. Root declares `pg` for that migration script;
 Next's standalone trace must retain its root link and pnpm dependency closure.
 The Docker CI check resolves it from the migration script in the final image.
-Helm uses an external database and migration Job.
+Helm uses an external database and migration Job. The [deployment guide](helm/nodex/README.md)
+owns Docker commands, CDN build configuration and chart installation/publication.
 
-Contribution and release steps live in [README.md](README.md#contribution-flow).
-Ordinary branches target `dev`; releases go from `dev` to `main` only when requested.
-Never commit directly to either long-lived branch. Preserve the publishing invariants:
+## Change and release flow
+
+`dev` integrates changes; `main` holds releases and is GitHub's default. Start
+branches from current `dev`, publish as `<type>/<short-slug>` (e.g.
+`docs/developer-guides`) and open PRs with explicit `--base dev`. Use Conventional
+Commits with one logical change each. Never commit or push directly to `dev`/`main`.
+Run [verification](#verification), describe the change and validation in the PR,
+and include before/after screenshots for visual changes. Merge with a merge commit
+after independent review and green CI. Release only when requested, including manual
+publication. Preserve the publishing invariants:
 
 - CLI version and release tag must match; app and migration images share the Helm
   `appVersion`. Published chart versions are immutable.
@@ -398,6 +620,35 @@ Never commit directly to either long-lived branch. Preserve the publishing invar
   checks the installed bin in an isolated npm consumer against the built registry,
   and optionally retains the tested archive for publication without repacking.
 - Check artifacts as well as workflow status; absent Docker credentials skip publication.
+
+`pnpm run build:cli` compiles `@kubitnodes/nodex` for Node 20+ without monorepo
+runtime dependencies. [npm-publish.yml](.github/workflows/npm-publish.yml) publishes
+on `v*` tags or manual runs through [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
+Authorize owner `kr4t0n`, repository `nodex`, workflow `npm-publish.yml` in npm's
+package settings. No npm token secret is needed. The GitHub-hosted runner uses
+Node 24, npm >=11.5.1, `id-token: write` and no package-manager cache; provenance
+is automatic, and OIDC configuration errors fail publication. Rehearse packaging:
+
+```bash
+(
+  set -e
+  nodex_pack_dir="$(mktemp -d)"
+  trap 'rm -rf "$nodex_pack_dir"' EXIT
+  pnpm run build:cli
+  pnpm --filter @kubitnodes/nodex pack --pack-destination "$nodex_pack_dir"
+  npm publish --dry-run --force "$nodex_pack_dir"/*.tgz
+)
+```
+
+This does not publish; `--force` skips the already-published-version check for the
+rehearsal. Releases use neither flag and publish the archive verified by `smoke:pack`.
+For a requested coordinated release, bump `packages/cli/package.json` and Helm
+`version`/`appVersion` through a reviewed PR to `dev`, then open `dev` → `main`
+and merge with a merge commit after review and green CI. Create/push a matching
+annotated `v<version>` tag at that released `main` commit. The merge triggers Docker
+and, when the chart/workflow changed, Helm publication; the tag triggers npm and
+Docker. Image versions omit `v`; npm rejects a tag/package mismatch. Confirm the
+published artifacts after workflows finish, including jobs that skipped publication.
 
 ## Cross-cutting rendering gotchas
 

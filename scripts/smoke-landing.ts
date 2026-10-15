@@ -1,19 +1,61 @@
 /** Browser regression for the landing's terminal, real themes and navigation. */
 import assert from 'node:assert/strict';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
-import { chromium, expect, type Page } from '@playwright/test';
+import { chromium, expect, type Browser, type Page } from '@playwright/test';
 
 import { startSite } from './lib/site.ts';
+import type { PublishedLanguage } from '../packages/core/src/schema.ts';
 
 let site: Awaited<ReturnType<typeof startSite>> | undefined;
+const evidence = process.env.NODEX_EVIDENCE_DIR
+  ? path.resolve(process.env.NODEX_EVIDENCE_DIR)
+  : await mkdtemp(path.join(tmpdir(), 'nodex-landing-evidence-'));
 interface HandoffMeasurement {
   height: number;
+  commandHeight: number;
   x: number;
   y: number;
   reused: boolean;
   prompts: number;
   visible: boolean;
+}
+
+async function observeTerminalHandoff(page: Page) {
+  // Capture in the browser when the final theme applies. A network assertion
+  // can otherwise outlast the brief final frame and read a detached demo.
+  await page
+    .locator('[data-cli-command]')
+    .last()
+    .evaluate((element) => {
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.nxLanguage !== 'sketchbook')
+          return;
+        const body = document.querySelector('[data-terminal-body]')!;
+        const bounds = element.querySelector('div')!.getBoundingClientRect();
+        const prompts = document.querySelectorAll('[data-cli-command]');
+        (
+          window as typeof window & { terminalHandoff?: HandoffMeasurement }
+        ).terminalHandoff = {
+          height: body.getBoundingClientRect().height,
+          commandHeight: bounds.height,
+          x: bounds.x,
+          y: bounds.y,
+          reused:
+            element.isConnected && prompts[prompts.length - 1] === element,
+          prompts: prompts.length,
+          visible: bounds.top >= 0 && bounds.bottom <= innerHeight,
+        };
+        observer.disconnect();
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-nx-language'],
+      });
+    });
 }
 
 async function openTerminal(page: Page) {
@@ -108,6 +150,256 @@ async function returnToHero(page: Page, slug: string) {
   );
 }
 
+/**
+ * The hero wordmark as painted: the screenshot's ink columns, not the layout
+ * box. The box hides the leading side bearing and the x's overhang, which is
+ * what pushed the x off narrow screens. Columns under a classic scrollbar are
+ * not visible, so they count as outside the viewport.
+ */
+async function heroWordmark(page: Page) {
+  const shot = (await page.screenshot()).toString('base64');
+  return page.evaluate(async (shot) => {
+    const mark = document.querySelector('h1')!;
+    const bounds = mark.getBoundingClientRect();
+    const image = new Image();
+    image.src = `data:image/png;base64,${shot}`;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(image, 0, 0);
+    const visible = document.documentElement.clientWidth;
+    const top = Math.max(0, Math.floor(bounds.top));
+    const height = Math.min(image.height, Math.ceil(bounds.bottom)) - top;
+    const pixels = context.getImageData(0, top, visible, height).data;
+    const ground = pixels.slice(0, 3);
+    let left = Infinity;
+    let right = -Infinity;
+    for (let row = 0; row < height; row++)
+      for (let column = 0; column < visible; column++) {
+        const index = (row * visible + column) * 4;
+        const difference =
+          Math.abs(pixels[index]! - ground[0]!) +
+          Math.abs(pixels[index + 1]! - ground[1]!) +
+          Math.abs(pixels[index + 2]! - ground[2]!);
+        if (difference <= 120) continue;
+        left = Math.min(left, column);
+        right = Math.max(right, column + 1);
+      }
+    const action = document.querySelector('header a')!.getBoundingClientRect();
+    const tagline = document.querySelector('header p')!;
+    const row = tagline.parentElement!.getBoundingClientRect();
+    return {
+      visible,
+      left,
+      right: visible - right,
+      width: right - left,
+      fontSize:
+        (bounds.width / Number.parseFloat(getComputedStyle(mark).width)) *
+        Number.parseFloat(getComputedStyle(mark).fontSize),
+      bottom: Math.max(action.bottom, row.bottom),
+      actionRight: action.right,
+      taglineLeft: tagline.getBoundingClientRect().left,
+      height: innerHeight,
+    };
+  }, shot);
+}
+
+/**
+ * Screenshot ink is read to the pixel on each side, so the margins may differ
+ * by 3px. The tagline and sign-in hang from the wordmark's painted edges.
+ */
+const HERO_TOLERANCE = 3;
+
+/** Record every hero failure, so one run shows each size that breaks. */
+async function assertHeroWordmark(
+  page: Page,
+  label: string,
+  failures: string[],
+) {
+  await page.evaluate(() => document.fonts.ready);
+  await delay(700);
+  const mark = await heroWordmark(page);
+  console.log(`Hero wordmark ${label}: ${JSON.stringify(mark)}`);
+  await page.screenshot({
+    path: path.join(evidence, `landing-hero-${label}.png`),
+  });
+  const fail = (message: string) => failures.push(`${label}: ${message}`);
+  if (!(mark.left > 0 && mark.right > 0))
+    fail('the wordmark must paint inside the visible width');
+  if (Math.abs(mark.left - mark.right) > HERO_TOLERANCE)
+    fail(
+      `the wordmark must be centred within ${HERO_TOLERANCE}px ` +
+        `(left ${mark.left}px, right ${mark.right}px)`,
+    );
+  if (!(mark.actionRight <= mark.visible && mark.bottom <= mark.height))
+    fail('the sign-in and tagline must stay on screen');
+  if (
+    Math.abs(mark.taglineLeft - mark.left) > HERO_TOLERANCE ||
+    Math.abs(mark.visible - mark.right - mark.actionRight) > HERO_TOLERANCE
+  )
+    fail(
+      `the tagline and sign-in must align with the wordmark's ink ` +
+        `(tagline ${mark.taglineLeft}px, sign-in ends ${mark.actionRight}px)`,
+    );
+}
+
+const HERO_SIZES = [
+  [320, 568],
+  [390, 844],
+  [568, 320],
+  [844, 390],
+  [768, 1024],
+  [1000, 700],
+  [1024, 400],
+  [1366, 768],
+  // Wider than about 1480px the bar's 1400px container centres, so the
+  // wordmark's resting origin is no longer the gutter.
+  [1536, 864],
+  [1920, 1080],
+] as const;
+
+async function checkHeroWordmark(origin: string, errors: string[]) {
+  const failures: string[] = [];
+  // A phone's overlay scrollbars, then a desktop's classic ones, which take
+  // width from the header but not from innerWidth.
+  for (const scrollbars of [false, true]) {
+    const browser: Browser = await chromium.launch({
+      headless: true,
+      ...(scrollbars ? { ignoreDefaultArgs: ['--hide-scrollbars'] } : {}),
+    });
+    try {
+      for (const [width, height] of HERO_SIZES) {
+        const page = await browser.newPage({
+          baseURL: origin,
+          viewport: { width, height },
+          reducedMotion: 'no-preference',
+        });
+        page.on('pageerror', (error) => errors.push(error.message));
+        await page.goto('/');
+        await assertHeroWordmark(
+          page,
+          `${width}x${height}${scrollbars ? '-scrollbar' : ''}`,
+          failures,
+        );
+        await page.close();
+      }
+      if (!scrollbars) continue;
+
+      // A cold load whose token sheet arrives late, one whose font file
+      // arrives after the page has measured the wordmark in the fallback, and
+      // one where the font never arrives. The wordmark must be measured again
+      // when the font swaps in, and the fallback font must centre as well.
+      for (const font of ['slow', 'late', 'blocked'] as const) {
+        const page = await browser.newPage({
+          baseURL: origin,
+          viewport: { width: 1000, height: 700 },
+        });
+        page.on('pageerror', (error) => errors.push(error.message));
+        const files: Buffer[] = [];
+        await page.route(
+          '**/languages/mono-editorial/tokens.css',
+          async (route) => {
+            if (font === 'blocked') return route.abort();
+            if (font === 'slow') {
+              await delay(1500);
+              return route.continue();
+            }
+            // Serve the embedded faces as separate files, so the sheet
+            // applies at once and only the font is late.
+            const response = await route.fetch();
+            const css = (await response.text()).replace(
+              /url\("data:font\/woff2;base64,([^"]+)"\)/g,
+              (_, data: string) => {
+                files.push(Buffer.from(data, 'base64'));
+                return `url("/__late-font-${files.length - 1}.woff2")`;
+              },
+            );
+            await route.fulfill({ response, body: css });
+          },
+        );
+        await page.route('**/__late-font-*.woff2', async (route) => {
+          await delay(2500);
+          const index = Number(
+            /late-font-(\d+)/.exec(route.request().url())![1],
+          );
+          await route.fulfill({
+            contentType: 'font/woff2',
+            body: files[index]!,
+          });
+        });
+        await page.goto('/');
+        if (font !== 'blocked')
+          await page.waitForFunction(
+            () =>
+              [...document.fonts].some(
+                (face) =>
+                  face.family.includes('Inter') && face.status === 'loaded',
+              ),
+            null,
+            { timeout: 10_000 },
+          );
+        await assertHeroWordmark(
+          page,
+          `1000x700-scrollbar-font-${font}`,
+          failures,
+        );
+        await page.close();
+      }
+
+      // Resizing after load, from a wide window down to a narrow one.
+      const resized = await browser.newPage({
+        baseURL: origin,
+        viewport: { width: 1366, height: 768 },
+      });
+      resized.on('pageerror', (error) => errors.push(error.message));
+      await resized.goto('/');
+      await resized.evaluate(() => document.fonts.ready);
+      await resized.setViewportSize({ width: 1000, height: 700 });
+      await assertHeroWordmark(resized, '1366-to-1000x700-scrollbar', failures);
+      await resized.close();
+
+      // Each language's font has its own side bearings and overhangs; the
+      // demo's command applies them to the wordmark too. Reduced motion
+      // reaches the editor directly and exercises the jump cut back to the hero.
+      const themed = await browser.newPage({
+        baseURL: origin,
+        viewport: { width: 1000, height: 700 },
+        reducedMotion: 'reduce',
+      });
+      themed.on('pageerror', (error) => errors.push(error.message));
+      await themed.goto('/');
+      for (const slug of ['hearth', 'sketchbook', 'neo-brutalism']) {
+        await openTerminal(themed);
+        const input = themed.getByRole('textbox', {
+          name: 'Terminal command',
+        });
+        await expect(input).toBeEnabled();
+        await input.fill(`nodex init ${slug}`);
+        await input.press('Enter');
+        await expect(themed.locator('html')).toHaveAttribute(
+          'data-nx-language',
+          slug,
+        );
+        await themed.evaluate(() => window.scrollTo(0, 0));
+        await assertHeroWordmark(
+          themed,
+          `1000x700-scrollbar-${slug}`,
+          failures,
+        );
+      }
+      await themed.close();
+    } finally {
+      await browser.close();
+    }
+  }
+  assert.deepEqual(failures, [], 'The hero wordmark must fit every size');
+  console.log(
+    'Landing hero: wordmark centred and on screen at narrow, short and wide sizes',
+  );
+}
+
 async function assertScrollback(page: Page) {
   const history = page.getByRole('region', { name: 'Terminal history' });
   await expect(history).toHaveCSS('scrollbar-width', 'thin');
@@ -141,8 +433,94 @@ async function assertScrollback(page: Page) {
   );
 }
 
+/** Frames of the demo's beats, handoff and focus for review, at both widths. */
+async function captureEvidence(
+  browser: Browser,
+  origin: string,
+  errors: string[],
+) {
+  for (const [name, viewport] of [
+    ['1366', { width: 1366, height: 768 }],
+    ['390', { width: 390, height: 844 }],
+  ] as const) {
+    const context = await browser.newContext({
+      baseURL: origin,
+      viewport,
+      reducedMotion: 'no-preference',
+    });
+    const page = await context.newPage();
+    page.on('pageerror', (error) => errors.push(error.message));
+    const shot = (frame: string) =>
+      page.screenshot({
+        path: path.join(evidence, `landing-${name}-${frame}.png`),
+      });
+    await page.goto('/');
+    await openTerminal(page);
+    for (const [index, frame] of [
+      [0, 'first-output'],
+      [1, 'second-output'],
+    ] as const) {
+      await expect(page.locator('[data-cli-output]').nth(index)).toHaveCSS(
+        'opacity',
+        '1',
+        { timeout: 15_000 },
+      );
+      await shot(frame);
+    }
+    await assertTheme(page, 'signal-console');
+    await shot('signal-console');
+    await expect(page.locator('[data-terminal-state]')).toHaveAttribute(
+      'data-terminal-state',
+      'interactive',
+      { timeout: 30_000 },
+    );
+    await shot('handoff');
+    const command = page.getByRole('textbox', { name: 'Terminal command' });
+    await page.getByRole('region', { name: 'Terminal history' }).focus();
+    for (let step = 0; step < 20; step += 1) {
+      if (
+        await command.evaluate((element) => element === document.activeElement)
+      )
+        break;
+      await page.keyboard.press('Tab');
+    }
+    await expect(command).toBeFocused();
+    await shot('keyboard-focus');
+    await context.close();
+
+    const reduced = await browser.newContext({
+      baseURL: origin,
+      viewport,
+      reducedMotion: 'reduce',
+    });
+    const still = await reduced.newPage();
+    still.on('pageerror', (error) => errors.push(error.message));
+    await still.goto('/');
+    await openTerminal(still);
+    await expect(
+      still.getByRole('textbox', { name: 'Terminal command' }),
+    ).toBeEnabled({ timeout: 15_000 });
+    await assertTheme(still, 'sketchbook');
+    await still.screenshot({
+      path: path.join(evidence, `landing-${name}-reduced.png`),
+    });
+    await still
+      .getByRole('region', { name: 'Terminal history' })
+      .evaluate((element) => {
+        element.scrollTop = 0;
+      });
+    await still.screenshot({
+      path: path.join(evidence, `landing-${name}-reduced-history-top.png`),
+    });
+    await reduced.close();
+  }
+}
+
 async function main() {
   const origin = process.argv[2] ?? (site = await startSite()).origin;
+  const languages = (await fetch(`${origin}/r/languages.json`).then(
+    (response) => response.json(),
+  )) as PublishedLanguage[];
   const browser = await chromium.launch({ headless: true });
   const errors: string[] = [];
   try {
@@ -172,7 +550,16 @@ async function main() {
     await delay(1600);
     await expect(page.locator('[data-nx-example]')).toHaveCount(0);
 
-    await expect(page.locator('[data-cli-command]')).toHaveCount(3);
+    await expect(page.locator('[data-cli-command]')).toHaveCount(4);
+    assert.deepEqual(
+      await page
+        .locator('[data-cli-output] [data-terminal-language]')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute('data-terminal-language')),
+        ),
+      languages.map((language) => language.slug),
+      'The scripted terminal list must preserve published language order',
+    );
     const samples: string[] = [];
     await page.exposeFunction('recordTerminalCommand', (text: string) => {
       samples.push(text);
@@ -196,7 +583,7 @@ async function main() {
       });
     await openTerminal(page);
     await expect(page.locator('[data-cli-command]').first()).toHaveText(
-      '$nodex list',
+      '$npm install -g @kubitnodes/nodex',
     );
     await returnToHero(page, 'mono-editorial');
     await expect(page.locator('[data-terminal-state]')).toHaveAttribute(
@@ -241,36 +628,7 @@ async function main() {
     );
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await assertTheme(page, 'neo-brutalism');
-    // Capture in the browser when the final theme applies. A network assertion
-    // can otherwise outlast the brief final frame and read a detached demo.
-    await page
-      .locator('[data-cli-command]')
-      .last()
-      .evaluate((element) => {
-        const observer = new MutationObserver(() => {
-          if (document.documentElement.dataset.nxLanguage !== 'sketchbook')
-            return;
-          const body = document.querySelector('[data-terminal-body]')!;
-          const bounds = element.querySelector('div')!.getBoundingClientRect();
-          const prompts = document.querySelectorAll('[data-cli-command]');
-          (
-            window as typeof window & { terminalHandoff?: HandoffMeasurement }
-          ).terminalHandoff = {
-            height: body.getBoundingClientRect().height,
-            x: bounds.x,
-            y: bounds.y,
-            reused:
-              element.isConnected && prompts[prompts.length - 1] === element,
-            prompts: prompts.length,
-            visible: bounds.top >= 0 && bounds.bottom <= innerHeight,
-          };
-          observer.disconnect();
-        });
-        observer.observe(document.documentElement, {
-          attributes: true,
-          attributeFilter: ['data-nx-language'],
-        });
-      });
+    await observeTerminalHandoff(page);
     await expect(page.locator('[data-nx-preview]').first()).toHaveAttribute(
       'data-nx-preview',
       /^neo-brutalism\//,
@@ -294,7 +652,7 @@ async function main() {
       measurement.reused,
       'Sketchbook must reuse the Neo-brutalism prompt',
     );
-    assert.equal(measurement.prompts, 3, 'The demo must retain three prompts');
+    assert.equal(measurement.prompts, 4, 'The demo must retain four prompts');
     assert(measurement.visible, 'The final demo prompt must be visible');
     const command = page.getByRole('textbox', {
       name: 'Terminal command',
@@ -342,9 +700,10 @@ async function main() {
       demoHeight,
       'The terminal body must keep its height at handoff',
     );
+    // The install line scrolls into history; every nodex prompt stays in view.
     assert(
       await page.locator('[data-terminal-entry]').evaluateAll((rows) =>
-        rows.every((row) => {
+        rows.slice(1).every((row) => {
           const viewport = row
             .closest('[role="region"]')!
             .getBoundingClientRect();
@@ -352,7 +711,7 @@ async function main() {
           return bounds.top >= viewport.top && bounds.bottom <= viewport.bottom;
         }),
       ),
-      'All three prompts must fit inside the desktop terminal',
+      'All three nodex prompts must fit inside the desktop terminal',
     );
     await assertFits(page);
 
@@ -379,8 +738,8 @@ async function main() {
       .allTextContents();
     assert.equal(
       completedText.length,
-      3,
-      'The editor must retain exactly three visible command rows',
+      4,
+      'The editor must retain exactly four visible command rows',
     );
     await expect(page.locator('[data-terminal-entry]').last()).toContainText(
       'nodex init sketchbook --force',
@@ -452,7 +811,7 @@ async function main() {
     await expect(page.locator('[data-terminal-output]')).toHaveText(
       'Switched to Mono Editorial',
     );
-    await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(page.locator('[data-terminal-entry]')).toHaveCount(4);
     await command.fill('nodex init ');
     await command.press('ArrowUp');
     await expect(command).toHaveValue('nodex init mono-editorial');
@@ -586,14 +945,14 @@ async function main() {
       )
       .toBe(true);
     await expect(page.locator('[data-cli-command]')).toHaveCount(0);
-    await expect(page.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(page.locator('[data-terminal-entry]')).toHaveCount(4);
     assert.deepEqual(
       (await page.locator('[data-terminal-entry]').allTextContents()).slice(
         0,
-        2,
+        3,
       ),
-      completedText.slice(0, 2),
-      'Edits must preserve the first two command rows',
+      completedText.slice(0, 3),
+      'Edits must preserve the first three command rows',
     );
     assert.equal(
       (await page.locator('[data-terminal-state] > div').last().boundingBox())!
@@ -635,10 +994,18 @@ async function main() {
     await expect(input).toHaveValue('nodex init sketchbook --force');
     await small.getByText('~/your-app', { exact: true }).tap();
     await expect(input).toBeFocused();
+    await expect(small.locator('[data-terminal-entry]').first()).toHaveText(
+      '$npm install -g @kubitnodes/nodex',
+    );
+    // Recall reaches the install command first typed by the demo, then returns.
+    for (let step = 0; step < 5; step += 1) await input.press('ArrowUp');
+    await expect(input).toHaveValue('npm install -g @kubitnodes/nodex');
+    for (let step = 0; step < 5; step += 1) await input.press('ArrowDown');
+    await expect(input).toHaveValue('nodex init sketchbook --force');
     await small.keyboard.press('Backspace');
     await expect(input).toHaveValue('nodex init sketchbook --forc');
     await small.keyboard.press('e');
-    await expect(small.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(small.locator('[data-terminal-entry]')).toHaveCount(4);
     await expect(small.locator('[data-terminal-caret]')).toHaveCSS(
       'animation-name',
       'none',
@@ -676,20 +1043,25 @@ async function main() {
     await assertTheme(small, 'mono-editorial');
     await input.fill('nodex list');
     await input.press('Enter');
+    await expect(
+      small.locator('[data-terminal-output] [data-terminal-language]'),
+    ).toHaveCount(languages.length);
+    assert.deepEqual(
+      await small
+        .locator('[data-terminal-output] [data-terminal-language]')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute('data-terminal-language')),
+        ),
+      languages.map((language) => language.slug),
+      'The terminal picker must preserve published language order',
+    );
     await small
       .locator('[data-terminal-output]')
       .getByRole('button', { name: 'Apply Neo-brutalism' })
       .click();
     await assertTheme(small, 'neo-brutalism');
     await assertFits(small);
-    for (const [language, name] of [
-      ['mono-editorial', 'Mono Editorial'],
-      ['signal-console', 'Signal Console'],
-      ['neo-brutalism', 'Neo-brutalism'],
-      ['sketchbook', 'Sketchbook'],
-      ['soft-studio', 'Soft Studio'],
-      ['nocturne', 'Nocturne'],
-    ]) {
+    for (const { slug: language, name } of languages) {
       await small.goto(`/l/${language}/button`);
       await expect(
         small.getByRole('heading', { name: 'Button', exact: true }),
@@ -714,27 +1086,32 @@ async function main() {
     }
     await small.emulateMedia({ reducedMotion: 'no-preference' });
     await small.goto('/');
+    await observeTerminalHandoff(small);
     await openTerminal(small);
     await expect(small.locator('[data-cli-command]').last()).toHaveText(
       '$nodex init sketchbook --force',
       { timeout: 30_000 },
     );
     await assertTheme(small, 'sketchbook');
-    const narrowDemo = (await small
-      .locator('[data-cli-command]')
-      .last()
-      .locator('div')
-      .boundingBox())!;
     await expect(input).toHaveValue('nodex init sketchbook --force');
     await expect(input).not.toBeFocused();
+    // Read the captured frame after handoff, when the demo nodes are gone.
+    await expect(small.locator('[data-cli-command]')).toHaveCount(0);
+    const narrowDemo = await small.evaluate(
+      () =>
+        (window as typeof window & { terminalHandoff?: HandoffMeasurement })
+          .terminalHandoff,
+    );
+    assert(narrowDemo, 'The narrow demo frame must be observed before handoff');
+    assert(narrowDemo.reused, 'The narrow demo must retain its final prompt');
     const narrowEditor = (await input.boundingBox())!;
     assert(
       Math.abs(narrowEditor.x - narrowDemo.x) < 1 &&
         Math.abs(narrowEditor.y - narrowDemo.y) < 1 &&
-        Math.abs(narrowEditor.height - narrowDemo.height) < 1,
+        Math.abs(narrowEditor.height - narrowDemo.commandHeight) < 1,
       'The narrow editor must preserve the demo command position and wrapping',
     );
-    await expect(small.locator('[data-terminal-entry]')).toHaveCount(3);
+    await expect(small.locator('[data-terminal-entry]')).toHaveCount(4);
     await mobile.close();
     console.log(
       'Landing accessibility: narrow viewport, keyboard switching and live reduced-motion changes passed',
@@ -755,10 +1132,13 @@ async function main() {
       'mono-editorial',
     );
     await failure.close();
-    assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
     console.log(
       'Landing failure state: unavailable token stylesheet leaves the default page usable',
     );
+    await checkHeroWordmark(origin, errors);
+    await captureEvidence(browser, origin, errors);
+    console.log(`Landing evidence: ${evidence}`);
+    assert.deepEqual(errors, [], 'Landing pages must not raise browser errors');
   } finally {
     await browser.close();
   }

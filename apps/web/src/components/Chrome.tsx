@@ -73,7 +73,7 @@ export function TopBar<T extends string>({
             >
               {user.avatarUrl ? (
                 // This 20px remote avatar bypasses the optimizer's host allowlist.
-                // eslint-disable-next-line @next/next/no-img-element
+                // oxlint-disable-next-line nextjs/no-img-element
                 <img
                   src={user.avatarUrl}
                   alt=""

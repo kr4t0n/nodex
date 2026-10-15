@@ -25,7 +25,7 @@
       "name": "data",
       "type": "readonly DotHeatDatum[]",
       "required": true,
-      "description": "Day, hour and ticket observations. Null, negative and nonfinite counts are unavailable. Measured zeros retain a tiny dot; one dashed ring identifies the first positive maximum."
+      "description": "Day, hour and ticket observations. Positive counts use the original square-root radius curve. Null, negative and nonfinite counts are unavailable. Measured zeros retain a tiny dot; one dashed ring identifies the first positive maximum."
     },
     {
       "name": "height",

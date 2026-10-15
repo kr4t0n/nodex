@@ -30,7 +30,7 @@
     {
       "name": "height",
       "type": "number",
-      "description": "Optional total component height in pixels; otherwise retains the original plot proportions.",
+      "description": "Optional total component height in pixels. Automatic height retains the original aspect ratio with a minimum that grows with the option count, reserving readable spacing for each heading and its ticks.",
       "required": false
     },
     {

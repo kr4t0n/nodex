@@ -27,7 +27,7 @@
       "name": "data",
       "type": "readonly SketchBarsDatum[]",
       "required": true,
-      "description": "Caller-ordered categories with unique nonempty id, label, nonnegative value or null, and optional tone a–i. Identity controls stable texture and default color. Invalid and missing values are unavailable; zero keeps a label without a bar. Empty or entirely unavailable data shows an explicit state. Dense categories scroll within the plot."
+      "description": "Caller-ordered categories with unique nonempty id, label, nonnegative value or null, and optional tone a–i. Repeated display labels are allowed. Identity controls stable texture and default color. Invalid and missing values are unavailable; zero keeps a label without a bar. Empty or entirely unavailable data shows an explicit state. Dense categories scroll within the plot."
     },
     {
       "name": "unitLabel",

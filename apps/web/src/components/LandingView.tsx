@@ -39,10 +39,14 @@ const NAV_FONT = 16;
 const NAV_TOP = 20;
 /** Matches the h1 line-height, so the hero centring maths knows the box. */
 const MARK_LEADING = 0.86;
-/** Optical inset of Inter ExtraBold's leading n, in em. */
-const MARK_LEFT_INSET = 0.056;
 /** Gap between the wordmark and the row beneath it, in the hero. */
 const HERO_ROW_GAP = 44;
+/** The bar's row starts this far above the wordmark, to share its baseline. */
+const ROW_LIFT = 3;
+/** Font size for drawing a glyph to find its ink, in px. 1px is 1/400 em. */
+const INK_MEASURE_SIZE = 400;
+/** Alpha above which a drawn pixel counts as ink, as in a screenshot. */
+const INK_ALPHA = 64;
 
 /** One card in the run. Fixed, so the loop distance is exact. */
 const RUN_CARD_WIDTH = 340;
@@ -111,6 +115,43 @@ export function LandingView() {
       const markElement = mark.current;
       const rowElement = row.current;
       const signInElement = signIn.current;
+      const canvas = document.createElement('canvas');
+      canvas.width = INK_MEASURE_SIZE * 2;
+      canvas.height = INK_MEASURE_SIZE * 2;
+      const measure = canvas.getContext('2d', { willReadFrequently: true });
+      /**
+       * One glyph's painted extent and advance, in em from its origin.
+       *
+       * Drawn and scanned rather than read from `actualBoundingBox*`: at
+       * large sizes Chromium reports Inter's n about 0.01em wider than it
+       * paints, which shifted the hero and its tagline by several pixels.
+       */
+      const glyphInk = (context: CanvasRenderingContext2D, glyph: string) => {
+        const size = INK_MEASURE_SIZE;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillText(glyph, size / 2, size * 1.5);
+        const pixels = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        ).data;
+        const inked = (column: number) => {
+          for (let row = 0; row < canvas.height; row++)
+            if (pixels[(row * canvas.width + column) * 4 + 3]! > INK_ALPHA)
+              return true;
+          return false;
+        };
+        let left = 0;
+        while (left < canvas.width && !inked(left)) left++;
+        let right = canvas.width;
+        while (right > left && !inked(right - 1)) right--;
+        return {
+          left: (left - size / 2) / size,
+          right: (right - size / 2) / size,
+          advance: context.measureText(glyph).width / size,
+        };
+      };
 
       /**
        * How far scene one is pushed before the bar is assembled. Shared by both
@@ -124,24 +165,101 @@ export function LandingView() {
       const foldDistance = () =>
         Math.round(Math.min(560, window.innerHeight * 0.66));
 
-      const gutter = () => (window.innerWidth >= 1024 ? 80 : 48);
-      // Keep fractional font metrics independent of the animation transforms.
-      // A guessed text width drifts from the actual font and can overflow mobile.
-      const markWidth = () =>
-        Number.parseFloat(getComputedStyle(markElement).width);
-      const heroSize = () =>
-        Math.min(
-          500,
-          Math.max(
-            64,
-            ((window.innerWidth - gutter()) * NAV_FONT) / markWidth(),
-          ),
+      /**
+       * Where the glyphs actually paint at bar size, in px from the box's left.
+       *
+       * The hero magnifies the bar layout twenty to thirty times, so the box
+       * is the wrong thing to centre: the leading n's side bearing sits inside
+       * it and the x's ink runs past the trailing negative tracking, by amounts
+       * that differ per language font. The box keeps the browser's real
+       * advances; the canvas only supplies each end glyph's overhang.
+       */
+      // Every function value reads the ink, so draw only when the font changes.
+      let inkCache:
+        | {
+            key: string;
+            first: ReturnType<typeof glyphInk>;
+            last: ReturnType<typeof glyphInk>;
+          }
+        | undefined;
+      const markInk = () => {
+        const style = getComputedStyle(markElement);
+        const width = Number.parseFloat(style.width);
+        const text = markElement.textContent ?? '';
+        if (!measure || !text) return { left: 0, right: width };
+        // Canvas rounds small text metrics to whole pixels too, so measure
+        // large and scale back down.
+        const em = Number.parseFloat(style.fontSize);
+        const font = `${style.fontStyle} ${style.fontWeight} ${INK_MEASURE_SIZE}px ${style.fontFamily}`;
+        // The same font string names the fallback until the webfont loads.
+        const key = `${font}|${text}|${document.fonts.check(font, text)}`;
+        if (inkCache?.key !== key) {
+          measure.font = font;
+          inkCache = {
+            key,
+            first: glyphInk(measure, text.at(0)!),
+            last: glyphInk(measure, text.at(-1)!),
+          };
+        }
+        const { first, last } = inkCache;
+        const tracking = Number.parseFloat(style.letterSpacing) || 0;
+        // The last glyph's ink beyond the box: its own overhang past its
+        // advance, plus the trailing tracking the box already gave back.
+        return {
+          left: first.left * em,
+          right: width + (last.right - last.advance) * em - tracking,
+        };
+      };
+      // The header is laid out in the client width, which excludes a classic
+      // scrollbar; innerWidth includes it and would push the x underneath one.
+      const viewportWidth = () => document.documentElement.clientWidth;
+      const gutter = () =>
+        Number.parseFloat(
+          getComputedStyle(markElement.parentElement!).paddingLeft,
         );
+      // The mark's untransformed left edge on screen. Wide screens centre
+      // the bar's container, so this is not always the gutter.
+      const markOrigin = () =>
+        markElement.parentElement!.getBoundingClientRect().left + gutter();
+      // Below the wordmark: the gap, then the row, whose tagline and action can
+      // overflow its fixed height in some languages.
+      const heroRowExtent = () =>
+        HERO_ROW_GAP - ROW_LIFT + rowElement.scrollHeight;
+      const heroSize = () => {
+        const ink = markInk();
+        const byWidth =
+          ((viewportWidth() - gutter() * 2) * NAV_FONT) /
+          (ink.right - ink.left);
+        // Short screens: the wordmark and its row must fit between the bar's
+        // inset above and the same inset below.
+        const byHeight =
+          (window.innerHeight - NAV_TOP * 2 - heroRowExtent()) / MARK_LEADING;
+        return Math.min(byWidth, 500, Math.max(64, byHeight));
+      };
       const heroScale = () => heroSize() / NAV_FONT;
-      const taglineX = () => heroSize() * MARK_LEFT_INSET;
-      const signInX = () => markWidth() * heroScale() - rowElement.clientWidth;
-      const markTop = () =>
-        (window.innerHeight - heroSize() * MARK_LEADING) / 2;
+      // Centre the painted glyphs, not the box, in the visible width.
+      const markX = () => {
+        const ink = markInk();
+        const scale = heroScale();
+        return (
+          (viewportWidth() - (ink.right - ink.left) * scale) / 2 -
+          markOrigin() -
+          ink.left * scale
+        );
+      };
+      // The tagline and the sign-in hang from the wordmark's painted edges.
+      const taglineX = () => markX() + markInk().left * heroScale();
+      const barTaglineX = () => markInk().left;
+      const signInX = () =>
+        markX() + markInk().right * heroScale() - rowElement.clientWidth;
+      // Centred, unless that would push the row below the bottom inset.
+      const markTop = () => {
+        const height = heroSize() * MARK_LEADING;
+        return Math.min(
+          (window.innerHeight - height) / 2,
+          window.innerHeight - NAV_TOP - heroRowExtent() - height,
+        );
+      };
       const markY = () => markTop() - NAV_TOP;
       const rowY = () =>
         markTop() + heroSize() * MARK_LEADING + HERO_ROW_GAP - NAV_TOP;
@@ -159,27 +277,27 @@ export function LandingView() {
       };
 
       const toHero = () => {
-        gsap.set(mark.current, { y: markY(), scale: heroScale() });
+        gsap.set(mark.current, { x: markX(), y: markY(), scale: heroScale() });
         gsap.set(row.current, { y: rowY() });
         gsap.set(signIn.current, { x: signInX() });
         gsap.set(tagline.current, { x: taglineX(), opacity: 1 });
         gsap.set(barBg.current, { opacity: 0 });
       };
       const toBar = () => {
-        gsap.set(mark.current, { y: 0, scale: 1 });
+        gsap.set(mark.current, { x: 0, y: 0, scale: 1 });
         gsap.set(row.current, { y: barRowY() });
         gsap.set(signIn.current, { x: 0 });
-        gsap.set(tagline.current, {
-          x: NAV_FONT * MARK_LEFT_INSET,
-          opacity: 0,
-        });
+        gsap.set(tagline.current, { x: barTaglineX(), opacity: 0 });
         gsap.set(barBg.current, { opacity: 1 });
       };
 
       // Font loading changes both the wordmark width and the action's metrics.
+      // The row follows the client width, so a scrollbar appearing without a
+      // window resize also re-measures the hero.
       const layoutObserver = new ResizeObserver(() => ScrollTrigger.refresh());
       layoutObserver.observe(markElement);
       layoutObserver.observe(signInElement);
+      layoutObserver.observe(rowElement);
 
       if (reduced) {
         // A jump cut rather than a scrub. The layout still has to change, or the
@@ -217,8 +335,8 @@ export function LandingView() {
       // whatever the viewport happened to be on first paint.
       tl.fromTo(
         mark.current,
-        { y: markY, scale: heroScale },
-        { y: 0, scale: 1, ease: 'none' },
+        { x: markX, y: markY, scale: heroScale },
+        { x: 0, y: 0, scale: 1, ease: 'none' },
         0,
       )
         .fromTo(row.current, { y: rowY }, { y: barRowY, ease: 'none' }, 0)
@@ -226,7 +344,7 @@ export function LandingView() {
         .fromTo(
           tagline.current,
           { x: taglineX },
-          { x: NAV_FONT * MARK_LEFT_INSET, ease: 'none' },
+          { x: barTaglineX, ease: 'none' },
           0,
         )
         .fromTo(
@@ -270,10 +388,13 @@ export function LandingView() {
         >
           {/* Sized at rest and scaled up for the hero, so the travel is a pure
               transform. Setting a font size at each end and animating between
-              them would relayout on every frame. */}
+              them would relayout on every frame. Geometric precision keeps the
+              16px layout's glyph advances fractional: hinted whole-pixel
+              advances, magnified to hero size, put each letter up to a pixel
+              times the scale away from where the font draws it. */}
           <h1
             ref={mark}
-            className="pointer-events-auto m-0 inline-block font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.045em]"
+            className="pointer-events-auto m-0 inline-block font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.045em] [text-rendering:geometricPrecision]"
             style={{
               fontSize: NAV_FONT,
               lineHeight: MARK_LEADING,
@@ -291,7 +412,7 @@ export function LandingView() {
           <div
             ref={row}
             className="absolute inset-x-6 flex h-8 items-baseline justify-between gap-8 lg:inset-x-10"
-            style={{ top: NAV_TOP - 3 }}
+            style={{ top: NAV_TOP - ROW_LIFT }}
           >
             <p
               ref={tagline}
