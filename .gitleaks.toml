@@ -32,7 +32,7 @@ regexes = ['''(?m)^DATABASE_URL=postgres://nodex:nodex@localhost:5433/nodex$''']
 [[rules]]
 id = "github-client-secret"
 description = "GitHub OAuth client secret in a configuration field"
-regex = '''(?i)\b(?:github[_.-]client[_.-]?secret|clientSecret|client_secret)["']?[ \t]*(?:=|:)[ \t]*["']?([a-f0-9]{40})(?:["'\s,;}]|$)'''
+regex = '''(?i)\b(?:github[_.-]client[_.-]?secret|clientSecret|client_secret)["']?[ \t]*(?:=|:)[ \t]*["']?([a-f0-9]{40})(?:["'\s,;}&]|$)'''
 secretGroup = 1
 keywords = ["secret"]
 
