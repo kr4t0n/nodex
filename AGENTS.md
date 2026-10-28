@@ -243,8 +243,10 @@ Docker image check for Next/native dependency changes.
 `pnpm install` runs Husky's `prepare` hook. Commits scan staged changes with
 gitleaks, redact findings and fail for secrets or a missing binary. Run manually:
 `gitleaks git --pre-commit --staged --redact --no-banner`. Remove secrets before
-committing and rotate exposed credentials if shared. CI and Docker set `HUSKY=0`;
-CI runs its own pinned scan before dependency installation. Do not bypass either scan.
+committing and rotate exposed credentials if shared. Both scans load the root
+`.gitleaks.toml`; put reviewed false positives in its narrowly scoped allowlists.
+CI and Docker set `HUSKY=0`; CI runs its own pinned scan before dependency
+installation. Do not bypass either scan.
 
 `pnpm run build` then `pnpm start` serves production. The web build sets
 `NODE_ENV=production` even if the calling shell exports `development`.
@@ -358,8 +360,9 @@ always runs and accepts only success from all three, rejecting failures, skips
 and cancellations. Separate `auth-postgres` and PR-only `docker-build` checks are
 not dependencies of `verify`; the latter builds/tests the image without publishing.
 CI verifies the official gitleaks 8.30.1 archive's pinned SHA-256 and scans full
-history. Run locally with `gitleaks git --redact --no-banner`; share only redacted
-findings and allowlist only reviewed false positives.
+history using the same `.gitleaks.toml` as the hook. Run locally with
+`gitleaks git --redact --no-banner`; share only redacted findings and allowlist only
+reviewed false positives.
 
 - `build:registry`/`check:registry` and their read-only boundary are described above.
   `test` covers invalid contracts/imports, computed paint, transformed strokes,

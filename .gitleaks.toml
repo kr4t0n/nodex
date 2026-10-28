@@ -1,0 +1,48 @@
+# Keep the upstream detectors alongside formats used by deployment and auth.
+[extend]
+useDefault = true
+
+# URL rule and placeholder handling from kr4t0n/helm-charts at 295b5b9.
+# Empty usernames matter for password-only DSNs, such as Redis.
+[[rules]]
+id = "url-credentials"
+description = "Password inside a URL (scheme://user:password@host)"
+regex = '''[a-zA-Z][a-zA-Z0-9+.-]*://[^\s:/@'"]*:([^\s/@'"]+)@'''
+secretGroup = 1
+keywords = ["://"]
+
+# Examples may use placeholders, including Kubernetes $(VAR) and ${VAR}.
+# The inherited allowlist handles repeated letters, stars and template values.
+[[rules.allowlists]]
+regexes = ['''(?i)^(?:pw|pass|password|change-?me|<[^>]*>|\$\([A-Za-z_][A-Za-z0-9_]*\)|\$\{[A-Za-z_][A-Za-z0-9_]*\})$''']
+
+# The local Compose database uses this exact documented development DSN.
+# Both its root example path and its complete line must match.
+# Multiline anchors handle the leading newline Gitleaks retains in history.
+[[rules.allowlists]]
+condition = "AND"
+paths = ['''^\.env\.example$''']
+regexTarget = "line"
+regexes = ['''(?m)^DATABASE_URL=postgres://nodex:nodex@localhost:5433/nodex$''']
+
+# GitHub client secrets are prefixless hex; the generic detector's entropy
+# threshold can miss them. Match the env, Helm and OAuth request field names,
+# not arbitrary commit hashes. GitHub's API example uses a 40-hex client secret:
+# https://docs.github.com/en/rest/apps/apps#create-a-github-app-from-a-manifest
+[[rules]]
+id = "github-client-secret"
+description = "GitHub OAuth client secret in a configuration field"
+regex = '''(?i)\b(?:github[_.-]client[_.-]?secret|clientSecret|client_secret)["']?[ \t]*(?:=|:)[ \t]*["']?([a-f0-9]{40})(?:["'\s,;}&]|$)'''
+secretGroup = 1
+keywords = ["secret"]
+
+# DOCKERHUB_TOKEN in docker.yml supplies a Docker Hub publishing credential.
+# Docker documents the prefix; Secretlint's Docker detector defines its body:
+# https://docs.docker.com/scout/explore/metrics-exporter/
+# https://github.com/secretlint/secretlint/tree/master/packages/%40secretlint/secretlint-rule-docker
+[[rules]]
+id = "dockerhub-pat"
+description = "Docker Hub personal access token"
+regex = '''\b(dckr_pat_[A-Za-z0-9_-]{27})(?:[^A-Za-z0-9_-]|$)'''
+secretGroup = 1
+keywords = ["dckr_pat_"]
