@@ -2,8 +2,33 @@ apiVersion: v1
 entries:
   nodex:
   - apiVersion: v2
+    appVersion: 0.3.3
+    created: "2026-11-18T09:13:21.363630936Z"
+    description: 'nodex — a component registry organised by design language. This
+      chart deploys the web app, which serves the browsable registry and the accounts
+      layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
+      site serves every public page and the sign-in page reports itself unconfigured;
+      point `database.url` at a managed instance when you want accounts. '
+    digest: 8a9bba3b7eda74c59f1f7e1c3efc882dbb115961cddc28ac24516c13ec793706
+    home: https://github.com/kr4t0n/nodex
+    keywords:
+    - nodex
+    - design-system
+    - component-registry
+    - design-tokens
+    maintainers:
+    - name: kr4t0n
+      url: https://github.com/kr4t0n
+    name: nodex
+    sources:
+    - https://github.com/kr4t0n/nodex
+    type: application
+    urls:
+    - https://kr4t0n.github.io/nodex/helm/nodex-0.3.3.tgz
+    version: 0.3.3
+  - apiVersion: v2
     appVersion: 0.3.2
-    created: "2026-10-28T07:42:23.058772779Z"
+    created: "2026-11-18T09:13:21.362947396Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -28,7 +53,7 @@ entries:
     version: 0.3.2
   - apiVersion: v2
     appVersion: 0.3.1
-    created: "2026-10-28T07:42:23.058191607Z"
+    created: "2026-11-18T09:13:21.362519968Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -53,7 +78,7 @@ entries:
     version: 0.3.1
   - apiVersion: v2
     appVersion: 0.3.0
-    created: "2026-10-28T07:42:23.057664844Z"
+    created: "2026-11-18T09:13:21.362079931Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -78,7 +103,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 0.2.3
-    created: "2026-10-28T07:42:23.057113412Z"
+    created: "2026-11-18T09:13:21.361732142Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -103,7 +128,7 @@ entries:
     version: 0.2.3
   - apiVersion: v2
     appVersion: 0.2.2
-    created: "2026-10-28T07:42:23.056145413Z"
+    created: "2026-11-18T09:13:21.361353397Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -128,7 +153,7 @@ entries:
     version: 0.2.2
   - apiVersion: v2
     appVersion: 0.2.1
-    created: "2026-10-28T07:42:23.055510456Z"
+    created: "2026-11-18T09:13:21.360984336Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -153,7 +178,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 0.2.0
-    created: "2026-10-28T07:42:23.055079767Z"
+    created: "2026-11-18T09:13:21.36057184Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -178,7 +203,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: latest
-    created: "2026-10-28T07:42:23.054641527Z"
+    created: "2026-11-18T09:13:21.360140887Z"
     description: 'nodex — a component registry organised by design language. This
       chart deploys the web app, which serves the browsable registry and the accounts
       layer.  PostgreSQL is NOT bundled and is NOT required. Without a database the
@@ -201,4 +226,4 @@ entries:
     urls:
     - https://kr4t0n.github.io/nodex/helm/nodex-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-28T07:42:23.054015857Z"
+generated: "2026-11-18T09:13:21.359625468Z"
