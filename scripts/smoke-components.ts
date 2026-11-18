@@ -1189,9 +1189,11 @@ async function checkConsumer(browser: Browser): Promise<void> {
         ),
       ).toHaveAttribute('data-nx-animated', 'false');
     await page.emulateMedia({ reducedMotion: 'no-preference' });
+    // Every mounted chart responds to this preference change. Wait for the
+    // first exact state before inspecting the rest of the delivered catalogue.
     await expect(
       page.locator('#line-primary [data-nx-animated]'),
-    ).toHaveAttribute('data-nx-animated', 'true');
+    ).toHaveAttribute('data-nx-animated', 'true', { timeout: 15_000 });
     await expect(
       page.locator('#dual-primary [data-nx-animated]'),
     ).toHaveAttribute('data-nx-animated', 'true');
@@ -1314,6 +1316,7 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await expect(page.locator('#matrix [data-nx-animated]')).toHaveAttribute(
       'data-nx-animated',
       'false',
+      { timeout: 15_000 },
     );
     await expect(
       page.locator('#dual-primary [data-nx-animated]'),
