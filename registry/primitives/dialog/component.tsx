@@ -105,6 +105,7 @@ export function DialogAction({
   confirm = false,
   type = 'button',
   className = '',
+  children,
   ...props
 }: DialogActionProps) {
   return (
@@ -112,6 +113,9 @@ export function DialogAction({
       {...props}
       type={type}
       className={`nx-dialog__action${confirm ? ' nx-dialog__action--confirm' : ''} ${className}`.trim()}
-    />
+    >
+      {confirm && <span className="nx-dialog__paint" aria-hidden="true" />}
+      {children}
+    </button>
   );
 }

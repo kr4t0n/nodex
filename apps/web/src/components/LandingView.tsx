@@ -426,6 +426,7 @@ export function LandingView() {
               href="/login"
               className="nx-btn nx-btn--solid pointer-events-auto ml-auto shrink-0 no-underline"
             >
+              <span className="nx-btn__paint" aria-hidden="true" />
               Sign in
               <ArrowRight size={13} weight="bold" aria-hidden />
             </Link>

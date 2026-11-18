@@ -1,0 +1,63 @@
+{
+  "slug": "comparison-bars",
+  "title": "Comparison bars",
+  "description": "Square-ended horizontal bars compare nonnegative magnitudes from zero, with direct labels and values.",
+  "component": "bar",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["ComparisonBars"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly ComparisonDatum[]",
+      "required": true,
+      "description": "Square-ended horizontal bars compare nonnegative magnitudes from zero, with direct labels and values."
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "subtitle",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "unit",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "required": false
+    }
+  ],
+  "files": ["component.tsx"],
+  "shared": [
+    "violet-chart-frame.tsx",
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 370
+  }
+}

@@ -83,7 +83,7 @@ export function PrimitiveScope({ id }: { id: string }) {
     <p data-form-result>{submitted}</p>
     <div data-primitive="code"><Code>report_id</Code> <Kbd>Enter</Kbd><CodeBlock>{'select report_id;\n'}</CodeBlock></div>
     <Details data-primitive="details" summary="Delivery details" meta="Local">The browser owns this disclosure.</Details>
-    <div data-primitive="dialog"><Button data-open-dialog onClick={() => setDialogOpen(true)}>Review settings</Button><Dialog title="Review settings" description="This modal uses the native dialog behavior." open={dialogOpen} onOpenChange={setDialogOpen} actions={<DialogAction onClick={() => setDialogOpen(false)}>Close review</DialogAction>}><Input label="Reviewer note" defaultValue="Ready" /></Dialog></div>
+    <div data-primitive="dialog"><Button data-open-dialog onClick={() => setDialogOpen(true)}>Review settings</Button><Dialog title="Review settings" description="This modal uses the native dialog behavior." open={dialogOpen} onOpenChange={setDialogOpen} actions={<><DialogAction confirm>Confirm review</DialogAction><DialogAction onClick={() => setDialogOpen(false)}>Close review</DialogAction></>}><Input label="Reviewer note" defaultValue="Ready" /></Dialog></div>
     <EmptyState data-primitive="empty-state" title="No scheduled reports" hint="A report can be scheduled after review." />
     <div data-primitive="link"><Link href={'#' + id} external>Return to settings</Link></div>
     <Prose data-primitive="prose"><h2>Delivery notes</h2><p>Reports use the selected <strong>window</strong> and format.</p><p><code>report_id</code> remains stable.</p></Prose>
@@ -104,6 +104,7 @@ export function PrimitiveConsumer() {
     <div data-primitive-language="soft-studio" data-studio className="grid grid-cols-2"><PrimitiveScope id="primitives-soft-studio-original" /><PrimitiveScope id="primitives-soft-studio-edited" /></div>
     <div data-primitive-language="nocturne" data-nocturne className="grid grid-cols-2"><PrimitiveScope id="primitives-nocturne-original" /><PrimitiveScope id="primitives-nocturne-edited" /></div>
     <div data-primitive-language="hearth" data-hearth className="grid grid-cols-2"><PrimitiveScope id="primitives-hearth-original" /><PrimitiveScope id="primitives-hearth-edited" /></div>
+    <div data-primitive-language="violet-draft" data-violet className="grid grid-cols-2"><PrimitiveScope id="primitives-violet-draft-original" /><PrimitiveScope id="primitives-violet-draft-edited" /></div>
     <div data-primitive-language="hearth-dark" data-hearth data-nx-mode="dark" className="grid grid-cols-2"><PrimitiveScope id="primitives-hearth-dark-original" /><PrimitiveScope id="primitives-hearth-dark-edited" /></div>
   </section>;
 }
@@ -122,6 +123,7 @@ const OVERRIDES: Record<string, string> = {
   '--nx-muted': '#516273',
   '--nx-grid': '#8a9baa',
   '--nx-border': '#8a9baa',
+  '--nx-fieldBorder': '#8a9baa',
   '--nx-actionFill': '#fae97b',
   '--nx-actionText': '#123456',
   '--nx-actionBorder': '#123456',
@@ -276,7 +278,7 @@ const STYLE_CHECKS: StyleCheck[] = [
     expected: 'rgb(18, 52, 86) 9px 7px 0px 0px',
   },
   {
-    selector: '[data-primitive="button"] .nx-btn',
+    selector: '[data-primitive="button"] .nx-btn__paint',
     property: 'backgroundColor',
     expected: 'rgb(250, 233, 123)',
   },
@@ -286,7 +288,7 @@ const STYLE_CHECKS: StyleCheck[] = [
     expected: 'rgb(18, 52, 86)',
   },
   {
-    selector: '[data-primitive="button"] .nx-btn',
+    selector: '[data-primitive="button"] .nx-btn__paint',
     property: 'borderTopColor',
     expected: 'rgb(18, 52, 86)',
   },
@@ -322,7 +324,11 @@ const STYLE_CHECKS: StyleCheck[] = [
   },
   { selector: '.nx-card', property: 'fontFamily', expected: 'Georgia, serif' },
   { selector: '.nx-input', property: 'fontFamily', expected: 'Georgia, serif' },
-  { selector: '.nx-table', property: 'fontFamily', expected: 'Georgia, serif' },
+  {
+    selector: '.nx-table',
+    property: 'fontFamily',
+    expected: 'Arial, sans-serif',
+  },
   {
     selector: '.nx-btn',
     property: 'fontFamily',
@@ -534,8 +540,23 @@ async function readStyle(scope: Locator, check: StyleCheck): Promise<string> {
     .locator(check.selector)
     .first()
     .evaluate((element, { property, pseudo }) => {
-      const style = getComputedStyle(element, pseudo ?? null);
-      return style[property as keyof CSSStyleDeclaration] as string;
+      // Inspect whichever layer actually paints the action. Legacy shapes keep
+      // native paint so fractional borders retain their original rasterization.
+      const painted =
+        element.matches('.nx-btn__paint, .nx-dialog__paint') &&
+        getComputedStyle(element).opacity === '0'
+          ? element.parentElement!
+          : element;
+      const style = getComputedStyle(painted, pseudo ?? null);
+      const value = style[property as keyof CSSStyleDeclaration] as string;
+      if (!value.startsWith('color(')) return value;
+      const context = document.createElement('canvas').getContext('2d')!;
+      context.fillStyle = value;
+      context.fillRect(0, 0, 1, 1);
+      const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
+      return a === 255
+        ? `rgb(${r}, ${g}, ${b})`
+        : `rgba(${r}, ${g}, ${b}, ${a! / 255})`;
     }, check);
 }
 
@@ -671,7 +692,21 @@ async function checkNeoActions(page: Page): Promise<void> {
   const button = scope.locator('[data-submit]');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.mouse.move(0, 0);
-  await expect(button).toHaveCSS('background-color', 'rgb(255, 216, 77)');
+  await expect
+    .poll(
+      () =>
+        readStyle(scope, {
+          selector: '[data-submit] .nx-btn__paint',
+          property: 'backgroundColor',
+          expected: '',
+        }),
+      // Resuming every delivered chart can queue a full-fixture style update.
+      {
+        timeout: 15_000,
+        message: 'Neo-brutalism action paint after motion resumes',
+      },
+    )
+    .toBe('rgb(255, 216, 77)');
   await expect(button).toHaveCSS('color', 'rgb(24, 24, 24)');
   await expect(button).toHaveCSS('border-top-width', '2px');
   await expect(button).toHaveCSS('border-radius', '4px');
@@ -725,7 +760,15 @@ async function checkNeoActions(page: Page): Promise<void> {
   );
 
   await button.hover();
-  await expect(button).toHaveCSS('background-color', 'rgb(241, 194, 50)');
+  await expect
+    .poll(() =>
+      readStyle(scope, {
+        selector: '[data-submit] .nx-btn__paint',
+        property: 'backgroundColor',
+        expected: '',
+      }),
+    )
+    .toBe('rgb(241, 194, 50)');
   await page.mouse.down();
   try {
     await expect(button).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 4, 4)');
@@ -755,7 +798,15 @@ async function checkNeoActions(page: Page): Promise<void> {
   await disabled.hover();
   await page.mouse.down();
   try {
-    await expect(disabled).toHaveCSS('background-color', 'rgb(255, 216, 77)');
+    await expect
+      .poll(() =>
+        readStyle(scope, {
+          selector: 'button:disabled .nx-btn__paint',
+          property: 'backgroundColor',
+          expected: '',
+        }),
+      )
+      .toBe('rgb(255, 216, 77)');
     await expect(disabled).toHaveCSS('transform', 'none');
   } finally {
     await page.mouse.up();
@@ -775,6 +826,7 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
     'nocturne',
     'hearth',
     'hearth-dark',
+    'violet-draft',
   ]) {
     const original = page.locator(`#primitives-${language}-original`);
     const edited = page.locator(`#primitives-${language}-edited`);
@@ -1004,12 +1056,19 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
 
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await expect
-      .poll(() =>
-        readStyle(edited, {
-          selector: '[data-primitive="input"] .nx-input',
-          property: 'transitionDuration',
-          expected: '',
-        }),
+      .poll(
+        () =>
+          readStyle(edited, {
+            selector: '[data-primitive="input"] .nx-input',
+            property: 'transitionDuration',
+            expected: '',
+          }),
+        // This preference change also wakes the other delivered charts in the
+        // fixture. Allow their queued work to settle before reading exact CSS.
+        {
+          timeout: 15_000,
+          message: `${language}: scoped input motion resumes`,
+        },
       )
       .toBe('0.073s');
     await expect
@@ -1062,6 +1121,6 @@ export async function checkPrimitiveConsumer(page: Page): Promise<void> {
       );
   }
   console.log(
-    'Validated all 24 CLI-delivered primitives in all seven languages, including both Hearth modes: scoped paint/type/UI fonts/texture/spacing/radius/shadows/motion, Sketchbook typography and stable targets, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.',
+    'Validated all 24 CLI-delivered primitives in all eight languages, including both Hearth modes: scoped paint/type/UI fonts/texture/spacing/radius/shadows/motion, Sketchbook typography and stable targets, tactile Neo-brutalism actions, native controls, custom picker, modal focus/Escape, and sibling/state isolation.',
   );
 }

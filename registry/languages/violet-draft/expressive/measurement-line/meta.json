@@ -1,0 +1,64 @@
+{
+  "slug": "measurement-line",
+  "title": "Measurement line",
+  "description": "Straight measured readings at numeric X coordinates, with gaps for unavailable readings.",
+  "component": "line",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["MeasurementLine"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly MeasurementDatum[]",
+      "required": true,
+      "description": "Straight measured readings at numeric X coordinates, with gaps for unavailable readings."
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "subtitle",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "unit",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "animate",
+      "type": "boolean",
+      "required": false
+    }
+  ],
+  "files": ["component.tsx"],
+  "shared": [
+    "violet-chart-frame.tsx",
+    "use-chart-motion.ts",
+    "use-reduced-motion.ts",
+    "numeric-domain.ts"
+  ],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 370
+  }
+}

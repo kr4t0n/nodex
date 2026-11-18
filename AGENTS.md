@@ -139,7 +139,8 @@ reduced-motion styling use shell tokens.
 
 `font.faces` is asset metadata, not CSS variables. Each face declares an exact
 static `@fontsource` or variable `@fontsource-variable` package, WOFF2 file,
-family, weight or weight range and style. The build checks
+family, weight or weight range and style. An optional validated `stretch` percentage
+or ordered percentage range preserves a variable font’s width axis. The build checks
 the pin and license and embeds font bytes with the OFL text in `tokens.css`.
 This keeps `init` self-contained and previews offline. Font loading completes
 before the build captures layout. The old semicolon-containing `font.webfont`
@@ -186,7 +187,7 @@ tokens and keeps neutral starter paint/system fonts; it must not maintain a seco
 hardcoded primitive-token list. The CLI smoke verifies the scaffold against all
 primitive CSS. Consumer smoke delivers all 24 primitives and tests descendant
 overrides, unaffected sibling scopes, retained form state, native keyboard/modal/
-picker behavior and reduced motion in all seven languages, including both Hearth modes.
+picker behavior and reduced motion in all eight languages, including both Hearth modes.
 
 Structural outlines use `color.border`, independently of quiet `color.grid`
 fills. Primary action fill, lettering, border and hover paint have `color.action*`
@@ -205,6 +206,17 @@ Prose has shared `type.prose.sectionTransform` and `headingLineHeight` roles.
 Existing languages use `uppercase` and `inherit`, retaining both regular and
 narrow prose. Choose a new language's values deliberately rather than imposing
 one heading treatment in the primitive.
+
+Solid Button and confirming DialogAction render a decorative paint span so
+`shape.actionClip` / `actionCompactClip` never clip native hit areas or focus.
+Class-only solid actions need the corresponding `nx-btn__paint` or
+`nx-dialog__paint` span with `aria-hidden="true"`. `shape.actionPaintOpacity`
+selects the clipped layer; existing languages keep native paint so fractional
+border rasterization is unchanged. Paint still references the semantic action
+colors directly. The sweep has its own `motion.action` timing.
+Card/dialog and prose headings consume width roles; compact captions, tables and
+statistics use `font.ui`, which equals the former stack in the original languages.
+`fieldBorder` separates an editable boundary from decorative `border` rules.
 
 Surface, field, selection, badge and value paints have independent semantic
 roles. Neo-brutalism uses lilac panels, cream fields, mint selections, pink
@@ -368,7 +380,7 @@ reviewed false positives.
   `test` covers invalid contracts/imports, computed paint, transformed strokes,
   published addresses, unchanged content/mtimes, lint coverage and warning failures.
 - `smoke` covers static/interactive previews and all charts/primitives copied into
-  a fresh React/TypeScript/Tailwind app: seven-language scoped tokens (both Hearth
+  a fresh React/TypeScript/Tailwind app: eight-language scoped tokens (both Hearth
   modes), stable sketch geometry, Soft Studio/Nocturne geometry and data semantics,
   native forms/keyboard behavior, shadows, button presses and reduced motion.
   Its disposable consumer installs packages over npm; offline previews need no
@@ -431,6 +443,8 @@ Landing/gallery checks also accept an existing URL, e.g.
 checks print fresh system-temporary evidence paths; set `NODEX_EVIDENCE_DIR` to
 collect them together. CI's `browser` job uploads `visual-evidence` from its runner
 temporary `nodex-visual-evidence` directory, including light/dark gallery fixtures.
+The consumer job retains Violet Draft chart frames and measurements in
+`consumer-visual-evidence`, including keyboard, scoped-paint and corner checks.
 Link the artifact in the PR; keep generated evidence outside the checkout.
 
 ## Gallery and preview runtime

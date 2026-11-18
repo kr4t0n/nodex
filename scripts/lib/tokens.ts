@@ -21,6 +21,8 @@ export interface TokenFontFace {
   family: string;
   weight: string;
   style: 'normal' | 'italic';
+  /** CSS width range of a variable face; unrelated to its weight range. */
+  stretch?: string;
 }
 
 export function fontFaces(tokens: Tokens): TokenFontFace[] {
@@ -66,6 +68,19 @@ export function fontFaces(tokens: Tokens): TokenFontFace[] {
     }
     if (face.style !== 'normal' && face.style !== 'italic')
       throw new Error('Font style must be normal or italic');
+    if (face.stretch !== undefined) {
+      if (
+        typeof face.stretch !== 'string' ||
+        !/^\d+(?:\.\d+)?%(?: \d+(?:\.\d+)?%)?$/.test(face.stretch)
+      )
+        throw new Error('Invalid font stretch descriptor');
+      const widths = face.stretch.split(' ').map(parseFloat);
+      if (
+        widths.some((width) => !Number.isFinite(width) || width <= 0) ||
+        (widths[1] !== undefined && widths[0]! > widths[1])
+      )
+        throw new Error('Invalid font stretch range');
+    }
     return face as unknown as TokenFontFace;
   });
 }
@@ -125,7 +140,7 @@ export async function renderFontFaces(
     if (font.subarray(0, 4).toString('ascii') !== 'wOF2')
       throw new Error(`${name}/${face.file} is not a WOFF2 font`);
     styles.push(
-      `@font-face {\n  font-family: ${JSON.stringify(face.family)};\n  font-style: ${face.style};\n  font-weight: ${face.weight};\n  font-display: swap;\n  src: url("data:font/woff2;base64,${font.toString('base64')}") format("woff2");\n}`,
+      `@font-face {\n  font-family: ${JSON.stringify(face.family)};\n  font-style: ${face.style};\n  font-weight: ${face.weight};\n${face.stretch === undefined ? '' : `  font-stretch: ${face.stretch};\n`}  font-display: swap;\n  src: url("data:font/woff2;base64,${font.toString('base64')}") format("woff2");\n}`,
     );
   }
   return `${styles.join('\n\n')}\n`;

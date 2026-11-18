@@ -12,7 +12,7 @@
   .nx-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: var(--nx-font-sans);
+    font-family: var(--nx-font-ui);
     font-size: var(--nx-type-body-size);
     color: var(--nx-ink);
   }

@@ -497,6 +497,26 @@ test('font metadata becomes licensed embedded assets, never invalid CSS declarat
   );
 });
 
+test('font width ranges survive delivery and reject invalid CSS descriptors', async () => {
+  const face = fontFaces(tokens)[0]!;
+  const fixture = { font: { faces: [{ ...face, stretch: '62% 125%' }] } };
+  const css = await renderFontFaces(fixture, ROOT);
+  assert.ok(
+    css.includes('font-stretch: 62% 125%;'),
+    'Delivered font loses its width axis',
+  );
+  for (const stretch of ['125% 62%', '0%', '100%; color:red', 'wide', 100]) {
+    assert.throws(
+      () => fontFaces({ font: { faces: [{ ...face, stretch }] } }),
+      /font stretch/,
+    );
+  }
+  assert.equal(
+    fontFaces({ font: { faces: [{ ...face, stretch: '110%' }] } })[0]!.stretch,
+    '110%',
+  );
+});
+
 test('font symlinks support a local pnpm store without allowing package or asset escapes', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'nodex-font-links-'));
   try {
@@ -721,7 +741,9 @@ async function fingerprint(directory: string): Promise<Record<string, string>> {
 
 test(
   '--check leaves authored sources and existing build outputs untouched',
-  { timeout: 120_000 },
+  // This renders the complete catalogue in every language/mode with real fonts.
+  // Leave CI headroom as languages grow; the read-only assertions stay exact.
+  { timeout: 600_000 },
   async () => {
     const before = await Promise.all(
       ['registry', 'public'].map((dir) => fingerprint(path.join(ROOT, dir))),
@@ -729,7 +751,7 @@ test(
     const result = await run(
       process.execPath,
       ['scripts/build-registry.ts', '--check'],
-      { cwd: ROOT, timeout: 110_000 },
+      { cwd: ROOT, timeout: 590_000 },
     );
     assert.match(result.stdout, /validated .* React components/);
     const after = await Promise.all(

@@ -119,10 +119,20 @@ jobs:
       # Exercise built previews and a fresh React app with real CLI installation.
       - name: Smoke-test components
         run: pnpm run smoke
+        env:
+          NODEX_EVIDENCE_DIR: ${{ runner.temp }}/nodex-consumer-evidence
 
       # Check conflicts, dependency managers, addresses and authenticated paths.
       - name: Smoke-test the CLI
         run: pnpm run smoke:cli
+
+      - name: Retain consumer visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-visual-evidence
+          path: ${{ runner.temp }}/nodex-consumer-evidence/
+          if-no-files-found: ignore
 
   browser:
     runs-on: ubuntu-latest

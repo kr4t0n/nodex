@@ -25,7 +25,8 @@
     box-shadow: var(--nx-shadow-control) var(--nx-ink);
     width: 100%;
     padding: var(--nx-space-controlPadding);
-    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border: var(--nx-stroke-hairline) solid
+      var(--nx-fieldBorder, var(--nx-border));
     border-radius: var(--nx-radius-pill);
     background: var(--nx-fieldFill);
     color: var(--nx-ink);

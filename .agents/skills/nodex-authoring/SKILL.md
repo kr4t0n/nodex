@@ -60,7 +60,8 @@ switching. Mode changes must preserve mounted charts, focus and form values.
 Declare downloadable fonts in a `font.faces` array. Each face names an exact
 `@fontsource-variable/<family>@<version>` or static `@fontsource/<family>@<version>`
 package, package-relative WOFF2 file, CSS family, weight or weight range and
-normal/italic style. Pin the same package in the
+normal/italic style. An optional `stretch` percentage or ordered percentage range
+(e.g. `62% 125%`) preserves the font width axis. Pin the same package in the
 repository's development dependencies. Declare each static weight separately.
 Use `font.heading` for headings, `font.ui` for short interface text, and `font.sans`
 for reading text and editable values. Give each an independent stack; root custom
@@ -188,6 +189,11 @@ shared with the existing language scale; controls use `type.control`, actions us
 `space.controlPadding`. New roles preserve existing values unless a visual change
 was requested. Circular marks, native-control geometry and zero resets stay local.
 Use interaction-motion roles for controls independently of chart `motion.draw`.
+Solid actions use a decorative paint span so `shape.actionClip` and compact
+corner cuts leave native targets and focus intact. React primitives supply it;
+class-only consumers add `nx-btn__paint` / `nx-dialog__paint` with `aria-hidden`.
+Use `fieldBorder` for editable boundaries independently of decorative `border`,
+and heading stretch roles when the font has a width axis.
 
 ## Verification and review
 

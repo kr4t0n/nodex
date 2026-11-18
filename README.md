@@ -12,7 +12,7 @@ app. You own the copied source; there is no Nodex runtime package.
 
 - **Complete design languages.** Typography, color, spacing, geometry and motion
   for whole interfaces, with written guidance and fonts that work offline.
-- **Expressive charts.** 121 charts built with Recharts, with caller-owned data,
+- **Expressive charts.** 124 charts built with Recharts, with caller-owned data,
   keyboard inspection and reduced-motion support.
 - **Shared primitives.** 24 editable components for forms, navigation, surfaces
   and prose, styled by the same language tokens.
@@ -32,6 +32,7 @@ Each guide explains the language. This is the catalogue order:
 5. [Hearth](registry/languages/hearth/DESIGN.md) — warm editorial type and flat surfaces, in light and dark modes.
 6. [Signal Console](registry/languages/signal-console/DESIGN.md) — dense operational layouts, monospace and status color.
 7. [Nocturne](registry/languages/nocturne/DESIGN.md) — graphite surfaces, proportional type and restrained accents.
+8. [Violet Draft](registry/languages/violet-draft/DESIGN.md) — white technical sheets, violet emphasis, wide headings and cut actions (light only; [source provenance](registry/languages/violet-draft/PROVENANCE.md)).
 
 Run `npx @kubitnodes/nodex list` for languages and counts, or `npx @kubitnodes/nodex search`
 for components. Browse the [chart gallery](https://nodex.kubitnodes.com/l/mono-editorial), starting with Mono Editorial.
