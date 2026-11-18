@@ -191,7 +191,8 @@ was requested. Circular marks, native-control geometry and zero resets stay loca
 Use interaction-motion roles for controls independently of chart `motion.draw`.
 Solid actions use a decorative paint span so `shape.actionClip` and compact
 corner cuts leave native targets and focus intact. React primitives supply it;
-class-only consumers add `nx-btn__paint` / `nx-dialog__paint` with `aria-hidden`.
+class-only consumers retain native paint and can add `nx-btn__paint` /
+`nx-dialog__paint` with `aria-hidden` for the clipped treatment.
 Use `fieldBorder` for editable boundaries independently of decorative `border`,
 and heading stretch roles when the font has a width axis.
 

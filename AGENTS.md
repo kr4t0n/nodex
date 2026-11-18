@@ -209,8 +209,8 @@ one heading treatment in the primitive.
 
 Solid Button and confirming DialogAction render a decorative paint span so
 `shape.actionClip` / `actionCompactClip` never clip native hit areas or focus.
-Class-only solid actions need the corresponding `nx-btn__paint` or
-`nx-dialog__paint` span with `aria-hidden="true"`. `shape.actionPaintOpacity`
+Class-only solid actions retain native paint; add the corresponding `nx-btn__paint`
+or `nx-dialog__paint` span with `aria-hidden="true"` for clipped treatment. `shape.actionPaintOpacity`
 selects the clipped layer; existing languages keep native paint so fractional
 border rasterization is unchanged. Paint still references the semantic action
 colors directly. The sweep has its own `motion.action` timing.
@@ -443,8 +443,9 @@ Landing/gallery checks also accept an existing URL, e.g.
 checks print fresh system-temporary evidence paths; set `NODEX_EVIDENCE_DIR` to
 collect them together. CI's `browser` job uploads `visual-evidence` from its runner
 temporary `nodex-visual-evidence` directory, including light/dark gallery fixtures.
-The consumer job retains Violet Draft chart frames and measurements in
-`consumer-visual-evidence`, including keyboard, scoped-paint and corner checks.
+The consumer job retains complete Violet Draft chart frames and layout
+measurements in `consumer-visual-evidence`. Its smoke log reports keyboard,
+scoped-paint, corner and motion assertions separately.
 Link the artifact in the PR; keep generated evidence outside the checkout.
 
 ## Gallery and preview runtime

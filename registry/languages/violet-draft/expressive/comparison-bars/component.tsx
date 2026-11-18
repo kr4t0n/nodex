@@ -60,25 +60,15 @@ export function ComparisonBars({
           typeof d.value === 'number' && Number.isFinite(d.value)
             ? d.value
             : null,
+        formatted:
+          typeof d.value === 'number' && Number.isFinite(d.value)
+            ? valueFormatter(d.value)
+            : '—',
       })),
-    [data],
+    [data, valueFormatter],
   );
   const maximum = rows.reduce((max, d) => Math.max(max, d.value ?? 0), 0);
-  const rowHeight = rows.reduce(
-    (height, d) =>
-      Math.max(
-        height,
-        Math.ceil(d.label.length / 9) * 16 + 12,
-        Math.ceil(
-          (d.value === null
-            ? 1
-            : (valueFormatter(d.value) + (unit ? ' ' + unit : '')).length) / 6,
-        ) *
-          16 +
-          12,
-      ),
-    48,
-  );
+  const rowTracks = `repeat(${rows.length || 1}, minmax(48px, 1fr))`;
   const status =
     rows.some((d) => !d.id.trim() || (d.value !== null && d.value < 0)) ||
     new Set(rows.map((d) => d.id)).size !== rows.length
@@ -96,118 +86,145 @@ export function ComparisonBars({
       className={className}
     >
       <div className="mt-[var(--nx-space-cardBodyGap)] overflow-x-auto">
-        {/* Wrapped labels and direct values retain the same row as each native bar. */}
-        <div
-          className="relative min-w-[280px]"
-          style={{ height: Math.max(70, rows.length * rowHeight + 28) }}
-        >
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-            initialDimension={{ width: 600, height: 292 }}
-          >
-            <BarChart
-              data={rows}
-              layout="vertical"
-              accessibilityLayer
-              title={title}
-              desc="Bar lengths compare nonnegative values from zero. Labels and exact values appear beside each bar. Use left and right arrow keys to inspect categories."
-              margin={{ top: 0, left: 86, right: 58, bottom: 0 }}
-              className="[&_[tabindex]:focus-visible]:[outline:var(--nx-stroke-hairline)_solid_var(--nx-ink)]"
+        {/* Intrinsic value width keeps numbers whole. Equal CSS rows grow from
+            actual wrapped text, and the native plot measures their shared box. */}
+        <div className="min-w-[280px]">
+          <div className="grid min-w-min grid-cols-[74px_12px_minmax(120px,1fr)_8px_max-content] pb-[28px] text-[length:var(--nx-type-legend-size)] leading-tight">
+            <div
+              className="col-start-1 grid"
+              style={{ gridTemplateRows: rowTracks }}
             >
-              <CartesianGrid
-                horizontal={false}
-                stroke="var(--nx-plotGrid)"
-                strokeWidth="var(--nx-stroke-hairline)"
-              />
-              <XAxis
-                type="number"
-                domain={[0, maximum || 1]}
-                tickCount={4}
-                axisLine={false}
-                tickLine={false}
-                height={28}
-                tickMargin={10}
-                tick={{
-                  fill: 'var(--nx-faint)',
-                  fontSize: 'var(--nx-type-axis-size)',
-                }}
-              />
-              <YAxis type="category" dataKey="id" hide />
-              <Tooltip
-                isAnimationActive={false}
-                filterNull={false}
-                cursor={false}
-                content={({ active, label }) => {
-                  const row = rows.find((d) => d.id === label);
-                  return active && row ? (
-                    <VioletTooltip>
-                      {row.label}:{' '}
-                      {row.value === null
-                        ? 'Unavailable'
-                        : `${valueFormatter(row.value)}${unit ? ' ' + unit : ''}`}
-                    </VioletTooltip>
-                  ) : null;
-                }}
-              />
-              <Bar
-                id={id}
-                dataKey="value"
-                barSize={20}
-                background={{ fill: 'var(--nx-plotTrack)' }}
-                {...motion}
-                shape={(props: unknown) => {
-                  const p = props as {
-                    x?: number;
-                    y?: number;
-                    width?: number;
-                    height?: number;
-                    payload?: ComparisonDatum;
-                  };
-                  if (
-                    !p.payload ||
-                    !Number.isFinite(p.x) ||
-                    !Number.isFinite(p.y)
-                  )
-                    return <g />;
-                  return (
-                    <rect
-                      data-nx-comparison={p.payload.id}
-                      x={p.x}
-                      y={p.y}
-                      width={p.width ?? 0}
-                      height={p.height}
-                      fill={tones[p.payload.tone ?? 'a']}
-                      stroke="none"
-                    />
-                  );
-                }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 bottom-[28px] grid"
-            style={{
-              gridTemplateRows: `repeat(${rows.length || 1}, minmax(0, 1fr))`,
-            }}
-          >
-            {rows.map((d) => (
-              <div
-                key={d.id}
-                className="flex items-center justify-between text-[length:var(--nx-type-legend-size)] leading-tight"
-              >
-                <span className="w-[74px] [overflow-wrap:anywhere]">
-                  {d.label}
-                </span>
-                <span
-                  data-nx-comparison-value={d.id}
-                  className="w-[50px] text-right [overflow-wrap:anywhere] text-[var(--nx-muted)] tabular-nums"
+              {rows.map((d) => (
+                <div
+                  key={d.id}
+                  data-nx-comparison-row={d.id}
+                  className="flex items-center py-1.5"
                 >
-                  {d.value === null ? '—' : valueFormatter(d.value)}
-                  {d.value !== null && unit ? ' ' + unit : ''}
-                </span>
+                  <span
+                    data-nx-comparison-label={d.id}
+                    className="[overflow-wrap:anywhere]"
+                  >
+                    {d.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="relative col-start-3">
+              <div className="absolute inset-x-0 top-0 -bottom-[28px]">
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                  initialDimension={{ width: 600, height: 292 }}
+                >
+                  <BarChart
+                    data={rows}
+                    layout="vertical"
+                    accessibilityLayer
+                    title={title}
+                    desc="Bar lengths compare nonnegative values from zero. Labels and exact values appear beside each bar. Use left and right arrow keys to inspect categories."
+                    margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
+                    className="[&_[tabindex]:focus-visible]:[outline:var(--nx-stroke-hairline)_solid_var(--nx-ink)]"
+                  >
+                    <CartesianGrid
+                      horizontal={false}
+                      stroke="var(--nx-plotGrid)"
+                      strokeWidth="var(--nx-stroke-hairline)"
+                    />
+                    <XAxis
+                      type="number"
+                      domain={[0, maximum || 1]}
+                      tickCount={4}
+                      interval="preserveStartEnd"
+                      axisLine={false}
+                      tickLine={false}
+                      height={28}
+                      tickMargin={10}
+                      tickFormatter={(value: number) =>
+                        new Intl.NumberFormat('en-US', {
+                          notation: 'compact',
+                          maximumFractionDigits: 1,
+                        }).format(value)
+                      }
+                      tick={{
+                        fill: 'var(--nx-faint)',
+                        fontSize: 'var(--nx-type-axis-size)',
+                      }}
+                    />
+                    <YAxis type="category" dataKey="id" hide />
+                    <Tooltip
+                      isAnimationActive={false}
+                      filterNull={false}
+                      cursor={false}
+                      content={({ active, label }) => {
+                        const row = rows.find((d) => d.id === label);
+                        return active && row ? (
+                          <VioletTooltip>
+                            {row.label}:{' '}
+                            {row.value === null
+                              ? 'Unavailable'
+                              : `${valueFormatter(row.value)}${unit ? ' ' + unit : ''}`}
+                          </VioletTooltip>
+                        ) : null;
+                      }}
+                    />
+                    <Bar
+                      id={id}
+                      dataKey="value"
+                      barSize={20}
+                      background={{ fill: 'var(--nx-plotTrack)' }}
+                      {...motion}
+                      shape={(props: unknown) => {
+                        const p = props as {
+                          x?: number;
+                          y?: number;
+                          width?: number;
+                          height?: number;
+                          payload?: ComparisonDatum;
+                        };
+                        if (
+                          !p.payload ||
+                          !Number.isFinite(p.x) ||
+                          !Number.isFinite(p.y)
+                        )
+                          return <g />;
+                        return (
+                          <rect
+                            data-nx-comparison={p.payload.id}
+                            x={p.x}
+                            y={p.y}
+                            width={p.width ?? 0}
+                            height={p.height}
+                            fill={tones[p.payload.tone ?? 'a']}
+                            stroke="none"
+                          />
+                        );
+                      }}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            ))}
+            </div>
+            <div
+              className="col-start-5 grid min-w-[50px] text-right text-[var(--nx-muted)] tabular-nums"
+              style={{ gridTemplateRows: rowTracks }}
+            >
+              {rows.map((d) => (
+                <div
+                  key={d.id}
+                  data-nx-comparison-value={d.id}
+                  className="flex flex-col justify-center py-1.5"
+                >
+                  <span data-nx-comparison-number className="whitespace-nowrap">
+                    {d.formatted}
+                  </span>
+                  {d.value !== null && unit && (
+                    <span className="w-min min-w-full [overflow-wrap:anywhere]">
+                      {unit}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

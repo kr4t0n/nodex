@@ -1,7 +1,9 @@
 @layer components {
   /* button - shared primitive, themed by the active language's tokens.
    The React API wraps a native button. These classes also remain available
-   when composing the same visual treatment with an existing headless control. */
+   when composing the same visual treatment with an existing headless control.
+   Add an aria-hidden .nx-btn__paint span for a language's clipped treatment;
+   without it, solid actions retain their native fill and border. */
 
   .nx-btn {
     position: relative;
@@ -34,6 +36,12 @@
 
   /* Solid. The only high-emphasis action on a surface. */
   .nx-btn--solid {
+    background: var(--nx-actionFill);
+    border-color: var(--nx-actionBorder);
+    color: var(--nx-actionText);
+  }
+
+  .nx-btn--solid:has(> .nx-btn__paint) {
     background: color-mix(
       in srgb,
       var(--nx-actionFill)
@@ -46,7 +54,6 @@
         calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
       transparent
     );
-    color: var(--nx-actionText);
   }
 
   /* Only paint is clipped. The native box retains its hit area, focus outline
@@ -96,6 +103,13 @@
   }
 
   .nx-btn--solid:hover:not(:disabled):not([aria-disabled='true']) {
+    background: var(--nx-actionHoverFill);
+    border-color: var(--nx-actionHoverBorder);
+  }
+
+  .nx-btn--solid:has(> .nx-btn__paint):hover:not(:disabled):not(
+      [aria-disabled='true']
+    ) {
     background: color-mix(
       in srgb,
       var(--nx-actionHoverFill)

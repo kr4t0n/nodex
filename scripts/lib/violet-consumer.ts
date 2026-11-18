@@ -8,7 +8,7 @@ export const VIOLET_CONSUMER_SOURCE = `import {useEffect,useState} from 'react';
 import {MeasurementLine} from './components/nodex/measurement-line/component';
 import {ComparisonBars} from './components/nodex/comparison-bars/component';
 import {ObservationMatrix} from './components/nodex/observation-matrix/component';
-type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long';
+type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long'|'large'|'headings'|'decimal'|'fraction';
 declare global {interface Window {nodexViolet:{setMode:(v:Mode)=>void}}}
 const line=[{id:'a',label:'Start',x:0,value:0},{id:'b',label:'Second',x:1,value:10},{id:'c',label:'Missing',x:4,value:null},{id:'d',label:'Last',x:6,value:20}];
 const bars=[{id:'a',label:'Aster',value:40},{id:'b',label:'Birch',value:20},{id:'c',label:'Zero',value:0},{id:'d',label:'Missing',value:null}];
@@ -17,16 +17,20 @@ const matrix=[{rowId:'a',columnId:'x',value:0},{rowId:'a',columnId:'y',value:nul
 export function VioletConsumer(){
  const [mode,setMode]=useState<Mode>('normal');useEffect(()=>{window.nodexViolet={setMode};},[]);
  let readings=line.map(d=>({...d})),categories=bars.map(d=>({...d})),observations=matrix.map(d=>({...d}));
+ let gridRows=rows,gridColumns=columns,domain:[number,number]=[0,100];
  if(mode==='empty'){readings=[];categories=[];observations=[];}
  if(mode==='zero'){readings=readings.map(d=>({...d,value:0}));categories=categories.map(d=>({...d,value:0}));observations=observations.map(d=>({...d,value:0}));}
  if(mode==='missing'){readings=readings.map(d=>({...d,value:NaN}));categories=categories.map(d=>({...d,value:NaN}));}
  if(mode==='single'){readings=readings.slice(0,1);categories=categories.slice(0,1);}
  if(mode==='invalid'){readings[1]!.x=0;categories[1]!.value=-1;observations[0]!.value=101;}
- if(mode==='long'){categories[0]!.label='An exceptionally long unbroken label WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW';}
+ if(mode==='long'){categories[0]!.label='Aster Birch Cedar Delta Ember Fjord Grove Hazel';categories[1]!.label='An exceptionally long unbroken label WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW';}
+ if(mode==='large'){categories=categories.map((d,i)=>({...d,value:[1234567.891,98765.4,123456,1234.5][i]!}));}
+ if(mode==='headings'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:5},(_,i)=>({id:String(i),label:'Very long column heading '+(i+1)}));observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:i*20}));}
+ if(mode==='decimal'||mode==='fraction'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:6},(_,i)=>({id:String(i),label:String(i)}));domain=mode==='decimal'?[0.1,0.6]:[0,3];const values=mode==='decimal'?[0.1,0.2,0.3,0.4,0.5,0.6]:[0,0.6,1.2,1.8,2.4,3];observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:values[i]!}));}
  return <section data-violet id="violet-consumer" className="mx-auto w-full max-w-[660px] bg-[var(--nx-bg)]">
   <MeasurementLine data={readings} title="Daily readings" subtitle="Irregular observation intervals" unit="units" />
-  <ComparisonBars data={categories} title="Group comparison" />
-  <ObservationMatrix data={observations} rows={rows} columns={columns} domain={[0,100]} title="Observation matrix" />
+  <ComparisonBars data={categories} title="Group comparison" unit={mode==='large'?'kWh':undefined} />
+  <ObservationMatrix data={observations} rows={gridRows} columns={gridColumns} domain={domain} title="Observation matrix" />
   <div data-violet-sibling><MeasurementLine data={line} title="Unaffected sibling" /></div>
  </section>;
 }
@@ -158,15 +162,22 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
   for (const viewport of [
     { width: 1440, height: 1000 },
     { width: 390, height: 844 },
+    { width: 320, height: 844 },
   ]) {
     await page.setViewportSize(viewport);
     await root.scrollIntoViewIfNeeded();
     await page.mouse.move(0, 0);
     await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
-    await page.screenshot({
+    const frame = await root.screenshot({
       path: path.join(evidence, `charts-${viewport.width}.png`),
-      clip: (await root.boundingBox()) ?? undefined,
     });
+    const frameBounds = (await root.boundingBox())!;
+    // Screenshot edges round outward independently at fractional positions.
+    assert(
+      frame.readUInt32BE(20) >= Math.floor(frameBounds.height) &&
+        frame.readUInt32BE(20) <= Math.ceil(frameBounds.height) + 1,
+      'The evidence frame must include the whole chart group',
+    );
     const bounds = await root.evaluate((el) => ({
       client: el.clientWidth,
       scroll: el.scrollWidth,
@@ -176,7 +187,14 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
       bounds.client,
       'Violet chart frame must contain responsive overflow',
     );
-    measurements.push({ viewport, bounds });
+    measurements.push({
+      viewport,
+      bounds,
+      screenshot: {
+        width: frame.readUInt32BE(16),
+        height: frame.readUInt32BE(20),
+      },
+    });
     await mode('long');
     await expect(bars).toContainText('An exceptionally long');
     const labels = await bars.locator('[title]').count();
@@ -185,8 +203,159 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
       0,
       'Full bar labels must wrap visibly rather than depend on title hints',
     );
+    const wrappedLabels = await bars
+      .locator('[data-nx-comparison-row]')
+      .evaluateAll((rows) =>
+        rows.map((row) => {
+          const label = row.querySelector('[data-nx-comparison-label]')!;
+          const box = row.getBoundingClientRect(),
+            text = label.getBoundingClientRect();
+          return {
+            row: box.height,
+            text: text.height,
+            contained: text.top >= box.top && text.bottom <= box.bottom,
+          };
+        }),
+      );
+    assert.equal(wrappedLabels.length, 4);
+    assert(
+      wrappedLabels.every((label) => label.contained),
+      'Wrapped labels must fit inside their own bar rows',
+    );
+    await expect
+      .poll(() =>
+        bars.evaluate((el) =>
+          ['a', 'b'].every((id) => {
+            const row = el
+              .querySelector(`[data-nx-comparison-row="${id}"]`)!
+              .getBoundingClientRect();
+            const mark = el
+              .querySelector(`[data-nx-comparison="${id}"]`)!
+              .getBoundingClientRect();
+            return (
+              Math.abs(row.top + row.height / 2 - mark.top - mark.height / 2) <
+              1
+            );
+          }),
+        ),
+      )
+      .toBe(true);
+    await mode('large');
+    await expect(bars.locator('[data-nx-comparison-value="a"]')).toContainText(
+      '1,234,567.89',
+    );
+    const numbers = await bars
+      .locator('[data-nx-comparison-value]')
+      .evaluateAll((nodes) =>
+        nodes.map((el) => {
+          const range = document.createRange();
+          const text = document
+            .createTreeWalker(el, NodeFilter.SHOW_TEXT)
+            .nextNode()!;
+          range.selectNodeContents(text);
+          const lines = [
+            ...new Set(
+              [...range.getClientRects()].map((r) => Math.round(r.top)),
+            ),
+          ];
+          const box = range.getBoundingClientRect(),
+            column = el.getBoundingClientRect();
+          return {
+            text: el.textContent,
+            lines: lines.length,
+            width: range.getBoundingClientRect().width,
+            column: column.width,
+            contained: box.left >= column.left && box.right <= column.right,
+          };
+        }),
+      );
+    assert(
+      numbers.every(
+        (n) => n.lines === 1 && n.width <= n.column + 0.5 && n.contained,
+      ),
+      'Each formatted value must stay on one line inside the intrinsic value column',
+    );
+    await expect
+      .poll(() =>
+        bars.locator('.recharts-cartesian-axis-tick-value').allTextContents(),
+      )
+      .toContain('1.2M');
+    const ticks = await bars
+      .locator('.recharts-cartesian-axis-tick-value')
+      .allTextContents();
+    assert(
+      ticks.includes('0') &&
+        ticks.some((t) => /[KM]/.test(t)) &&
+        !ticks.some((t) => /\d{6}/.test(t)),
+      'Large magnitudes need compact axis labels',
+    );
+    await bars.screenshot({
+      path: path.join(evidence, `large-bars-${viewport.width}.png`),
+    });
+    const scroller = bars.locator('.overflow-x-auto');
+    await scroller.evaluate((el) => (el.scrollLeft = el.scrollWidth));
+    await bars.screenshot({
+      path: path.join(evidence, `large-bars-end-${viewport.width}.png`),
+    });
+    await scroller.evaluate((el) => (el.scrollLeft = 0));
+    await mode('headings');
+    await expect(
+      matrix
+        .locator('foreignObject')
+        .filter({ hasText: 'Very long column heading' })
+        .last(),
+    ).toContainText('Very long column heading');
+    const headings = await matrix
+      .locator('foreignObject')
+      .filter({ hasText: 'Very long column heading' })
+      .evaluateAll((nodes) =>
+        nodes.map((el) => {
+          const box = el.getBoundingClientRect(),
+            svg = el.closest('svg')!.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const text = range.getBoundingClientRect();
+          return {
+            bottom: text.bottom - svg.top,
+            svgHeight: svg.height,
+            height: text.height,
+            contained:
+              text.bottom <= box.bottom + 0.5 &&
+              text.bottom <= svg.bottom + 0.5,
+          };
+        }),
+      );
+    assert.equal(headings.length, 5);
+    assert(
+      headings.every((h) => h.contained && h.height > 15),
+      'Two-line matrix headings must fit the SVG and their foreignObject',
+    );
+    await matrix.screenshot({
+      path: path.join(evidence, `wrapped-matrix-${viewport.width}.png`),
+    });
+    measurements.push({ viewport, wrappedLabels, numbers, ticks, headings });
     await mode('normal');
   }
+  const fills = [
+    'rgb(244, 239, 255)',
+    'rgb(217, 204, 242)',
+    'rgb(167, 139, 250)',
+    'rgb(111, 66, 193)',
+    'rgb(45, 11, 140)',
+    'rgb(45, 11, 140)',
+  ];
+  for (const boundary of ['decimal', 'fraction']) {
+    await mode(boundary);
+    await expect(matrix.locator('[data-nx-observation]')).toHaveCount(6);
+    await expect
+      .poll(() =>
+        matrix
+          .locator('[data-nx-observation] rect')
+          .evaluateAll((nodes) => nodes.map((n) => getComputedStyle(n).fill)),
+      )
+      .toEqual(fills);
+  }
+  await mode('normal');
   await page.setViewportSize({ width: 1280, height: 900 });
   const primitive = page.locator('#primitives-violet-draft-original');
   const button = primitive.locator('[data-submit]');
@@ -258,6 +427,52 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
     .toBe('0%');
   await confirm.evaluate((el) => ((el as HTMLButtonElement).disabled = false));
   await page.keyboard.press('Escape');
+  await primitive.evaluate((el) => {
+    const group = document.createElement('div');
+    group.dataset.violetClassOnlyGroup = '';
+    group.style.cssText = 'display:flex;gap:16px;padding:16px;flex-wrap:wrap';
+    for (const [kind, className] of [
+      ['button', 'nx-btn nx-btn--solid'],
+      ['confirm', 'nx-dialog__action nx-dialog__action--confirm'],
+    ]) {
+      const action = document.createElement('button');
+      action.className = className!;
+      action.textContent = `Class-only ${kind}`;
+      action.dataset.violetClassOnly = kind;
+      group.append(action);
+    }
+    el.append(group);
+  });
+  try {
+    const actions = primitive.locator('[data-violet-class-only]');
+    for (const action of await actions.all()) {
+      await expect(action).toHaveCSS('background-color', 'rgb(111, 66, 193)');
+      await expect(action).toHaveCSS('color', 'rgb(255, 255, 255)');
+      await expect(action).toHaveCSS('border-top-color', 'rgb(111, 66, 193)');
+      await action.focus();
+      await expect(action).toHaveCSS('outline-style', 'solid');
+    }
+    await primitive.locator('[data-violet-class-only-group]').screenshot({
+      path: path.join(evidence, 'class-only-actions.png'),
+    });
+    const nativeButton = primitive.locator('[data-violet-class-only="button"]');
+    await nativeButton.hover();
+    await expect(nativeButton).toHaveCSS(
+      'background-color',
+      'rgb(45, 11, 140)',
+    );
+    await nativeButton.evaluate(
+      (el) => ((el as HTMLButtonElement).disabled = true),
+    );
+    await expect(nativeButton).toHaveCSS(
+      'background-color',
+      'rgb(111, 66, 193)',
+    );
+  } finally {
+    await primitive
+      .locator('[data-violet-class-only-group]')
+      .evaluateAll((nodes) => nodes.forEach((n) => n.remove()));
+  }
   await writeFile(
     path.join(evidence, 'measurements.json'),
     JSON.stringify(measurements, null, 2),

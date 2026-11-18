@@ -158,13 +158,17 @@ export function ObservationMatrix({
         const raw = lookup.get(key(row.id, column.id));
         const value =
           typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
-        const level =
+        const position =
           value === null || !validDomain
             ? 0
-            : Math.min(
-                4,
-                Math.floor(((value - domain[0]) / (domain[1] - domain[0])) * 5),
-              );
+            : ((value - domain[0]) / (domain[1] - domain[0])) * 5;
+        // Decimal boundaries may round a few ULPs below their integer bin.
+        const level = Math.min(
+          4,
+          Math.floor(
+            position + Number.EPSILON * Math.max(1, Math.abs(position)) * 4,
+          ),
+        );
         return {
           rowId: row.id,
           columnId: column.id,
@@ -209,7 +213,7 @@ export function ObservationMatrix({
             <ScatterChart
               accessibilityLayer
               title={title}
-              desc="Color follows five equal intervals of the fixed domain. A diagonal slash means unavailable. Use arrow keys to inspect cells."
+              desc="Color follows five equal intervals of the fixed domain. A diagonal slash means unavailable. Use left and right arrow keys to inspect cells in row order."
               margin={{ top: 0, right: 1, bottom: 0, left: 0 }}
               className="[&_[tabindex]:focus-visible]:[outline:var(--nx-stroke-hairline)_solid_var(--nx-ink)]"
             >
@@ -222,6 +226,7 @@ export function ObservationMatrix({
                 tickFormatter={(x: number) => columns[x]?.label ?? ''}
                 height={axisHeight}
                 tickMargin={12}
+                tickSize={0}
                 axisLine={false}
                 tickLine={false}
                 tick={(props: unknown) => {
