@@ -198,7 +198,9 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
     const probe = await page.context().newPage();
     const errors: string[] = [];
     probe.on('pageerror', (error) => errors.push(error.message));
-    const url = page.url();
+    const fixtureUrl = new URL(page.url());
+    fixtureUrl.searchParams.set('violet-ticks', '');
+    const url = fixtureUrl.href;
     try {
       await probe.route(url, async (route) => {
         const response = await route.fetch();
@@ -262,6 +264,12 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
         `"${family}"`,
       );
       await expect(probe.locator('body')).toHaveCSS('font-stretch', stretch);
+      const measuringSpan = probe.locator('#recharts_measurement_span');
+      await expect(measuringSpan).toHaveCSS('font-family', `"${family}"`);
+      await expect(measuringSpan).toHaveCSS('font-stretch', stretch);
+      const measurementFamily = await measuringSpan.evaluate(
+        (el) => getComputedStyle(el).fontFamily,
+      );
       await probe.mouse.move(0, 0);
       for (const maximum of [
         Number.MIN_VALUE,
@@ -396,6 +404,7 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
             source,
             stretch,
             referenceWidth,
+            measurementFamily,
             maximum,
             width,
             ticks,
