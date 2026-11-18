@@ -6,6 +6,7 @@ import {
   BarChart,
   CartesianGrid,
   ResponsiveContainer,
+  Text,
   Tooltip,
   XAxis,
   YAxis,
@@ -40,6 +41,11 @@ const tones = {
 };
 const formatNumber = (value: number) =>
   new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
+const formatTick = (value: number) =>
+  new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value);
 
 export function ComparisonBars({
   data,
@@ -88,7 +94,7 @@ export function ComparisonBars({
       <div className="mt-[var(--nx-space-cardBodyGap)] overflow-x-auto">
         {/* Intrinsic value width keeps numbers whole. Equal CSS rows grow from
             actual wrapped text, and the native plot measures their shared box. */}
-        <div className="min-w-[280px]">
+        <div className="min-w-full">
           <div className="grid min-w-min grid-cols-[74px_12px_minmax(120px,1fr)_8px_max-content] pb-[28px] text-[length:var(--nx-type-legend-size)] leading-tight">
             <div
               className="col-start-1 grid"
@@ -139,15 +145,29 @@ export function ComparisonBars({
                       tickLine={false}
                       height={28}
                       tickMargin={10}
-                      tickFormatter={(value: number) =>
-                        new Intl.NumberFormat('en-US', {
-                          notation: 'compact',
-                          maximumFractionDigits: 1,
-                        }).format(value)
-                      }
-                      tick={{
-                        fill: 'var(--nx-faint)',
-                        fontSize: 'var(--nx-type-axis-size)',
+                      tickFormatter={formatTick}
+                      tick={(props) => {
+                        const { x, y, index, visibleTicksCount, payload } =
+                          props;
+                        const first = index === 0;
+                        const last = index === visibleTicksCount - 1;
+                        // Recharts measures text outside the scoped font. Anchor
+                        // endpoint ink inward without shortening the bar scale.
+                        return (
+                          <Text
+                            x={first || last ? payload.coordinate : x}
+                            y={y}
+                            textAnchor={
+                              first ? 'start' : last ? 'end' : 'middle'
+                            }
+                            verticalAnchor="start"
+                            className="recharts-cartesian-axis-tick-value"
+                            fill="var(--nx-faint)"
+                            fontSize="var(--nx-type-axis-size)"
+                          >
+                            {formatTick(payload.value)}
+                          </Text>
+                        );
                       }}
                     />
                     <YAxis type="category" dataKey="id" hide />

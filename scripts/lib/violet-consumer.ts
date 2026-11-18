@@ -8,7 +8,7 @@ export const VIOLET_CONSUMER_SOURCE = `import {useEffect,useState} from 'react';
 import {MeasurementLine} from './components/nodex/measurement-line/component';
 import {ComparisonBars} from './components/nodex/comparison-bars/component';
 import {ObservationMatrix} from './components/nodex/observation-matrix/component';
-type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long'|'large'|'headings'|'decimal'|'fraction';
+type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long'|'large'|'billions'|'headings'|'decimal'|'fraction';
 declare global {interface Window {nodexViolet:{setMode:(v:Mode)=>void}}}
 const line=[{id:'a',label:'Start',x:0,value:0},{id:'b',label:'Second',x:1,value:10},{id:'c',label:'Missing',x:4,value:null},{id:'d',label:'Last',x:6,value:20}];
 const bars=[{id:'a',label:'Aster',value:40},{id:'b',label:'Birch',value:20},{id:'c',label:'Zero',value:0},{id:'d',label:'Missing',value:null}];
@@ -25,6 +25,7 @@ export function VioletConsumer(){
  if(mode==='invalid'){readings[1]!.x=0;categories[1]!.value=-1;observations[0]!.value=101;}
  if(mode==='long'){categories[0]!.label='Aster Birch Cedar Delta Ember Fjord Grove Hazel';categories[1]!.label='An exceptionally long unbroken label WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW';}
  if(mode==='large'){categories=categories.map((d,i)=>({...d,value:[1234567.891,98765.4,123456,1234.5][i]!}));}
+ if(mode==='billions'){categories=categories.map((d,i)=>({...d,value:[9900000000,6600000000,3300000000,0][i]!}));}
  if(mode==='headings'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:5},(_,i)=>({id:String(i),label:'Very long column heading '+(i+1)}));observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:i*20}));}
  if(mode==='decimal'||mode==='fraction'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:6},(_,i)=>({id:String(i),label:String(i)}));domain=mode==='decimal'?[0.1,0.6]:[0,3];const values=mode==='decimal'?[0.1,0.2,0.3,0.4,0.5,0.6]:[0,0.6,1.2,1.8,2.4,3];observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:values[i]!}));}
  return <section data-violet id="violet-consumer" className="mx-auto w-full max-w-[660px] bg-[var(--nx-bg)]">
@@ -35,6 +36,139 @@ export function VioletConsumer(){
  </section>;
 }
 `;
+
+/** Isolated so the same assertions can run against a built base fixture. */
+export async function checkVioletSizing(page: Page, evidence: string) {
+  const root = page.locator('#violet-consumer');
+  const bars = root.locator('[data-nx-chart="comparison-bars"]');
+  const measurements = [];
+  const failures: string[] = [];
+  // Match the native gallery specimen width. The full consumer page has its
+  // own 16px gutters, which otherwise turn a 320px specimen into 288px.
+  const originalWidth = await root.evaluate((el) => {
+    const node = el as HTMLElement;
+    const width = node.style.width;
+    node.style.width = 'min(660px, 100vw)';
+    return width;
+  });
+  try {
+    for (const width of [1440, 390, 320]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.evaluate(() =>
+        (
+          window as unknown as { nodexViolet: { setMode: (v: string) => void } }
+        ).nodexViolet.setMode('normal'),
+      );
+      await expect(bars.locator('[data-nx-comparison-value="a"]')).toHaveText(
+        '40',
+      );
+      await root.screenshot({
+        path: path.join(evidence, `sizing-${width}.png`),
+      });
+      assert.equal(
+        await root.evaluate((el) => el.clientWidth),
+        Math.min(width, 660),
+      );
+      const regions = await root
+        .locator('[data-nx-chart]')
+        .evaluateAll((charts) =>
+          charts.map((chart) => {
+            // The line has no scroller; measure its plot region as well.
+            const region =
+              chart.querySelector('.overflow-x-auto') ??
+              chart.querySelector('.recharts-responsive-container')!
+                .parentElement!;
+            return {
+              chart: chart.getAttribute('data-nx-chart'),
+              client: region.clientWidth,
+              scroll: region.scrollWidth,
+            };
+          }),
+        );
+      for (const region of regions) {
+        if (region.scroll !== region.client)
+          failures.push(
+            `${width}px ${region.chart}: fitting data scrollWidth ${region.scroll} != clientWidth ${region.client}`,
+          );
+      }
+      await page.evaluate(() =>
+        (
+          window as unknown as { nodexViolet: { setMode: (v: string) => void } }
+        ).nodexViolet.setMode('billions'),
+      );
+      await expect(bars.locator('[data-nx-comparison-value="a"]')).toHaveText(
+        '9,900,000,000',
+      );
+      await expect
+        .poll(() =>
+          bars.locator('.recharts-cartesian-axis-tick-value').allTextContents(),
+        )
+        .toContain('9.9B');
+      const scroller = bars.locator('.overflow-x-auto');
+      await scroller.evaluate((el) => (el.scrollLeft = el.scrollWidth));
+      await bars.screenshot({
+        path: path.join(evidence, `billions-${width}.png`),
+      });
+      const ticks = await bars
+        .locator('.recharts-cartesian-axis-tick-value')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => {
+            const box = node.getBoundingClientRect(),
+              svg = node.closest('svg')!.getBoundingClientRect();
+            return {
+              text: node.textContent,
+              left: box.left,
+              right: box.right,
+              svgLeft: svg.left,
+              svgRight: svg.right,
+            };
+          }),
+        );
+      assert(
+        ticks.length >= 2,
+        'Billion-scale bars must retain start and end ticks',
+      );
+      for (const tick of ticks) {
+        if (tick.left < tick.svgLeft || tick.right > tick.svgRight)
+          failures.push(
+            `${width}px tick ${tick.text}: box [${tick.left}, ${tick.right}] outside SVG [${tick.svgLeft}, ${tick.svgRight}]`,
+          );
+      }
+      const wide = await scroller.evaluate((el) => ({
+        client: el.clientWidth,
+        scroll: el.scrollWidth,
+      }));
+      if (width === 320)
+        assert(
+          wide.scroll > wide.client,
+          'Intrinsic long values must retain local scrolling',
+        );
+      measurements.push({ width, regions, ticks, wide });
+      await scroller.evaluate((el) => (el.scrollLeft = 0));
+    }
+  } finally {
+    await root.evaluate(
+      (el, width) => ((el as HTMLElement).style.width = width),
+      originalWidth,
+    );
+  }
+
+  await page.evaluate(() =>
+    (
+      window as unknown as { nodexViolet: { setMode: (v: string) => void } }
+    ).nodexViolet.setMode('normal'),
+  );
+  await writeFile(
+    path.join(evidence, 'sizing.json'),
+    JSON.stringify(measurements, null, 2),
+  );
+  console.log(`Violet sizing evidence: ${evidence}`);
+  assert.deepEqual(
+    failures,
+    [],
+    'Violet fitting data and tick labels must remain inside their regions',
+  );
+}
 
 export async function checkVioletConsumer(page: Page): Promise<void> {
   const root = page.locator('#violet-consumer');
@@ -158,6 +292,7 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
     ? path.join(process.env.NODEX_EVIDENCE_DIR, 'violet')
     : await mkdtemp(path.join(tmpdir(), 'nodex-violet-evidence-'));
   await mkdir(evidence, { recursive: true });
+  await checkVioletSizing(page, evidence);
   const measurements: unknown[] = [];
   for (const viewport of [
     { width: 1440, height: 1000 },
@@ -289,6 +424,8 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
         !ticks.some((t) => /\d{6}/.test(t)),
       'Large magnitudes need compact axis labels',
     );
+    if (viewport.width === 1440)
+      assert.deepEqual(ticks, ['0', '450K', '900K', '1.2M']);
     await bars.screenshot({
       path: path.join(evidence, `large-bars-${viewport.width}.png`),
     });
@@ -330,10 +467,29 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
       headings.every((h) => h.contained && h.height > 15),
       'Two-line matrix headings must fit the SVG and their foreignObject',
     );
+    const dense = await matrix.locator('.overflow-x-auto').evaluate((el) => ({
+      client: el.clientWidth,
+      scroll: el.scrollWidth,
+    }));
+    assert(
+      dense.scroll > dense.client,
+      'Wide matrix columns must retain local scrolling',
+    );
+    assert.equal(
+      await root.evaluate((el) => el.scrollWidth - el.clientWidth),
+      0,
+    );
     await matrix.screenshot({
       path: path.join(evidence, `wrapped-matrix-${viewport.width}.png`),
     });
-    measurements.push({ viewport, wrappedLabels, numbers, ticks, headings });
+    measurements.push({
+      viewport,
+      wrappedLabels,
+      numbers,
+      ticks,
+      headings,
+      dense,
+    });
     await mode('normal');
   }
   const fills = [
