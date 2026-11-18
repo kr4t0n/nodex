@@ -5,6 +5,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  getNiceTickValues,
   ResponsiveContainer,
   Text,
   Tooltip,
@@ -41,11 +42,24 @@ const tones = {
 };
 const formatNumber = (value: number) =>
   new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
-const formatTick = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(value);
+const compactTick = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+const smallTick = new Intl.NumberFormat('en-US', {
+  maximumSignificantDigits: 2,
+});
+const scientificTick = new Intl.NumberFormat('en-US', {
+  notation: 'scientific',
+  maximumSignificantDigits: 2,
+});
+const formatTick = (value: number) => {
+  const label = (value > 0 && value < 1 ? smallTick : compactTick).format(
+    value,
+  );
+  // Bound extreme magnitudes without rounding a nonzero tick to zero.
+  return label.length > 6 ? scientificTick.format(value) : label;
+};
 
 export function ComparisonBars({
   data,
@@ -74,6 +88,22 @@ export function ComparisonBars({
     [data, valueFormatter],
   );
   const maximum = rows.reduce((max, d) => Math.max(max, d.value ?? 0), 0);
+  const ticks = useMemo(() => {
+    const end = maximum || 1;
+    // Keep both endpoints when a rounded intermediate label would repeat one.
+    const labels = new Set([formatTick(0), formatTick(end)]);
+    return [
+      0,
+      ...getNiceTickValues([0, end], 4).filter((value) => {
+        if (value <= 0 || value >= end) return false;
+        const label = formatTick(value);
+        if (labels.has(label)) return false;
+        labels.add(label);
+        return true;
+      }),
+      end,
+    ];
+  }, [maximum]);
   const rowTracks = `repeat(${rows.length || 1}, minmax(48px, 1fr))`;
   const status =
     rows.some((d) => !d.id.trim() || (d.value !== null && d.value < 0)) ||
@@ -140,9 +170,10 @@ export function ComparisonBars({
                       type="number"
                       domain={[0, maximum || 1]}
                       tickCount={4}
+                      ticks={ticks}
                       interval="preserveStartEnd"
-                      // Inward endpoints need clearance beyond the host-font estimate.
-                      minTickGap={14}
+                      // Fractional endpoints need clearance beyond the host-font estimate.
+                      minTickGap={22}
                       axisLine={false}
                       tickLine={false}
                       height={28}

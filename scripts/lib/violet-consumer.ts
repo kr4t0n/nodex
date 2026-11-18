@@ -175,7 +175,11 @@ export async function checkVioletSizing(page: Page, evidence: string) {
 export async function checkVioletTickSpacing(page: Page, evidence: string) {
   const measurements = [];
   const failures: string[] = [];
-  for (const font of ['sans-serif', 'serif']) {
+  for (const font of [
+    'sans-serif',
+    'serif',
+    '"Liberation Sans Narrow", sans-serif',
+  ]) {
     const probe = await page.context().newPage();
     const url = page.url();
     try {
@@ -198,7 +202,9 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
       await expect(probe.locator('body')).toHaveCSS('font-family', font);
       await probe.mouse.move(0, 0);
       for (const maximum of [
-        0.5, 0.66, 84, 1234567.891, 2.4e9, 9.9e9, 2.4e12,
+        0.000000044, 0.000044, 0.0012, 0.01, 0.0123, 0.013, 0.024, 0.044, 0.05,
+        0.066, 0.099, 0.1, 0.13, 0.24, 0.3, 0.30001, 0.33, 0.5, 0.66, 84,
+        999900, 1234567.891, 2.4e9, 9.9e9, 777.7e9, 2.4e12, 555.5e12, 9.99e15,
       ]) {
         await probe.evaluate((maximum) => {
           const fixture = (
@@ -217,7 +223,9 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
             maximum,
           ),
         );
-        for (const width of [300, 320, 348, 388, 390, 480, 660]) {
+        for (const width of [
+          300, 320, 333.5, 348, 384, 387.25, 388, 390, 480, 660,
+        ]) {
           await root.evaluate(
             (el, width) => ((el as HTMLElement).style.width = `${width}px`),
             width,
@@ -251,13 +259,27 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
             'Start and end tick labels must remain visible',
           );
           assert.equal(ticks[0]!.text, '0');
-          assert.equal(
-            ticks.at(-1)!.text,
-            new Intl.NumberFormat('en-US', {
-              notation: 'compact',
-              maximumFractionDigits: 1,
-            }).format(maximum),
-          );
+          const labels = ticks.map((tick) => tick.text);
+          if (new Set(labels).size !== labels.length)
+            failures.push(
+              `${font}, max ${maximum}, frame ${width}px: repeated tick labels ${labels.join(' / ')}`,
+            );
+          const expectedEnd = new Map([
+            [0.000000044, '4.4E-8'],
+            [0.000044, '4.4E-5'],
+            [0.01, '0.01'],
+            [0.044, '0.044'],
+            [0.1, '0.1'],
+            [0.24, '0.24'],
+            [0.30001, '0.3'],
+            [84, '84'],
+            [1234567.891, '1.2M'],
+          ]).get(maximum);
+          if (expectedEnd && labels.at(-1) !== expectedEnd)
+            failures.push(
+              `${font}, max ${maximum}: expected end label ${expectedEnd}, got ${labels.at(-1)}`,
+            );
+          assert.equal(ticks.at(-1)!.right, ticks.at(-1)!.svgWidth);
           assert(
             ticks.every(
               (tick) => tick.left >= 0 && tick.right <= tick.svgWidth,
@@ -279,6 +301,14 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
             await bars.screenshot({
               path: path.join(evidence, `tick-spacing-${font}.png`),
             });
+          if (
+            font === 'sans-serif' &&
+            maximum === 0.044 &&
+            [320, 660].includes(width)
+          )
+            await bars.screenshot({
+              path: path.join(evidence, `tick-labels-${width}.png`),
+            });
         }
       }
     } finally {
@@ -293,7 +323,7 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
   assert.deepEqual(
     failures,
     [],
-    'Violet neighbouring ticks need visible separation across host fonts',
+    'Violet ticks must be distinct and separated across host fonts',
   );
 }
 
