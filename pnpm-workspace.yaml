@@ -11,9 +11,6 @@ enablePrePostScripts: true
 optimisticRepeatInstall: false
 
 overrides:
-  # Next's image optimizer needs the patched libheif and librsvg binaries.
-  # https://github.com/advisories/GHSA-wq5f-xc86-pv6w
-  sharp: 0.35.5
   # Bound indexed source-map offsets in PostCSS and Tailwind's source maps.
   # https://github.com/advisories/GHSA-68fv-2mgg-jv7q
   source-map-js: 1.2.2
@@ -29,7 +26,7 @@ overrides:
 # The React deprecation fallback still needs the ESLint 10 API adapter.
 peerDependencyRules:
   allowedVersions:
-    'eslint-plugin-react@7.37.5>eslint': '10.9.0'
+    'eslint-plugin-react@7.37.5>eslint': '10.15.0'
 
 allowBuilds:
   # Use the published platform binaries; no source-build fallback is needed.
