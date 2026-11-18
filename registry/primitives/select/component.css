@@ -38,7 +38,8 @@
     width: 100%;
     padding: var(--nx-space-controlPadding);
     padding-right: var(--nx-space-selectIndicatorPadding);
-    border: var(--nx-stroke-hairline) solid var(--nx-border);
+    border: var(--nx-stroke-hairline) solid
+      var(--nx-fieldBorder, var(--nx-border));
     border-radius: var(--nx-radius-pill);
     background-color: var(--nx-fieldFill);
     color: var(--nx-ink);
@@ -138,7 +139,8 @@
 
     .nx-select::picker(select) {
       background: var(--nx-fieldFill);
-      border: var(--nx-stroke-hairline) solid var(--nx-border);
+      border: var(--nx-stroke-hairline) solid
+        var(--nx-fieldBorder, var(--nx-border));
       border-radius: var(--nx-radius-card);
       padding: var(--nx-space-pickerPadding);
       margin-top: var(--nx-space-pickerOffset);

@@ -86,6 +86,7 @@ export default async function Page({
 
                 <div className="mt-7 flex flex-wrap items-center gap-3">
                   <button type="submit" className="nx-btn nx-btn--solid">
+                    <span className="nx-btn__paint" aria-hidden="true" />
                     {pending ? `Authorise ${pending.userCode}` : 'Authorise'}
                   </button>
                   {pending ? (

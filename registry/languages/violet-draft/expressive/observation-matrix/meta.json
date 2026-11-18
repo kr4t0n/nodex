@@ -1,0 +1,70 @@
+{
+  "slug": "observation-matrix",
+  "title": "Observation matrix",
+  "description": "Rectangular cells use five equal intervals of a fixed domain, distinguishing unavailable readings from zero.",
+  "component": "heatmap",
+  "tier": "expressive",
+  "runtime": "react",
+  "library": "recharts",
+  "density": "close-read",
+  "entry": "component.tsx",
+  "exports": ["ObservationMatrix"],
+  "props": [
+    {
+      "name": "data",
+      "type": "readonly MatrixObservation[]",
+      "required": true,
+      "description": "Rectangular cells use five equal intervals of a fixed domain, distinguishing unavailable readings from zero."
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "subtitle",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "unit",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "valueFormatter",
+      "type": "(value: number) => string",
+      "required": false
+    },
+    {
+      "name": "className",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "rows",
+      "type": "readonly ObservationAxis[]",
+      "required": true
+    },
+    {
+      "name": "columns",
+      "type": "readonly ObservationAxis[]",
+      "required": true
+    },
+    {
+      "name": "domain",
+      "type": "readonly [number, number]",
+      "required": true,
+      "description": "Finite increasing bounds shared across comparisons; values outside them are rejected. Missing pairs, null and nonfinite values are unavailable."
+    }
+  ],
+  "files": ["component.tsx"],
+  "shared": ["violet-chart-frame.tsx"],
+  "dependencies": ["recharts@3.10.1"],
+  "example": {
+    "entry": "example.tsx",
+    "export": "Example",
+    "width": 660,
+    "height": 320
+  }
+}

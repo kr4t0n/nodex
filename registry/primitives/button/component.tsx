@@ -10,6 +10,7 @@ export function Button({
   variant = 'solid',
   type = 'button',
   className = '',
+  children,
   ...props
 }: ButtonProps) {
   return (
@@ -17,6 +18,11 @@ export function Button({
       {...props}
       type={type}
       className={`nx-btn nx-btn--${variant} ${className}`.trim()}
-    />
+    >
+      {variant === 'solid' && (
+        <span className="nx-btn__paint" aria-hidden="true" />
+      )}
+      {children}
+    </button>
   );
 }

@@ -69,6 +69,7 @@ export default async function Page({
               href="/api/auth/github"
               className="nx-btn nx-btn--solid mt-9 no-underline"
             >
+              <span className="nx-btn__paint" aria-hidden="true" />
               <GithubLogo size={15} weight="fill" aria-hidden />
               Continue with GitHub
             </a>

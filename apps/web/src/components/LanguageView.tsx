@@ -86,7 +86,7 @@ export function LanguageView({ slug }: { slug: string }) {
         <section className="grid grid-cols-1 gap-10 pt-14 pb-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <h1 className="m-0 [font-family:var(--nx-font-heading)] text-[34px] leading-[1.05] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] sm:text-[42px]">
+              <h1 className="m-0 [font-family:var(--nx-font-heading)] text-[34px] leading-[1.05] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.03em] [font-stretch:var(--nx-type-pageTitle-stretch)] sm:text-[42px]">
                 {language.name}
               </h1>
               <LanguageModeControl

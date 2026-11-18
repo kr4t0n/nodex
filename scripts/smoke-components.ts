@@ -1,3 +1,7 @@
+import {
+  VIOLET_CONSUMER_SOURCE,
+  checkVioletConsumer,
+} from './lib/violet-consumer.ts';
 import assert from 'node:assert/strict';
 import { scopeTokenCss } from '../packages/cli/src/tokens.ts';
 import { execFile } from 'node:child_process';
@@ -356,6 +360,7 @@ import { NocturneExtendedConsumer } from './nocturne-extended-consumer';
 import { NocturneDistributionConsumer } from './nocturne-distribution-consumer';
 import { NocturneAnalyticalConsumer } from './nocturne-analytical-consumer';
 import { NocturneMatrixConsumer } from './nocturne-matrix-consumer';
+import { VioletConsumer } from './violet-consumer';
 import { BlockBarsConsumer } from './block-bars-consumer';
 import { NeoChartsConsumer } from './neo-charts-consumer';
 import { NeoExtendedConsumer } from './neo-extended-consumer';
@@ -430,6 +435,7 @@ function Consumer() {
     <NocturneDistributionConsumer />
     <NocturneAnalyticalConsumer />
     <NocturneMatrixConsumer />
+    <VioletConsumer />
   </main>;
 }
 
@@ -581,6 +587,19 @@ async function consumerFixture(): Promise<string> {
       path.join(fixture, 'src/styles/hearth-tokens.css'),
       scopeTokenCss(hearthTokens, 'hearth', '[data-hearth]'),
     );
+    const violetTokens = await run(
+      process.execPath,
+      [cli, 'tokens', 'violet-draft'],
+      fixture,
+    );
+    await writeFile(
+      path.join(fixture, 'src/styles/violet-tokens.css'),
+      scopeTokenCss(violetTokens, 'violet-draft', '[data-violet]'),
+    );
+    await writeFile(
+      path.join(fixture, 'src/violet-consumer.tsx'),
+      VIOLET_CONSUMER_SOURCE,
+    );
     const nocturneTokens = await run(
       process.execPath,
       [cli, 'tokens', 'nocturne'],
@@ -643,7 +662,7 @@ async function consumerFixture(): Promise<string> {
     );
     await writeFile(
       path.join(fixture, 'src/styles/main.css'),
-      '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@import "./nocturne-tokens.css";\n@import "./hearth-tokens.css";\n@source "../";\n',
+      '@import "tailwindcss";\n@import "./nodex-tokens.css";\n@import "./signal-tokens.css";\n@import "./neo-tokens.css";\n@import "./sketchbook-tokens.css";\n@import "./studio-tokens.css";\n@import "./nocturne-tokens.css";\n@import "./hearth-tokens.css";\n@import "./violet-tokens.css";\n@source "../";\n',
     );
     await writeFile(path.join(fixture, 'src/main.tsx'), CONSUMER_SOURCE);
     await writeFile(
@@ -899,6 +918,8 @@ async function checkConsumer(browser: Browser): Promise<void> {
           'Manrope',
           'Newsreader',
           'Source Sans 3',
+          'Archivo',
+          'IBM Plex Mono',
         ].map((family) => document.fonts.load(`12px "${family}"`)),
       );
       await document.fonts.ready;
@@ -915,9 +936,12 @@ async function checkConsumer(browser: Browser): Promise<void> {
         'Manrope',
         'Newsreader',
         'Source Sans 3',
+        'Archivo',
+        'IBM Plex Mono',
       ].every((family) => loadedFonts.includes(family)),
       'All delivered design-language fonts must load without an external host',
     );
+    await checkVioletConsumer(page);
     await checkPrimitiveConsumer(page);
     await checkNocturneConsumer(page);
     await checkNocturneExtendedConsumer(page);
@@ -1165,9 +1189,11 @@ async function checkConsumer(browser: Browser): Promise<void> {
         ),
       ).toHaveAttribute('data-nx-animated', 'false');
     await page.emulateMedia({ reducedMotion: 'no-preference' });
+    // Every mounted chart responds to this preference change. Wait for the
+    // first exact state before inspecting the rest of the delivered catalogue.
     await expect(
       page.locator('#line-primary [data-nx-animated]'),
-    ).toHaveAttribute('data-nx-animated', 'true');
+    ).toHaveAttribute('data-nx-animated', 'true', { timeout: 15_000 });
     await expect(
       page.locator('#dual-primary [data-nx-animated]'),
     ).toHaveAttribute('data-nx-animated', 'true');
@@ -1290,6 +1316,7 @@ async function checkConsumer(browser: Browser): Promise<void> {
     await expect(page.locator('#matrix [data-nx-animated]')).toHaveAttribute(
       'data-nx-animated',
       'false',
+      { timeout: 15_000 },
     );
     await expect(
       page.locator('#dual-primary [data-nx-animated]'),

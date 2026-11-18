@@ -39,6 +39,7 @@
     margin: 0;
     font-family: var(--nx-font-heading, var(--nx-font-sans));
     font-size: var(--nx-type-cardTitle-size);
+    font-stretch: var(--nx-type-cardTitle-stretch);
     font-weight: var(--nx-type-cardTitle-weight);
     letter-spacing: var(--nx-type-cardTitle-tracking);
   }
@@ -65,9 +66,13 @@
 
    Duplicated from the button primitive rather than depending on it, because
    primitives are copied individually and a dialog whose buttons are unstyled is
-   not a usable copy. If you have already added the button primitive, use
-   .nx-btn here instead and delete these three rules. */
+   not a usable copy. An aria-hidden .nx-dialog__paint span supplies a language's
+   compact clipped treatment; class-only confirmations retain native paint
+   without that span. To substitute Button, use its API or its classes and
+   optional .nx-btn__paint span, then remove this local action treatment. */
   .nx-dialog__action {
+    position: relative;
+    isolation: isolate;
     box-shadow: var(--nx-shadow-action) var(--nx-ink);
     padding: var(--nx-space-compactActionPadding);
     border: var(--nx-stroke-hairline) solid var(--nx-border);
@@ -82,7 +87,7 @@
     cursor: pointer;
   }
 
-  .nx-dialog__action:hover {
+  .nx-dialog__action:hover:not(:disabled):not([aria-disabled='true']) {
     border-color: var(--nx-ink);
   }
 
@@ -92,6 +97,85 @@
     background: var(--nx-actionFill);
     border-color: var(--nx-actionBorder);
     color: var(--nx-actionText);
+  }
+
+  .nx-dialog__action--confirm:has(> .nx-dialog__paint) {
+    background: color-mix(
+      in srgb,
+      var(--nx-actionFill)
+        calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
+      transparent
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--nx-actionBorder)
+        calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
+      transparent
+    );
+  }
+
+  .nx-dialog__action--confirm:has(> .nx-dialog__paint):hover:not(:disabled):not(
+      [aria-disabled='true']
+    ) {
+    border-color: color-mix(
+      in srgb,
+      var(--nx-ink) calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
+      transparent
+    );
+  }
+
+  /* Kept local because a delivered Dialog does not depend on Button CSS. */
+  .nx-dialog__paint {
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    opacity: var(--nx-shape-actionPaintOpacity, 0);
+    inset: calc(-1 * var(--nx-stroke-hairline));
+    border: var(--nx-stroke-hairline) solid var(--nx-actionBorder);
+    border-radius: inherit;
+    background: var(--nx-actionFill);
+    clip-path: var(--nx-shape-actionCompactClip);
+    overflow: hidden;
+  }
+
+  .nx-dialog__action--confirm:hover:not(:disabled):not([aria-disabled='true'])
+    > .nx-dialog__paint {
+    border-color: var(--nx-ink);
+  }
+
+  .nx-dialog__paint::before {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--nx-stroke-hairline));
+    background-image: linear-gradient(
+      var(--nx-shape-actionSweepAngle),
+      var(--nx-actionFill) var(--nx-shape-actionSweepStart),
+      var(--nx-actionHoverFill) var(--nx-shape-actionSweepEnd)
+    );
+    background-size: var(--nx-shape-actionSweepSize);
+    opacity: var(--nx-shape-actionSweepOpacity);
+    transition: background-position var(--nx-motion-action-duration)
+      var(--nx-motion-action-easing);
+  }
+
+  .nx-dialog__action--confirm:hover:not(:disabled):not([aria-disabled='true'])
+    > .nx-dialog__paint::before {
+    background-position: 100% 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-dialog__paint::before {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .nx-dialog__paint {
+      clip-path: none;
+    }
+    .nx-dialog__paint::before {
+      display: none;
+    }
   }
 
   .nx-dialog__action:focus-visible {

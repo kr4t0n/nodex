@@ -62,6 +62,7 @@
   }
 
   .nx-card--invert .nx-card__caption {
+    font-family: var(--nx-font-ui);
     color: var(--nx-onDarkFaint, var(--nx-muted));
   }
 
@@ -77,6 +78,7 @@
     margin: 0;
     font-family: var(--nx-font-heading, var(--nx-font-sans));
     font-size: var(--nx-type-cardTitle-size);
+    font-stretch: var(--nx-type-cardTitle-stretch);
     font-weight: var(--nx-type-cardTitle-weight);
     letter-spacing: var(--nx-type-cardTitle-tracking);
   }
@@ -94,6 +96,7 @@
   }
 
   .nx-card__caption {
+    font-family: var(--nx-font-ui);
     margin-top: var(--nx-space-captionGap);
     font-size: var(--nx-type-caption-size);
     font-weight: var(--nx-type-caption-weight);

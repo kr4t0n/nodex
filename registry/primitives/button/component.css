@@ -1,7 +1,9 @@
 @layer components {
   /* button - shared primitive, themed by the active language's tokens.
    The React API wraps a native button. These classes also remain available
-   when composing the same visual treatment with an existing headless control. */
+   when composing the same visual treatment with an existing headless control.
+   Add an aria-hidden .nx-btn__paint span for a language's clipped treatment;
+   without it, solid actions retain their native fill and border. */
 
   .nx-btn {
     position: relative;
@@ -39,9 +41,87 @@
     color: var(--nx-actionText);
   }
 
+  .nx-btn--solid:has(> .nx-btn__paint) {
+    background: color-mix(
+      in srgb,
+      var(--nx-actionFill)
+        calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
+      transparent
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--nx-actionBorder)
+        calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
+      transparent
+    );
+  }
+
+  /* Only paint is clipped. The native box retains its hit area, focus outline
+     and shadow, and the existing outline/hatch pseudo-elements stay separate. */
+  .nx-btn__paint {
+    position: absolute;
+    pointer-events: none;
+    z-index: -2;
+    opacity: var(--nx-shape-actionPaintOpacity, 0);
+    inset: calc(-1 * var(--nx-stroke-hairline));
+    border: var(--nx-stroke-hairline) solid var(--nx-actionBorder);
+    border-radius: inherit;
+    background: var(--nx-actionFill);
+    clip-path: var(--nx-shape-actionClip);
+    overflow: hidden;
+    transition:
+      background-color var(--nx-motion-control-duration)
+        var(--nx-motion-control-easing),
+      border-color var(--nx-motion-control-duration)
+        var(--nx-motion-control-easing);
+  }
+
+  .nx-btn__paint::before {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--nx-stroke-hairline));
+    background-image: linear-gradient(
+      var(--nx-shape-actionSweepAngle),
+      var(--nx-actionFill) var(--nx-shape-actionSweepStart),
+      var(--nx-actionHoverFill) var(--nx-shape-actionSweepEnd)
+    );
+    background-size: var(--nx-shape-actionSweepSize);
+    opacity: var(--nx-shape-actionSweepOpacity);
+    transition: background-position var(--nx-motion-action-duration)
+      var(--nx-motion-action-easing);
+  }
+
+  .nx-btn--solid:hover:not(:disabled):not([aria-disabled='true'])
+    > .nx-btn__paint {
+    background: var(--nx-actionHoverFill);
+    border-color: var(--nx-actionHoverBorder);
+  }
+
+  .nx-btn--solid:hover:not(:disabled):not([aria-disabled='true'])
+    > .nx-btn__paint::before {
+    background-position: 100% 0;
+  }
+
   .nx-btn--solid:hover:not(:disabled):not([aria-disabled='true']) {
     background: var(--nx-actionHoverFill);
     border-color: var(--nx-actionHoverBorder);
+  }
+
+  .nx-btn--solid:has(> .nx-btn__paint):hover:not(:disabled):not(
+      [aria-disabled='true']
+    ) {
+    background: color-mix(
+      in srgb,
+      var(--nx-actionHoverFill)
+        calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
+      transparent
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--nx-actionHoverBorder)
+        calc(100% * (1 - var(--nx-shape-actionPaintOpacity, 0))),
+      transparent
+    );
   }
 
   /* Outline. Structural paint is independent of quiet tracks and grid fills. */
@@ -92,6 +172,14 @@
     opacity: var(--nx-texture-outlineOpacity);
   }
 
+  .nx-btn--solid::before {
+    border-color: var(--nx-actionBorder);
+  }
+
+  .nx-btn--solid:hover:not(:disabled):not([aria-disabled='true'])::before {
+    border-color: var(--nx-actionHoverBorder);
+  }
+
   .nx-btn--solid::after {
     content: '';
     position: absolute;
@@ -132,7 +220,9 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .nx-btn {
+    .nx-btn,
+    .nx-btn__paint,
+    .nx-btn__paint::before {
       transition: none;
     }
     .nx-btn:active:not(:disabled):not([aria-disabled='true']) {
@@ -141,6 +231,15 @@
     .nx-btn--solid:active:not(:disabled):not([aria-disabled='true']),
     .nx-btn--outline:active:not(:disabled):not([aria-disabled='true']) {
       box-shadow: var(--nx-shadow-action) var(--nx-ink);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .nx-btn__paint {
+      clip-path: none;
+    }
+    .nx-btn__paint::before {
+      display: none;
     }
   }
 }

@@ -536,6 +536,7 @@ async function cmdNewLanguage(slug: string, explicit?: string): Promise<void> {
       pagePadding: '32px',
     },
     shadow: group(template.shadow, 'shadow'),
+    shape: group(template.shape, 'shape'),
     texture: group(template.texture, 'texture'),
     type: {
       ...type,

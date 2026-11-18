@@ -40,6 +40,7 @@
     margin-bottom: 0;
     font-family: var(--nx-font-heading, var(--nx-font-sans));
     letter-spacing: var(--nx-type-prose-headingTracking);
+    font-stretch: var(--nx-type-prose-headingStretch);
     line-height: var(--nx-type-prose-headingLineHeight);
   }
 

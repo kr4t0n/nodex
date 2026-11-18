@@ -216,7 +216,7 @@ function LanguageTile({
     >
       <div className="flex flex-wrap items-end justify-between gap-6 pb-9">
         <div>
-          <h2 className="m-0 [font-family:var(--nx-font-heading)] text-[24px] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em]">
+          <h2 className="m-0 [font-family:var(--nx-font-heading)] text-[24px] font-[number:var(--nx-type-pageTitle-weight)] tracking-[-0.025em] [font-stretch:var(--nx-type-pageTitle-stretch)]">
             {language.name}
           </h2>
           <p
@@ -244,6 +244,7 @@ function LanguageTile({
           href={`/l/${language.slug}`}
           className="nx-btn nx-btn--solid no-underline"
         >
+          <span className="nx-btn__paint" aria-hidden="true" />
           Open {language.name}
           <ArrowRight size={13} weight="bold" aria-hidden />
         </Link>

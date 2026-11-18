@@ -1,0 +1,8 @@
+{
+  "slug": "violet-draft",
+  "name": "Violet Draft",
+  "description": "White technical sheets, violet emphasis, wide headings and precise monospace detail.",
+  "visibility": "public",
+  "density": ["close-read"],
+  "featured": ["measurement-line", "comparison-bars", "observation-matrix"]
+}
