@@ -230,12 +230,21 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
           'script[type="application/nodex-held-module"]',
         );
         if (!entries.length) throw new Error('Missing consumer module entry');
-        for (const entry of entries) {
-          const script = document.createElement('script');
-          script.type = 'module';
-          script.src = entry.src;
-          entry.replaceWith(script);
-        }
+        await Promise.all(
+          Array.from(
+            entries,
+            (entry) =>
+              new Promise<void>((resolve, reject) => {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = entry.src;
+                script.onload = () => resolve();
+                script.onerror = () =>
+                  reject(new Error('Consumer module failed to load'));
+                entry.replaceWith(script);
+              }),
+          ),
+        );
         return width;
       }, family);
       for (const previous of hostFonts)
