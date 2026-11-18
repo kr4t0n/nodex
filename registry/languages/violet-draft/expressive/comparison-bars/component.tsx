@@ -90,11 +90,19 @@ export function ComparisonBars({
   const maximum = rows.reduce((max, d) => Math.max(max, d.value ?? 0), 0);
   const ticks = useMemo(() => {
     const end = maximum || 1;
+    let candidates: number[];
+    try {
+      candidates = getNiceTickValues([0, end], 4);
+    } catch {
+      // The generator's step underflows at the smallest positive subnormal.
+      return [0, end];
+    }
+    if (!candidates.every(Number.isFinite)) return [0, end];
     // Keep both endpoints when a rounded intermediate label would repeat one.
     const labels = new Set([formatTick(0), formatTick(end)]);
     return [
       0,
-      ...getNiceTickValues([0, end], 4).filter((value) => {
+      ...candidates.filter((value) => {
         if (value <= 0 || value >= end) return false;
         const label = formatTick(value);
         if (labels.has(label)) return false;
@@ -104,6 +112,9 @@ export function ComparisonBars({
       end,
     ];
   }, [maximum]);
+  const tickLength = Math.max(
+    ...ticks.map((value) => formatTick(value).length),
+  );
   const rowTracks = `repeat(${rows.length || 1}, minmax(48px, 1fr))`;
   const status =
     rows.some((d) => !d.id.trim() || (d.value !== null && d.value < 0)) ||
@@ -169,11 +180,10 @@ export function ComparisonBars({
                     <XAxis
                       type="number"
                       domain={[0, maximum || 1]}
-                      tickCount={4}
                       ticks={ticks}
                       interval="preserveStartEnd"
-                      // Fractional endpoints need clearance beyond the host-font estimate.
-                      minTickGap={22}
+                      // Long scientific labels need extra clearance beyond the host-font estimate.
+                      minTickGap={26 + Math.max(0, tickLength - 6) * 4}
                       axisLine={false}
                       tickLine={false}
                       height={28}

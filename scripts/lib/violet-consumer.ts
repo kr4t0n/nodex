@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, type Page } from '@playwright/test';
@@ -175,36 +175,119 @@ export async function checkVioletSizing(page: Page, evidence: string) {
 export async function checkVioletTickSpacing(page: Page, evidence: string) {
   const measurements = [];
   const failures: string[] = [];
-  for (const font of [
-    'sans-serif',
-    'serif',
-    '"Liberation Sans Narrow", sans-serif',
-  ]) {
+  const hostFonts: { font: string; referenceWidth: number }[] = [];
+  for (const [font, source, stretch] of [
+    [
+      'sans-serif',
+      '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2',
+      '100%',
+    ],
+    [
+      'serif',
+      '@fontsource-variable/newsreader/files/newsreader-latin-standard-normal.woff2',
+      '100%',
+    ],
+    [
+      'condensed',
+      '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2',
+      '62%',
+    ],
+  ] as const) {
+    const family = `Violet Host ${font}`;
+    const bytes = await readFile(new URL(import.meta.resolve(source)));
     const probe = await page.context().newPage();
+    const errors: string[] = [];
+    probe.on('pageerror', (error) => errors.push(error.message));
     const url = page.url();
     try {
       await probe.route(url, async (route) => {
         const response = await route.fetch();
         await route.fulfill({
           response,
-          body: (await response.text()).replace(
-            '</head>',
-            `<style>body { font-family: ${font}; }</style></head>`,
-          ),
+          body: (await response.text())
+            .replaceAll('type="module"', 'type="application/nodex-held-module"')
+            .replace(
+              '</head>',
+              `<style>@font-face { font-family: "${family}"; src: url(data:font/woff2;base64,${bytes.toString('base64')}); font-weight: 100 900; font-stretch: ${font === 'condensed' ? '62% 125%' : '100%'}; } body { font-family: "${family}"; font-stretch: ${stretch}; }</style></head>`,
+            ),
         });
       });
       await probe.setViewportSize({ width: 1440, height: 1000 });
       await probe.goto(url);
+      // Load the exact face before React mounts: a fallback measurement would
+      // remain in Recharts' cache even after the real font finished loading.
+      const referenceWidth = await probe.evaluate(async (family) => {
+        const faces = await document.fonts.load(`12px "${family}"`);
+        if (!faces.length || faces.some((face) => face.status !== 'loaded'))
+          throw new Error(`Host font did not load: ${family}`);
+        const reference = document.createElement('span');
+        reference.textContent = '0123456789 0.0012 999.9K 555.5T WMi';
+        reference.style.cssText = 'font-size:12px;white-space:pre';
+        document.body.append(reference);
+        const width = reference.getBoundingClientRect().width;
+        reference.remove();
+        const entries = document.querySelectorAll<HTMLScriptElement>(
+          'script[type="application/nodex-held-module"]',
+        );
+        if (!entries.length) throw new Error('Missing consumer module entry');
+        for (const entry of entries) {
+          const script = document.createElement('script');
+          script.type = 'module';
+          script.src = entry.src;
+          entry.replaceWith(script);
+        }
+        return width;
+      }, family);
+      for (const previous of hostFonts)
+        assert(
+          Math.abs(previous.referenceWidth - referenceWidth) > 1,
+          `${font} (${referenceWidth}px) must draw a different reference width from ${previous.font} (${previous.referenceWidth}px)`,
+        );
+      hostFonts.push({ font, referenceWidth });
       const root = probe.locator('#violet-consumer');
       const bars = root.locator('[data-nx-chart="comparison-bars"]');
       await expect(bars.locator('[data-nx-comparison]')).not.toHaveCount(0);
       await probe.evaluate(() => document.fonts.ready);
-      await expect(probe.locator('body')).toHaveCSS('font-family', font);
+      await expect(probe.locator('body')).toHaveCSS(
+        'font-family',
+        `"${family}"`,
+      );
+      await expect(probe.locator('body')).toHaveCSS('font-stretch', stretch);
       await probe.mouse.move(0, 0);
       for (const maximum of [
-        0.000000044, 0.000044, 0.0012, 0.01, 0.0123, 0.013, 0.024, 0.044, 0.05,
-        0.066, 0.099, 0.1, 0.13, 0.24, 0.3, 0.30001, 0.33, 0.5, 0.66, 84,
-        999900, 1234567.891, 2.4e9, 9.9e9, 777.7e9, 2.4e12, 555.5e12, 9.99e15,
+        Number.MIN_VALUE,
+        1e-323,
+        1.5e-323,
+        1e-320,
+        0.000000044,
+        0.000044,
+        0.0012,
+        0.01,
+        0.0123,
+        0.013,
+        0.024,
+        0.044,
+        0.05,
+        0.066,
+        0.099,
+        0.1,
+        0.13,
+        0.24,
+        0.3,
+        0.30001,
+        0.33,
+        0.5,
+        0.66,
+        84,
+        999900,
+        1234567.891,
+        2.4e9,
+        9.9e9,
+        777.7e9,
+        2.4e12,
+        555.5e12,
+        9.99e15,
+        Number.MAX_VALUE,
       ]) {
         await probe.evaluate((maximum) => {
           const fixture = (
@@ -224,7 +307,8 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
           ),
         );
         for (const width of [
-          300, 320, 333.5, 348, 384, 387.25, 388, 390, 480, 660,
+          300, 320, 333.5, 348, 364, 384, 387.25, 388, 390, 404, 416, 480, 488,
+          660,
         ]) {
           await root.evaluate(
             (el, width) => ((el as HTMLElement).style.width = `${width}px`),
@@ -265,6 +349,11 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
               `${font}, max ${maximum}, frame ${width}px: repeated tick labels ${labels.join(' / ')}`,
             );
           const expectedEnd = new Map([
+            [Number.MIN_VALUE, '5E-324'],
+            [1e-323, '1E-323'],
+            [1.5e-323, '1.5E-323'],
+            [Number.MAX_VALUE, '1.8E308'],
+            [1e-320, '1E-320'],
             [0.000000044, '4.4E-8'],
             [0.000044, '4.4E-5'],
             [0.01, '0.01'],
@@ -293,7 +382,16 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
             failures.push(
               `${font}, max ${maximum}, frame ${width}px: neighbouring tick gap ${Math.min(...gaps).toFixed(3)}px < 2px`,
             );
-          measurements.push({ font, maximum, width, ticks, gaps });
+          measurements.push({
+            font,
+            source,
+            stretch,
+            referenceWidth,
+            maximum,
+            width,
+            ticks,
+            gaps,
+          });
           if (
             (font === 'sans-serif' && maximum === 0.5 && width === 348) ||
             (font === 'serif' && maximum === 2.4e9 && width === 300)
@@ -311,6 +409,11 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
             });
         }
       }
+      assert.deepEqual(
+        errors,
+        [],
+        `${font}: finite values must not throw during rendering`,
+      );
     } finally {
       await probe.close();
     }
