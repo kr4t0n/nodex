@@ -8,14 +8,14 @@ export const VIOLET_CONSUMER_SOURCE = `import {useEffect,useState} from 'react';
 import {MeasurementLine} from './components/nodex/measurement-line/component';
 import {ComparisonBars} from './components/nodex/comparison-bars/component';
 import {ObservationMatrix} from './components/nodex/observation-matrix/component';
-type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long'|'large'|'billions'|'headings'|'decimal'|'fraction';
-declare global {interface Window {nodexViolet:{setMode:(v:Mode)=>void}}}
+type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long'|'large'|'billions'|'ticks'|'headings'|'decimal'|'fraction';
+declare global {interface Window {nodexViolet:{setMode:(v:Mode)=>void;setMaximum:(v:number)=>void}}}
 const line=[{id:'a',label:'Start',x:0,value:0},{id:'b',label:'Second',x:1,value:10},{id:'c',label:'Missing',x:4,value:null},{id:'d',label:'Last',x:6,value:20}];
 const bars=[{id:'a',label:'Aster',value:40},{id:'b',label:'Birch',value:20},{id:'c',label:'Zero',value:0},{id:'d',label:'Missing',value:null}];
 const rows=[{id:'a',label:'Aster'},{id:'b',label:'Birch'}],columns=[{id:'x',label:'01'},{id:'y',label:'02'},{id:'z',label:'03'}];
 const matrix=[{rowId:'a',columnId:'x',value:0},{rowId:'a',columnId:'y',value:null},{rowId:'a',columnId:'z',value:100},{rowId:'b',columnId:'x',value:40},{rowId:'b',columnId:'y',value:NaN},{rowId:'b',columnId:'z',value:Infinity}];
 export function VioletConsumer(){
- const [mode,setMode]=useState<Mode>('normal');useEffect(()=>{window.nodexViolet={setMode};},[]);
+ const [mode,setMode]=useState<Mode>('normal'),[maximum,setMaximum]=useState(40);useEffect(()=>{window.nodexViolet={setMode,setMaximum};},[]);
  let readings=line.map(d=>({...d})),categories=bars.map(d=>({...d})),observations=matrix.map(d=>({...d}));
  let gridRows=rows,gridColumns=columns,domain:[number,number]=[0,100];
  if(mode==='empty'){readings=[];categories=[];observations=[];}
@@ -26,6 +26,7 @@ export function VioletConsumer(){
  if(mode==='long'){categories[0]!.label='Aster Birch Cedar Delta Ember Fjord Grove Hazel';categories[1]!.label='An exceptionally long unbroken label WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW';}
  if(mode==='large'){categories=categories.map((d,i)=>({...d,value:[1234567.891,98765.4,123456,1234.5][i]!}));}
  if(mode==='billions'){categories=categories.map((d,i)=>({...d,value:[9900000000,6600000000,3300000000,0][i]!}));}
+ if(mode==='ticks'){categories=categories.map((d,i)=>({...d,value:maximum*[1,0.66,0.33,0][i]!}));}
  if(mode==='headings'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:5},(_,i)=>({id:String(i),label:'Very long column heading '+(i+1)}));observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:i*20}));}
  if(mode==='decimal'||mode==='fraction'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:6},(_,i)=>({id:String(i),label:String(i)}));domain=mode==='decimal'?[0.1,0.6]:[0,3];const values=mode==='decimal'?[0.1,0.2,0.3,0.4,0.5,0.6]:[0,0.6,1.2,1.8,2.4,3];observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:values[i]!}));}
  return <section data-violet id="violet-consumer" className="mx-auto w-full max-w-[660px] bg-[var(--nx-bg)]">
@@ -170,6 +171,132 @@ export async function checkVioletSizing(page: Page, evidence: string) {
   );
 }
 
+/** A fresh document per host font avoids Recharts' shared text-width cache. */
+export async function checkVioletTickSpacing(page: Page, evidence: string) {
+  const measurements = [];
+  const failures: string[] = [];
+  for (const font of ['sans-serif', 'serif']) {
+    const probe = await page.context().newPage();
+    const url = page.url();
+    try {
+      await probe.route(url, async (route) => {
+        const response = await route.fetch();
+        await route.fulfill({
+          response,
+          body: (await response.text()).replace(
+            '</head>',
+            `<style>body { font-family: ${font}; }</style></head>`,
+          ),
+        });
+      });
+      await probe.setViewportSize({ width: 1440, height: 1000 });
+      await probe.goto(url);
+      const root = probe.locator('#violet-consumer');
+      const bars = root.locator('[data-nx-chart="comparison-bars"]');
+      await expect(bars.locator('[data-nx-comparison]')).not.toHaveCount(0);
+      await probe.evaluate(() => document.fonts.ready);
+      await expect(probe.locator('body')).toHaveCSS('font-family', font);
+      await probe.mouse.move(0, 0);
+      for (const maximum of [
+        0.5, 0.66, 84, 1234567.891, 2.4e9, 9.9e9, 2.4e12,
+      ]) {
+        await probe.evaluate((maximum) => {
+          const fixture = (
+            window as unknown as {
+              nodexViolet: {
+                setMode: (v: string) => void;
+                setMaximum: (v: number) => void;
+              };
+            }
+          ).nodexViolet;
+          fixture.setMaximum(maximum);
+          fixture.setMode('ticks');
+        }, maximum);
+        await expect(bars.locator('[data-nx-comparison-value="a"]')).toHaveText(
+          new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(
+            maximum,
+          ),
+        );
+        for (const width of [300, 320, 348, 388, 390, 480, 660]) {
+          await root.evaluate(
+            (el, width) => ((el as HTMLElement).style.width = `${width}px`),
+            width,
+          );
+          await probe.evaluate(
+            () =>
+              new Promise<void>((resolve) =>
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => resolve()),
+                ),
+              ),
+          );
+          const ticks = await bars
+            .locator(
+              '.recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value',
+            )
+            .evaluateAll((nodes) =>
+              nodes.map((node) => {
+                const box = node.getBoundingClientRect(),
+                  svg = node.closest('svg')!.getBoundingClientRect();
+                return {
+                  text: node.textContent,
+                  left: box.left - svg.left,
+                  right: box.right - svg.left,
+                  svgWidth: svg.width,
+                };
+              }),
+            );
+          assert(
+            ticks.length >= 2,
+            'Start and end tick labels must remain visible',
+          );
+          assert.equal(ticks[0]!.text, '0');
+          assert.equal(
+            ticks.at(-1)!.text,
+            new Intl.NumberFormat('en-US', {
+              notation: 'compact',
+              maximumFractionDigits: 1,
+            }).format(maximum),
+          );
+          assert(
+            ticks.every(
+              (tick) => tick.left >= 0 && tick.right <= tick.svgWidth,
+            ),
+            'Tick labels must remain inside the SVG',
+          );
+          const gaps = ticks
+            .slice(1)
+            .map((tick, index) => tick.left - ticks[index]!.right);
+          if (gaps.some((gap) => gap < 2))
+            failures.push(
+              `${font}, max ${maximum}, frame ${width}px: neighbouring tick gap ${Math.min(...gaps).toFixed(3)}px < 2px`,
+            );
+          measurements.push({ font, maximum, width, ticks, gaps });
+          if (
+            (font === 'sans-serif' && maximum === 0.5 && width === 348) ||
+            (font === 'serif' && maximum === 2.4e9 && width === 300)
+          )
+            await bars.screenshot({
+              path: path.join(evidence, `tick-spacing-${font}.png`),
+            });
+        }
+      }
+    } finally {
+      await probe.close();
+    }
+  }
+  await writeFile(
+    path.join(evidence, 'tick-spacing.json'),
+    JSON.stringify(measurements, null, 2),
+  );
+  console.log(`Violet neighbouring tick evidence: ${evidence}`);
+  assert.deepEqual(
+    failures,
+    [],
+    'Violet neighbouring ticks need visible separation across host fonts',
+  );
+}
+
 export async function checkVioletConsumer(page: Page): Promise<void> {
   const root = page.locator('#violet-consumer');
   const line = root.locator('[data-nx-chart="measurement-line"]').first();
@@ -293,6 +420,7 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
     : await mkdtemp(path.join(tmpdir(), 'nodex-violet-evidence-'));
   await mkdir(evidence, { recursive: true });
   await checkVioletSizing(page, evidence);
+  await checkVioletTickSpacing(page, evidence);
   const measurements: unknown[] = [];
   for (const viewport of [
     { width: 1440, height: 1000 },

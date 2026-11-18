@@ -694,6 +694,11 @@ published artifacts after workflows finish, including jobs that skipped publicat
   arrow keys and allow the library's animation-frame input throttling to settle.
 - Recharts vertical bars advance to the next route with ArrowLeft in the pinned
   release; the accessible description documents the library's direction.
+- Recharts measures axis ticks in a body-level span using the host font family
+  and the tick's computed size. Scoped chart fonts and custom endpoint anchors
+  can therefore need extra `minTickGap`. Check adjacent label boxes as well as
+  SVG edges, including a different host font; use fresh documents because its
+  text-width cache does not track inherited font-family changes.
 - Recharts makes the chart SVG focusable. Suppress its browser outline for
   pointer focus and style `:focus-visible` with language ink and mark-stroke
   tokens. Pie sectors can also receive pointer focus despite `tabindex="-1"`;

@@ -94,7 +94,7 @@ export function ComparisonBars({
       <div className="mt-[var(--nx-space-cardBodyGap)] overflow-x-auto">
         {/* Intrinsic value width keeps numbers whole. Equal CSS rows grow from
             actual wrapped text, and the native plot measures their shared box. */}
-        <div className="min-w-full">
+        <div>
           <div className="grid min-w-min grid-cols-[74px_12px_minmax(120px,1fr)_8px_max-content] pb-[28px] text-[length:var(--nx-type-legend-size)] leading-tight">
             <div
               className="col-start-1 grid"
@@ -141,6 +141,8 @@ export function ComparisonBars({
                       domain={[0, maximum || 1]}
                       tickCount={4}
                       interval="preserveStartEnd"
+                      // Inward endpoints need clearance beyond the host-font estimate.
+                      minTickGap={14}
                       axisLine={false}
                       tickLine={false}
                       height={28}
