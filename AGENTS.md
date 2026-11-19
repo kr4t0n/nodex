@@ -698,8 +698,8 @@ published artifacts after workflows finish, including jobs that skipped publicat
   and measure current descendants in one evaluation, then retry the complete
   expected layout; a prior text wait or `evaluateAll` handle list can be stale.
   Record timed playback through its final period after observing its first,
-  with a failure deadline: CPU load can delay chained timers beyond a fixed
-  capture window. Retain intermediate-position assertions.
+  with a stall deadline renewed by progress: CPU load can delay chained timers
+  beyond a fixed capture window. Retain intermediate-position assertions.
 - Recharts measures axis ticks in a body-level span using the tick's computed
   size. Without an explicit family it inherits the host font, but another chart
   can leave its own family on that shared span. Scoped fonts and custom endpoint

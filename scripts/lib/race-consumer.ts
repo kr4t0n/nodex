@@ -165,6 +165,9 @@ export async function checkRaceConsumer(page: Page): Promise<void> {
       let frame = 0;
       let finished = false;
       let sawFirst = false;
+      let latestFrame = -1;
+      const stallTimeoutMs = 30_000;
+      let lastProgressAt = performance.now();
       const finish = () => {
         finished = true;
         observer.disconnect();
@@ -173,6 +176,13 @@ export async function checkRaceConsumer(page: Page): Promise<void> {
         resolve(samples);
       };
       const read = () => {
+        if (finished) return;
+        // A blocked main thread may deliver a frame before an overdue timeout.
+        // Do not let that late frame renew an already expired stall deadline.
+        if (performance.now() - lastProgressAt >= stallTimeoutMs) {
+          finish();
+          return;
+        }
         if (element.getAttribute('data-nx-animated') !== 'true') return;
         const bar = element.querySelector<SVGGraphicsElement>(
           '[data-nx-revenue-bar="a"]',
@@ -184,6 +194,15 @@ export async function checkRaceConsumer(page: Page): Promise<void> {
           period: element.querySelector('[data-nx-period]')?.textContent ?? '',
         };
         samples.push(sample);
+        if (
+          sample.frame === latestFrame + 1 &&
+          sample.period === String(2019 + sample.frame)
+        ) {
+          latestFrame = sample.frame;
+          lastProgressAt = performance.now();
+          clearTimeout(deadline);
+          deadline = setTimeout(finish, stallTimeoutMs);
+        }
         if (sample.frame === 0 && sample.period === '2019') sawFirst = true;
         if (sawFirst && sample.frame === 2 && sample.period === '2021')
           finish();
@@ -193,9 +212,11 @@ export async function checkRaceConsumer(page: Page): Promise<void> {
         attributes: true,
         attributeFilter: ['data-nx-frame'],
       });
-      // Bound a broken or stalled playback; the assertions below report which
-      // periods or intermediate positions were missing from the captured trace.
-      const deadline = setTimeout(finish, 15_000);
+      // Bound time without progress, including startup while other charts resume.
+      // Only successive periods renew it; repeated samples or looping frames must
+      // not keep a stalled playback alive. Assertions still require every period
+      // and intermediate position from the captured trace.
+      let deadline = setTimeout(finish, stallTimeoutMs);
       const tick = () => {
         read();
         if (!finished) frame = requestAnimationFrame(tick);
