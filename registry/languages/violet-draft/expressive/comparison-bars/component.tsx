@@ -5,7 +5,9 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  getNiceTickValues,
   ResponsiveContainer,
+  Text,
   Tooltip,
   XAxis,
   YAxis,
@@ -40,6 +42,24 @@ const tones = {
 };
 const formatNumber = (value: number) =>
   new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
+const compactTick = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+const smallTick = new Intl.NumberFormat('en-US', {
+  maximumSignificantDigits: 2,
+});
+const scientificTick = new Intl.NumberFormat('en-US', {
+  notation: 'scientific',
+  maximumSignificantDigits: 2,
+});
+const formatTick = (value: number) => {
+  const label = (value > 0 && value < 1 ? smallTick : compactTick).format(
+    value,
+  );
+  // Bound extreme magnitudes without rounding a nonzero tick to zero.
+  return label.length > 6 ? scientificTick.format(value) : label;
+};
 
 export function ComparisonBars({
   data,
@@ -68,6 +88,33 @@ export function ComparisonBars({
     [data, valueFormatter],
   );
   const maximum = rows.reduce((max, d) => Math.max(max, d.value ?? 0), 0);
+  const ticks = useMemo(() => {
+    const end = maximum || 1;
+    let candidates: number[];
+    try {
+      candidates = getNiceTickValues([0, end], 4);
+    } catch {
+      // The generator's step underflows at the smallest positive subnormal.
+      return [0, end];
+    }
+    if (!candidates.every(Number.isFinite)) return [0, end];
+    // Keep both endpoints when a rounded intermediate label would repeat one.
+    const labels = new Set([formatTick(0), formatTick(end)]);
+    return [
+      0,
+      ...candidates.filter((value) => {
+        if (value <= 0 || value >= end) return false;
+        const label = formatTick(value);
+        if (labels.has(label)) return false;
+        labels.add(label);
+        return true;
+      }),
+      end,
+    ];
+  }, [maximum]);
+  const tickLength = Math.max(
+    ...ticks.map((value) => formatTick(value).length),
+  );
   const rowTracks = `repeat(${rows.length || 1}, minmax(48px, 1fr))`;
   const status =
     rows.some((d) => !d.id.trim() || (d.value !== null && d.value < 0)) ||
@@ -88,7 +135,7 @@ export function ComparisonBars({
       <div className="mt-[var(--nx-space-cardBodyGap)] overflow-x-auto">
         {/* Intrinsic value width keeps numbers whole. Equal CSS rows grow from
             actual wrapped text, and the native plot measures their shared box. */}
-        <div className="min-w-[280px]">
+        <div>
           <div className="grid min-w-min grid-cols-[74px_12px_minmax(120px,1fr)_8px_max-content] pb-[28px] text-[length:var(--nx-type-legend-size)] leading-tight">
             <div
               className="col-start-1 grid"
@@ -133,21 +180,37 @@ export function ComparisonBars({
                     <XAxis
                       type="number"
                       domain={[0, maximum || 1]}
-                      tickCount={4}
+                      ticks={ticks}
                       interval="preserveStartEnd"
+                      // Long scientific labels need extra clearance beyond the host-font estimate.
+                      minTickGap={26 + Math.max(0, tickLength - 6) * 4}
                       axisLine={false}
                       tickLine={false}
                       height={28}
                       tickMargin={10}
-                      tickFormatter={(value: number) =>
-                        new Intl.NumberFormat('en-US', {
-                          notation: 'compact',
-                          maximumFractionDigits: 1,
-                        }).format(value)
-                      }
-                      tick={{
-                        fill: 'var(--nx-faint)',
-                        fontSize: 'var(--nx-type-axis-size)',
+                      tickFormatter={formatTick}
+                      tick={(props) => {
+                        const { x, y, index, visibleTicksCount, payload } =
+                          props;
+                        const first = index === 0;
+                        const last = index === visibleTicksCount - 1;
+                        // Recharts measures text outside the scoped font. Anchor
+                        // endpoint ink inward without shortening the bar scale.
+                        return (
+                          <Text
+                            x={first || last ? payload.coordinate : x}
+                            y={y}
+                            textAnchor={
+                              first ? 'start' : last ? 'end' : 'middle'
+                            }
+                            verticalAnchor="start"
+                            className="recharts-cartesian-axis-tick-value"
+                            fill="var(--nx-faint)"
+                            fontSize="var(--nx-type-axis-size)"
+                          >
+                            {formatTick(payload.value)}
+                          </Text>
+                        );
                       }}
                     />
                     <YAxis type="category" dataKey="id" hide />

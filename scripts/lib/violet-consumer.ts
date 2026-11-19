@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, type Page } from '@playwright/test';
@@ -8,14 +8,14 @@ export const VIOLET_CONSUMER_SOURCE = `import {useEffect,useState} from 'react';
 import {MeasurementLine} from './components/nodex/measurement-line/component';
 import {ComparisonBars} from './components/nodex/comparison-bars/component';
 import {ObservationMatrix} from './components/nodex/observation-matrix/component';
-type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long'|'large'|'headings'|'decimal'|'fraction';
-declare global {interface Window {nodexViolet:{setMode:(v:Mode)=>void}}}
+type Mode='normal'|'empty'|'zero'|'missing'|'invalid'|'single'|'long'|'large'|'billions'|'ticks'|'headings'|'decimal'|'fraction';
+declare global {interface Window {nodexViolet:{setMode:(v:Mode)=>void;setMaximum:(v:number)=>void}}}
 const line=[{id:'a',label:'Start',x:0,value:0},{id:'b',label:'Second',x:1,value:10},{id:'c',label:'Missing',x:4,value:null},{id:'d',label:'Last',x:6,value:20}];
 const bars=[{id:'a',label:'Aster',value:40},{id:'b',label:'Birch',value:20},{id:'c',label:'Zero',value:0},{id:'d',label:'Missing',value:null}];
 const rows=[{id:'a',label:'Aster'},{id:'b',label:'Birch'}],columns=[{id:'x',label:'01'},{id:'y',label:'02'},{id:'z',label:'03'}];
 const matrix=[{rowId:'a',columnId:'x',value:0},{rowId:'a',columnId:'y',value:null},{rowId:'a',columnId:'z',value:100},{rowId:'b',columnId:'x',value:40},{rowId:'b',columnId:'y',value:NaN},{rowId:'b',columnId:'z',value:Infinity}];
 export function VioletConsumer(){
- const [mode,setMode]=useState<Mode>('normal');useEffect(()=>{window.nodexViolet={setMode};},[]);
+ const [mode,setMode]=useState<Mode>('normal'),[maximum,setMaximum]=useState(40);useEffect(()=>{window.nodexViolet={setMode,setMaximum};},[]);
  let readings=line.map(d=>({...d})),categories=bars.map(d=>({...d})),observations=matrix.map(d=>({...d}));
  let gridRows=rows,gridColumns=columns,domain:[number,number]=[0,100];
  if(mode==='empty'){readings=[];categories=[];observations=[];}
@@ -25,6 +25,8 @@ export function VioletConsumer(){
  if(mode==='invalid'){readings[1]!.x=0;categories[1]!.value=-1;observations[0]!.value=101;}
  if(mode==='long'){categories[0]!.label='Aster Birch Cedar Delta Ember Fjord Grove Hazel';categories[1]!.label='An exceptionally long unbroken label WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW';}
  if(mode==='large'){categories=categories.map((d,i)=>({...d,value:[1234567.891,98765.4,123456,1234.5][i]!}));}
+ if(mode==='billions'){categories=categories.map((d,i)=>({...d,value:[9900000000,6600000000,3300000000,0][i]!}));}
+ if(mode==='ticks'){categories=categories.map((d,i)=>({...d,value:maximum*[1,0.66,0.33,0][i]!}));}
  if(mode==='headings'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:5},(_,i)=>({id:String(i),label:'Very long column heading '+(i+1)}));observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:i*20}));}
  if(mode==='decimal'||mode==='fraction'){gridRows=rows.slice(0,1);gridColumns=Array.from({length:6},(_,i)=>({id:String(i),label:String(i)}));domain=mode==='decimal'?[0.1,0.6]:[0,3];const values=mode==='decimal'?[0.1,0.2,0.3,0.4,0.5,0.6]:[0,0.6,1.2,1.8,2.4,3];observations=gridColumns.map((c,i)=>({rowId:'a',columnId:c.id,value:values[i]!}));}
  return <section data-violet id="violet-consumer" className="mx-auto w-full max-w-[660px] bg-[var(--nx-bg)]">
@@ -35,6 +37,416 @@ export function VioletConsumer(){
  </section>;
 }
 `;
+
+/** Isolated so the same assertions can run against a built base fixture. */
+export async function checkVioletSizing(page: Page, evidence: string) {
+  const root = page.locator('#violet-consumer');
+  const bars = root.locator('[data-nx-chart="comparison-bars"]');
+  const measurements = [];
+  const failures: string[] = [];
+  // Match the native gallery specimen width. The full consumer page has its
+  // own 16px gutters, which otherwise turn a 320px specimen into 288px.
+  const originalWidth = await root.evaluate((el) => {
+    const node = el as HTMLElement;
+    const width = node.style.width;
+    node.style.width = 'min(660px, 100vw)';
+    return width;
+  });
+  try {
+    for (const width of [1440, 390, 320]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.evaluate(() =>
+        (
+          window as unknown as { nodexViolet: { setMode: (v: string) => void } }
+        ).nodexViolet.setMode('normal'),
+      );
+      await expect(bars.locator('[data-nx-comparison-value="a"]')).toHaveText(
+        '40',
+      );
+      await root.screenshot({
+        path: path.join(evidence, `sizing-${width}.png`),
+      });
+      assert.equal(
+        await root.evaluate((el) => el.clientWidth),
+        Math.min(width, 660),
+      );
+      const regions = await root
+        .locator('[data-nx-chart]')
+        .evaluateAll((charts) =>
+          charts.map((chart) => {
+            // The line has no scroller; measure its plot region as well.
+            const region =
+              chart.querySelector('.overflow-x-auto') ??
+              chart.querySelector('.recharts-responsive-container')!
+                .parentElement!;
+            return {
+              chart: chart.getAttribute('data-nx-chart'),
+              client: region.clientWidth,
+              scroll: region.scrollWidth,
+            };
+          }),
+        );
+      for (const region of regions) {
+        if (region.scroll !== region.client)
+          failures.push(
+            `${width}px ${region.chart}: fitting data scrollWidth ${region.scroll} != clientWidth ${region.client}`,
+          );
+      }
+      await page.evaluate(() =>
+        (
+          window as unknown as { nodexViolet: { setMode: (v: string) => void } }
+        ).nodexViolet.setMode('billions'),
+      );
+      await expect(bars.locator('[data-nx-comparison-value="a"]')).toHaveText(
+        '9,900,000,000',
+      );
+      await expect
+        .poll(() =>
+          bars.locator('.recharts-cartesian-axis-tick-value').allTextContents(),
+        )
+        .toContain('9.9B');
+      const scroller = bars.locator('.overflow-x-auto');
+      await scroller.evaluate((el) => (el.scrollLeft = el.scrollWidth));
+      await bars.screenshot({
+        path: path.join(evidence, `billions-${width}.png`),
+      });
+      const ticks = await bars
+        .locator('.recharts-cartesian-axis-tick-value')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => {
+            const box = node.getBoundingClientRect(),
+              svg = node.closest('svg')!.getBoundingClientRect();
+            return {
+              text: node.textContent,
+              left: box.left,
+              right: box.right,
+              svgLeft: svg.left,
+              svgRight: svg.right,
+            };
+          }),
+        );
+      assert(
+        ticks.length >= 2,
+        'Billion-scale bars must retain start and end ticks',
+      );
+      for (const tick of ticks) {
+        if (tick.left < tick.svgLeft || tick.right > tick.svgRight)
+          failures.push(
+            `${width}px tick ${tick.text}: box [${tick.left}, ${tick.right}] outside SVG [${tick.svgLeft}, ${tick.svgRight}]`,
+          );
+      }
+      const wide = await scroller.evaluate((el) => ({
+        client: el.clientWidth,
+        scroll: el.scrollWidth,
+      }));
+      if (width === 320)
+        assert(
+          wide.scroll > wide.client,
+          'Intrinsic long values must retain local scrolling',
+        );
+      measurements.push({ width, regions, ticks, wide });
+      await scroller.evaluate((el) => (el.scrollLeft = 0));
+    }
+  } finally {
+    await root.evaluate(
+      (el, width) => ((el as HTMLElement).style.width = width),
+      originalWidth,
+    );
+  }
+
+  await page.evaluate(() =>
+    (
+      window as unknown as { nodexViolet: { setMode: (v: string) => void } }
+    ).nodexViolet.setMode('normal'),
+  );
+  await writeFile(
+    path.join(evidence, 'sizing.json'),
+    JSON.stringify(measurements, null, 2),
+  );
+  console.log(`Violet sizing evidence: ${evidence}`);
+  assert.deepEqual(
+    failures,
+    [],
+    'Violet fitting data and tick labels must remain inside their regions',
+  );
+}
+
+/** A fresh document per host font avoids Recharts' shared text-width cache. */
+export async function checkVioletTickSpacing(page: Page, evidence: string) {
+  const measurements = [];
+  const failures: string[] = [];
+  const hostFonts: { font: string; referenceWidth: number }[] = [];
+  for (const [font, source, stretch] of [
+    [
+      'sans-serif',
+      '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2',
+      '100%',
+    ],
+    [
+      'serif',
+      '@fontsource-variable/newsreader/files/newsreader-latin-standard-normal.woff2',
+      '100%',
+    ],
+    [
+      'condensed',
+      '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2',
+      '62%',
+    ],
+  ] as const) {
+    const family = `Violet Host ${font}`;
+    const bytes = await readFile(new URL(import.meta.resolve(source)));
+    const probe = await page.context().newPage();
+    const errors: string[] = [];
+    probe.on('pageerror', (error) => errors.push(error.message));
+    const fixtureUrl = new URL(page.url());
+    fixtureUrl.searchParams.set('violet-ticks', '');
+    const url = fixtureUrl.href;
+    try {
+      await probe.route(url, async (route) => {
+        const response = await route.fetch();
+        await route.fulfill({
+          response,
+          body: (await response.text())
+            .replaceAll('type="module"', 'type="application/nodex-held-module"')
+            .replace(
+              '</head>',
+              `<style>@font-face { font-family: "${family}"; src: url(data:font/woff2;base64,${bytes.toString('base64')}); font-weight: 100 900; font-stretch: ${font === 'condensed' ? '62% 125%' : '100%'}; } body { font-family: "${family}"; font-stretch: ${stretch}; }</style></head>`,
+            ),
+        });
+      });
+      await probe.setViewportSize({ width: 1440, height: 1000 });
+      await probe.goto(url);
+      // Load the exact face before React mounts: a fallback measurement would
+      // remain in Recharts' cache even after the real font finished loading.
+      const referenceWidth = await probe.evaluate(async (family) => {
+        const faces = await document.fonts.load(`12px "${family}"`);
+        if (!faces.length || faces.some((face) => face.status !== 'loaded'))
+          throw new Error(`Host font did not load: ${family}`);
+        const reference = document.createElement('span');
+        reference.textContent = '0123456789 0.0012 999.9K 555.5T WMi';
+        reference.style.cssText = 'font-size:12px;white-space:pre';
+        document.body.append(reference);
+        const width = reference.getBoundingClientRect().width;
+        reference.remove();
+        const entries = document.querySelectorAll<HTMLScriptElement>(
+          'script[type="application/nodex-held-module"]',
+        );
+        if (!entries.length) throw new Error('Missing consumer module entry');
+        await Promise.all(
+          Array.from(
+            entries,
+            (entry) =>
+              new Promise<void>((resolve, reject) => {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = entry.src;
+                script.onload = () => resolve();
+                script.onerror = () =>
+                  reject(new Error('Consumer module failed to load'));
+                entry.replaceWith(script);
+              }),
+          ),
+        );
+        return width;
+      }, family);
+      for (const previous of hostFonts)
+        assert(
+          Math.abs(previous.referenceWidth - referenceWidth) > 1,
+          `${font} (${referenceWidth}px) must draw a different reference width from ${previous.font} (${previous.referenceWidth}px)`,
+        );
+      hostFonts.push({ font, referenceWidth });
+      const root = probe.locator('#violet-consumer');
+      const bars = root.locator('[data-nx-chart="comparison-bars"]');
+      await expect(bars.locator('[data-nx-comparison]')).not.toHaveCount(0);
+      await probe.evaluate(() => document.fonts.ready);
+      await expect(probe.locator('body')).toHaveCSS(
+        'font-family',
+        `"${family}"`,
+      );
+      await expect(probe.locator('body')).toHaveCSS('font-stretch', stretch);
+      const measuringSpan = probe.locator('#recharts_measurement_span');
+      await expect(measuringSpan).toHaveCSS('font-family', `"${family}"`);
+      await expect(measuringSpan).toHaveCSS('font-stretch', stretch);
+      const measurementFamily = await measuringSpan.evaluate(
+        (el) => getComputedStyle(el).fontFamily,
+      );
+      await probe.mouse.move(0, 0);
+      for (const maximum of [
+        Number.MIN_VALUE,
+        1e-323,
+        1.5e-323,
+        1e-320,
+        0.000000044,
+        0.000044,
+        0.0012,
+        0.01,
+        0.0123,
+        0.013,
+        0.024,
+        0.044,
+        0.05,
+        0.066,
+        0.099,
+        0.1,
+        0.13,
+        0.24,
+        0.3,
+        0.30001,
+        0.33,
+        0.5,
+        0.66,
+        84,
+        999900,
+        1234567.891,
+        2.4e9,
+        9.9e9,
+        777.7e9,
+        2.4e12,
+        555.5e12,
+        9.99e15,
+        Number.MAX_VALUE,
+      ]) {
+        await probe.evaluate((maximum) => {
+          const fixture = (
+            window as unknown as {
+              nodexViolet: {
+                setMode: (v: string) => void;
+                setMaximum: (v: number) => void;
+              };
+            }
+          ).nodexViolet;
+          fixture.setMaximum(maximum);
+          fixture.setMode('ticks');
+        }, maximum);
+        await expect(bars.locator('[data-nx-comparison-value="a"]')).toHaveText(
+          new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(
+            maximum,
+          ),
+        );
+        for (const width of [
+          300, 320, 333.5, 348, 364, 384, 387.25, 388, 390, 404, 416, 480, 488,
+          660,
+        ]) {
+          await root.evaluate(
+            (el, width) => ((el as HTMLElement).style.width = `${width}px`),
+            width,
+          );
+          await probe.evaluate(
+            () =>
+              new Promise<void>((resolve) =>
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => resolve()),
+                ),
+              ),
+          );
+          const ticks = await bars
+            .locator(
+              '.recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value',
+            )
+            .evaluateAll((nodes) =>
+              nodes.map((node) => {
+                const box = node.getBoundingClientRect(),
+                  svg = node.closest('svg')!.getBoundingClientRect();
+                return {
+                  text: node.textContent,
+                  left: box.left - svg.left,
+                  right: box.right - svg.left,
+                  svgWidth: svg.width,
+                };
+              }),
+            );
+          assert(
+            ticks.length >= 2,
+            'Start and end tick labels must remain visible',
+          );
+          assert.equal(ticks[0]!.text, '0');
+          const labels = ticks.map((tick) => tick.text);
+          if (new Set(labels).size !== labels.length)
+            failures.push(
+              `${font}, max ${maximum}, frame ${width}px: repeated tick labels ${labels.join(' / ')}`,
+            );
+          const expectedEnd = new Map([
+            [Number.MIN_VALUE, '5E-324'],
+            [1e-323, '1E-323'],
+            [1.5e-323, '1.5E-323'],
+            [Number.MAX_VALUE, '1.8E308'],
+            [1e-320, '1E-320'],
+            [0.000000044, '4.4E-8'],
+            [0.000044, '4.4E-5'],
+            [0.01, '0.01'],
+            [0.044, '0.044'],
+            [0.1, '0.1'],
+            [0.24, '0.24'],
+            [0.30001, '0.3'],
+            [84, '84'],
+            [1234567.891, '1.2M'],
+          ]).get(maximum);
+          if (expectedEnd && labels.at(-1) !== expectedEnd)
+            failures.push(
+              `${font}, max ${maximum}: expected end label ${expectedEnd}, got ${labels.at(-1)}`,
+            );
+          assert.equal(ticks.at(-1)!.right, ticks.at(-1)!.svgWidth);
+          assert(
+            ticks.every(
+              (tick) => tick.left >= 0 && tick.right <= tick.svgWidth,
+            ),
+            'Tick labels must remain inside the SVG',
+          );
+          const gaps = ticks
+            .slice(1)
+            .map((tick, index) => tick.left - ticks[index]!.right);
+          if (gaps.some((gap) => gap < 2))
+            failures.push(
+              `${font}, max ${maximum}, frame ${width}px: neighbouring tick gap ${Math.min(...gaps).toFixed(3)}px < 2px`,
+            );
+          measurements.push({
+            font,
+            source,
+            stretch,
+            referenceWidth,
+            measurementFamily,
+            maximum,
+            width,
+            ticks,
+            gaps,
+          });
+          if (
+            (font === 'sans-serif' && maximum === 0.5 && width === 348) ||
+            (font === 'serif' && maximum === 2.4e9 && width === 300)
+          )
+            await bars.screenshot({
+              path: path.join(evidence, `tick-spacing-${font}.png`),
+            });
+          if (
+            font === 'sans-serif' &&
+            maximum === 0.044 &&
+            [320, 660].includes(width)
+          )
+            await bars.screenshot({
+              path: path.join(evidence, `tick-labels-${width}.png`),
+            });
+        }
+      }
+      assert.deepEqual(
+        errors,
+        [],
+        `${font}: finite values must not throw during rendering`,
+      );
+    } finally {
+      await probe.close();
+    }
+  }
+  await writeFile(
+    path.join(evidence, 'tick-spacing.json'),
+    JSON.stringify(measurements, null, 2),
+  );
+  console.log(`Violet neighbouring tick evidence: ${evidence}`);
+  assert.deepEqual(
+    failures,
+    [],
+    'Violet ticks must be distinct and separated across host fonts',
+  );
+}
 
 export async function checkVioletConsumer(page: Page): Promise<void> {
   const root = page.locator('#violet-consumer');
@@ -158,6 +570,8 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
     ? path.join(process.env.NODEX_EVIDENCE_DIR, 'violet')
     : await mkdtemp(path.join(tmpdir(), 'nodex-violet-evidence-'));
   await mkdir(evidence, { recursive: true });
+  await checkVioletSizing(page, evidence);
+  await checkVioletTickSpacing(page, evidence);
   const measurements: unknown[] = [];
   for (const viewport of [
     { width: 1440, height: 1000 },
@@ -289,6 +703,8 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
         !ticks.some((t) => /\d{6}/.test(t)),
       'Large magnitudes need compact axis labels',
     );
+    if (viewport.width === 1440)
+      assert.deepEqual(ticks, ['0', '450K', '900K', '1.2M']);
     await bars.screenshot({
       path: path.join(evidence, `large-bars-${viewport.width}.png`),
     });
@@ -330,10 +746,29 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
       headings.every((h) => h.contained && h.height > 15),
       'Two-line matrix headings must fit the SVG and their foreignObject',
     );
+    const dense = await matrix.locator('.overflow-x-auto').evaluate((el) => ({
+      client: el.clientWidth,
+      scroll: el.scrollWidth,
+    }));
+    assert(
+      dense.scroll > dense.client,
+      'Wide matrix columns must retain local scrolling',
+    );
+    assert.equal(
+      await root.evaluate((el) => el.scrollWidth - el.clientWidth),
+      0,
+    );
     await matrix.screenshot({
       path: path.join(evidence, `wrapped-matrix-${viewport.width}.png`),
     });
-    measurements.push({ viewport, wrappedLabels, numbers, ticks, headings });
+    measurements.push({
+      viewport,
+      wrappedLabels,
+      numbers,
+      ticks,
+      headings,
+      dense,
+    });
     await mode('normal');
   }
   const fills = [

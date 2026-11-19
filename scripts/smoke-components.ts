@@ -439,7 +439,10 @@ function Consumer() {
   </main>;
 }
 
-createRoot(document.getElementById('root')!).render(<Consumer />);
+// Other charts can leave an explicit font on Recharts' shared measuring span.
+createRoot(document.getElementById('root')!).render(
+  new URLSearchParams(location.search).has('violet-ticks') ? <VioletConsumer /> : <Consumer />
+);
 `;
 
 async function consumerFixture(): Promise<string> {

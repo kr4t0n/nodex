@@ -201,7 +201,7 @@ export function ObservationMatrix({
       <div className="mt-[var(--nx-space-cardBodyGap)] overflow-x-auto">
         <div
           style={{
-            minWidth: Math.max(280, columns.length * columnWidth + 90),
+            minWidth: columns.length * columnWidth + 90,
             height: Math.max(90, rows.length * rowHeight + axisHeight),
           }}
         >
