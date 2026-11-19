@@ -250,6 +250,11 @@ export async function checkRaceConsumer(page: Page): Promise<void> {
   await page.keyboard.press('Enter');
   await expect(node).toHaveAttribute('data-nx-frame', '0');
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  // Replay also ends on frame 2 without reduced motion. Wait for the motion
+  // state itself, allowing the other charts to render the preference change.
+  await expect(node).toHaveAttribute('data-nx-animated', 'false', {
+    timeout: 30_000,
+  });
   await expect(node).toHaveAttribute('data-nx-frame', '2');
   await page.waitForTimeout(1100);
   await expect(node).toHaveAttribute('data-nx-frame', '2');
