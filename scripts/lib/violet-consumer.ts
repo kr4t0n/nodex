@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export const VIOLET_CONSUMER_SOURCE = `import {useEffect,useState} from 'react';
 import {MeasurementLine} from './components/nodex/measurement-line/component';
@@ -37,6 +37,74 @@ export function VioletConsumer(){
  </section>;
 }
 `;
+
+async function readAxisTicks(chart: Locator, selector: string) {
+  // evaluateAll selects handles before its callback runs; Recharts can replace
+  // keyed ticks in between. Query and measure live descendants in one task.
+  const read = () =>
+    chart.evaluate((chart, selector) => {
+      const nodes = Array.from(chart.querySelectorAll(selector));
+      if (!chart.isConnected || nodes.some((node) => !node.closest('svg')))
+        return [];
+      return nodes.map((node) => {
+        const box = node.getBoundingClientRect();
+        const svg = node.closest('svg')!.getBoundingClientRect();
+        return {
+          text: node.textContent,
+          left: box.left,
+          right: box.right,
+          svgLeft: svg.left,
+          svgRight: svg.right,
+          svgWidth: svg.width,
+        };
+      });
+    }, selector);
+  let ticks: Awaited<ReturnType<typeof read>> = [];
+  await expect
+    .poll(async () => {
+      ticks = await read();
+      return ticks.length;
+    })
+    .toBeGreaterThanOrEqual(2);
+  return ticks;
+}
+
+export async function checkVioletMatrixHeadings(matrix: Locator) {
+  const read = () =>
+    matrix.evaluate((chart) => {
+      const nodes = Array.from(chart.querySelectorAll('foreignObject')).filter(
+        (node) => node.textContent?.includes('Very long column heading'),
+      );
+      if (!chart.isConnected || nodes.some((node) => !node.closest('svg')))
+        return [];
+      return nodes.map((node) => {
+        const box = node.getBoundingClientRect();
+        const svg = node.closest('svg')!.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const text = range.getBoundingClientRect();
+        return {
+          bottom: text.bottom - svg.top,
+          svgHeight: svg.height,
+          height: text.height,
+          contained:
+            text.bottom <= box.bottom + 0.5 && text.bottom <= svg.bottom + 0.5,
+        };
+      });
+    });
+  let headings: Awaited<ReturnType<typeof read>> = [];
+  // Text can commit before the new axis layout. Retry the whole measurement,
+  // including containment, so persistent clipping still fails.
+  await expect(async () => {
+    headings = await read();
+    assert.equal(headings.length, 5);
+    assert(
+      headings.every((heading) => heading.contained && heading.height > 15),
+      'Two-line matrix headings must fit the SVG and their foreignObject',
+    );
+  }).toPass({ timeout: 5000 });
+  return headings;
+}
 
 /** Isolated so the same assertions can run against a built base fixture. */
 export async function checkVioletSizing(page: Page, evidence: string) {
@@ -110,21 +178,10 @@ export async function checkVioletSizing(page: Page, evidence: string) {
       await bars.screenshot({
         path: path.join(evidence, `billions-${width}.png`),
       });
-      const ticks = await bars
-        .locator('.recharts-cartesian-axis-tick-value')
-        .evaluateAll((nodes) =>
-          nodes.map((node) => {
-            const box = node.getBoundingClientRect(),
-              svg = node.closest('svg')!.getBoundingClientRect();
-            return {
-              text: node.textContent,
-              left: box.left,
-              right: box.right,
-              svgLeft: svg.left,
-              svgRight: svg.right,
-            };
-          }),
-        );
+      const ticks = await readAxisTicks(
+        bars,
+        '.recharts-cartesian-axis-tick-value',
+      );
       assert(
         ticks.length >= 2,
         'Billion-scale bars must retain start and end ticks',
@@ -339,22 +396,17 @@ export async function checkVioletTickSpacing(page: Page, evidence: string) {
                 ),
               ),
           );
-          const ticks = await bars
-            .locator(
+          const ticks = (
+            await readAxisTicks(
+              bars,
               '.recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value',
             )
-            .evaluateAll((nodes) =>
-              nodes.map((node) => {
-                const box = node.getBoundingClientRect(),
-                  svg = node.closest('svg')!.getBoundingClientRect();
-                return {
-                  text: node.textContent,
-                  left: box.left - svg.left,
-                  right: box.right - svg.left,
-                  svgWidth: svg.width,
-                };
-              }),
-            );
+          ).map((tick) => ({
+            text: tick.text,
+            left: tick.left - tick.svgLeft,
+            right: tick.right - tick.svgLeft,
+            svgWidth: tick.svgWidth,
+          }));
           assert(
             ticks.length >= 2,
             'Start and end tick labels must remain visible',
@@ -715,37 +767,7 @@ export async function checkVioletConsumer(page: Page): Promise<void> {
     });
     await scroller.evaluate((el) => (el.scrollLeft = 0));
     await mode('headings');
-    await expect(
-      matrix
-        .locator('foreignObject')
-        .filter({ hasText: 'Very long column heading' })
-        .last(),
-    ).toContainText('Very long column heading');
-    const headings = await matrix
-      .locator('foreignObject')
-      .filter({ hasText: 'Very long column heading' })
-      .evaluateAll((nodes) =>
-        nodes.map((el) => {
-          const box = el.getBoundingClientRect(),
-            svg = el.closest('svg')!.getBoundingClientRect();
-          const range = document.createRange();
-          range.selectNodeContents(el);
-          const text = range.getBoundingClientRect();
-          return {
-            bottom: text.bottom - svg.top,
-            svgHeight: svg.height,
-            height: text.height,
-            contained:
-              text.bottom <= box.bottom + 0.5 &&
-              text.bottom <= svg.bottom + 0.5,
-          };
-        }),
-      );
-    assert.equal(headings.length, 5);
-    assert(
-      headings.every((h) => h.contained && h.height > 15),
-      'Two-line matrix headings must fit the SVG and their foreignObject',
-    );
+    const headings = await checkVioletMatrixHeadings(matrix);
     const dense = await matrix.locator('.overflow-x-auto').evaluate((el) => ({
       client: el.clientWidth,
       scroll: el.scrollWidth,

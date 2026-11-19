@@ -694,6 +694,12 @@ published artifacts after workflows finish, including jobs that skipped publicat
   arrow keys and allow the library's animation-frame input throttling to settle.
 - Recharts vertical bars advance to the next route with ArrowLeft in the pinned
   release; the accessible description documents the library's direction.
+- Recharts can replace keyed ticks while an axis updates. Browser checks query
+  and measure current descendants in one evaluation, then retry the complete
+  expected layout; a prior text wait or `evaluateAll` handle list can be stale.
+  Record timed playback through its final period after observing its first,
+  with a failure deadline: CPU load can delay chained timers beyond a fixed
+  capture window. Retain intermediate-position assertions.
 - Recharts measures axis ticks in a body-level span using the tick's computed
   size. Without an explicit family it inherits the host font, but another chart
   can leave its own family on that shared span. Scoped fonts and custom endpoint
