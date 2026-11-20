@@ -154,46 +154,72 @@ export async function checkRaceConsumer(page: Page): Promise<void> {
     ).nodexRaceFixture.setEnabled(true),
   );
   await expect(node).toHaveAttribute('data-nx-frame', '2');
-  // Arm the recorder before playback: protocol round trips after frame zero can
-  // consume its entire dwell on a large consumer page. Observe period commits as
-  // well as animation frames, retaining the real intermediate-geometry checks.
+  // Arm before playback so protocol round trips cannot consume frame zero.
+  // Other charts resuming motion can delay playback timers: stop on final-period
+  // state after frame zero, not on a fixed recording window.
   type Sample = { frame: number; y: number; period: string };
   await node.evaluate((element) => {
     const target = element as HTMLElement & { raceTrace?: Promise<Sample[]> };
     target.raceTrace = new Promise<Sample[]>((resolve) => {
-      const armed = performance.now();
-      let started: number | undefined;
       const samples: Sample[] = [];
+      let frame = 0;
+      let finished = false;
+      let sawFirst = false;
+      let latestFrame = -1;
+      const stallTimeoutMs = 30_000;
+      let lastProgressAt = performance.now();
+      const finish = () => {
+        finished = true;
+        observer.disconnect();
+        cancelAnimationFrame(frame);
+        clearTimeout(deadline);
+        resolve(samples);
+      };
       const read = () => {
+        if (finished) return;
+        // A blocked main thread may deliver a frame before an overdue timeout.
+        // Do not let that late frame renew an already expired stall deadline.
+        if (performance.now() - lastProgressAt >= stallTimeoutMs) {
+          finish();
+          return;
+        }
         if (element.getAttribute('data-nx-animated') !== 'true') return;
-        started ??= performance.now();
         const bar = element.querySelector<SVGGraphicsElement>(
           '[data-nx-revenue-bar="a"]',
         );
-        if (bar)
-          samples.push({
-            frame: Number(element.getAttribute('data-nx-frame')),
-            y: bar.getBBox().y,
-            period:
-              element.querySelector('[data-nx-period]')?.textContent ?? '',
-          });
+        if (!bar) return;
+        const sample = {
+          frame: Number(element.getAttribute('data-nx-frame')),
+          y: bar.getBBox().y,
+          period: element.querySelector('[data-nx-period]')?.textContent ?? '',
+        };
+        samples.push(sample);
+        if (
+          sample.frame === latestFrame + 1 &&
+          sample.period === String(2019 + sample.frame)
+        ) {
+          latestFrame = sample.frame;
+          lastProgressAt = performance.now();
+          clearTimeout(deadline);
+          deadline = setTimeout(finish, stallTimeoutMs);
+        }
+        if (sample.frame === 0 && sample.period === '2019') sawFirst = true;
+        if (sawFirst && sample.frame === 2 && sample.period === '2021')
+          finish();
       };
       const observer = new MutationObserver(read);
       observer.observe(element, {
         attributes: true,
         attributeFilter: ['data-nx-frame'],
       });
+      // Bound time without progress, including startup while other charts resume.
+      // Only successive periods renew it; repeated samples or looping frames must
+      // not keep a stalled playback alive. Assertions still require every period
+      // and intermediate position from the captured trace.
+      let deadline = setTimeout(finish, stallTimeoutMs);
       const tick = () => {
         read();
-        if (
-          performance.now() - (started ?? armed) <
-          (started === undefined ? 8000 : 3200)
-        )
-          requestAnimationFrame(tick);
-        else {
-          observer.disconnect();
-          resolve(samples);
-        }
+        if (!finished) frame = requestAnimationFrame(tick);
       };
       tick();
     });
@@ -224,6 +250,11 @@ export async function checkRaceConsumer(page: Page): Promise<void> {
   await page.keyboard.press('Enter');
   await expect(node).toHaveAttribute('data-nx-frame', '0');
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  // Replay also ends on frame 2 without reduced motion. Wait for the motion
+  // state itself, allowing the other charts to render the preference change.
+  await expect(node).toHaveAttribute('data-nx-animated', 'false', {
+    timeout: 30_000,
+  });
   await expect(node).toHaveAttribute('data-nx-frame', '2');
   await page.waitForTimeout(1100);
   await expect(node).toHaveAttribute('data-nx-frame', '2');
