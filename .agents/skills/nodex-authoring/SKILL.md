@@ -198,6 +198,10 @@ and heading stretch roles when the font has a width axis.
 
 ## Verification and review
 
+For targeted checks, use the [review recipes](references/review-verification.md):
+match CI's mode baseline, mount custom data, compare builds, inspect the index
+without authentication, probe standalone previews and clean generated output.
+
 ```bash
 pnpm run build:registry
 pnpm test
