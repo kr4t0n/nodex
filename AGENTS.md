@@ -409,7 +409,9 @@ reviewed false positives.
   modal focus, dark first paint, live reduced motion and prose roles. Desktop/mobile
   default-palette comparisons use `NODEX_BASE_REF` (default: merge base with
   `origin/dev`), reading that revision's compiler, tokens and prose CSS through Git
-  without another checkout. Tests publish no alternate language.
+  without another checkout. CI sets it to
+  `${{ github.event.pull_request.base.sha || github.event.before }}`; local PR
+  comparisons should use that PR's base SHA. Tests publish no alternate language.
 - `smoke:hearth` checks all nine copied chart contracts, numeric geometry, zero
   and unavailable readings, offline fonts, mode changes, each chart's keyboard
   inspection, one-time entrances and live reduced motion. Desktop/mobile frames
