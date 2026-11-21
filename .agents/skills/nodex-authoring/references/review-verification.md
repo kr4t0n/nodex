@@ -35,7 +35,7 @@ NODEX_BASE_REF="$review_base" pnpm run smoke:modes
 [The check](../../../../scripts/smoke-modes.ts) otherwise uses
 `git merge-base HEAD origin/dev`. [CI](../../../../.github/workflows/ci.yml) uses
 `${{ github.event.pull_request.base.sha || github.event.before }}`: the PR base
-for pull requests, or the previous commit for pushes. Record the actual baseline
+for pull requests, or the branch tip before the push. Record the actual baseline
 from `comparison.txt`; a different baseline is a different comparison.
 
 ## Mount charts with custom data
@@ -67,21 +67,23 @@ Read the component's exported types and metadata before supplying data.
    `<checkout>/node_modules/tailwindcss/index.css` with `source(none)`, then
    absolute `@source` paths for `registry/languages/<language>`,
    `registry/_shared` and the entry file. Include `registry/primitives` when
-   mounting primitives. A bare `@import 'tailwindcss'` in a system-temporary
-   directory cannot resolve the checkout's packages. Compile it:
+   mounting primitives. Keep `source(none)` so automatic detection does not scan
+   unrelated files outside those explicit sources. Compile to a separate file
+   from esbuild's component CSS:
 
    ```bash
    "$review_root/node_modules/.bin/tailwindcss" \
-     -i "$review_dir/input.css" -o "$review_dir/app.css"
+     -i "$review_dir/input.css" -o "$review_dir/utilities.css"
    ```
 
-4. Write an HTML page with a viewport meta tag, the `root` element, `app.css`,
-   the built `public/registry/languages/<language>/tokens.css` after it, and a
-   module script for `app.js`. Set `data-nx-language="<language>"` on `<html>`.
+4. Write an HTML page with a viewport meta tag, the `root` element and a module
+   script for `app.js`. Link stylesheets in this order: `utilities.css`, `app.css`
+   if esbuild emitted it from component imports, then the built
+   `public/registry/languages/<language>/tokens.css`. Tailwind must establish the
+   layer order before component CSS; otherwise its base reset can override
+   component styles. Set `data-nx-language="<language>"` on `<html>`.
    For a language supporting dark mode, set `data-nx-mode="dark"` on that same
-   element; changing it live must retain mounted state. If esbuild emits CSS
-   from component imports, include that too; use a distinct utility CSS filename
-   so the Tailwind step does not overwrite it.
+   element; changing it live must retain mounted state.
 5. In a temporary `.mjs` probe, use `createRequire` from `node:module` with the
    absolute `<checkout>/package.json` to load `@playwright/test`. The root does
    not declare a package named `playwright`. Route `http://probe.test/**` with
@@ -95,6 +97,10 @@ Read the component's exported types and metadata before supplying data.
 For a base comparison, `git clone --shared` the checkout into a fresh temporary
 subdirectory and check out `review_base` there. Build a second entry using those
 source paths and that revision's tokens and utility sources. Reusing the head's
+generated tokens is valid only when their inputs, including font assets and the
+token compiler, match. Otherwise install dependencies and run
+`pnpm run build:registry` in the base clone to generate its `tokens.css`; a fresh
+clone has no built token stylesheet. Reusing the head's
 package aliases isolates source changes only when the package versions match;
 install the base's dependencies if dependency changes are part of the comparison.
 
